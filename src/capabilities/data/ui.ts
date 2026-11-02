@@ -13,16 +13,12 @@ export default function (qz: UiExtensionAPI) {
     confirm: qz.dialogs.confirm, requestText: qz.dialogs.requestText,
     showToast: qz.showToast, hideToast: qz.hideToast,
     showArtifactToast: message => qz.showToast(message),
-    beforeOpenArtifactTable: () => {
-      qz.extensions.invoke("sessions.closeArtifacts");
-      qz.navigate("data", { userInitiated: true, refresh: false });
-    },
+    beforeOpenArtifactTable: () => { qz.extensions.invoke("sessions.closeArtifacts"); },
   });
   qz.onDispose(data.dispose);
   qz.extensions.register({
     references: [createDataReferences(data.listTables, data.formatTableDate)],
-    commands: [{ id: "open-data", composerLabel: t("data"),
-      composerIcon: '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M3 15h18M9 4v16"/>', run: () => qz.navigate("data", { userInitiated: true }) }, { id: "data.openTable", run: payload => {
+    commands: [{ id: "open-data", run: () => qz.navigate("data", { userInitiated: true }) }, { id: "data.openTable", run: payload => {
       const value = payload && typeof payload === "object" ? payload as Record<string, unknown> : {};
       return data.openArtifactTable(String(value.table || ""), {
         anchorEl: value.anchorEl instanceof HTMLElement ? value.anchorEl : null,
@@ -32,7 +28,7 @@ export default function (qz: UiExtensionAPI) {
   qz.on("data_changed", () => data.invalidate());
   qz.registerPage({
       id: "data", title: t("data"), order: 30, navigation: false, elements: [data.panel],
-      activate: () => data.activate(), deactivate: data.deactivate,
+      activate: () => { data.leaveSheet(); return data.activate(); }, deactivate: data.deactivate,
       capture: () => ({ table: data.getCurrentTable() }),
       restore: state => {
         // Restore the destination before reveal; loading a table must not hold workspace startup.

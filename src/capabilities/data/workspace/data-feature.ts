@@ -47,7 +47,10 @@ export function createDataFeature(options: DataFeatureOptions = {}) {
   const root = options.root || document;
   const $ = <T extends HTMLElement = HTMLElement>(selector: string) => root.querySelector<T>(selector);
   let disposed = false;
-  const isActive = () => !disposed && (options.isActive?.() ?? false);
+  // The panel doubles as a sheet over the chat when a table is opened from an artifact card.
+  let sheetOpen = false;
+  const isSheetVisible = () => sheetOpen && !$("#data-panel")?.classList.contains("hidden");
+  const isActive = () => !disposed && (isSheetVisible() || (options.isActive?.() ?? false));
   const startTrace = options.startTrace || (() => () => {});
   const gridTrace = options.gridTrace || (() => {});
   const showToast = options.showToast || (() => {});
@@ -261,6 +264,7 @@ export function createDataFeature(options: DataFeatureOptions = {}) {
 
 
   btnImportData?.addEventListener("click", openDataImportPanel, { signal: lifecycleSignal });
+  $("#btn-close-data-sheet")?.addEventListener("click", closeSheet, { signal: lifecycleSignal });
   btnDataTableActions?.addEventListener("click", () => {
     const open = dataTableActionsMenu?.classList.contains("hidden");
     setDataTableActionsMenuOpen(open, { restoreFocus: false });
@@ -393,11 +397,34 @@ export function createDataFeature(options: DataFeatureOptions = {}) {
       dataColumns.closeMenu();
       return true;
     }
-    return false;
+    return closeSheet();
   }
 
   function hasBlockingOverlay() {
-    return isElementVisible(dataImportPanel) || isElementVisible(dataRowDetail);
+    return isElementVisible(dataImportPanel) || isElementVisible(dataRowDetail) || isSheetVisible();
+  }
+
+  function openSheet() {
+    sheetOpen = true;
+    dataPanel?.classList.add("data-sheet");
+    dataPanel?.classList.remove("hidden");
+    dataGridAdapter.resumeAfterTabShow();
+  }
+
+  /** Page activation takes over the panel, so it only drops the sheet styling. */
+  function leaveSheet() {
+    sheetOpen = false;
+    dataPanel?.classList.remove("data-sheet");
+  }
+
+  function closeSheet() {
+    if (!sheetOpen) return false;
+    leaveSheet();
+    if (!options.isActive?.()) {
+      dataPanel?.classList.add("hidden");
+      deactivate();
+    }
+    return true;
   }
 
   function setDataTableActionsMenuOpen(open: boolean | undefined, { restoreFocus = true } = {}) {
@@ -424,10 +451,12 @@ export function createDataFeature(options: DataFeatureOptions = {}) {
     }
     options.beforeOpenArtifactTable?.();
     selectCurrentDataTable(table);
+    openSheet();
     try {
       await showDataTable(table, { resetView: true });
       return true;
     } catch (_error) {
+      closeSheet();
       if (!disposed) options.showArtifactToast?.(t("tableCannotBeOpenedRightNow", { name: String(table) }), anchorEl);
       return false;
     }
@@ -1276,6 +1305,8 @@ export function createDataFeature(options: DataFeatureOptions = {}) {
     scheduleRefresh: scheduleDataTablesRefresh,
     formatTableDate: formatDataTableDate,
     openArtifactTable,
+    leaveSheet,
+    closeSheet,
     closeTopmostTransientUi,
     hasBlockingOverlay,
     getCurrentTable: () => currentDataTable,

@@ -1,4 +1,22 @@
 @layer components {
+.data-sheet-bar {
+  display: none;
+}
+
+#data-panel.data-sheet {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  background: var(--bg-primary);
+}
+
+#data-panel.data-sheet .data-sheet-bar {
+  display: flex;
+  flex: none;
+  justify-content: flex-end;
+  padding: 6px var(--data-panel-x, 12px) 0;
+}
+
 .data-main {
   --data-panel-x: 12px;
   --data-control-gap: 8px;
