@@ -213,7 +213,7 @@ for (const [locale, language, chromeLocale, save, brand] of scenarios) {
         await expect(page.locator(".welcome-onboarding")).toBeHidden();
         await expect(page.locator(".welcome-subtitle")).toBeVisible();
         const tagline = messages[messageId("core.tagline")]?.message
-          ?? (language === "zh-CN" ? "万重山外，一舟轻渡" : "A lighter way to get things done.");
+          ?? (language === "zh-CN" ? "你的浏览器 AI 助手" : "A lighter way to get things done.");
         await expect(page.locator(".welcome-subtitle")).toHaveText(tagline);
         if (language === "ja") await expect(page.locator(".welcome-subtitle")).toHaveCSS("white-space", "pre-line");
         await page.screenshot({ path: resolve(artifacts, `${language}-${colorScheme}-welcome.png`) });

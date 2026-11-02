@@ -1123,7 +1123,7 @@ def check_tool_component(page, name):
         expect("提取页面" in text and "城市特色明确" in text, "ask_llm: missing useful prompt/result content")
     if name == "group_tabs":
         text = card.text_content() or ""
-        expect("已整理到「轻舟任务」" in text and "绿色分组" in text and "3 个标签页" in text, "group_tabs: missing group summary")
+        expect("已整理到「Zuri 任务」" in text and "绿色分组" in text and "3 个标签页" in text, "group_tabs: missing group summary")
         expect("发布编辑页" in text and "素材表" in text, "group_tabs: missing tab list")
     if name == "document_read_chunk":
         text = card.text_content() or ""

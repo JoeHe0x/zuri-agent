@@ -196,7 +196,7 @@ test("notification titles follow browser language and preserve the user's task t
     getSessions: async () => ({ s1: { id: "s1", title: "我的用户标题", parentSessionId: "0" } }),
   });
   assert.equal(await inLanguage("en", () => notifier.notifyCompleted("s1")), true);
-  assert.equal(notices[0].title, "qz task completed");
+  assert.equal(notices[0].title, "Zuri task completed");
   assert.equal(notices[0].message, "我的用户标题");
 });
 
@@ -213,9 +213,9 @@ test("schedule display localizes without changing Beijing-time persistence or sc
 });
 
 
-for (const title of ["轻舟任务", "Qingzhou task", "qz task"]) test(`tab groups reuse ${title} after the brand change`, async () => {
+for (const title of ["Zuri 任务", "轻舟任务", "Qingzhou task", "Zuri task"]) test(`tab groups reuse ${title} after the brand change`, async () => {
   await inLanguage("en", async () => {
-    assert.equal(qingzhouTabGroupPatch().title, "qz task");
+    assert.equal(qingzhouTabGroupPatch().title, "Zuri task");
     const patches = [];
     globalThis.chrome = {
       ...globalThis.chrome,
@@ -224,6 +224,6 @@ for (const title of ["轻舟任务", "Qingzhou task", "qz task"]) test(`tab grou
     };
     const result = await ensureQingzhouTabGroupForWindow([7]);
     assert.equal(result.groupId, 8);
-    assert.equal(patches.at(-1).title, "qz task");
+    assert.equal(patches.at(-1).title, "Zuri task");
   });
 });

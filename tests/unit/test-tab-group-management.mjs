@@ -133,7 +133,7 @@ async function assertManagedGroupSurvivesLanguageSwitch() {
   const updated = await ensureQingzhouTabGroupForWindow([301, 302], { preferredGroupId: created.groupId });
   assert.equal(updated.groupId, created.groupId, "the persisted identity survives a language switch");
   assert.equal(state.groups.size, 1, "changing language must not create another task group");
-  assert.equal(updated.group.title, "qz task");
+  assert.equal(updated.group.title, "Zuri task");
   assert.equal(state.tabs.get(302).groupId, created.groupId);
 }
 
@@ -142,13 +142,13 @@ async function assertManagedGroupSurvivesLegacyBranding() {
   for (const title of ["Tâche Qingzhou", "Qingzhou のタスク", "輕舟任務"]) {
     const state = installChromeMock({
       tabs: [{ id: 401, windowId: 4, groupId: 9 }, { id: 402, windowId: 4, groupId: 5 }],
-      groups: [{ id: 9, windowId: 4, title }, { id: 5, windowId: 4, title: "qz task" }],
+      groups: [{ id: 9, windowId: 4, title }, { id: 5, windowId: 4, title: "Zuri task" }],
     });
     globalThis.chrome.i18n = { getUILanguage: () => "en" };
     const result = await ensureQingzhouTabGroupForWindow([401, 402], { preferredGroupId: 9 });
     assert.equal(result.groupId, 9, `owned group ${title} takes priority over title matching`);
     assert.equal(state.tabs.get(402).groupId, 9, "existing duplicate groups still merge");
-    assert.equal(result.group.title, "qz task");
+    assert.equal(result.group.title, "Zuri task");
   }
 }
 
@@ -157,7 +157,7 @@ async function assertInvalidPreferredGroupIsNotAdopted() {
   for (const preferredGroupId of [99, 8, 0, null]) {
     const state = installChromeMock({
       tabs: [{ id: 501, windowId: 5, groupId: -1 }, { id: 502, windowId: 5, groupId: 0 }, { id: 601, windowId: 6, groupId: 8 }],
-      groups: [{ id: 0, windowId: 5, title: "Personal" }, { id: 8, windowId: 6, title: "qz task" }],
+      groups: [{ id: 0, windowId: 5, title: "Personal" }, { id: 8, windowId: 6, title: "Zuri task" }],
     });
     globalThis.chrome.i18n = { getUILanguage: () => "en" };
     const result = await ensureQingzhouTabGroupForWindow([501], { preferredGroupId });

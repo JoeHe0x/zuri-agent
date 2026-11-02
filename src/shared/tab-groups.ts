@@ -1,7 +1,7 @@
 import { t } from "./i18n/backend.js";
 type GroupAppearance = Pick<chrome.tabGroups.UpdateProperties, "color" | "collapsed">;
 
-export const QINGZHOU_TAB_GROUP_TITLE = "轻舟任务";
+export const QINGZHOU_TAB_GROUP_TITLE = "Zuri 任务";
 
 export function qingzhouTabGroupPatch({ color = "cyan", collapsed = false }: GroupAppearance = {}) {
   return {
@@ -82,7 +82,7 @@ async function listQingzhouTabGroups(windowId: number, preferredGroupId: number 
   // A stored group ID needs a current task tab as evidence; browser restarts may reuse IDs.
   // That witnessed identity survives translated-title changes after a language switch.
   // Title matching remains a fallback for older groups without a stored identity.
-  const titles = new Set([t("notification.task"), QINGZHOU_TAB_GROUP_TITLE, "Qingzhou task", "qz task"]);
+  const titles = new Set([t("notification.task"), QINGZHOU_TAB_GROUP_TITLE, "Zuri task", "轻舟任务", "Qingzhou task", "qz task"]);
   return groups
     .filter(group => group.windowId === windowId && (
       group.id === preferredGroupId || typeof group.title === "string" && titles.has(group.title)

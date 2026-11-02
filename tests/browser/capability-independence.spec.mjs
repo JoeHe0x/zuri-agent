@@ -59,7 +59,7 @@ for (const omitted of ["settings", "data"]) {
     if (omitted === "settings") {
       await expect(page.locator("#cfg-provider, #model-preset-switcher, #current-model-indicator")).toHaveCount(0);
       await expect(page.locator(".welcome-subtitle")).toBeVisible();
-      await expect(page.locator(".welcome-subtitle")).toHaveText("万重山外，一舟轻渡");
+      await expect(page.locator(".welcome-subtitle")).toHaveText("你的浏览器 AI 助手");
       await expect(page.locator('[data-tab="data"]')).toBeVisible();
     } else {
       await expect(page.locator('[data-tab="data"], #data-panel')).toHaveCount(0);
