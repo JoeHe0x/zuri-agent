@@ -868,7 +868,7 @@
   overflow: hidden;
   background: var(--text-primary);
   border: none;
-  border-radius: var(--radius-sm);
+  border-radius: 50%;
   color: var(--bg-primary);
   cursor: pointer;
   transition:
