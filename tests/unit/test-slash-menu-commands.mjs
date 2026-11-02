@@ -72,13 +72,21 @@ try {
   assert.match(menu.innerHTML, /data-slash-filter="notes"[^>]*>notes: 1</u);
   assert.match(menu.innerHTML, /&lt;Note&gt;/u, "custom source labels must remain text");
   assert.ok(menu.innerHTML.indexOf("站点指南") < menu.innerHTML.indexOf("places"), "matching site skills retain their higher priority");
-  for (const [query, token] of [["places", "[data_store: places]"], ["site-guide", "[skill: site-guide]"], ["draft", "@note(draft)"]]) {
+  for (const [query, token] of [["places", "[data_store: places]"], ["draft", "@note(draft)"]]) {
     input.value = `/${query}`;
     input.selectionStart = input.selectionEnd = input.value.length;
     await feature.update();
     assert.equal(feature.handleKeydown({ key: "Enter", preventDefault() {} }), true);
     assert.equal(input.value, token, "reference source controls its insertion token while builtins keep their original syntax");
   }
+  input.value = "/site-guide";
+  input.selectionStart = input.selectionEnd = input.value.length;
+  await feature.update();
+  assert.equal(feature.handleKeydown({ key: "Enter", preventDefault() {} }), true);
+  assert.equal(input.value, "", "a selected Skill leaves the input and becomes a chip");
+  assert.equal(feature.mentionTokens(), "[skill: site-guide]");
+  feature.clearMentions();
+  assert.equal(feature.mentionTokens(), "");
   input.value = "/";
   input.selectionStart = input.selectionEnd = 1;
   await feature.update();
