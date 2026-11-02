@@ -393,6 +393,8 @@ function presetConfigKey(config: ConfigInput | ModelPreset = {}) {
     const endpoint = normalizeCustomEndpoint(config.customEndpoint, protocol).toLowerCase();
     return `${provider}::${protocol}::${endpoint}::${model}`;
   }
+  // Sign-in providers share one account, so a provider keeps a single preset and switching models edits it.
+  if (getProviderDef({ provider }).auth) return provider;
   return `${provider}::${model}`;
 }
 
