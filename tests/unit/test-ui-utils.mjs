@@ -28,6 +28,6 @@ assert.equal(formatTokenCount(1500), "1.5k");
 assert.equal(formatTokenCount(1200000), "1.2M");
 assert.equal(formatContextUsageText(0, 10000), "");
 assert.equal(formatContextUsageText(1200, 0), "ctx 1.2k");
-assert.equal(formatContextUsageText(1200, 32000), "ctx 1.2k/32k");
+assert.equal(formatContextUsageText(1200, 32000), "ctx 1.2k/32k · 4%");
 
 console.log("ui utils tests passed");

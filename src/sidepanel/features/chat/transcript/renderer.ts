@@ -2146,7 +2146,7 @@ function appendSystemNote(message: string) {
     showWelcome();
     scroll.syncScrollPosition();
     applyBranding();
-    if (contextUsageEl) contextUsageEl.textContent = "";
+    if (contextUsageEl) contextUsageEl.title = "";
     pendingToolCalls.clear();
     renderDock();
     renderGoal();

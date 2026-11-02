@@ -121,7 +121,6 @@
       <div id="status-bar" class="status-bar hidden qz:flex qz:min-h-7.5 qz:items-center qz:gap-2 qz:px-3.5 qz:pt-1.5 qz:pb-0">
         <div class="status-dot"></div>
         <span id="status-text" data-i18n="core.thinking">思考中...</span>
-        <span id="context-usage" class="context-usage"></span>
         <button id="btn-abort" class="qz-icon-btn qz-icon-btn--secondary qz-icon-btn--xs abort-btn qz:ml-auto" title="停止" data-i18n-title="core.stop">
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="3" y="3" width="8" height="8" rx="1.5" fill="currentColor"/></svg>
         </button>
@@ -156,6 +155,7 @@
         </div>
         <div class="input-hint qz:flex qz:min-w-0 qz:items-center qz:justify-between qz:gap-2.5 qz:px-1 qz:pt-0.5 qz:pb-0">
           <span><kbd>Enter</kbd> <span data-i18n="core.send">发送</span> · <kbd>Shift+Enter</kbd> <span data-i18n="core.newline">换行</span></span>
+          <span id="context-usage" class="context-usage qz:ml-auto"></span>
           <span data-ui-slot="composer-meta" class="qz:contents"></span>
         </div>
       </footer>

@@ -1,5 +1,5 @@
 import { t } from "../../i18n/index.js";
-import { formatContextUsageText, formatTokenCount } from "../../ui/ui-utils.js";
+import { contextUsageLevel, contextUsagePercent, formatContextUsageText, formatTokenCount } from "../../ui/ui-utils.js";
 import { optionalSessionId as normalizeSessionId } from "../sessions/session-id.js";
 import type { ClientRuntime, SessionViewEvent } from "../sessions/session-state.js";
 import type { TranscriptEntry } from "../../../shared/contracts/session.js";
@@ -519,22 +519,17 @@ function updateStatusText() {
 
 function handleContextUsage(event: PortMessage) {
   if (!contextUsageEl) return;
-  contextUsageEl.textContent = shouldShowContextUsage() ? formatContextUsageText(event.inputTokensEstimate, event.contextWindow) : "";
+  contextUsageEl.title = formatContextUsageText(event.inputTokensEstimate, event.contextWindow);
+  contextUsageEl.dataset.level = contextUsageLevel(event.inputTokensEstimate, event.contextWindow);
+  contextUsageEl.style.setProperty("--pct", String(contextUsagePercent(event.inputTokensEstimate, event.contextWindow)));
 }
 
 function handleRuntimeContextUsage(runtime: Record<string, unknown> | null = {}) {
   if (!contextUsageEl) return;
-  contextUsageEl.textContent = shouldShowContextUsage() ? formatContextUsageText(runtime?.inputTokensEstimate, runtime?.contextWindow) : "";
+  contextUsageEl.title = formatContextUsageText(runtime?.inputTokensEstimate, runtime?.contextWindow);
+  contextUsageEl.dataset.level = contextUsageLevel(runtime?.inputTokensEstimate, runtime?.contextWindow);
+  contextUsageEl.style.setProperty("--pct", String(contextUsagePercent(runtime?.inputTokensEstimate, runtime?.contextWindow)));
 }
-
-function shouldShowContextUsage() {
-  let userMessages = 0;
-  for (const entry of transcript.getCurrentTranscript()) {
-    if (entry?.type === "user" && ++userMessages > 1) return true;
-  }
-  return false;
-}
-
 
 function requestCurrentSessionState() {
   const sessionId = normalizeSessionId(getSessionId());

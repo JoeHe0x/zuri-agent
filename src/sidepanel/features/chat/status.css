@@ -27,11 +27,23 @@
   animation: pulse 1.2s infinite;
 }
 
+/* Ring showing used / window; the tooltip (title) carries the numbers. */
 .context-usage {
-  color: var(--text-muted);
-  font-family: var(--font-mono);
-  font-size: 11px;
+  --ring-color: var(--text-muted);
+  flex: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: conic-gradient(var(--ring-color) calc(var(--pct, 0) * 1%), var(--border) 0);
+  -webkit-mask: radial-gradient(circle, transparent 4px, #000 4.5px);
+  mask: radial-gradient(circle, transparent 4px, #000 4.5px);
 }
+
+.context-usage:not([title]),
+.context-usage[title=""] { display: none; }
+
+.context-usage[data-level="warn"] { --ring-color: color-mix(in srgb, var(--red) 55%, var(--text-muted)); }
+.context-usage[data-level="danger"] { --ring-color: var(--red); }
 
 .msg-compact {
   display: flex;

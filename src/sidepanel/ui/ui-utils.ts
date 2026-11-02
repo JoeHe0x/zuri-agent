@@ -137,5 +137,18 @@ export function formatTokenCount(value: unknown) {
 export function formatContextUsageText(inputTokensEstimate: unknown, contextWindow: unknown): string {
   if (!inputTokensEstimate) return "";
   const windowText = contextWindow ? `/${formatTokenCount(contextWindow)}` : "";
-  return `ctx ${formatTokenCount(inputTokensEstimate)}${windowText}`;
+  const percent = contextWindow ? ` · ${Math.round(Number(inputTokensEstimate) / Number(contextWindow) * 100)}%` : "";
+  return `ctx ${formatTokenCount(inputTokensEstimate)}${windowText}${percent}`;
+}
+
+/** "warn" from 80%, "danger" from 90% of the context window; "" when the window is unknown. */
+export function contextUsageLevel(inputTokensEstimate: unknown, contextWindow: unknown): "" | "warn" | "danger" {
+  const ratio = Number(inputTokensEstimate) / Number(contextWindow);
+  if (!Number.isFinite(ratio)) return "";
+  return ratio >= 0.9 ? "danger" : ratio >= 0.8 ? "warn" : "";
+}
+
+export function contextUsagePercent(inputTokensEstimate: unknown, contextWindow: unknown): number {
+  const ratio = Number(inputTokensEstimate) / Number(contextWindow);
+  return Number.isFinite(ratio) ? Math.min(100, Math.round(ratio * 100)) : 0;
 }

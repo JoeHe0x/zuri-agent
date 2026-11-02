@@ -616,7 +616,7 @@ function assertContextUsageHasSingleSourceOfTruth() {
     /formatContextUsageText\(event\.inputTokensEstimate, event\.contextWindow\)/,
     "ctx should use the send-window estimate, never raw provider token usage",
   );
-  assert.equal(formatContextUsageText(57000, 64000), "ctx 57k/64k");
+  assert.equal(formatContextUsageText(57000, 64000), "ctx 57k/64k · 89%");
   assert.equal(formatContextUsageText(undefined, 32000), "", "missing estimate must not show a provider usage fallback");
 }
 
