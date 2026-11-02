@@ -86,7 +86,7 @@ for (const colorScheme of ["light", "dark"]) {
       });
 
       await expect(dialog).toBeHidden();
-      await expect(page.locator("#current-model-indicator")).toHaveText(`${modelSnapshot["kimi-code-plan-cn"].name} - kimi-k3`);
+      await expect(page.locator("#current-model-indicator .model-menu-trigger")).toHaveText("kimi-k3");
       await expect(page.locator("#input")).toBeFocused();
       expect(await page.evaluate(() => window.__qzPresetFocusOrder)).toEqual([
         "dialog-close",

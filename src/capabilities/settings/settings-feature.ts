@@ -84,6 +84,8 @@ export function createSettingsFeature(options: SettingsFeatureOptions) {
   const renderWelcome = options.renderWelcome || (() => {});
   const getRunContext = options.getRunContext || (() => ({ runStatus: "idle", activeRunId: "", currentSessionId: "" }));
   const currentModelIndicator = root.querySelector<HTMLElement>("#current-model-indicator");
+  const modelMenuTrigger = currentModelIndicator?.querySelector<HTMLButtonElement>(".model-menu-trigger");
+  const modelMenuList = currentModelIndicator?.querySelector<HTMLElement>(".model-menu-list");
   const gptConnectHint = root.querySelector<HTMLElement>("#gpt-connect-hint");
 
   const skillSettingsList = $("#skill-settings-list");
@@ -241,11 +243,7 @@ export function createSettingsFeature(options: SettingsFeatureOptions) {
     },
     getActivePresetId: () => lastSettingsConfig?.activePresetId || currentSettingsActivePresetId,
     getPresetUsage: () => lastSettingsConfig?.presetUsage || {},
-    async applyPreset(presetId) {
-      const result = await request("apply_model_preset", { presetId }, 15000);
-      if (!result?.config) throw new Error(t("couldNotSwitchModelsPleaseTryAgain"));
-      populateSettings(result.config);
-    },
+    applyPreset: applyModelPreset,
     onClose: options.restoreComposerFocus,
   });
 
@@ -2125,19 +2123,64 @@ export function createSettingsFeature(options: SettingsFeatureOptions) {
     for (const id of ids) options.settings.setState(id, state);
   }
 
+  async function applyModelPreset(presetId: string) {
+    const result = await request("apply_model_preset", { presetId }, 15000);
+    if (!result?.config) throw new Error(t("couldNotSwitchModelsPleaseTryAgain"));
+    populateSettings(result.config);
+  }
+
+  function setModelMenuOpen(open: boolean) {
+    modelMenuList?.classList.toggle("hidden", !open);
+    modelMenuTrigger?.setAttribute("aria-expanded", String(open));
+  }
+  modelMenuTrigger?.addEventListener("click", () => setModelMenuOpen(modelMenuList?.classList.contains("hidden") ?? false), { signal: options.signal });
+  modelMenuList?.addEventListener("click", event => {
+    const presetId = (event.target as Element).closest<HTMLElement>("[data-preset-id]")?.dataset.presetId;
+    setModelMenuOpen(false);
+    if (!presetId) return;
+    applyModelPreset(presetId).catch(error => {
+      showToast(errorMessage(error) || t("couldNotSwitchModelsPleaseTryAgain"), { tone: "error" });
+    });
+  }, { signal: options.signal });
+  root.addEventListener("click", event => {
+    if (!currentModelIndicator?.contains(event.target as Node)) setModelMenuOpen(false);
+  }, { signal: options.signal });
+  root.addEventListener("keydown", event => { if (event.key === "Escape") setModelMenuOpen(false); }, { signal: options.signal });
+
   function updateCurrentModelIndicator(config = lastSettingsConfig) {
-    if (!currentModelIndicator) return;
+    if (!currentModelIndicator || !modelMenuTrigger || !modelMenuList) return;
     const provider = String(config?.provider || "").trim();
     const model = String(config?.modelLabel || config?.model || "").trim();
+    setModelMenuOpen(false);
     if (!provider || !model) {
-      currentModelIndicator.textContent = "";
+      modelMenuTrigger.textContent = "";
       currentModelIndicator.title = "";
       currentModelIndicator.classList.add("hidden");
       renderGptConnectHint();
       return;
     }
+    const activeId = String(config?.activePresetId || "");
+    const presets = Array.isArray(config?.presets) ? config.presets : [];
+    const entries = presets.map(preset => ({ id: preset.id, model: preset.model, provider: preset.provider }));
+    // The active config may not match a saved preset; show it as the current, non-switchable entry.
+    if (!presets.some(preset => preset.id === activeId)) entries.unshift({ id: "", model, provider });
+    modelMenuList.replaceChildren(...entries.map(entry => {
+      const item = document.createElement("button");
+      item.type = "button";
+      item.className = "model-menu-item";
+      item.setAttribute("role", "option");
+      const selected = entry.id === activeId;
+      item.setAttribute("aria-selected", String(selected));
+      if (entry.id) item.dataset.presetId = entry.id;
+      const name = document.createElement("span");
+      name.textContent = entry.model;
+      const sub = document.createElement("small");
+      sub.textContent = getProviderDisplayName(entry.provider);
+      item.append(name, sub);
+      return item;
+    }));
     const text = `${getProviderDisplayName(provider)} - ${model}`;
-    currentModelIndicator.textContent = text;
+    modelMenuTrigger.textContent = model;
     currentModelIndicator.title = text;
     currentModelIndicator.classList.remove("hidden");
     renderGptConnectHint();
