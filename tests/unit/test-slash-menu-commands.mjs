@@ -12,8 +12,11 @@ import { createSkillReferences } from "../../src/capabilities/skills/references.
 
 assert.deepEqual(
   BUILTIN_SLASH_COMMANDS.map(command => [command.kind, command.name, command.token]),
-  [["command", "compact_context", "/compact"]],
+  [["command", "compact_context", "/compact"], ["command", "new_chat", "/new"]],
 );
+
+assert.equal(parseSlashCommandText("/clear")?.name, "new_chat");
+assert.equal(parseSlashCommandText("/new")?.name, "new_chat");
 
 assert.deepEqual(
   pickCommandFields(parseSlashCommandText("/compact")),

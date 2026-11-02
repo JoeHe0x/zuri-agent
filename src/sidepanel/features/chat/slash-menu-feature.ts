@@ -25,6 +25,18 @@ export const BUILTIN_SLASH_COMMANDS = Object.freeze([
     priority: -1,
     search: "compact 压缩上下文 上下文 摘要 命令",
   }),
+  Object.freeze({
+    kind: "command",
+    name: "new_chat",
+    aliases: Object.freeze(["new", "clear", t("newChat")]),
+    token: "/new",
+    label: t("newChat"),
+    title: t("newChat"),
+    subtitle: t("newChatHint"),
+    meta: "/new · /clear",
+    priority: -1,
+    search: "new clear 新对话 清空 清除 命令",
+  }),
 ]);
 
 export function parseSlashCommandText(value: unknown = "") {
@@ -250,7 +262,7 @@ function getSlashEmptyText(filter: string) {
   return sources().find(source => source.id === filter)?.emptyText || t("noMatchingResources");
 }
 
-const kindRank = (kind: string) => kind === "skill" ? 0 : kind === "command" ? 2 : 1;
+const kindRank = (kind: string) => kind === "command" ? -1 : kind === "skill" ? 0 : 1;
 const SLASH_ICONS: Record<string, string> = {
   skill: '<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/>',
   command: '<path d="M8 20 16 4"/>',
@@ -297,7 +309,7 @@ function renderSlashMenu() {
     const label = `<div class="slash-group" role="presentation">${escapeHtml(slashKindLabel(item))}</div>`;
     if (item.group && groups.size) return groupHeaders(item.group.id);
     if (item.kind === "skill" && groups.size) return groupHeaders() + (!prev || prev.kind !== "skill" || prev.group ? label : "");
-    return groupHeaders() + (!prev || item.kind !== prev.kind ? label : "");
+    return (item.kind === "command" ? "" : groupHeaders()) + (!prev || item.kind !== prev.kind ? label : "");
   };
   const rows = slashMenuState.items.map((item, index) => slashMenuState.mention ? `
     <button class="qz-menu-item slash-item slash-tab ${index === slashMenuState.selected ? "active" : ""}" type="button" data-slash-index="${index}">

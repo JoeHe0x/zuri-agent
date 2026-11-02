@@ -192,6 +192,7 @@ export function createChatWorkspaceFeature(options: ChatWorkspaceOptions) {
   let runController: ReturnType<typeof createChatRunController>;
   let reconcile: ReturnType<typeof createTranscriptReconcileFeature<Partial<ClientRuntime>>>;
   async function executeSlashCommand(command: NonNullable<ReturnType<typeof parseSlashCommandText>>) {
+    if (command.name === "new_chat") { btnNew.click(); return { ok: true }; }
     if (command.name !== "compact_context") return { ok: false };
     const sessionId = String(options.getCurrentSessionId?.() || "").trim();
     const toastKey = sessionId ? `compact-context:${sessionId}` : "compact-context";

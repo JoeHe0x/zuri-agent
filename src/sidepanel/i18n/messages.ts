@@ -112,6 +112,7 @@ export default defineMessages("core", {
   steerFailed: { "zh-CN": "转为引导失败，请重试。", en: "Could not use this message to steer the task. Try again." },
   compactContext: { "zh-CN": "压缩上下文", en: "Compact context" },
   compactHint: { "zh-CN": "可选：补充本次摘要应重点保留的内容", en: "Optional: tell the agent what to keep in the summary" },
+  newChatHint: { "zh-CN": "开始新对话，/clear 同效", en: "Start a new chat; /clear does the same" },
   commands: { "zh-CN": "命令", en: "Commands" },
   noMatchingCommands: { "zh-CN": "没有匹配的命令", en: "No matching commands" },
   noMatchingResources: { "zh-CN": "没有匹配的资源", en: "No matching resources" },
