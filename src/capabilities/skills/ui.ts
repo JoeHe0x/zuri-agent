@@ -22,7 +22,7 @@ export default function (qz: UiExtensionAPI) {
   qz.onDispose(skills.dispose);
   qz.extensions.register({
     commands: [{ id: "open-skills", composerLabel: t("manageSkills"),
-      composerIcon: '<path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3Z"/><path d="M9 9h6M9 13h6"/>', run: () => qz.navigate("skills", { userInitiated: true }) }],
+      composerIcon: '<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/>', run: () => qz.navigate("skills", { userInitiated: true }) }],
     references: [createSkillReferences(skills.list, () => skills.resolveCurrentSiteUrls({ fresh: false }), () => qz.navigate("skills", { userInitiated: true }))],
   });
   qz.on("plugin_registry_update", async () => {

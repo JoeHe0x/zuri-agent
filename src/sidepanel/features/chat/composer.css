@@ -1157,11 +1157,6 @@
   margin-inline-start: auto;
 }
 
-/* Reached through the composer "+" menu. */
-.element-picker-btn {
-  display: none;
-}
-
 .composer-plus-menu .qz-menu-item svg {
   width: 16px;
   height: 16px;
