@@ -1,6 +1,6 @@
 # Privacy and browser permissions
 
-This privacy policy covers the qz-browser-agent Chrome extension. qz stores its workspace in your
+This privacy policy covers the Zuri Chrome extension. Zuri stores its workspace in your
 browser and connects to the model providers, websites, Skills, and MCP services you use for tasks.
 
 ## Information used by tasks
@@ -34,20 +34,20 @@ endpoints, and protect the browser profile that stores your settings and credent
 
 ## Limited Use
 
-qz-browser-agent's use and transfer of information received from Chrome APIs adheres to the
+Zuri's use and transfer of information received from Chrome APIs adheres to the
 [Chrome Web Store User Data Policy](https://developer.chrome.com/docs/webstore/program-policies/policies#protecting_user_privacy),
 including the [Limited Use requirements](https://developer.chrome.com/docs/webstore/program-policies/limited-use).
 Task data is used to provide the features you request.
-qz does not sell this data or use it for advertising. Data sharing is limited to the services and
+Zuri does not sell this data or use it for advertising. Data sharing is limited to the services and
 actions used to carry out your tasks, as described above.
 
 For questions about this policy, contact the maintainers through the
-[project issue tracker](https://github.com/alibaba/qz-browser-agent/issues). Share a description of
+[project issue tracker](https://github.com/JoeHe0x/zuri-agent/issues). Share a description of
 your question; keep credentials and personal task content out of public issues.
 
 ## Browser access
 
-This guide explains the 19 permissions and host permission in [manifest.json](../src/manifest.json).
+This guide explains the 20 permissions and host permission in [manifest.json](../src/manifest.json).
 `history`, `bookmarks`, `desktopCapture`, and `downloads.open` are optional: Chrome requests them
 when the user activates the feature. All other permissions, including `geolocation`, are declared
 at installation. Chrome, operating system, and website restrictions still apply.
@@ -60,6 +60,7 @@ at installation. Chrome, operating system, and website restrictions still apply.
 | `storage` | Store model settings, Sessions, Skills, and versioned repository records | Core state |
 | `unlimitedStorage` | Persist conversations, documents, Data tables, and resources locally; disk space can still run out | Core state |
 | `tabs` | Read URLs, titles, and status of task-owned tabs; `background/session/tabs.ts` | Page operations |
+| `favicon` | Show site icons on tab chips in the composer and transcript; `sidepanel/features/chat/transcript/renderer.ts` | Core UI |
 | `tabGroups` | Group task tabs; `shared/tab-groups.ts` | Task organization |
 | `scripting` | Inject Content features and self-contained functions into task pages; `background/tools/runtime.ts` | Page operations |
 | `debugger` | Use CDP to operate pages, capture screenshots, inspect requests, and print PDFs; `background/tools/cdp-runtime.ts` and tools | Page operations |
@@ -136,11 +137,11 @@ later calls reuse it. Declining leaves consent unset. Device location access and
 are required; a failed lookup returns recovery guidance. History and bookmarks
 are read when their tools are invoked; their authorization cards explain that task results are sent
 to the configured model service. Skill network access and outgoing MCP connections follow user
-configuration. After first-use consent, qz enables local MCP and CLI connections. `qz connect`
+configuration. After first-use consent, Zuri enables local MCP and CLI connections. `qz connect`
 starts the local service and opens a local connection page when needed. The extension verifies that
 page's address and the service identity before saving its endpoint. It tries the saved endpoint
 (initially `http://127.0.0.1:18765`) and becomes idle after three consecutive failures; the connection
-page resumes it. Local clients can then access qz tasks and browser tools without a pairing token.
+page resumes it. Local clients can then access Zuri tasks and browser tools without a pairing token.
 The service accepts loopback connections, validates request Host and Origin, and rejects ordinary
 web-page origins. `qz stop` stops the local service. See the [connection guide](../services/mcp-bridge/README.md)
 for setup and connection controls.

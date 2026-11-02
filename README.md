@@ -6,7 +6,8 @@
 Zuri is an open-source browser agent that runs as a Chrome extension. Describe a task in one
 sentence, and it works in the sites you are already signed in to, extracts data, and returns tables,
 files, or reports with sources. It works with the model provider you choose, using your own API key.
-Task data stays in your browser and is sent only to that provider.
+Task data stays in your browser and is sent only to that provider. See
+[Privacy and browser permissions](docs/permissions.md) for what the extension reads and where it goes.
 
 ## Install
 
@@ -33,12 +34,12 @@ adds the following.
 **Chat and composer**
 
 - Floating ball launcher, switchable in Settings.
-- `@tab` mentions, with the current tab shared by default. Shared tabs, picked page elements and
-  Skills appear as chips in the composer.
+- `@tab` mentions, with the current tab shared by default. Shared tabs, picked page elements (with a
+  thumbnail) and Skills appear as chips in the composer. Pasted images show above the input.
 - Slash menu with grouped rows and icons, `/new` and `/clear`, and Skills pinned first. The plus menu
   picks individual Skills and opens Skills, Data and History.
 - Model menu in the composer that lists every provider's models with vendor icons and friendly names.
-- Context usage ring that also shows the prompt cache hit rate.
+- Context usage ring. Click it to see the context composition and the cache hit rate of each request.
 - Page-specific suggestions on the landing screen and follow-up suggestions after each reply, in the
   UI language.
 - Data tables open from artifact cards in a sheet over the chat. Blank chats are hidden from History.
@@ -57,7 +58,8 @@ adds the following.
 
 **Branding and settings**
 
-- Renamed to Zuri with a new logo, welcome wordmark and README.
+- Renamed to Zuri Agent with a new logo, pixel welcome wordmark and README. The built-in settings
+  Skill is renamed to Agent管理.
 - Removed the CLI connection, shortcut and model rate limit controls from Advanced settings.
 
 ## License
