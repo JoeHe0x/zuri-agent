@@ -23,7 +23,7 @@ export function pageSuggestionKeys(url: string): Key[] {
   }
 }
 
-/** Shows page-aware prompt chips above the composer on the landing screen, and model follow-ups after each finished reply. */
+/** Shows page-aware prompt chips above the composer on the landing screen, and model follow-ups below the last reply. */
 export function createPageSuggestionsFeature(options: {
   root: HTMLElement; statusBar: HTMLElement; messagesEl: HTMLElement; extensions: Pick<WorkspaceExtensions, "listReferences">;
   submit(text: string): unknown;
@@ -39,6 +39,7 @@ export function createPageSuggestionsFeature(options: {
   reload.textContent = t("suggestRefresh");
   root.append(list, reload);
   root.hidden = true;
+  const home = { parent: root.parentElement!, next: root.nextSibling };
 
   let keys: Key[] = [];
   let generated: string[] = [];
@@ -60,8 +61,11 @@ export function createPageSuggestionsFeature(options: {
 
   function render() {
     const landing = messagesEl.dataset.chatState === "landing";
-    const following = !landing && followUps?.anchor === lastExchange()?.assistant && options.getRunStatus() === "idle";
+    const following = !landing && !!followUps && followUps.anchor === lastExchange()?.assistant && options.getRunStatus() === "idle";
     root.hidden = landing ? !page : !following;
+    // Follow-ups sit under the reply they belong to; otherwise the chips stay above the composer.
+    if (following) followUps!.anchor.after(root);
+    else if (root.parentElement !== home.parent) home.parent.insertBefore(root, home.next);
     const base = landing ? (generated.length ? generated : keys.map(key => t(key))) : following ? followUps!.items : [];
     const texts = base.filter(text => !hidden().has(text));
     const shown = [...list.children].map(child => child.firstElementChild?.textContent);

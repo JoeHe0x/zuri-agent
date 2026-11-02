@@ -20,6 +20,9 @@ export function createCommandMenu({ button, menu, extensions, list }: {
   let shown: MenuItem[] = [];
   const setOpen = (open: boolean) => {
     menu.classList.toggle("hidden", !open);
+    // The button is vertically centred in a growing input row; open just above it, not above the whole input area.
+    const area = menu.offsetParent;
+    if (open && area) menu.style.bottom = `${Math.round(area.getBoundingClientRect().bottom - button.getBoundingClientRect().top + 4)}px`;
     button.setAttribute("aria-expanded", String(open));
   };
   async function render() {
