@@ -3,11 +3,13 @@ import workbench from "./workbench.js";
 import siteAuthor from "./site-author.js";
 import findSkills from "./find-skills.js";
 import taskRetrospective from "./task-retrospective.js";
+import siteMemory from "./site-memory.js";
 
 const register: SkillExtension = qz => {
   qz.registerSkill(workbench);
   qz.registerSkill(siteAuthor);
   qz.registerSkill(findSkills);
   qz.registerSkill(taskRetrospective);
+  qz.registerSkill(siteMemory);
 };
 export default register;
