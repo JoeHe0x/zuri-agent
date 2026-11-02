@@ -25,7 +25,7 @@ export function createSidepanelTransport(api: BackgroundApi, {
     mcp_connection_status: { method: "system.mcpConnectionStatus", response: "mcp_connection_status_result", envelope: "result", args: (_message, port) => [port?.sender || {}] },
     mcp_connection_connect: { method: "system.connectMcpFromSettings", response: "mcp_connection_connect_result", envelope: "result", args: (message, port) => [port?.sender || {}, { name: message.name, endpoint: message.endpoint }] },
     mcp_connection_disconnect: { method: "system.disconnectMcp", response: "mcp_connection_disconnect_result", envelope: "result", args: (_message, port) => [port?.sender || {}] },
-    page_suggestions: { method: "ui.pageSuggestions", response: "page_suggestions_result", envelope: "suggestions", args: message => [message.tabId, message.exclude] },
+    page_suggestions: { method: "ui.pageSuggestions", response: "page_suggestions_result", envelope: "suggestions", args: message => [message.tabId, message.exclude, message.conversation] },
     start_element_picker: { method: "ui.startElementPicker", response: "element_picker_result", args: message => [message.tabId] },
     confirm_element_picker: { method: "ui.confirmElementPicker", response: "element_picker_confirmed", args: message => [message.tabId] },
     cancel_element_picker: { method: "ui.cancelElementPicker", response: "element_picker_cancelled", args: message => [message.tabId] },

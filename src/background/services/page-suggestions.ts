@@ -13,6 +13,7 @@ interface PageSuggestionsOptions {
   getRuntimeConfig(): Promise<unknown>;
   llmChat(messages: ModelMessage[], tools: unknown[], signal: undefined, options: Record<string, unknown>): Promise<{ message?: { content?: unknown } }>;
   buildMessages(page: { title: string; url: string; text: string }, avoid: string[]): ModelMessage[];
+  buildFollowUpMessages(conversation: { user: string; assistant: string }, avoid: string[]): ModelMessage[];
 }
 
 /** Model-generated prompt suggestions for a tab, cached per URL. Blocked and non-web pages yield none. */
@@ -22,11 +23,21 @@ export function createPageSuggestions({
   getRuntimeConfig,
   llmChat,
   buildMessages,
+  buildFollowUpMessages,
 }: PageSuggestionsOptions) {
   const cache = new Map<string, string[]>();
 
-  async function suggest(tabId: unknown, exclude: unknown = []): Promise<string[]> {
+  async function suggest(tabId: unknown, exclude: unknown = [], conversation?: { user?: unknown; assistant?: unknown }): Promise<string[]> {
     const avoid = (Array.isArray(exclude) ? exclude : []).filter((item): item is string => typeof item === "string").slice(0, 12).map(item => item.slice(0, 80));
+    if (conversation) {
+      // Follow-ups depend on the last exchange only, so they skip the page, its guardrails and the cache.
+      const { message } = await llmChat(buildFollowUpMessages({ user: String(conversation.user || "").slice(0, TEXT_LIMIT), assistant: String(conversation.assistant || "").slice(0, TEXT_LIMIT) }, avoid), [], undefined, {
+        sessionId: "page-suggestions:follow-up",
+        config: await getRuntimeConfig(),
+        rateLimit: false,
+      });
+      return parse(message?.content);
+    }
     const tab = await tabs.get(Number(tabId)).catch(() => null);
     const url = tab?.url || "";
     if (!tab?.id || !isWebTabUrl(url) || matchBlockedUrl(url, await getSecurityGuardrails())) return [];

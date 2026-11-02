@@ -23,10 +23,11 @@ export function pageSuggestionKeys(url: string): Key[] {
   }
 }
 
-/** Shows page-aware prompt chips above the composer while the chat is on the landing screen. */
+/** Shows page-aware prompt chips above the composer on the landing screen, and model follow-ups after each finished reply. */
 export function createPageSuggestionsFeature(options: {
-  root: HTMLElement; messagesEl: HTMLElement; extensions: Pick<WorkspaceExtensions, "listReferences">;
+  root: HTMLElement; statusBar: HTMLElement; messagesEl: HTMLElement; extensions: Pick<WorkspaceExtensions, "listReferences">;
   submit(text: string): unknown;
+  getRunStatus(): string;
   request(type: string, payload: Record<string, unknown>, timeout: number): Promise<Record<string, any>>;
 }) {
   const { root, messagesEl, extensions } = options;
@@ -41,6 +42,13 @@ export function createPageSuggestionsFeature(options: {
 
   let keys: Key[] = [];
   let generated: string[] = [];
+  // Follow-ups belong to one assistant message; they disappear when another message becomes the last one.
+  let followUps: { anchor: Element; items: string[] } | null = null;
+  const lastExchange = () => {
+    const assistant = [...messagesEl.querySelectorAll(".msg-assistant")].pop();
+    const user = [...messagesEl.querySelectorAll(".msg-user .msg-content")].pop();
+    return assistant && user ? { assistant, user: user.textContent || "", text: assistant.textContent || "" } : null;
+  };
   let page: { key: string; tabId: number } | null = null;
   let seq = 0;
   let renderSeq = 0;
@@ -52,8 +60,10 @@ export function createPageSuggestionsFeature(options: {
 
   function render() {
     const landing = messagesEl.dataset.chatState === "landing";
-    root.hidden = !landing || !page;
-    const texts = landing ? (generated.length ? generated : keys.map(key => t(key))).filter(text => !hidden().has(text)) : [];
+    const following = !landing && followUps?.anchor === lastExchange()?.assistant && options.getRunStatus() === "idle";
+    root.hidden = landing ? !page : !following;
+    const base = landing ? (generated.length ? generated : keys.map(key => t(key))) : following ? followUps!.items : [];
+    const texts = base.filter(text => !hidden().has(text));
     const shown = [...list.children].map(child => child.firstElementChild?.textContent);
     if (texts.length === shown.length && texts.every((text, index) => text === shown[index])) return;
     const current = ++renderSeq;
@@ -91,8 +101,8 @@ export function createPageSuggestionsFeature(options: {
     } else swap();
   }
 
-  function request(tabId: number, exclude: string[] = []) {
-    return options.request("page_suggestions", { tabId, exclude }, 30000)
+  function request(tabId: number, exclude: string[] = [], conversation?: { user: string; assistant: string }) {
+    return options.request("page_suggestions", { tabId, exclude, conversation }, 30000)
       .then(reply => (Array.isArray(reply?.suggestions) ? reply.suggestions : []).filter((item: unknown) => typeof item === "string") as string[])
       .catch(() => [] as string[]);
   }
@@ -128,8 +138,25 @@ export function createPageSuggestionsFeature(options: {
     render();
   }
 
+  async function followUp(exclude: string[] = []) {
+    const last = lastExchange();
+    if (!last || options.getRunStatus() !== "idle") return;
+    const items = (await request(page?.tabId ?? 0, exclude, { user: last.user, assistant: last.text })).filter(text => !exclude.includes(text));
+    if (items.length && last.assistant === lastExchange()?.assistant) {
+      followUps = { anchor: last.assistant, items };
+      render();
+    }
+  }
+
   reload.addEventListener("click", async () => {
-    if (!page || reload.disabled) return;
+    if (reload.disabled) return;
+    if (messagesEl.dataset.chatState !== "landing") {
+      reload.disabled = true;
+      await followUp([...list.querySelectorAll(".page-suggestion-text")].map(el => el.textContent || ""));
+      reload.disabled = false;
+      return;
+    }
+    if (!page) return;
     const target = page;
     const current = seq;
     // The model avoids everything already shown or dismissed on this page.
@@ -145,6 +172,11 @@ export function createPageSuggestionsFeature(options: {
   });
 
   new MutationObserver(render).observe(messagesEl, { attributes: true, attributeFilter: ["data-chat-state"] });
+  // The status bar hides when a run ends; a new run hides the chips again.
+  new MutationObserver(() => {
+    render();
+    if (options.getRunStatus() === "idle" && messagesEl.dataset.chatState === "conversation" && !followUps) void followUp();
+  }).observe(options.statusBar, { attributes: true, attributeFilter: ["class"] });
   if (typeof chrome !== "undefined" && chrome.tabs?.onActivated) {
     const run = () => void refresh().catch(() => {});
     chrome.tabs.onActivated.addListener(run);

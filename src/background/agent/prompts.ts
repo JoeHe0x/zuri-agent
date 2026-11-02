@@ -57,3 +57,10 @@ export function buildPageSuggestionMessages(page: { title: string; url: string; 
     { role: "user", content: JSON.stringify({ page, avoid }) },
   ];
 }
+
+export function buildFollowUpMessages(conversation: { user: string; assistant: string }, avoid: string[] = []): ModelMessage[] {
+  return [
+    { role: "system", content: t("followUpInstructions", { language: getAvailableLanguages().find(pack => pack.language === getLanguage())?.name || getLanguage() }) },
+    { role: "user", content: JSON.stringify({ conversation, avoid }) },
+  ];
+}

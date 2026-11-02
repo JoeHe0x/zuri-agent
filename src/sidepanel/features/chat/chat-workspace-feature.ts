@@ -285,7 +285,8 @@ export function createChatWorkspaceFeature(options: ChatWorkspaceOptions) {
     stopCurrentRun: () => runController?.stop() === true,
   });
   createPageSuggestionsFeature({
-    root: select("#page-suggestions"), messagesEl, extensions,
+    root: select("#page-suggestions"), statusBar: select("#status-bar"), messagesEl, extensions,
+    getRunStatus: () => runController?.getStatus() || CHAT_RUN_STATES.IDLE,
     submit: text => { composer.setValue(text); return composer.send(); },
     request: options.request,
   });

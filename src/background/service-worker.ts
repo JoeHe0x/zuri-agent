@@ -142,7 +142,7 @@ import {
   isAutomationSessionFamily as isAutomationSessionTree,
 } from "./automation/runtime.js";
 import { ensureQingzhouTabGroupForWindow } from "../shared/tab-groups.js";
-import { buildPageSuggestionMessages, buildSessionTitleMessages } from "./agent/prompts.js";
+import { buildFollowUpMessages, buildPageSuggestionMessages, buildSessionTitleMessages } from "./agent/prompts.js";
 import { createPageSuggestions } from "./services/page-suggestions.js";
 import { nowBeijingDateTime } from "../shared/time-utils.js";
 import {
@@ -640,6 +640,7 @@ const pageSuggestions = createPageSuggestions({
   getRuntimeConfig: getCurrentRuntimeConfig,
   llmChat,
   buildMessages: buildPageSuggestionMessages,
+  buildFollowUpMessages,
 });
 const platformCommands = createPlatformCommands({
   sessionSupervisor,
