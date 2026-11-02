@@ -474,12 +474,18 @@
   line-height: 1.5;
 }
 
+.input-highlight .hl-slash,
+.input-highlight .hl-mention {
+  /* Stroke thickens glyphs without changing advance widths, so the mirror stays aligned with the textarea caret. */
+  -webkit-text-stroke: 0.5px currentColor;
+}
+
 .input-highlight .hl-slash {
-  color: var(--accent);
+  color: var(--syntax-title);
 }
 
 .input-highlight .hl-mention {
-  color: var(--green);
+  color: var(--syntax-keyword);
 }
 
 #input.has-highlight {
