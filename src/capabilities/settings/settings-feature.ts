@@ -2056,7 +2056,7 @@ export function createSettingsFeature(options: SettingsFeatureOptions) {
     const saved = (id: string) => presets.filter(preset => preset.provider === id).map(preset => ({ id: preset.model, label: preset.modelLabel }));
     const keyFor = (id: string) => {
       const apiKey = providerNeedsApiKey(id) ? getRememberedProviderApiKey(id) || (id === provider ? String(config?.apiKey || "") : "") : "";
-      return { provider: id, apiKey, credentialVersion: hashModelCachePart(apiKey) };
+      return { provider: id, apiKey, credentialVersion: hashModelCachePart(apiKey), independent: true };
     };
     const merge = (id: string, models: readonly { id: string; label?: string }[] = []) => ({ id, models: [...new Map([...models, ...saved(id)].map(model => [model.id, model] as const).reverse()).values()].reverse() });
     const paint = (groups: { id: string; models: { id: string; label?: string }[] }[]) => {

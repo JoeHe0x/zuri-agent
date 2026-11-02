@@ -103,3 +103,13 @@ test("closing and clearing a panel ignores late failure and reopens with a fresh
   assert.deepEqual(ids(await reopened), ["reopened"]);
   assert.equal(requests.length, 2);
 });
+
+test("independent loads for different providers all resolve and do not supersede the selected provider", async () => {
+  const { controller, requests } = deferredLoader();
+  const selected = controller.load({ provider: "A" });
+  const menu = [controller.load({ provider: "B", independent: true }), controller.load({ provider: "C", independent: true })];
+  requests.forEach((request, index) => request.resolve([{ id: `model-${index}` }]));
+  const results = await Promise.all([selected, ...menu]);
+  assert.deepEqual(results.map(result => result.stale), [false, false, false]);
+  assert.deepEqual(ids(controller.peek({ provider: "B" })), ["model-1"]);
+});

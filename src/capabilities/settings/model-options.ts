@@ -7,6 +7,8 @@ import {
 export interface ModelOptionsInput {
   provider?: string; endpoint?: string; customEndpoint?: string; credentialVersion?: string;
   apiKey?: string; refresh?: boolean;
+  /** Concurrent lists (the model menu loads every provider) neither supersede nor are superseded by the selected provider's load. */
+  independent?: boolean;
 }
 type ModelList = readonly (string | ModelOptionInput)[];
 interface ModelEntry { provider: string; providerLabel: string; models: ModelOption[]; loadedAt: number; sequence: number }
@@ -32,16 +34,16 @@ export function createModelOptionsController(options: ModelOptionsControllerOpti
 
   async function load(input: ModelOptionsInput = {}) {
     const key = cacheKey(input);
-    const sequence = ++requestSequence;
+    const sequence = input.independent ? requestSequence : ++requestSequence;
     if (!input.refresh && cache.has(key)) return { ...cache.get(key), cached: true, stale: false, sequence };
     let result;
     try {
       result = await options.loadModels(input);
     } catch (error) {
-      if (sequence !== requestSequence) return { models: [], stale: true, cached: false, sequence };
+      if (!input.independent && sequence !== requestSequence) return { models: [], stale: true, cached: false, sequence };
       throw error;
     }
-    if (sequence !== requestSequence) return { models: [], stale: true, cached: false, sequence };
+    if (!input.independent && sequence !== requestSequence) return { models: [], stale: true, cached: false, sequence };
     const info = "models" in result ? result : { models: result };
     const models = normalizeModelOptions(info.models);
     const entry = {
