@@ -25,6 +25,41 @@ npm run build
 After you change the source, run `npm run build` again and reload the extension on
 `chrome://extensions`.
 
+## Changes from upstream
+
+Zuri is forked from [alibaba/qz-browser-agent](https://github.com/alibaba/qz-browser-agent) and
+adds the following.
+
+**Chat and composer**
+
+- Floating ball launcher, switchable in Settings.
+- `@tab` mentions, with the current tab shared by default. Shared tabs, picked page elements and
+  Skills appear as chips in the composer.
+- Slash menu with grouped rows and icons, `/new` and `/clear`, and Skills pinned first. The plus menu
+  picks individual Skills and opens Skills, Data and History.
+- Model menu in the composer that lists every provider's models with vendor icons and friendly names.
+- Context usage ring that also shows the prompt cache hit rate.
+- Page-specific suggestions on the landing screen and follow-up suggestions after each reply, in the
+  UI language.
+- Data tables open from artifact cards in a sheet over the chat. Blank chats are hidden from History.
+- Inverse-colored tooltips and a gradient chat surface.
+
+**Providers and context**
+
+- Claude Pro/Max sign-in provider with account model discovery.
+- Anthropic prompt caching, batched image pruning for a stable prompt prefix, and a `cache_usage` trace.
+- Superseded page observations are replaced at once.
+
+**Skills**
+
+- Built-in `find-skills`, `task-retrospective` and `site-memory` Skills. `site-memory` keeps and
+  corrects per-site notes through `skill-workbench`.
+
+**Branding and settings**
+
+- Renamed to Zuri with a new logo, welcome wordmark and README.
+- Removed the CLI connection, shortcut and model rate limit controls from Advanced settings.
+
 ## License
 
 Apache-2.0. See [LICENSE](LICENSE).

@@ -12,7 +12,7 @@
 
 </div>
 
-轻舟（qz）是一个运行在你浏览器里的开源浏览器 Agent（Chrome 扩展）。一句话描述任务，它就会在你已登录的网站上自动操作、提取数据，交付表格、文件或带出处的报告。可接入 DeepSeek、OpenAI、Claude 等任意模型，用自己的 API Key，数据留在本地，只发给你选的模型；Grok Bot、Claude Code、Codex 等 Agent 也能通过 CLI 和 MCP 把网页任务交给它。
+Zuri 是一个运行在你浏览器里的开源浏览器 Agent（Chrome 扩展）。一句话描述任务，它就会在你已登录的网站上自动操作、提取数据，交付表格、文件或带出处的报告。可接入 DeepSeek、OpenAI、Claude 等任意模型，用自己的 API Key，数据留在本地，只发给你选的模型；Grok Bot、Claude Code、Codex 等 Agent 也能通过 CLI 和 MCP 把网页任务交给它。
 
 <p align="center">
   <a href="https://chromewebstore.google.com/detail/dknbdgkgoinlgjpfebapkklbmjjgdblm"><img src="docs/images/chrome-web-store-badge.png" alt="在 Chrome 应用商店获取" height="58"></a>
@@ -22,29 +22,29 @@
   <a href="#让你的-agent-更会用浏览器"><img src="docs/images/connect-command.svg" alt="npx skills add JoeHe0x/zuri-agent -g" height="52"></a>
 </p>
 
-![轻舟从 Wikipedia 采集杭州照片](docs/images/workspace-zh-CN.png)
+![Zuri 从 Wikipedia 采集杭州照片](docs/images/workspace-zh-CN.png)
 
 https://github.com/user-attachments/assets/3203bc89-ef26-4f66-86cc-b602a912a1ab
 
-## 为什么用轻舟？
+## 为什么用 Zuri？
 
 ### 解决 Agent 网页交互的“最后一公里”
 
-通用 AI Agent 并不擅长复杂的浏览器操作，遇到登录墙、连续点击或异步翻页极易中断。轻舟相当于为你的 Agent 挂载了一个真实的本地 Chrome，在真实环境里跑完复杂流程，再将干净的结果返回。
+通用 AI Agent 并不擅长复杂的浏览器操作，遇到登录墙、连续点击或异步翻页极易中断。Zuri 相当于为你的 Agent 挂载了一个真实的本地 Chrome，在真实环境里跑完复杂流程，再将干净的结果返回。
 
 ### 透明可见，人与 Agent 协同
 
-其他 browser agent 大多能看到执行过程，但中途很难介入，而且要么只给人用，要么只给 Agent 用。轻舟常驻在浏览器侧边栏，每一步操作和结果都清晰可见，你可以随时介入或停止。同时，Claude Code、Codex 等 coding agent 也能通过 CLI 和 MCP 直接向轻舟下发任务。
+其他 browser agent 大多能看到执行过程，但中途很难介入，而且要么只给人用，要么只给 Agent 用。Zuri 常驻在浏览器侧边栏，每一步操作和结果都清晰可见，你可以随时介入或停止。同时，Claude Code、Codex 等 coding agent 也能通过 CLI 和 MCP 直接向 Zuri 下发任务。
 
 ### 并行多任务调研，从网页数据到可复用 Skill
 
-告别在十几个标签页之间反复横跳与手动清洗数据。轻舟可以同时运行大量任务，每个任务还能派生子任务分头执行，把单个 browser agent 难以完成的大规模调研拆开并行推进。面对分散在不同网站、结构混乱的网页信息，轻舟能跨站点自动提取你需要比对的参数，并附带来源链接；将异构的网页内容直接整理为标准化的对比视图或本地文件，无缝接入你的分析流。跑通的流程还能直接沉淀为 Skill，下次只需一句话即可复用。
+告别在十几个标签页之间反复横跳与手动清洗数据。Zuri 可以同时运行大量任务，每个任务还能派生子任务分头执行，把单个 browser agent 难以完成的大规模调研拆开并行推进。面对分散在不同网站、结构混乱的网页信息，Zuri 能跨站点自动提取你需要比对的参数，并附带来源链接；将异构的网页内容直接整理为标准化的对比视图或本地文件，无缝接入你的分析流。跑通的流程还能直接沉淀为 Skill，下次只需一句话即可复用。
 
 ### 原生浏览器环境，数据纯本地留存
 
-告别繁琐的虚拟环境配置。轻舟直接调用你日常使用的 Chrome，现有的登录状态、Cookie 和扩展程序即插即用。任务数据完全存储在本地，底层大模型由你自主配置，安全可控。
+告别繁琐的虚拟环境配置。Zuri 直接调用你日常使用的 Chrome，现有的登录状态、Cookie 和扩展程序即插即用。任务数据完全存储在本地，底层大模型由你自主配置，安全可控。
 
-## 可以让轻舟做什么
+## 可以让 Zuri 做什么
 
 ### 从一个简单的任务开始
 
@@ -102,12 +102,12 @@ https://github.com/user-attachments/assets/3203bc89-ef26-4f66-86cc-b602a912a1ab
   <img src="docs/images/examples/zh/github-weekly-zh.png" width="320" alt="">
 </p>
 
-### 让你的 Agent 把任务交给轻舟
+### 让你的 Agent 把任务交给 Zuri
 
 在 pi 等编程 Agent 里说：
 
 ```text
-用轻舟查本周 GitHub 上最火的 AI agent 项目，整理成周报发给我。
+用 Zuri 查本周 GitHub 上最火的 AI agent 项目，整理成周报发给我。
 ```
 
 <p align="center">
@@ -116,16 +116,16 @@ https://github.com/user-attachments/assets/3203bc89-ef26-4f66-86cc-b602a912a1ab
 
 ## 快速开始
 
-1. **安装扩展**：前往 [Chrome 应用商店](https://chromewebstore.google.com/detail/dknbdgkgoinlgjpfebapkklbmjjgdblm)点击**添加至 Chrome**，完成后点击浏览器工具栏上的轻舟图标，唤起侧边栏。
+1. **安装扩展**：前往 [Chrome 应用商店](https://chromewebstore.google.com/detail/dknbdgkgoinlgjpfebapkklbmjjgdblm)点击**添加至 Chrome**，完成后点击浏览器工具栏上的 Zuri 图标，唤起侧边栏。
 2. **接入模型**：进入**设置**，选择模型服务商（如 DeepSeek、Claude），填入 API Key 并保存。若已有 ChatGPT 账号，可直接选择 **OpenAI Codex** 登录，免填 Key。
 
-   <img src="docs/images/settings-model-zh-CN.png" alt="轻舟设置页：选择服务商并填入 API Key" width="320">
+   <img src="docs/images/settings-model-zh-CN.png" alt="Zuri 设置页：选择服务商并填入 API Key" width="320">
 
 3. **运行任务**：在侧边栏输入你的指令，例如：
    ```text
    查今年诺贝尔奖各奖项得主，整理成带来源链接的表格。
    ```
-4. **（可选）接入其他 Agent**：在终端运行 `npx --yes qz-browser-agent@latest connect`，即可让外部 Agent 调用轻舟。详见 [让你的 Agent 更会用浏览器](#让你的-agent-更会用浏览器)。
+4. **（可选）接入其他 Agent**：在终端运行 `npx --yes qz-browser-agent@latest connect`，即可让外部 Agent 调用 Zuri。详见 [让你的 Agent 更会用浏览器](#让你的-agent-更会用浏览器)。
 
 <details id="手动安装">
 <summary>无法访问 Chrome 应用商店？手动安装</summary>
@@ -139,9 +139,9 @@ https://github.com/user-attachments/assets/3203bc89-ef26-4f66-86cc-b602a912a1ab
 
 ## 让你的 Agent 更会用浏览器
 
-Grok Bot、Claude Code、Codex、pi 等 Agent 遇到网页任务时，可以把它交给轻舟。轻舟在你的浏览器侧边栏里执行，过程看得见，结果再交回给 Agent，让它接着往下做。
+Grok Bot、Claude Code、Codex、pi 等 Agent 遇到网页任务时，可以把它交给 Zuri。Zuri 在你的浏览器侧边栏里执行，过程看得见，结果再交回给 Agent，让它接着往下做。
 
-1. **安装 Skill**：让你的 Agent 学会怎么调用轻舟。
+1. **安装 Skill**：让你的 Agent 学会怎么调用 Zuri。
    ```bash
    npx skills add JoeHe0x/zuri-agent -g
    ```
@@ -149,7 +149,7 @@ Grok Bot、Claude Code、Codex、pi 等 Agent 遇到网页任务时，可以把�
    ```bash
    npx qz-browser-agent@latest connect
    ```
-3. **直接吩咐**：跟你的 Agent 说“用轻舟对比最近 6 个月发布的开源大模型，整理成带来源的表格”。
+3. **直接吩咐**：跟你的 Agent 说“用 Zuri 对比最近 6 个月发布的开源大模型，整理成带来源的表格”。
 
 <details>
 <summary>直接用 CLI 或 MCP</summary>
@@ -167,7 +167,7 @@ npx qz-browser-agent@latest create "你的任务" --stream
 
 ## 与同类项目对比
 
-| | **轻舟** | Nanobrowser | Browser Use | agent-browser | Playwright MCP |
+| | **Zuri** | Nanobrowser | Browser Use | agent-browser | Playwright MCP |
 | --- | :-: | :-: | :-: | :-: | :-: |
 | **整个任务交给它，不用一步步指挥** | ✅ | ◐ | ◐ | ◐ | ❌ |
 | **直接用你已登录的 Chrome** | ✅ | ✅ | ◐ | ◐ | ◐ |
@@ -179,19 +179,19 @@ npx qz-browser-agent@latest create "你的任务" --stream
 
 ## 本地优先
 
-轻舟完全运行在你的浏览器里。会话、Skill 和采集的数据都保存在本地，CLI/MCP 桥接服务同样运行在你的本机上。轻舟没有后台服务器，数据只会发给你配置的模型，以及任务直接访问的网站。
+Zuri 完全运行在你的浏览器里。会话、Skill 和采集的数据都保存在本地，CLI/MCP 桥接服务同样运行在你的本机上。Zuri 没有后台服务器，数据只会发给你配置的模型，以及任务直接访问的网站。
 
 详见[隐私政策](docs/permissions.md)与[浏览器权限](docs/permissions.md#browser-access)。
 
 ## 常见问题
 
-### 轻舟免费吗？
+### Zuri 免费吗？
 
 扩展和 CLI 按 [Apache-2.0](LICENSE) 免费提供。模型费用取决于服务商，也支持兼容的本地模型。ChatGPT 的权限和额度取决于你的账号及[套餐](https://learn.chatgpt.com/docs/pricing)。
 
 ### 怎么用 ChatGPT 账号登录？
 
-在**设置**中选择 **OpenAI Codex**，按设备码提示在 `auth.openai.com` 完成登录。回到轻舟，选择模型并保存。如果设备码登录未启用，请按 OpenAI 的[认证说明](https://learn.chatgpt.com/docs/auth#preferred-device-code-authentication-beta)操作。
+在**设置**中选择 **OpenAI Codex**，按设备码提示在 `auth.openai.com` 完成登录。回到 Zuri，选择模型并保存。如果设备码登录未启用，请按 OpenAI 的[认证说明](https://learn.chatgpt.com/docs/auth#preferred-device-code-authentication-beta)操作。
 
 ### 支持哪些模型？
 
@@ -206,7 +206,7 @@ npx qz-browser-agent@latest create "你的任务" --stream
 
 ## 开发
 
-需要修改轻舟的行为或检查其运行方式时，可以在本地构建并加载扩展。
+需要修改 Zuri 的行为或检查其运行方式时，可以在本地构建并加载扩展。
 
 ### 从源码构建
 
@@ -236,13 +236,43 @@ npm run verify:coverage # 共享套件、Chrome 套件，以及覆盖率门禁
 
 ### 添加能力包
 
-想添加轻舟还没有的工具、视图、设置或服务商，见[能力包指南](src/capabilities/README.md)。
+想添加 Zuri 还没有的工具、视图、设置或服务商，见[能力包指南](src/capabilities/README.md)。
 
 ### 更多文档
 
 - [架构](docs/architecture.md)
 - [命令与构建选项](docs/commands.md)
 - [贡献指南](CONTRIBUTING.md)
+
+## 相对上游的改动
+
+Zuri 派生自 [alibaba/qz-browser-agent](https://github.com/alibaba/qz-browser-agent)，新增以下内容。
+
+**聊天与输入框**
+
+- 悬浮球启动器，可在设置中开关。
+- `@tab` 提及，默认共享当前标签页。共享的标签页、选取的页面元素和 Skill 以标签形式显示在输入框中。
+- 斜杠菜单按组显示并带图标，支持 `/new` 和 `/clear`，Skill 置顶。加号菜单可单独选择 Skill，并进入 Skills、Data 和 History。
+- 输入框内的模型菜单，列出所有服务商的模型，带厂商图标和易读的模型名。
+- 上下文用量环，同时显示提示缓存命中率。
+- 落地页的页面相关建议，以及每次回复后的追问建议，均使用界面语言。
+- 数据表可从产物卡片在聊天上方的面板中打开。空白对话不再出现在历史记录中。
+- 反色提示气泡和渐变聊天背景。
+
+**服务商与上下文**
+
+- Claude Pro/Max 登录服务商，支持账号模型发现。
+- Anthropic 提示缓存、批量图片裁剪以稳定提示前缀，以及 `cache_usage` 跟踪。
+- 被取代的页面观察结果会立即替换。
+
+**Skill**
+
+- 内置 `find-skills`、`task-retrospective` 和 `site-memory` Skill。`site-memory` 通过 `skill-workbench` 记录并修正各站点的笔记。
+
+**品牌与设置**
+
+- 更名为 Zuri，换用新 Logo、欢迎页字标和 README。
+- 从高级设置中移除 CLI 连接、快捷键和模型限速控件。
 
 ## 许可证
 
