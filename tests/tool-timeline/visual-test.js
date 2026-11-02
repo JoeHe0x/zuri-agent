@@ -580,7 +580,7 @@ function sampleForTool(name) {
   if (name === "list_tabs" || name === "group_tabs") {
     return {
       args: name === "group_tabs" ? { tabIds: tabs.map(tab => tab.id), color: "green" } : { windowId: 1 },
-      result: name === "group_tabs" ? { groupId: 12, tabIds: tabs.map(tab => tab.id), title: "轻舟任务", color: "green", tabs } : { tabs },
+      result: name === "group_tabs" ? { groupId: 12, tabIds: tabs.map(tab => tab.id), title: "Zuri 任务", color: "green", tabs } : { tabs },
     };
   }
   if (name === "get_working_tab") return { args: {}, result: tabs[0] };

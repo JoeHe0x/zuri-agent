@@ -2,7 +2,7 @@ import { expect, test } from "./fixtures.mjs";
 
 const compactCases = [
   { name: "get_working_tab", args: {}, result: { id: 17, windowId: 1, active: true, title: "竞品详情", url: "https://example.com/brand/detail" }, expected: "竞品详情" },
-  { name: "group_tabs", args: { tabIds: [17, 18, 19], color: "green" }, result: { groupId: 12, tabIds: [17, 18, 19], title: "轻舟任务", color: "green" }, expected: "轻舟任务" },
+  { name: "group_tabs", args: { tabIds: [17, 18, 19], color: "green" }, result: { groupId: 12, tabIds: [17, 18, 19], title: "Zuri 任务", color: "green" }, expected: "Zuri 任务" },
   { name: "manage_goal", args: { sample: true }, result: { ok: true, message: "目标追踪 已完成", count: 1 }, expected: "目标追踪 已完成" },
   { name: "run_skill_script", args: { sample: true }, result: { ok: true, message: "执行技能脚本 已完成", count: 1 }, expected: "执行技能脚本 已完成" },
   { name: "fallback_test__skill", args: {}, result: { action: "save", saved: true, name: "测试技能", scope: "global", domains: [], urlPatterns: [], resources: [] }, expected: "测试技能" },

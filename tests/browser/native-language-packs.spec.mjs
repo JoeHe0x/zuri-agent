@@ -16,8 +16,8 @@ const literalEntry = { message: "$QZ_LITERAL$", placeholders: { qz_literal: {
 
 for (const [language, chromeLocale, brand, tagline] of [
   ["en", "en", "qz", "A lighter way to get things done."],
-  ["zh-CN", "zh_CN", "轻舟", "万重山外，一舟轻渡"],
-  ["zh-TW", "zh_TW", "輕舟", "萬重山外，一舟輕渡"],
+  ["zh-CN", "zh_CN", "轻舟", "你的浏览器 AI 助手"],
+  ["zh-TW", "zh_TW", "輕舟", "你的瀏覽器 AI 助手"],
   ["ja", "ja", "軽舟", "やりたいことを、軽やかに。"],
   ["ar", "ar", "qz", "أفق أوسع، وخطوة أخف."],
 ]) {

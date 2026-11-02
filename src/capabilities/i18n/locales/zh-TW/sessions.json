@@ -142,7 +142,7 @@
   "sessions.items": "項目：{count}",
   "sessions.dataTable": "資料表",
   "sessions.file": "檔案",
-  "sessions.qingzhouTask": "輕舟任務",
+  "sessions.qingzhouTask": "Zuri 任務",
   "sessions.loadingArtifactList": "正在載入產物",
   "sessions.checkingTaskArtifacts": "正在檢查任務產物",
   "sessions.artifactCount": "產物：{count}",

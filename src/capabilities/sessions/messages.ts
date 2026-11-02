@@ -155,7 +155,7 @@ export default defineMessages("sessions", {
   "items": { "zh-CN": "{count} 个", en: "Items: {count}" },
   "dataTable": { "zh-CN": "数据表", en: "Data" },
   "file": { "zh-CN": "文件", en: "File" },
-  "qingzhouTask": { "zh-CN": "轻舟任务", en: "qz task" },
+  "qingzhouTask": { "zh-CN": "Zuri 任务", en: "Zuri task" },
   "loadingArtifactList": { "zh-CN": "正在加载产物列表", en: "Loading artifacts" },
   "checkingTaskArtifacts": { "zh-CN": "正在检查任务产物", en: "Checking task artifacts" },
   "artifactCount": { "zh-CN": "{count} 个产物", en: "Artifacts: {count}" },

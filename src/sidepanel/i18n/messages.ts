@@ -357,7 +357,7 @@ export default defineMessages("core", {
   next: { "zh-CN": "下一个", en: "Next" },
   nextSearchResult: { "zh-CN": "下一个搜索结果", en: "Next search result" },
   closeSearch: { "zh-CN": "关闭搜索", en: "Close search" },
-  tagline: { "zh-CN": "万重山外，一舟轻渡", en: "A lighter way to get things done." },
+  tagline: { "zh-CN": "你的浏览器 AI 助手", en: "A lighter way to get things done." },
   stop: { "zh-CN": "停止", en: "Stop" },
   taskPlaceholder: { "zh-CN": "这个任务要做什么？", en: "What would you like to do?" },
   send: { "zh-CN": "发送", en: "Send" },
