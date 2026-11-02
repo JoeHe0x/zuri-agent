@@ -26,10 +26,12 @@ import {
 import { createWorkspaceExtensions } from "./features/app/workspace-extensions.js";
 import { createPerfTrace } from "./features/dev/perf-trace.js";
 import { isConversationBenchmarkHarness } from "./features/dev/test-host.js";
+import { installTooltipFeature } from "./ui/tooltip-feature.js";
 
 const UI_TABS = Object.freeze({
   CHAT: "chat",
 });
+installTooltipFeature();
 const benchmarkHarness = isConversationBenchmarkHarness();
 const workspaceBootstrap = await loadWorkspaceBootstrap();
 let workspaceWindowId = workspaceBootstrap.windowId;

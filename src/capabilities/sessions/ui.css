@@ -1396,11 +1396,11 @@
   left: 50%;
   max-width: 86px;
   padding: 3px 7px;
-  border: 1px solid var(--border);
+  border: 0;
   border-radius: var(--radius-pill);
-  background: var(--bg-primary);
+  background: var(--control-primary-surface);
   box-shadow: var(--shadow-sm);
-  color: var(--text-secondary);
+  color: var(--control-primary-text);
   content: attr(data-tooltip);
   font-size: 10px;
   font-weight: 620;

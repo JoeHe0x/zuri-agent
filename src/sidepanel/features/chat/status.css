@@ -38,7 +38,7 @@
   mask: radial-gradient(circle, transparent 4px, #000 4.5px);
 }
 
-.context-usage:not([title]),
+.context-usage:not([title]):not([data-tip]),
 .context-usage[title=""] { display: none; }
 
 .context-usage[data-level="warn"] { --ring-color: color-mix(in srgb, var(--red) 55%, var(--text-muted)); }

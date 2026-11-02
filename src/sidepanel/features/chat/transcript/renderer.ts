@@ -903,7 +903,7 @@ function syncUserMessageActions(el: HTMLElement, entry: TranscriptEntry, canEdit
   const actions = document.createElement("div");
   actions.className = "msg-user-actions";
   actions.innerHTML = `
-    <button class="qz-icon-btn qz-icon-btn--sm msg-action-btn msg-user-edit-btn" type="button" data-action="edit-user-message" data-tooltip="${tHtml("edit")}" title="${tHtml("edit")}" aria-label="${tHtml("edit")}">
+    <button class="qz-icon-btn qz-icon-btn--sm msg-action-btn msg-user-edit-btn" type="button" data-action="edit-user-message" data-tooltip="${tHtml("edit")}" aria-label="${tHtml("edit")}">
       <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m15.2 5.2 3.6 3.6"/><path d="M4 20l4.2-1 11-11a2.55 2.55 0 0 0-3.6-3.6l-11 11Z"/></svg>
     </button>
   `;

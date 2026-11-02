@@ -213,10 +213,10 @@
   bottom: calc(100% + 3px);
   z-index: 4;
   padding: 5px 8px;
-  border: 1px solid var(--border);
+  border: 0;
   border-radius: 999px;
-  background: var(--popover-surface);
-  color: var(--text-secondary);
+  background: var(--control-primary-surface);
+  color: var(--control-primary-text);
   box-shadow: var(--shadow-sm);
   font-size: 12px;
   font-weight: 600;
