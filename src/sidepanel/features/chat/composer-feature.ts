@@ -1107,6 +1107,7 @@ export function createComposerFeature(options: ComposerOptions) {
     retryUserMessage,
     syncInputState,
     setValue,
+    addFiles,
     focus: () => input.focus(),
     isComposing: () => isComposingInput,
     handleSessionChanged,

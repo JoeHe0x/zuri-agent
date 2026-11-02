@@ -31,6 +31,7 @@ export default defineMessages("sessions", {
   "showingTheFirst": { "zh-CN": "已显示前", en: "Showing the first" },
   "charactersViewTheRawDataForTheFullContent": { "zh-CN": "字符，完整内容见原始数据。", en: "characters. View the raw data for the full content." },
   "tasksLabel": { "zh-CN": "任务", en: "Tasks" },
+  "history": { "zh-CN": "历史", en: "History" },
   "goalTracking": { "zh-CN": "目标追踪", en: "Goal tracking" },
   "goalTrackingShort": { "zh-CN": "目标追踪", en: "Goal tracking" },
   "latestMessages": { "zh-CN": "最新消息", en: "Latest messages" },

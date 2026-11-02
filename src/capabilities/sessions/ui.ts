@@ -123,7 +123,10 @@ export default function (qz: UiExtensionAPI) {
     if (event.type === "ui_workspace_reset") { artifacts.reset(); sessions.reset(); automations.reset(); }
   });
   qz.onDispose(() => { artifacts.reset(); sessions.reset(); automations.reset(); });
-  qz.registerPage({ id: "sessions", title: t("tasksLabel"), order: 10, elements: [sessions.panel],
+  qz.extensions.register({
+    commands: [{ id: "open-sessions", run: () => qz.navigate("sessions", { userInitiated: true }) }],
+  });
+  qz.registerPage({ id: "sessions", title: t("history"), order: 10, navigation: false, elements: [sessions.panel],
       activate: ({ refresh }) => { if (refresh) sessions.refresh({ requestFreshState: true }); },
       deactivate: sessions.clearInteractionHold,
       capture: () => ({ mode: sessions.getMode() }),

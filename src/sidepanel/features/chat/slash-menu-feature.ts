@@ -350,6 +350,16 @@ function closeSlashMenu() {
     isOpen: () => slashMenuState.open,
     mentionTokens: () => sharedItems().map(item => `[${item.kind}: ${item.name}]`).join(" "),
     clearMentions() { mentions = []; renderMentions(); },
+    isTabShared: (item: SlashItem) => sharedItems().some(shared => tabKey(shared) === tabKey(item)),
+    toggleTab(item: SlashItem) {
+      const key = tabKey(item);
+      if (sharedItems().some(shared => tabKey(shared) === key)) {
+        if (currentTab && tabKey(currentTab) === key) { dismissedTab = key; currentTab = null; }
+        mentions = mentions.filter(mention => tabKey(mention) !== key);
+      } else mentions.push(item);
+      if (sharedItems().length < 2) mentionsExpanded = false;
+      renderMentions();
+    },
     parseCommand: parseSlashCommandText,
     executeCommand: (command: NonNullable<ReturnType<typeof parseSlashCommandText>>) => onCommand(command),
   };

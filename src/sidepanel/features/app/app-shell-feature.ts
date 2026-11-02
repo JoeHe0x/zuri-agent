@@ -35,9 +35,14 @@ export function createAppShellFeature(options: AppShellOptions) {
     options.root?.defaultView?.addEventListener?.("focus", retryComposerFocus);
     options.sidePanelApi?.onOpened?.addListener?.(scheduleComposerFocus);
     options.newButton?.addEventListener("click", startNewChat);
+    options.root?.getElementById?.("btn-back")?.addEventListener("click", backToChat);
     unsubscribePages = options.ui.subscribeChanges(refreshPages);
     refreshPages();
     renderTab(isValidTab(initialTab) ? initialTab : options.tabs.CHAT, { refresh: false });
+  }
+
+  function backToChat() {
+    switchTab(options.tabs.CHAT, { userInitiated: true });
   }
 
   function setReady() {
@@ -55,6 +60,7 @@ export function createAppShellFeature(options: AppShellOptions) {
     options.root?.defaultView?.removeEventListener?.("focus", retryComposerFocus);
     options.sidePanelApi?.onOpened?.removeListener?.(scheduleComposerFocus);
     options.newButton?.removeEventListener("click", startNewChat);
+    options.root?.getElementById?.("btn-back")?.removeEventListener("click", backToChat);
     unsubscribePages?.();
     unsubscribePages = null;
     options.ui.deactivatePage();
@@ -87,6 +93,13 @@ export function createAppShellFeature(options: AppShellOptions) {
     return true;
   }
 
+  // A lone "Chat" tab is redundant; the segment appears only when another tab (e.g. Logs) is enabled.
+  function updateHeaderTabs(tab = options.getCurrentTab?.()) {
+    const tabs = options.root?.querySelector?.(".header-tabs");
+    const visible = tabs?.querySelectorAll(".tab-btn:not(.hidden)").length || 0;
+    tabs?.classList.toggle("hidden", tab !== options.tabs.CHAT || visible < 2);
+  }
+
   function renderTab(tab: string, { refresh = true } = {}) {
     options.setCurrentTab?.(tab);
     options.root?.querySelectorAll?.<HTMLElement>(".tab-btn").forEach(button => {
@@ -95,6 +108,10 @@ export function createAppShellFeature(options: AppShellOptions) {
     for (const page of options.ui.getPages()) {
       page.elements.forEach(element => element?.classList.toggle("hidden", page.id !== tab));
     }
+    options.root?.getElementById?.("btn-back")?.classList.toggle("hidden", tab === options.tabs.CHAT);
+    const backLabel = options.root?.getElementById?.("btn-back-label");
+    if (backLabel) backLabel.textContent = options.ui.getPage(tab)?.title || "";
+    updateHeaderTabs(tab);
     options.runController.renderDock();
     options.goalStrip.renderCurrent();
     options.ui.activatePage(tab, { refresh });
@@ -124,6 +141,7 @@ export function createAppShellFeature(options: AppShellOptions) {
     }
     const navigation = root?.querySelector?.(".header-tabs");
     for (const page of pages) {
+      if (page.navigation === false) continue;
       let entry = navigationButtons.get(page.id);
       if (!entry) {
         const existing = page.button || Array.from(root?.querySelectorAll?.<HTMLElement>(".tab-btn") || []).find(button => button.dataset.tab === page.id);
@@ -139,6 +157,7 @@ export function createAppShellFeature(options: AppShellOptions) {
       entry.button.classList.toggle("active", page.id === options.getCurrentTab?.());
       navigation?.append(entry.button);
     }
+    updateHeaderTabs();
     options.caseRecordingButton?.classList.toggle("hidden", options.isDebugEnabled?.() !== true);
     const current = options.getCurrentTab?.();
     if (started && current && !isValidTab(current)) switchTab(options.tabs.CHAT);

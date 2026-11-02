@@ -21,6 +21,8 @@ export default function (qz: UiExtensionAPI) {
   });
   qz.onDispose(skills.dispose);
   qz.extensions.register({
+    commands: [{ id: "open-skills", composerLabel: t("skills"),
+      composerIcon: '<path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3Z"/><path d="M9 9h6M9 13h6"/>', run: () => qz.navigate("skills", { userInitiated: true }) }],
     references: [createSkillReferences(skills.list, () => skills.resolveCurrentSiteUrls({ fresh: false }))],
   });
   qz.on("plugin_registry_update", async () => {
@@ -31,7 +33,7 @@ export default function (qz: UiExtensionAPI) {
     }
   });
   qz.registerPage({
-      id: "skills", title: t("skills"), order: 40, elements: [skills.panel],
+      id: "skills", title: t("skills"), order: 40, navigation: false, elements: [skills.panel],
       activate: () => skills.activate(), deactivate: skills.deactivate,
       capture: () => ({ skill: skills.getCurrentSkill() }),
       restore: state => skills.restore(state && typeof state === "object" && "skill" in state ? String(state.skill || "") || null : null),

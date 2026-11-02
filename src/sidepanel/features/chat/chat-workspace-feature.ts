@@ -34,6 +34,7 @@ import { createChatRunController, CHAT_RUN_STATES } from "./chat-run-controller.
 import { createChatScrollFeature } from "./chat-scroll-feature.js";
 import { createChatSearchFeature } from "./chat-search-feature.js";
 import { createChatTextSizeFeature } from "./chat-text-size-feature.js";
+import { createCommandMenu } from "./command-menu.js";
 import { createComposerFeature } from "./composer-feature.js";
 import { createElementPickerFeature } from "./element-picker-feature.js";
 import { createGoalStripFeature } from "./goal-strip-feature.js";
@@ -84,6 +85,35 @@ export function createChatWorkspaceFeature(options: ChatWorkspaceOptions) {
   const slashMenuEl = root.createElement("div");
   slashMenuEl.className = "qz-popover qz-menu input-slash-menu hidden";
   inputArea.insertBefore(slashMenuEl, attachmentsEl);
+  const plusMenuEl = root.createElement("div");
+  plusMenuEl.className = "qz-popover qz-menu input-slash-menu composer-plus-menu hidden";
+  inputArea.insertBefore(plusMenuEl, attachmentsEl);
+  const fileInput = root.createElement("input");
+  fileInput.type = "file"; fileInput.multiple = true; fileInput.hidden = true;
+  fileInput.addEventListener("change", () => { void composer.addFiles([...(fileInput.files || [])]); fileInput.value = ""; });
+  inputArea.append(fileInput);
+  let showAllTabs = false;
+  createCommandMenu({
+    button: select("#btn-composer-plus"), menu: plusMenuEl, extensions,
+    list: async () => {
+      const tabs = (await extensions.listReferences()).filter(item => item.kind === "tab").sort((a, b) => a.priority - b.priority);
+      const visibleTabs = showAllTabs ? tabs : tabs.slice(0, 3);
+      return [
+      ...visibleTabs.map(item => ({ id: `tab:${item.name}`, label: item.title, iconUrl: item.icon,
+        hint: item.current ? t("currentTabHint") : "", checked: slashMenu.isTabShared(item), keepOpen: true, run: () => slashMenu.toggleTab(item) })),
+      ...(tabs.length > 3 ? [{ id: "more-tabs", label: showAllTabs ? t("fewerTabs") : t("moreTabs"), chevron: true, keepOpen: true,
+        icon: '<circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/>', run: () => { showAllTabs = !showAllTabs; } }] : []),
+      ...(btnPickElement.classList.contains("hidden") ? [] : [{ id: "pick-element", label: t("selectElement"), separator: true,
+        icon: ('<path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2"/>'), run: () => btnPickElement.click() }]),
+      { id: "upload-files", label: t("uploadFiles"), separator: btnPickElement.classList.contains("hidden"),
+        icon: ('<path d="m21 11-8.6 8.6a5 5 0 0 1-7-7l8.6-8.6a3.3 3.3 0 0 1 4.7 4.7l-8.6 8.6a1.7 1.7 0 0 1-2.4-2.4L15.4 7"/>'), run: () => fileInput.click() },
+      ...extensions.composerCommands().map((command, index) => ({ id: command.id, label: command.composerLabel!, icon: command.composerIcon, chevron: true, separator: index === 0 })),
+      { id: "new-chat", label: t("newChat"), separator: true,
+        icon: ('<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/>'), run: () => btnNew.click() },
+      ];
+    },
+  });
+  select("#btn-more").addEventListener("click", () => extensions.invoke("open-sessions"));
   const mentionChipsEl = root.createElement("div");
   mentionChipsEl.className = "mention-chips hidden";
   select(".input-wrapper").before(mentionChipsEl);

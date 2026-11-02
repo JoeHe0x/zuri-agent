@@ -50,6 +50,10 @@ export interface UiTranscriptContribution {
 }
 export interface UiCommand {
   id: string;
+  /** Lists the command in the composer "+" menu. */
+  composerLabel?: string;
+  /** SVG inner markup (24x24 viewBox, stroked) shown beside `composerLabel`. */
+  composerIcon?: string;
   run(payload: unknown): unknown;
 }
 export interface WorkspaceContribution {
@@ -91,6 +95,8 @@ export interface UiPage {
   readonly id: string;
   readonly title: string;
   readonly order?: number;
+  /** `false` keeps the page out of the header tabs; reach it through a command. */
+  readonly navigation?: false;
   readonly elements: readonly (HTMLElement | null)[];
   readonly button?: HTMLElement | null;
   isEnabled?(): boolean;

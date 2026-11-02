@@ -1029,3 +1029,104 @@
 .input-hint > span:first-child {
   flex: 0 0 auto;
 }
+
+/* Two-row composer: text on top, tool row (+, picker, send) below. */
+.input-wrapper {
+  flex-wrap: wrap;
+  row-gap: 6px;
+}
+
+.input-wrapper > #input {
+  order: -1;
+  flex: 1 0 100%;
+}
+
+.input-wrapper > .send-btn {
+  margin-inline-start: auto;
+}
+
+.composer-plus-btn {
+  --qz-control-size: 32px;
+  flex: 0 0 32px;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  color: var(--text-secondary);
+}
+
+.composer-plus-btn:hover,
+.composer-plus-btn[aria-expanded="true"] {
+  background: var(--control-hover-fill);
+  color: var(--text-primary);
+}
+
+.composer-plus-btn[aria-expanded="true"] svg {
+  transform: rotate(45deg);
+}
+
+.composer-plus-btn svg {
+  transition: transform 160ms var(--ease-standard);
+}
+
+.composer-plus-menu {
+  --qz-menu-padding: 6px;
+  --qz-popover-radius: 16px;
+  right: auto;
+  min-width: 200px;
+}
+
+.composer-plus-menu .qz-menu-item {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 12px;
+  min-height: 40px;
+  padding: 0 12px;
+  border-radius: 10px;
+  font-size: 14px;
+}
+
+.composer-menu-sep {
+  height: 1px;
+  margin: 6px 8px;
+  background: var(--border);
+}
+
+.composer-plus-menu .qz-menu-item .composer-menu-chevron {
+  margin-inline-start: auto;
+}
+
+/* Reached through the composer "+" menu. */
+.element-picker-btn {
+  display: none;
+}
+
+.composer-plus-menu .qz-menu-item svg {
+  width: 18px;
+  height: 18px;
+  flex: none;
+  color: var(--text-muted);
+}
+
+.composer-plus-menu .qz-menu-item:hover svg {
+  color: var(--text-primary);
+}
+
+.composer-menu-favicon {
+  width: 18px;
+  height: 18px;
+  flex: none;
+  border-radius: 4px;
+}
+
+.composer-menu-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.composer-menu-hint {
+  flex: none;
+  color: var(--text-muted);
+  font-size: 13px;
+}

@@ -70,6 +70,7 @@ export function createWorkspaceExtensions(onError: (error: unknown) => void = co
       }
     },
     hasCommand: (id: string) => commands.has(id),
+    composerCommands: () => [...commands.values()].filter(command => command.composerLabel),
     invoke(id: string, payload?: unknown): unknown {
       const command = commands.get(id);
       if (!command) return undefined;
