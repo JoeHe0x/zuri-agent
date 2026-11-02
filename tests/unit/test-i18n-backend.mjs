@@ -37,7 +37,7 @@ test("backend catalogs provide complete bilingual plain-text messages", () => {
 });
 
 test("isolated content bridge messages use the extension language instead of the page language", async () => {
-  assert.equal(await inLanguage("en-US", () => contentText("brand")), "qz");
+  assert.equal(await inLanguage("en-US", () => contentText("brand")), "Zuri");
   assert.equal(await inLanguage("zh-CN", () => contentText("importFailed")), "会话导入失败");
   assert.equal(await inLanguage("fr-FR", () => contentText("noStableSelector")), "Could not generate a stable selector for this element");
 });
