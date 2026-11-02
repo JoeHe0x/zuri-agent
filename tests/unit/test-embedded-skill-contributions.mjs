@@ -80,7 +80,7 @@ test('host registration validates manifest identity, runtime, target, and duplic
 });
 
 test('runtime projection preserves trusted host policy, while forged stored workbench identities remain denied', async () => {
-  assert.deepEqual(listBuiltinSkills().map(skill => skill.name), ['skill-workbench','site-skill-author','qingzhou-management','qingzhou-documents','qingzhou-mcp']);
+  assert.deepEqual(listBuiltinSkills().map(skill => skill.name), ['skill-workbench','site-skill-author','qingzhou-management','find-skills','qingzhou-documents','task-retrospective','qingzhou-mcp','site-memory']);
   const candidate = prepareSkillToolRegistryFromSkills(listBuiltinSkills());
   const entry = candidate.toolIndex.get('qingzhou_management__manage_settings');
   assert.equal(getHostCoreToolTarget(entry.plugin,entry.tool),'manage_settings');
