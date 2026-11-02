@@ -69,6 +69,16 @@ export function contextTokensFromUsage(value: unknown): number {
   return Math.max(0, Math.ceil(input + output + cacheRead + cacheWrite));
 }
 
+/** Input split for one request: `input` counts cached and uncached prompt tokens across provider usage shapes. */
+export function cacheStatsFromUsage(value: unknown) {
+  const usage = record(value);
+  const read = firstFiniteNumber(usage.cache_read_input_tokens, usage.cached_tokens, record(usage.prompt_tokens_details).cached_tokens);
+  const write = firstFiniteNumber(usage.cache_creation_input_tokens);
+  // OpenAI prompt_tokens already includes cached tokens; Anthropic and Codex input_tokens exclude them.
+  const input = firstFiniteNumber(usage.prompt_tokens) || firstFiniteNumber(usage.input_tokens) + read + write;
+  return { input, read, write };
+}
+
 function providerStateTextLength(value: unknown): number {
   const state = record(value);
   if (typeof state.reasoningText === "string") return state.reasoningText.length;

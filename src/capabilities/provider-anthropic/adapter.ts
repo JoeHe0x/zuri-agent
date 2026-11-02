@@ -275,7 +275,23 @@ function buildAnthropicRequestBody(config: RuntimeConfig, messages: ModelMessage
   }
   if (converted.system) body.system = converted.system;
   if (tools && tools.length > 0) body.tools = convertToolsToAnthropic(tools, providerDef.anthropicToolPrefix);
+  addCacheBreakpoints(body);
   return body;
+}
+
+/** Mark the end of tools, system and the conversation so each request reads the previous one's prefix from cache. */
+function addCacheBreakpoints(body: Record<string, unknown>) {
+  const mark = (block: unknown) => {
+    if (block && typeof block === "object" && (block as {type?: string}).type !== "thinking" && (block as {type?: string}).type !== "redacted_thinking") {
+      (block as Record<string, unknown>).cache_control = { type: "ephemeral" };
+    }
+  };
+  const last = (list: unknown) => (Array.isArray(list) ? list[list.length - 1] : undefined);
+  mark(last(body.tools));
+  mark(last(body.system));
+  const tail = last(body.messages) as {content?: unknown} | undefined;
+  if (typeof tail?.content === "string") tail.content = [{ type: "text", text: tail.content }];
+  mark(last(tail?.content));
 }
 
 function convertOpenAiMessagesToAnthropic(messages: ModelMessage[] = [], config: RuntimeConfig = {}, providerDef: Partial<ProviderDefinition> = {}) {

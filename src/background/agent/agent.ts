@@ -61,6 +61,7 @@ import {
 } from "../llm/provider-errors.js";
 import { createLlmRetryPolicy, waitForAbortableDelay } from "../llm/transport.js";
 import { projectMessage, IMAGE_PLACEHOLDER } from "../llm/message-projection.js";
+import { cacheStatsFromUsage } from "../llm/token-accounting.js";
 import { createStreamAttempt } from "../llm/stream-attempt.js";
 
 import type { AgentServices } from './services.js';
@@ -142,6 +143,7 @@ const RESERVE_TOKENS = 16000;      // Reserved for the response
 const KEEP_RECENT_TOKENS = 40000;  // Recent tokens retained during compaction
 const TOOL_RESULT_RECENT_ROUNDS = 2;
 const IMAGE_MESSAGE_RECENT_LIMIT = 8;
+const IMAGE_PRUNE_BATCH = 4;
 const TOOL_RESULT_PROTECT_RATIO = 0.2;
 const TOOL_RESULT_PRUNE_BATCH_RATIO = 0.5;
 const FOLLOW_UP_RUN_HANDOFF_DELAY_MS = 160;
@@ -1874,12 +1876,14 @@ export class Agent {
   _sendWindowPruning(messages: AgentMessage[]) {
     const pruned = new Set<AgentMessage>();
     if (!this._trimOldToolResultsEnabled()) return pruned;
-    let imageMessages = 0;
-    for (let i = messages.length - 1; i >= 0; i--) {
-      const message = messages[i];
+    // Drop images in batches so the cached request prefix changes once per batch, not on every new image.
+    const imageTotal = messages.reduce((n, message) => n + (countMessageImages(message) > 0 ? 1 : 0), 0);
+    const imageDrop = imageTotal > IMAGE_MESSAGE_RECENT_LIMIT ? Math.ceil((imageTotal - IMAGE_MESSAGE_RECENT_LIMIT) / IMAGE_PRUNE_BATCH) * IMAGE_PRUNE_BATCH : 0;
+    let imageIndex = 0;
+    for (const message of messages) {
       const hasImages = countMessageImages(message) > 0;
-      if (hasImages) imageMessages++;
-      if (message?.trim === true || (hasImages && imageMessages > IMAGE_MESSAGE_RECENT_LIMIT)) pruned.add(message);
+      if (hasImages) imageIndex++;
+      if (message?.trim === true || (hasImages && imageIndex <= imageDrop)) pruned.add(message);
     }
     return pruned;
   }
@@ -2242,6 +2246,8 @@ export class Agent {
 
   _emitProviderContextUsage(usage: unknown) {
     if (!usage || typeof usage !== "object") return;
+    const cache = cacheStatsFromUsage(usage);
+    if (cache.input > 0) this._trace(`cache_usage ${safeTraceJson({ ...cache, hitRate: Number((cache.read / cache.input).toFixed(3)) })}`);
     this._emitContextUsage({ source: "provider_usage", usage });
   }
 

@@ -194,7 +194,7 @@ transcripts and exports retain full history. Manual and automatic compaction use
 
 With history trimming enabled, completed runs apply the round/token policy to old tool results and
 images, protecting the latest two user rounds. While trimming is enabled, each model request also
-keeps images in the latest eight image-bearing messages. Uploads and tool images share this count;
+keeps images in at most the latest eight image-bearing messages; older ones become placeholders in batches of four, so the request prefix stays stable for prompt caching between batches. Uploads and tool images share this count;
 each message occupies one slot regardless of its image count. Earlier images become placeholders
 while text and tool-call links remain. Sending and token estimation use the same selection. Stored
 images and exports stay complete.

@@ -109,8 +109,8 @@ for (const mode of ["chat", "chatStream"]) {
     assert.equal(request.headers.get("user-agent"), "qz-agent/1.0.0");
     assert.equal(request.headers.get("authorization"), null);
     assert.deepEqual(request.body.thinking, { type: "enabled", budget_tokens: 1024 });
-    assert.deepEqual(request.body.system, [{ type: "text", text: "Follow the task." }]);
-    assert.deepEqual(request.body.tools[0], { name: "echo", description: "Echo text", input_schema: tool.function.parameters });
+    assert.deepEqual(request.body.system, [{ type: "text", text: "Follow the task.", cache_control: { type: "ephemeral" } }]);
+    assert.deepEqual(request.body.tools[0], { name: "echo", description: "Echo text", input_schema: tool.function.parameters, cache_control: { type: "ephemeral" } });
     await invoke(mode, "kimicode", { thinking: { type: "disabled" } }, [...messages, response, { role: "user", content: "Continue" }]);
     assert.deepEqual(requests[1].body.thinking, { type: "disabled" });
     const assistant = requests[1].body.messages.find(message => message.role === "assistant");

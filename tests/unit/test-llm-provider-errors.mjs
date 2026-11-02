@@ -701,3 +701,15 @@ test("OpenAI requests omit the traceparent header by default", async () => {
   assert.equal(new Headers(seenHeaders).get("traceparent"), null);
   assert.equal(new Headers(seenHeaders).get("baggage"), null);
 });
+
+test("Anthropic requests mark tools, system and the last message for prompt caching", async () => {
+  let body;
+  globalThis.fetch = async (_url, init) => {
+    body = JSON.parse(init.body);
+    return jsonResponse({ content: [{ type: "text", text: "ok" }], stop_reason: "end_turn", usage: { input_tokens: 1, output_tokens: 1 } });
+  };
+  const tools = [{ type: "function", function: { name: "a", parameters: { type: "object", properties: {} } } }, { type: "function", function: { name: "b", parameters: { type: "object", properties: {} } } }];
+  await chatAnthropic([{ role: "system", content: "sys" }, { role: "user", content: "hi" }], tools, null, noRetryOptions(), anthropicConfig());
+  const marked = [body.tools[0], body.tools[1], body.system[0], body.messages[0].content.at(-1)].map(b => b.cache_control?.type);
+  assert.deepEqual(marked, [undefined, "ephemeral", "ephemeral", "ephemeral"]);
+});

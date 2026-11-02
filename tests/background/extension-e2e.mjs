@@ -403,10 +403,10 @@ async function screenActionFeedbackRoundTrip(page, browserContext, providerServe
   assert.equal(requests[2].imageMessageCount, 1);
   assert.equal(requests[2].totalImageCount, 1);
   assert.equal(requests[2].imagePlaceholderCount, 0);
-  assert.deepEqual(requests.slice(2).map(item => item.imageMessageCount), [1, 2, 3, 4, 5, 6, 7, 8, 8],
-    "successive tool images in a single run must obey the default eight-message limit");
-  assert.equal(requests.at(-1).totalImageCount, 8, "the entire final model request retains only the latest eight screenshots");
-  assert.equal(requests.at(-1).imagePlaceholderCount, 1, "the oldest screenshot remains represented by its placeholder");
+  assert.deepEqual(requests.slice(2).map(item => item.imageMessageCount), [1, 2, 3, 4, 5, 6, 7, 8, 5],
+    "successive tool images in a single run must obey the default eight-message limit and drop images in batches of four");
+  assert.equal(requests.at(-1).totalImageCount, 5, "the ninth screenshot drops the oldest batch of four");
+  assert.equal(requests.at(-1).imagePlaceholderCount, 4, "the dropped screenshots remain represented by placeholders");
   assert.equal(requests[3].containsDisplayProjection, false, "chat-only action metadata must not enter model context");
 
   const history = await historyMessages(page, sessionId);

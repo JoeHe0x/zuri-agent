@@ -449,7 +449,7 @@ async function assertModelParametersPassThroughProtocolBodies() {
   assert.equal(anthropicBody.temperature, 0.4);
   assert.equal(anthropicBody.max_tokens, 654);
   assert.deepEqual(anthropicBody.thinking, { type: "enabled", budget_tokens: 2048 });
-  assert.deepEqual(anthropicBody.system, [{ type: "text", text: "system-owned" }]);
+  assert.deepEqual(anthropicBody.system, [{ type: "text", text: "system-owned", cache_control: { type: "ephemeral" } }]);
   assert.equal(anthropicBody.tools[0].name, "lookup");
 
   storageData.openaiCodexAuth = {
