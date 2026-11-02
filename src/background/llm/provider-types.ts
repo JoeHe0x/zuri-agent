@@ -47,6 +47,8 @@ export interface ProviderDefinition {
   contentThinkTags?: boolean;
   modelsAuthHeader?: string;
   anthropicVersion?: string;
+  /** Wire-only tool name prefix: added to outgoing tool names and removed from returned ones. */
+  anthropicToolPrefix?: string;
   manualModelInput?: boolean;
   requiresApiKey?: boolean;
   supportsVision?: boolean;

@@ -76,6 +76,12 @@ propagates. Use its own [model
 capabilities](../src/capabilities/provider-codex/model-capabilities.ts) and [option
 declarations](../src/capabilities/provider-codex/options.ts) for account-specific behavior.
 
+The [Claude Pro/Max](../src/capabilities/provider-anthropic/auth.ts) provider (`claudeplan`) signs in through a
+loopback redirect against `claude.ai`: `poll` finds the `localhost:54545/callback` redirect, exchanges the code
+at `api.anthropic.com/v1/oauth/token`, and rotates refresh tokens through one shared request. Its
+[adapter](../src/capabilities/provider-anthropic/claude-plan.ts) reuses the Anthropic Messages adapter with a
+bearer token, the `oauth-2025-04-20` beta and the Claude Code identity system block that subscription tokens require.
+
 An adapter translates requests, messages, tool calls, usage and terminal stream events. Preserve
 tool-call identity, event order and `AbortSignal` across every asynchronous boundary. Read the
 resolved definition and headers supplied with the request.

@@ -150,7 +150,7 @@ export async function* chatStreamAnthropic(messages: ModelMessage[], tools: obje
             id,
             type: "function",
             function: {
-              name: block.name || "",
+              name: stripToolPrefix(block.name, providerDef.anthropicToolPrefix),
               arguments: JSON.stringify(block.input || {}),
             },
           };
@@ -274,7 +274,7 @@ function buildAnthropicRequestBody(config: RuntimeConfig, messages: ModelMessage
     body.max_tokens = resolveRequestMaxOutputTokens(options);
   }
   if (converted.system) body.system = converted.system;
-  if (tools && tools.length > 0) body.tools = convertToolsToAnthropic(tools);
+  if (tools && tools.length > 0) body.tools = convertToolsToAnthropic(tools, providerDef.anthropicToolPrefix);
   return body;
 }
 
@@ -308,7 +308,7 @@ function convertOpenAiMessagesToAnthropic(messages: ModelMessage[] = [], config:
         content.push({
           type: "tool_use",
           id,
-          name: toolCall.function?.name || "tool",
+          name: `${providerDef.anthropicToolPrefix || ""}${toolCall.function?.name || "tool"}`,
           input: parseToolArguments(toolCall.function?.arguments),
         });
       }
@@ -398,13 +398,13 @@ function convertImageUrlPartToAnthropic(part: Record<string, unknown>) {
   };
 }
 
-function convertToolsToAnthropic(tools: object[] = []) {
+function convertToolsToAnthropic(tools: object[] = [], prefix = "") {
   return tools.map(value => {
     const tool = record(value);
     const fn = tool.function && typeof tool.function === "object" ? record(tool.function) : tool;
     const parameters = record(fn.parameters);
     return {
-      name: fn.name,
+      name: `${prefix}${fn.name}`,
       description: fn.description || "",
       input_schema: {
         type: "object",
@@ -461,7 +461,7 @@ function anthropicMessageToOpenAi(data: AnthropicEnvelope, config: RuntimeConfig
         id: String(block.id || ""),
         type: "function",
         function: {
-          name: block.name || "",
+          name: stripToolPrefix(block.name, providerDef.anthropicToolPrefix),
           arguments: JSON.stringify(block.input || {}),
         },
       });
@@ -528,11 +528,16 @@ function buildAnthropicHeaders(config: RuntimeConfig, options: ModelOptions = {}
   return {
     ...options.baseHeaders,
     "Content-Type": "application/json",
-    "x-api-key": config.apiKey || "",
+    ...(config.apiKey ? { "x-api-key": config.apiKey } : {}),
     "anthropic-version": providerDef.anthropicVersion || "2023-06-01",
     "anthropic-dangerous-direct-browser-access": "true",
     ...(options.headers || {}),
   };
+}
+
+function stripToolPrefix(name: string | undefined, prefix = "") {
+  const value = name || "";
+  return prefix && value.startsWith(prefix) ? value.slice(prefix.length) : value;
 }
 
 function record(value: unknown): Record<string, unknown> {

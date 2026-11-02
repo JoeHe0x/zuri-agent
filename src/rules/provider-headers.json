@@ -78,5 +78,28 @@
         "xmlhttprequest"
       ]
     }
+  },
+  {
+    "id": 6,
+    "priority": 1,
+    "action": {
+      "type": "modifyHeaders",
+      "requestHeaders": [
+        {
+          "header": "Origin",
+          "operation": "remove"
+        },
+        {
+          "header": "anthropic-dangerous-direct-browser-access",
+          "operation": "remove"
+        }
+      ]
+    },
+    "condition": {
+      "urlFilter": "||api.anthropic.com/",
+      "resourceTypes": [
+        "xmlhttprequest"
+      ]
+    }
   }
 ]
