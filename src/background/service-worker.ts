@@ -637,6 +637,7 @@ const skillNetwork = createSkillNetworkService({
   runtime: chrome.runtime,
 });
 const pageSuggestions = createPageSuggestions({
+  ready: async () => { await languageReady; await whenLanguageReady(); },
   getRuntimeConfig: getCurrentRuntimeConfig,
   llmChat,
   buildMessages: buildPageSuggestionMessages,

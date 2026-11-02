@@ -10,6 +10,8 @@ const CACHE_LIMIT = 50;
 interface PageSuggestionsOptions {
   tabs?: Pick<typeof chrome.tabs, "get">;
   scripting?: Pick<typeof chrome.scripting, "executeScript">;
+  /** Resolves once the saved UI language is applied; suggestions are written in that language. */
+  ready?(): Promise<unknown>;
   getRuntimeConfig(): Promise<unknown>;
   llmChat(messages: ModelMessage[], tools: unknown[], signal: undefined, options: Record<string, unknown>): Promise<{ message?: { content?: unknown } }>;
   buildMessages(page: { title: string; url: string; text: string }, avoid: string[]): ModelMessage[];
@@ -20,6 +22,7 @@ interface PageSuggestionsOptions {
 export function createPageSuggestions({
   tabs = globalThis.chrome?.tabs,
   scripting = globalThis.chrome?.scripting,
+  ready = async () => {},
   getRuntimeConfig,
   llmChat,
   buildMessages,
@@ -28,6 +31,7 @@ export function createPageSuggestions({
   const cache = new Map<string, string[]>();
 
   async function suggest(tabId: unknown, exclude: unknown = [], conversation?: { user?: unknown; assistant?: unknown }): Promise<string[]> {
+    await ready();
     const avoid = (Array.isArray(exclude) ? exclude : []).filter((item): item is string => typeof item === "string").slice(0, 12).map(item => item.slice(0, 80));
     if (conversation) {
       // Follow-ups depend on the last exchange only, so they skip the page, its guardrails and the cache.
