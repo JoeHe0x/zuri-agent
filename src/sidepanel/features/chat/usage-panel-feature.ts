@@ -1,5 +1,5 @@
 import { t } from "../../i18n/index.js";
-import { formatTokenCount } from "../../ui/ui-utils.js";
+import { contextUsageLevel, contextUsagePercent, formatContextUsageText, formatTokenCount } from "../../ui/ui-utils.js";
 import type { PortMessage } from "../app/port-client.js";
 
 interface UsageStep { input: number; read: number; write: number; output: number }
@@ -153,6 +153,12 @@ export function createUsagePanelFeature(options: UsagePanelOptions) {
       const reply = await options.request("get_usage", { sessionId }, 3000);
       steps = Array.isArray(reply.steps) ? reply.steps as UsageStep[] : [];
       context = (reply.context as ContextBreakdown | undefined) ?? null;
+      // The ring only hears about send-time snapshots; sync it to the fresh estimate so both show one number.
+      if (context?.used) {
+        button.title = formatContextUsageText(context.used, context.window);
+        button.dataset.level = contextUsageLevel(context.used, context.window);
+        button.style.setProperty("--pct", String(contextUsagePercent(context.used, context.window)));
+      }
     } catch (_err) {
       steps = [];
       context = null;
