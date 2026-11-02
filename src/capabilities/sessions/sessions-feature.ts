@@ -944,7 +944,13 @@ async function loadSessionsList({ requestFreshState = false } = {}) {
 
   artifactsFeature.scheduleSummaryBackfill(list);
 
-  const searchState = filterSessionsForSearch(list, searchQuery);
+  // Blank chats stay out of history; parents are kept so children are not orphaned.
+  const parentIds = new Set(list.map(session => session.parentSessionId));
+  const visible = list.filter(session => {
+    const summary = normalizeSessionListSummary(session.listSummary);
+    return summary.messageCount || summary.artifactCount || parentIds.has(session.id);
+  });
+  const searchState = filterSessionsForSearch(visible, searchQuery);
   if (searchState.searchActive && searchState.list.length === 0) {
     resetSessionListRenderOrder();
     commitSessionsListSearchHtml(`
