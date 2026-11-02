@@ -420,16 +420,17 @@
 
 .input-wrapper {
   background: var(--bg-primary);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: 7px 10px;
+  border: 1px solid transparent;
+  border-radius: 24px;
+  box-shadow: 0 1px 3px rgba(60, 64, 67, 0.12), 0 4px 14px rgba(60, 64, 67, 0.08);
+  padding: 10px 14px;
   transition: border-color var(--transition), background-color var(--transition), box-shadow var(--transition);
 }
 
 .input-wrapper:focus-within,
 .input-wrapper.is-file-dragover {
-  border-color: var(--border-focus);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--border-focus) 10%, transparent);
+  border-color: transparent;
+  box-shadow: 0 2px 6px rgba(60, 64, 67, 0.16), 0 6px 20px rgba(60, 64, 67, 0.12);
 }
 
 .input-wrapper.is-file-dragover {
@@ -1003,25 +1004,6 @@
   transform: translateY(0) scale(0.96);
 }
 
-.input-hint {
-  font-size: 10px;
-  line-height: 1.25;
-  /* Dim via color: container opacity would also fade the model menu that opens from here. */
-  color: color-mix(in srgb, var(--text-muted) 60%, transparent);
-}
-
-.input-hint kbd {
-  background: var(--bg-tertiary);
-  padding: 1px 4px;
-  border-radius: 3px;
-  font-family: var(--font-mono);
-  font-size: 10px;
-}
-
-.input-hint > span:first-child {
-  flex: 0 0 auto;
-}
-
 /* Two-row composer: text on top, tool row (+, picker, send) below. */
 .input-wrapper {
   flex-wrap: wrap;
@@ -1031,10 +1013,6 @@
 .input-wrapper > #input {
   order: -1;
   flex: 1 0 100%;
-}
-
-.input-wrapper > .send-btn {
-  margin-inline-start: auto;
 }
 
 .composer-plus-btn {

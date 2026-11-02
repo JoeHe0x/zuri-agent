@@ -3,8 +3,7 @@
    ============================================================================ */
 
 .chat-dock {
-  background: var(--bg-secondary);
-  border-top: 1px solid var(--border);
+  background: transparent;
   border-radius: 0;
 }
 

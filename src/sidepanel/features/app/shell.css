@@ -29,12 +29,28 @@
    Header
    ============================================================================ */
 
+/* One surface: header, transcript and dock share a single gradient with no dividers. */
+#app {
+  --app-glow: #dbe9fb;
+  background:
+    radial-gradient(120% 55% at 50% 100%, var(--app-glow), transparent 70%),
+    #fafafa;
+}
+
+@media (prefers-color-scheme: dark) {
+  #app {
+    --app-glow: #1c2a42;
+    background:
+      radial-gradient(120% 55% at 50% 100%, var(--app-glow), transparent 70%),
+      var(--bg-primary);
+  }
+}
+
 #header {
   grid-template-columns: minmax(0, 1fr) max-content;
   gap: 8px;
   padding: 10px 14px;
-  border-bottom: 1px solid var(--border);
-  background: var(--bg-secondary);
+  background: transparent;
 }
 
 .header-actions {
@@ -79,8 +95,7 @@
 
 .session-title-bar {
   padding: 4px 10px 5px 14px;
-  border-bottom: 1px solid var(--border);
-  background: color-mix(in srgb, var(--bg-secondary) 88%, var(--bg-primary));
+  background: transparent;
   color: var(--text-muted);
   font-size: 11px;
   line-height: 1.45;

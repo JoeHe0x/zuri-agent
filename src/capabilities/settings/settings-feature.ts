@@ -2154,15 +2154,15 @@ export function createSettingsFeature(options: SettingsFeatureOptions) {
     // Fixed order and content: every configured provider (first-seen order) lists all its models,
     // so the list does not change with the selected model.
     const providers = [...new Set([...presets.map(preset => preset.provider), provider])];
-    const saved = (id: string) => presets.filter(preset => preset.provider === id).map(preset => preset.model);
+    const saved = (id: string) => presets.filter(preset => preset.provider === id).map(preset => ({ id: preset.model, label: preset.modelLabel }));
     const keyFor = (id: string) => {
       const apiKey = providerNeedsApiKey(id) ? getRememberedProviderApiKey(id) || (id === provider ? String(config?.apiKey || "") : "") : "";
       return { provider: id, apiKey, credentialVersion: hashModelCachePart(apiKey) };
     };
-    const merge = (id: string, models: readonly { id: string }[] = []) => ({ id, models: [...new Set([...models.map(model => model.id), ...saved(id)])] });
-    const paint = (groups: { id: string; models: string[] }[]) => {
+    const merge = (id: string, models: readonly { id: string; label?: string }[] = []) => ({ id, models: [...new Map([...models, ...saved(id)].map(model => [model.id, model] as const).reverse()).values()].reverse() });
+    const paint = (groups: { id: string; models: { id: string; label?: string }[] }[]) => {
       const scrollTop = modelMenuList.scrollTop;
-      modelMenuList.replaceChildren(...groups.flatMap(group => group.models.map(model => {
+      modelMenuList.replaceChildren(...groups.flatMap(group => group.models.map(({ id: model, label }) => {
         const item = document.createElement("button");
         item.type = "button";
         item.className = "model-menu-item";
@@ -2173,7 +2173,8 @@ export function createSettingsFeature(options: SettingsFeatureOptions) {
         const presetId = presets.find(preset => preset.provider === group.id && preset.model === model)?.id;
         if (presetId) item.dataset.presetId = presetId;
         const name = document.createElement("span");
-        name.textContent = model;
+        item.dataset.label = label || model;
+        name.textContent = label || model;
         item.append(providerBadge(group.id, model), name);
         return item;
       })));
@@ -2190,12 +2191,12 @@ export function createSettingsFeature(options: SettingsFeatureOptions) {
   }
 
   async function switchModel(item: HTMLElement) {
-    const { presetId, provider, model } = item.dataset;
+    const { presetId, provider, model, label } = item.dataset;
     if (presetId) return applyModelPreset(presetId);
     if (!provider || !model) return;
     // shortcut: contextWindow/vision are dropped so Background applies the provider defaults, not the new model's own.
     const { contextWindow: _contextWindow, vision: _vision, ...config } = lastSettingsConfig || {};
-    const result = await request("save_config", { config: { ...config, provider, model, modelLabel: model, activePresetId: "", apiKey: providerNeedsApiKey(provider) ? getRememberedProviderApiKey(provider) : "" } }, 45000);
+    const result = await request("save_config", { config: { ...config, provider, model, modelLabel: label || model, activePresetId: "", apiKey: providerNeedsApiKey(provider) ? getRememberedProviderApiKey(provider) : "" } }, 45000);
     if (result.config) populateSettings(result.config);
   }
 

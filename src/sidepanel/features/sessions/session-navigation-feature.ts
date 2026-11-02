@@ -123,16 +123,19 @@ export function createSessionNavigationFeature(options: NavigationOptions) {
     const sessionTitleBar = options.sessionTitleBar;
     const currentSessionTitle = options.currentSessionTitle;
     if (!sessionTitleBar || !currentSessionTitle) return;
+    const titleActions = sessionTitleBar.ownerDocument.getElementById("session-title-actions");
     if (!options.getCurrentSessionId?.() || !text || options.getCurrentTab?.() !== options.chatTab) {
       closeSessionTitleEditor();
       currentSessionTitle.textContent = "";
       currentSessionTitle.removeAttribute("title");
       sessionTitleBar.classList.add("hidden");
+      titleActions?.classList.add("hidden");
       return;
     }
     currentSessionTitle.textContent = text;
     currentSessionTitle.title = text;
     sessionTitleBar.classList.remove("hidden");
+    titleActions?.classList.remove("hidden");
   }
 
   function installSessionTitleEditor() {

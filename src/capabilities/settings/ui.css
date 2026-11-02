@@ -276,7 +276,7 @@ details[open] > .cli-address-summary .cli-address-chevron {
 
 .model-menu {
   position: relative;
-  max-width: 60%;
+  max-width: 100%;
 }
 
 .model-menu-trigger {
