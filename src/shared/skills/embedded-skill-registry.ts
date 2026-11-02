@@ -20,9 +20,9 @@ export function createEmbeddedSkillRegistry(contributions: readonly SkillExtensi
     definitions.push(structuredClone(definition));
   };
   for (const register of contributions) register(Object.freeze({ registerSkill }));
-  const skills = definitions.sort((a, b) => (a.order ?? 0) - (b.order ?? 0)).map(({ order: _order, aliases: _aliases, displayName, ...definition }) => normalizeModernSkill({
+  const skills = definitions.sort((a, b) => (a.order ?? 0) - (b.order ?? 0)).map(({ order: _order, aliases: _aliases, displayName, group, ...definition }) => normalizeModernSkill({
     ...definition,
-    metadata: { displayName: displayName || definition.name },
+    metadata: { displayName: displayName || definition.name, ...(group ? { group } : {}) },
     scope: definition.scope || "global", status: "active", builtin: true, readOnly: true, source: "system",
     domains: definition.domains || [], urlPatterns: definition.urlPatterns || [], excludePatterns: definition.excludePatterns || [],
     resources: definition.resources || [], createdAt: "system", updatedAt: "system",

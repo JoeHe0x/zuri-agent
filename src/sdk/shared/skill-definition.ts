@@ -3,6 +3,8 @@ export interface SkillDefinition {
   name: string; displayName?: string; description: string; content: string; order?: number;
   /** Stable lookup aliases, including display names in other supported languages. Not stored in user Skill records. */
   aliases?: readonly string[];
+  /** Skills declared in a directory share a collapsible group; ungrouped Skills stay at the root. `icon` is an extension resource path. */
+  group?: { id: string; label: string; icon?: string };
   scope?: "global" | "site" | "resident";
   domains?: readonly string[]; urlPatterns?: readonly string[]; excludePatterns?: readonly string[];
   resources?: readonly { path: string; type: string; title?: string; description?: string; content?: string; encoding?: string; mimeType?: string; size?: number }[];

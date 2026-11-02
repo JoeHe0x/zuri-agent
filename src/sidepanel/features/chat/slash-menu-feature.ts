@@ -208,7 +208,7 @@ async function loadSlashResources(query = "", { includeCommands = true, mention 
   return all
     .filter(item => (item.kind === "tab") === mention)
     .filter(item => !q || item.search.includes(q))
-    .sort((a, b) => Number(!!a.run) - Number(!!b.run) || kindRank(a.kind) - kindRank(b.kind) || a.kind.localeCompare(b.kind) || a.priority - b.priority || a.title.localeCompare(b.title, getLocale()));
+    .sort((a, b) => Number(!!a.run) - Number(!!b.run) || kindRank(a.kind) - kindRank(b.kind) || a.kind.localeCompare(b.kind) || a.priority - b.priority || (a.group?.id || "").localeCompare(b.group?.id || "") || a.title.localeCompare(b.title, getLocale()));
 }
 
 async function refreshOpenSlashMenu() {
@@ -238,8 +238,11 @@ function resolveFilter(filter: string) {
   return sources().some(source => source.id === filter) ? filter : "all";
 }
 
+const collapsedSlashGroups = new Set<string>();
+
 function getVisibleSlashItems(items: SlashItem[] = [], filter = "all") {
-  const visibleItems = filter === "all" ? items : items.filter(item => item.kind === filter);
+  const byFilter = filter === "all" ? items : items.filter(item => item.kind === filter);
+  const visibleItems = slashMenuState.query ? byFilter : byFilter.filter(item => !item.group || !collapsedSlashGroups.has(item.group.id));
   return visibleItems.slice(0, SLASH_MENU_LIMIT);
 }
 
@@ -272,26 +275,43 @@ function renderSlashMenu() {
     return;
   }
   menu.classList.remove("hidden");
-  if (!slashMenuState.items.length) {
+  if (!slashMenuState.items.length && (slashMenuState.query || slashMenuState.mention || !collapsedSlashGroups.size)) {
     menu.innerHTML = `<div class="slash-empty">${escapeHtml(getSlashEmptyText(slashMenuState.filter))}</div>`;
     return;
   }
-  menu.innerHTML = `${slashMenuState.items.map((item, index) => slashMenuState.mention ? `
+  const groups = new Map<string, { label: string; count: number }>();
+  if (!slashMenuState.mention && !slashMenuState.query) {
+    for (const item of slashMenuState.allItems) if (item.group) groups.set(item.group.id, { label: item.group.label, count: (groups.get(item.group.id)?.count || 0) + 1 });
+  }
+  const groupIds = [...groups.keys()].sort();
+  const emitted = new Set<string>();
+  // Collapsed groups have no visible rows, so headers are emitted ahead of the first row that follows them.
+  const groupHeaders = (upTo?: string) => groupIds.filter(id => !emitted.has(id) && (upTo === undefined || id <= upTo)).map(id => {
+    emitted.add(id);
+    const collapsed = collapsedSlashGroups.has(id);
+    return `<button class="slash-group slash-group-toggle" type="button" data-slash-group-toggle="${escapeHtmlAttribute(id)}" aria-expanded="${!collapsed}">${collapsed ? "▸" : "▾"} ${escapeHtml(groups.get(id)!.label)} <span>${groups.get(id)!.count}</span></button>`;
+  }).join("");
+  const slashHeader = (item: SlashItem, index: number) => {
+    const prev = slashMenuState.items[index - 1];
+    if (item.run) return groupHeaders() + (prev?.run ? "" : `<div class="composer-menu-sep" role="separator"></div>`);
+    const label = `<div class="slash-group" role="presentation">${escapeHtml(slashKindLabel(item))}</div>`;
+    if (item.group && groups.size) return groupHeaders(item.group.id);
+    if (item.kind === "skill" && groups.size) return groupHeaders() + (!prev || prev.kind !== "skill" || prev.group ? label : "");
+    return groupHeaders() + (!prev || item.kind !== prev.kind ? label : "");
+  };
+  const rows = slashMenuState.items.map((item, index) => slashMenuState.mention ? `
     <button class="qz-menu-item slash-item slash-tab ${index === slashMenuState.selected ? "active" : ""}" type="button" data-slash-index="${index}">
       ${item.icon ? `<img class="slash-tab-icon" src="${escapeHtmlAttribute(item.icon)}" alt="">` : `<span class="slash-tab-icon"></span>`}
       <span class="slash-title">${escapeHtml(item.title)}</span>
     </button>` : `
-    ${item.run ? (slashMenuState.items[index - 1]?.run ? "" : `<div class="composer-menu-sep" role="separator"></div>`)
-      : !index || item.kind !== slashMenuState.items[index - 1].kind ? `<div class="slash-group" role="presentation">${escapeHtml(slashKindLabel(item))}</div>` : ""}
-    <button class="qz-menu-item slash-item ${index === slashMenuState.selected ? "active" : ""}" type="button" data-slash-index="${index}">
-      <span class="slash-icon ${escapeHtmlAttribute(slashKindClass(item))}">${slashIcon(item.run ? "add" : item.kind)}</span>
-      <span class="slash-main">
-        <span class="slash-title">${escapeHtml(item.title)}</span>
-        ${item.subtitle ? `<span class="slash-subtitle">${escapeHtml(item.subtitle)}</span>` : ""}
-      </span>
+    ${slashHeader(item, index)}
+    <button class="qz-menu-item slash-item ${item.group && groups.size ? "slash-item-nested " : ""}${index === slashMenuState.selected ? "active" : ""}" type="button" data-slash-index="${index}"${item.subtitle ? ` title="${escapeHtmlAttribute(item.subtitle)}"` : ""}>
+      <span class="slash-icon ${escapeHtmlAttribute(slashKindClass(item))}">${item.kind === "skill" && item.icon ? `<img class="slash-skill-icon" src="${escapeHtmlAttribute(item.icon)}" alt="">` : slashIcon(item.run ? "add" : item.kind)}</span>
+      <span class="slash-title">${escapeHtml(item.title)}</span>
       <span class="slash-meta">${escapeHtml(item.meta)}</span>
     </button>
-  `).join("")}`;
+  `).join("");
+  menu.innerHTML = rows + groupHeaders();
   menu.querySelector(".slash-item.active")?.scrollIntoView({ block: "nearest" });
 }
 
@@ -351,6 +371,12 @@ function closeSlashMenu() {
   menu.addEventListener("mousedown", (event) => {
     event.preventDefault();
     const target = event.target instanceof Element ? event.target : event.target instanceof Node ? event.target.parentElement : null;
+    const groupId = target?.closest<HTMLElement>("[data-slash-group-toggle]")?.dataset.slashGroupToggle;
+    if (groupId) {
+      if (!collapsedSlashGroups.delete(groupId)) collapsedSlashGroups.add(groupId);
+      void refreshOpenSlashMenu();
+      return;
+    }
     const itemEl = target?.closest<HTMLElement>("[data-slash-index]");
     if (!itemEl) return;
     selectSlashItem(Number(itemEl.dataset.slashIndex));

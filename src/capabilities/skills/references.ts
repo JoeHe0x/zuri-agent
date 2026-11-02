@@ -1,7 +1,7 @@
 import { t } from "./i18n.js";
 import type { UiReferenceSource } from "#sdk/sidepanel";
 import { isBuiltinSkill } from "#sdk/shared/skills";
-import { getSkillDisplayName, matchSiteSkillsForUrls, SKILL_SCOPE_RESIDENT, type SkillRecord } from "#sdk/shared/skills";
+import { getSkillDisplayName, getSkillGroup, matchSiteSkillsForUrls, SKILL_SCOPE_RESIDENT, type SkillRecord } from "#sdk/shared/skills";
 
 export function createSkillReferences(list: () => Promise<SkillRecord[]>, siteUrls: () => Promise<string[]>, addSkill: () => void): UiReferenceSource {
   return {
@@ -16,11 +16,13 @@ export function createSkillReferences(list: () => Promise<SkillRecord[]>, siteUr
         search: `add skill ${t("addSkill")}`.toLowerCase() };
       return [...enabled.map(skill => {
         const displayName = getSkillDisplayName(skill) || skill.name;
+        const group = getSkillGroup(skill);
         return {
           kind: "skill", name: skill.name, label: displayName, title: displayName,
+          ...(group ? { group: { id: group.id, label: group.label }, ...(group.icon ? { icon: chrome.runtime.getURL(group.icon) } : {}) } : {}),
           subtitle: skill.description || "",
           meta: isBuiltinSkill(skill) ? t("builtInSkill") : skill.scope === SKILL_SCOPE_RESIDENT ? t("residentSkill") : siteNames.has(skill.name) ? t("siteSkill") : t("skills"),
-          priority: siteNames.has(skill.name) ? 0 : 2,
+          priority: group ? -1 : siteNames.has(skill.name) ? 0 : 2,
           search: [skill.name, displayName, skill.description, skill.scope, ...(skill.domains || []), ...(skill.urlPatterns || [])].join(" ").toLowerCase(),
         };
       }), add];

@@ -98,6 +98,12 @@ export function getSkillDisplayName(skill: Data = {}) {
   ).trim();
 }
 
+export function getSkillGroup(skill: Data = {}): { id: string; label: string; icon?: string } | null {
+  const group = normalizeSkillMetadata(skill.metadata).group as { id?: unknown; label?: unknown; icon?: unknown } | undefined;
+  return group && typeof group.id === "string" && group.id
+    ? { id: group.id, label: String(group.label || group.id), ...(typeof group.icon === "string" ? { icon: group.icon } : {}) } : null;
+}
+
 export function skillMatchesName(skill: Data = {}, name = "") {
   const target = normalizeSkillLookup(name);
   if (!target) return false;

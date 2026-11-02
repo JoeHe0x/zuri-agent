@@ -7,6 +7,7 @@ import type { ComposerDraft } from "../../../shared/contracts/composer-draft.js"
 import type { TranscriptEntry, TranscriptImage } from "../../../shared/contracts/session.js";
 import { normalizeMessageDocument, type MessageDocument } from "../../../shared/documents/document-attachments.js";
 import type { DocumentFile } from "../../../shared/documents/document-store.js";
+import { createInputHighlight } from "./input-highlight.js";
 import type { createSlashMenuFeature, parseSlashCommandText } from "./slash-menu-feature.js";
 import type { createElementPickerFeature } from "./element-picker-feature.js";
 import type { OutgoingBatch } from "./queued-followups-feature.js";
@@ -55,6 +56,7 @@ const DRAFT_SAVE_DEBOUNCE_MS = 240;
 
 export function createComposerFeature(options: ComposerOptions) {
   const input = options.input;
+  createInputHighlight(input);
   const sendButton = options.sendButton;
   const attachments = options.attachments;
   const slashMenu = options.slashMenu;

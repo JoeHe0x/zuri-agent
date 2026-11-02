@@ -6,6 +6,7 @@ import type { ClientRuntime, SessionViewEvent } from "#sdk/sidepanel/sessions";
 import {
   modernSkillValuesFromRecord,
   getSkillDisplayName,
+  getSkillGroup,
   isValidAgentSkillName,
   normalizeModernSkill,
   normalizeSkill,
@@ -498,10 +499,14 @@ export function createSkillsFeature(options: SkillsOptions) {
     applySkillFilters();
   }
 
+  const skillGroupId = (skill: SkillRecord) => getSkillGroup(skill)?.id || "";
+  const collapsedSkillGroups = new Set<string>();
+
   function compareSkillsForDisplay(a: SkillRecord, b: SkillRecord) {
     const aBuiltin = isBuiltinSkill(a);
     const bBuiltin = isBuiltinSkill(b);
     if (aBuiltin !== bBuiltin) return aBuiltin ? -1 : 1;
+    if (skillGroupId(a) !== skillGroupId(b)) return !skillGroupId(a) ? 1 : !skillGroupId(b) ? -1 : skillGroupId(a).localeCompare(skillGroupId(b));
     return compareBeijingDateTimeDesc(a.updatedAt, b.updatedAt) || String(a.name || "").localeCompare(String(b.name || ""), getLocale());
   }
 
@@ -779,7 +784,22 @@ export function createSkillsFeature(options: SkillsOptions) {
       return;
     }
 
-    skillsList.innerHTML = skills.map(renderSkillCard).join("");
+    const grouped = new Map<string, SkillRecord[]>();
+    for (const skill of skills.filter(skillGroupId)) grouped.set(skillGroupId(skill), [...(grouped.get(skillGroupId(skill)) || []), skill]);
+    skillsList.innerHTML = [...grouped].map(([id, members]) => {
+      const group = getSkillGroup(members[0])!;
+      const icon = group.icon ? `<img class="skill-card-icon" src="${escapeHtmlAttribute(chrome.runtime.getURL(group.icon))}" alt="" aria-hidden="true">` : "";
+      return `
+      <details class="skill-group" data-group="${escapeHtmlAttribute(id)}"${collapsedSkillGroups.has(id) ? "" : " open"}>
+        <summary class="skill-group-head">${icon}${escapeHtml(group.label)}<span class="skill-group-count">${members.length}</span></summary>
+        <div class="skill-group-body">${members.map(renderSkillCard).join("")}</div>
+      </details>`;
+    }).join("") + skills.filter(skill => !skillGroupId(skill)).map(renderSkillCard).join("");
+    skillsList.querySelectorAll<HTMLDetailsElement>(".skill-group").forEach(details => {
+      details.addEventListener("toggle", () => {
+        if (details.open) collapsedSkillGroups.delete(details.dataset.group || ""); else collapsedSkillGroups.add(details.dataset.group || "");
+      }, { signal: lifecycleSignal });
+    });
 
     skillsList.querySelectorAll<HTMLElement>(".skill-card").forEach(card => {
       card.addEventListener("click", () => showSkillDetail(card.dataset.name || ""), { signal: lifecycleSignal });

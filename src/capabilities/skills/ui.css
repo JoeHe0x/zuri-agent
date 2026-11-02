@@ -347,6 +347,58 @@
   transition: var(--transition-surface);
 }
 
+.skill-card-icon {
+  width: 16px;
+  height: 16px;
+  margin-right: 6px;
+  vertical-align: -3px;
+  border-radius: 3px;
+}
+
+.skill-group-head {
+  display: flex;
+  align-items: center;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  list-style: none;
+}
+
+.skill-group-head::-webkit-details-marker {
+  display: none;
+}
+
+.skill-group-head::before {
+  content: "\25B8";
+  margin-right: 6px;
+  color: var(--text-muted);
+}
+
+.skill-group[open] > .skill-group-head::before {
+  content: "\25BE";
+}
+
+.skill-group-body {
+  margin: 4px 12px 8px 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg-secondary);
+  overflow: hidden;
+}
+
+.skill-group-body .skill-card:last-child {
+  border-bottom: 0;
+}
+
+.skill-group-count {
+  margin-left: 6px;
+  font-weight: 400;
+  color: var(--text-muted);
+}
+
 .skill-card:hover {
   background: var(--control-hover-fill);
 }
