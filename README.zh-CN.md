@@ -21,9 +21,7 @@ npm run build
 
 修改源码后，再次运行 `npm run build`，并在 `chrome://extensions` 中重新加载扩展。
 
-## 相对上游的改动
-
-Zuri 派生自 [alibaba/qz-browser-agent](https://github.com/alibaba/qz-browser-agent)，新增以下内容。
+## 改动
 
 **聊天与输入框**
 
@@ -45,11 +43,6 @@ Zuri 派生自 [alibaba/qz-browser-agent](https://github.com/alibaba/qz-browser-
 **Skill**
 
 - 内置 `find-skills`、`task-retrospective` 和 `site-memory` Skill。`site-memory` 通过 `skill-workbench` 记录并修正各站点的笔记。
-
-**品牌与设置**
-
-- 更名为 Zuri Agent，换用新 Logo、像素风欢迎页字标和 README。内置设置 Skill 更名为 Agent管理。
-- 从高级设置中移除 CLI 连接、快捷键和模型限速控件。
 
 ## 许可证
 

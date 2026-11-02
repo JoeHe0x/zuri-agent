@@ -26,10 +26,7 @@ npm run build
 After you change the source, run `npm run build` again and reload the extension on
 `chrome://extensions`.
 
-## Changes from upstream
-
-Zuri is forked from [alibaba/qz-browser-agent](https://github.com/alibaba/qz-browser-agent) and
-adds the following.
+## Changes
 
 **Chat and composer**
 
@@ -55,12 +52,6 @@ adds the following.
 
 - Built-in `find-skills`, `task-retrospective` and `site-memory` Skills. `site-memory` keeps and
   corrects per-site notes through `skill-workbench`.
-
-**Branding and settings**
-
-- Renamed to Zuri Agent with a new logo, pixel welcome wordmark and README. The built-in settings
-  Skill is renamed to Agent管理.
-- Removed the CLI connection, shortcut and model rate limit controls from Advanced settings.
 
 ## License
 
