@@ -61,6 +61,7 @@ export function createPageSuggestionsFeature(options: {
 
   function render() {
     const landing = messagesEl.dataset.chatState === "landing";
+    if (landing) followUps = null;
     const following = !landing && !!followUps && followUps.anchor === lastExchange()?.assistant && options.getRunStatus() === "idle";
     root.hidden = landing ? !page : !following;
     // Follow-ups sit under the reply they belong to; otherwise the chips stay above the composer.
@@ -179,7 +180,7 @@ export function createPageSuggestionsFeature(options: {
   // The status bar hides when a run ends; a new run hides the chips again.
   new MutationObserver(() => {
     render();
-    if (options.getRunStatus() === "idle" && messagesEl.dataset.chatState === "conversation" && !followUps) void followUp();
+    if (options.getRunStatus() === "idle" && messagesEl.dataset.chatState === "conversation" && followUps?.anchor !== lastExchange()?.assistant) void followUp();
   }).observe(options.statusBar, { attributes: true, attributeFilter: ["class"] });
   if (typeof chrome !== "undefined" && chrome.tabs?.onActivated) {
     const run = () => void refresh().catch(() => {});
