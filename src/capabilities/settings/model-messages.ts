@@ -25,15 +25,15 @@ const messages = defineMessages("settings-model", {
   },
   managementDisplayName: {
     "zh-CN": "Agent管理",
-    en: "qz settings",
+    en: "Agent management",
   },
   managementDescription: {
-    "zh-CN": "通过对话管理轻舟自身的模型、Provider、模型请求参数、预设、高级运行设置、Skill 配置和访问安全护栏。用户要求配置或切换模型、调整思考开关或推理强度、写入 API Key、调整上下文或视觉能力、处理模型接口 429/频率限制、读取或修改 Skill 配置、设置站点黑白名单、URL pattern 或访问流控时加载。",
-    en: "Manage qz's models, providers, model request parameters, presets, advanced runtime settings, Skill settings, and access guardrails through conversation. Load when the user asks to configure or switch models, adjust thinking or reasoning effort, set an API key, change context or image capabilities, address model API 429/rate limits, read or update Skill settings, or configure site allow/block rules, URL patterns, or navigation rate limits.",
+    "zh-CN": "通过对话管理 Agent 自身的模型、Provider、模型请求参数、预设、高级运行设置、Skill 配置和访问安全护栏。用户要求配置或切换模型、调整思考开关或推理强度、写入 API Key、调整上下文或视觉能力、处理模型接口 429/频率限制、读取或修改 Skill 配置、设置站点黑白名单、URL pattern 或访问流控时加载。",
+    en: "Manage Agent's models, providers, model request parameters, presets, advanced runtime settings, Skill settings, and access guardrails through conversation. Load when the user asks to configure or switch models, adjust thinking or reasoning effort, set an API key, change context or image capabilities, address model API 429/rate limits, read or update Skill settings, or configure site allow/block rules, URL patterns, or navigation rate limits.",
   },
   manageSettings: {
-    "zh-CN": "读取和修改轻舟模型与运行设置（访问规则与站点流控请用 qingzhou_management__manage_guardrails，Skill 自带配置请用 qingzhou_management__manage_skill_settings）。先 get 查看当前 provider/model 和 presets；已有匹配预设时优先 apply_preset；查询可用模型用 list_models；缺少 API Key 时先请用户提供或调用 wait_for_user/ask_user。update_config 接收增量补丁（未传字段保持不变）：切换到新 provider/model 时省略 contextWindow 和 vision 以自动匹配新模型默认值（不要复制旧模型值）；若返回 MODEL_CAPABILITIES_REQUIRED，向用户确认 contextWindow 后显式传入重试。处理模型接口 429/rate limit 时只传 requestRateLimit:true 开启 RPM/TPM 排队（余额或总配额耗尽不适用）。",
-    en: "Read and update qz model and runtime settings (use qingzhou_management__manage_guardrails for access rules/rate limits, and qingzhou_management__manage_skill_settings for Skill-defined settings). Call get first to inspect the current provider/model and presets; prefer apply_preset when a matching preset exists; use list_models to list models; if an API key is needed, ask the user via wait_for_user/ask_user first. update_config applies a partial patch (omitted fields stay unchanged): when switching provider/model, omit contextWindow and vision to use the new model's detected defaults (never copy the old model's values); if MODEL_CAPABILITIES_REQUIRED is returned, ask the user for contextWindow and retry. To mitigate model API 429/rate limits (not exhausted quota/balance), pass requestRateLimit:true.",
+    "zh-CN": "读取和修改 Agent 模型与运行设置（访问规则与站点流控请用 qingzhou_management__manage_guardrails，Skill 自带配置请用 qingzhou_management__manage_skill_settings）。先 get 查看当前 provider/model 和 presets；已有匹配预设时优先 apply_preset；查询可用模型用 list_models；缺少 API Key 时先请用户提供或调用 wait_for_user/ask_user。update_config 接收增量补丁（未传字段保持不变）：切换到新 provider/model 时省略 contextWindow 和 vision 以自动匹配新模型默认值（不要复制旧模型值）；若返回 MODEL_CAPABILITIES_REQUIRED，向用户确认 contextWindow 后显式传入重试。处理模型接口 429/rate limit 时只传 requestRateLimit:true 开启 RPM/TPM 排队（余额或总配额耗尽不适用）。",
+    en: "Read and update Agent model and runtime settings (use qingzhou_management__manage_guardrails for access rules/rate limits, and qingzhou_management__manage_skill_settings for Skill-defined settings). Call get first to inspect the current provider/model and presets; prefer apply_preset when a matching preset exists; use list_models to list models; if an API key is needed, ask the user via wait_for_user/ask_user first. update_config applies a partial patch (omitted fields stay unchanged): when switching provider/model, omit contextWindow and vision to use the new model's detected defaults (never copy the old model's values); if MODEL_CAPABILITIES_REQUIRED is returned, ask the user for contextWindow and retry. To mitigate model API 429/rate limits (not exhausted quota/balance), pass requestRateLimit:true.",
   },
   settingsAction: {
     "zh-CN": "操作类型。必填项：apply_preset/delete_preset 需 presetId；update_config 至少传一个配置字段。",
@@ -108,8 +108,8 @@ const messages = defineMessages("settings-model", {
     en: "Maximum models returned by list_models. Default: 200; range: 1–1000.",
   },
   manageGuardrails: {
-    "zh-CN": "读取和修改轻舟访问安全护栏与站点打开流控（修改前先 get 查看现有规则及顺序）。访问规则支持 block（禁止）和 allow（加白），按列表顺序第一条命中生效；流控使用 minOpenIntervalSeconds（秒）限制打开/跳转同一站点的最小间隔。",
-    en: "Read and update qz access guardrails and page-opening rate limits (call get first to inspect existing rules and order). Access rules support block and allow, with the first matching rule in order taking effect; rate limits use minOpenIntervalSeconds in seconds between page openings/navigations.",
+    "zh-CN": "读取和修改 Agent 访问安全护栏与站点打开流控（修改前先 get 查看现有规则及顺序）。访问规则支持 block（禁止）和 allow（加白），按列表顺序第一条命中生效；流控使用 minOpenIntervalSeconds（秒）限制打开/跳转同一站点的最小间隔。",
+    en: "Read and update Agent access guardrails and page-opening rate limits (call get first to inspect existing rules and order). Access rules support block and allow, with the first matching rule in order taking effect; rate limits use minOpenIntervalSeconds in seconds between page openings/navigations.",
   },
   guardrailAction: {
     "zh-CN": "操作类型。必填项：add_rule 需 targetType + target；remove_rule 需 id 或 target；add_rate_limit 需 targetType + target + minOpenIntervalSeconds；remove_rate_limit 需 id 或 target；reorder 需 order。",
@@ -161,7 +161,7 @@ const messages = defineMessages("settings-model", {
   },
   managementManifestTitle: {
     "zh-CN": "Agent管理 Skill 工具清单",
-    en: "qz settings Skill tool manifest",
+    en: "Agent management Skill tool manifest",
   },
   managementManifestDescription: {
     "zh-CN": "声明模型设置、Skill 配置和安全护栏的按需管理工具。",
@@ -169,12 +169,12 @@ const messages = defineMessages("settings-model", {
   },
   managementScriptDescription: {
     "zh-CN": "Agent管理 host runtime 脚本。",
-    en: "qz settings host runtime script.",
+    en: "Agent management host runtime script.",
   },
   builtinContent: {
     "zh-CN": `# Agent管理
 
-用户可以通过对话读取和调整轻舟自身的模型、Provider、预设、高级设置、Skill 配置与访问边界。收到这类要求时使用本 Skill 完成，不要求用户再去轻舟设置页重复操作；没有用户要求时，不自行修改配置。
+用户可以通过对话读取和调整 Agent 自身的模型、Provider、预设、高级设置、Skill 配置与访问边界。收到这类要求时使用本 Skill 完成，不要求用户再去 Agent 设置页重复操作；没有用户要求时，不自行修改配置。
 
 ## 通用流程
 
@@ -227,9 +227,9 @@ const messages = defineMessages("settings-model", {
 - 护栏修改后再次 \`get\`，确认规则类型、目标、顺序和流控秒数。
 - Skill 配置修改后再次 \`get\`，确认目标字段、configured、missing 和密钥字段的 hasValue 状态。
 `,
-    en: `# qz settings
+    en: `# Agent management
 
-Users can read and change qz's models, providers, presets, advanced settings, Skill settings, and access boundaries through conversation. Handle these requests with this Skill without asking the user to repeat the changes in the Settings page. Do not change configuration without a user request.
+Users can read and change Agent's models, providers, presets, advanced settings, Skill settings, and access boundaries through conversation. Handle these requests with this Skill without asking the user to repeat the changes in the Settings page. Do not change configuration without a user request.
 
 ## General workflow
 
