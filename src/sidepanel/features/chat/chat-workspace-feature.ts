@@ -94,11 +94,14 @@ export function createChatWorkspaceFeature(options: ChatWorkspaceOptions) {
   fileInput.addEventListener("change", () => { void composer.addFiles([...(fileInput.files || [])]); fileInput.value = ""; });
   inputArea.append(fileInput);
   let showAllTabs = false;
+  let showAllSkills = false;
   createCommandMenu({
     button: select("#btn-composer-plus"), menu: plusMenuEl, extensions,
     list: async () => {
       const tabs = (await extensions.listReferences()).filter(item => item.kind === "tab").sort((a, b) => a.priority - b.priority);
       const visibleTabs = showAllTabs ? tabs : tabs.slice(0, 3);
+      const skills = (await extensions.listReferences()).filter(item => item.kind === "skill" && !item.run && !item.token).sort((a, b) => a.priority - b.priority || a.title.localeCompare(b.title));
+      const visibleSkills = showAllSkills ? skills : skills.slice(0, 3);
       return [
       ...visibleTabs.map(item => ({ id: `tab:${item.name}`, label: item.title, iconUrl: item.icon,
         hint: item.current ? t("currentTabHint") : "", checked: slashMenu.isTabShared(item), keepOpen: true, run: () => slashMenu.toggleTab(item) })),
@@ -106,9 +109,13 @@ export function createChatWorkspaceFeature(options: ChatWorkspaceOptions) {
         icon: '<circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/>', run: () => { showAllTabs = !showAllTabs; } }] : []),
       ...(btnPickElement.classList.contains("hidden") ? [] : [{ id: "pick-element", label: t("selectElement"), separator: true,
         icon: ('<path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2"/>'), run: () => btnPickElement.click() }]),
+      ...visibleSkills.map((item, index) => ({ id: `skill:${item.name}`, label: item.title, iconUrl: item.icon, separator: index === 0,
+        checked: slashMenu.isSkillSelected(item), keepOpen: true, run: () => slashMenu.toggleSkill(item) })),
+      ...(skills.length > 3 ? [{ id: "more-skills", label: showAllSkills ? t("fewerSkills") : t("moreSkills"), chevron: true, keepOpen: true,
+        icon: '<circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/>', run: () => { showAllSkills = !showAllSkills; } }] : []),
+      ...extensions.composerCommands().map(command => ({ id: command.id, label: command.composerLabel!, icon: command.composerIcon, chevron: true })),
       { id: "upload-files", label: t("uploadFiles"), separator: btnPickElement.classList.contains("hidden"),
         icon: ('<path d="m21 11-8.6 8.6a5 5 0 0 1-7-7l8.6-8.6a3.3 3.3 0 0 1 4.7 4.7l-8.6 8.6a1.7 1.7 0 0 1-2.4-2.4L15.4 7"/>'), run: () => fileInput.click() },
-      ...extensions.composerCommands().map((command, index) => ({ id: command.id, label: command.composerLabel!, icon: command.composerIcon, chevron: true, separator: index === 0 })),
       { id: "new-chat", label: t("newChat"), separator: true,
         icon: ('<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/>'), run: () => btnNew.click() },
       ];

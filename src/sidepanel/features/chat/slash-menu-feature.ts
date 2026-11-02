@@ -411,6 +411,11 @@ function closeSlashMenu() {
       if (css && !elements.includes(css)) elements.push(css);
       renderMentions();
     },
+    isSkillSelected: (item: SlashItem) => skills.some(skill => skill.name === item.name),
+    toggleSkill(item: SlashItem) {
+      skills = skills.some(skill => skill.name === item.name) ? skills.filter(skill => skill.name !== item.name) : [...skills, item];
+      renderMentions();
+    },
     isTabShared: (item: SlashItem) => sharedItems().some(shared => tabKey(shared) === tabKey(item)),
     toggleTab(item: SlashItem) {
       const key = tabKey(item);

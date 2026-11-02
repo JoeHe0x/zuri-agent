@@ -42,6 +42,8 @@ export default defineMessages("core", {
   uploadFiles: { "zh-CN": "上传文件", en: "Upload files" },
   currentTabHint: { "zh-CN": "当前标签页", en: "Current tab" },
   moreTabs: { "zh-CN": "更多标签页", en: "More tabs" },
+  moreSkills: { "zh-CN": "更多技能", en: "More skills" },
+  fewerSkills: { "zh-CN": "收起技能", en: "Fewer skills" },
   fewerTabs: { "zh-CN": "收起标签页", en: "Fewer tabs" },
   more: { "zh-CN": "更多", en: "More" },
   cancelled: { "zh-CN": "已取消", en: "Canceled" },
