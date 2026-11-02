@@ -1,5 +1,5 @@
 import type { ModelMessage } from "../../shared/contracts/model-message.js";
-import { getLanguage, withLanguage, type Language } from "../../shared/i18n/index.js";
+import { getAvailableLanguages, getLanguage, withLanguage, type Language } from "../../shared/i18n/index.js";
 import { sessionAutomationsEnabled } from "../../shared/session-automations.js";
 import * as zhCN from "./prompts/zh-CN.js";
 import * as en from "./prompts/en.js";
@@ -48,5 +48,12 @@ export function buildSessionTitleMessages(text = ""): ModelMessage[] {
   return [
     { role: "system", content: t("titleInstructions") },
     { role: "user", content: JSON.stringify({ source_text: String(text ?? "") }) },
+  ];
+}
+
+export function buildPageSuggestionMessages(page: { title: string; url: string; text: string }, avoid: string[] = []): ModelMessage[] {
+  return [
+    { role: "system", content: t("suggestionInstructions", { language: getAvailableLanguages().find(pack => pack.language === getLanguage())?.name || getLanguage() }) },
+    { role: "user", content: JSON.stringify({ page, avoid }) },
   ];
 }

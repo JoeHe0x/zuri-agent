@@ -32,3 +32,119 @@
   color: var(--text-secondary);
   margin-bottom: 0;
 }
+
+.page-suggestions {
+  padding: 0 14px 6px;
+}
+
+.page-suggestions[hidden] {
+  display: none;
+}
+
+.page-suggestion-list {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.page-suggestion {
+  display: flex;
+  align-items: center;
+  max-width: 100%;
+  border: 1px solid color-mix(in srgb, var(--border) 80%, transparent);
+  border-radius: 999px;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: 13px;
+  animation: page-suggestion-in 280ms var(--ease-standard) calc(var(--i, 0) * 60ms) both;
+  transition:
+    background-color 120ms var(--ease-standard),
+    opacity 150ms var(--ease-standard),
+    transform 150ms var(--ease-standard);
+}
+
+.page-suggestion:hover {
+  background: color-mix(in srgb, var(--text-primary) 6%, var(--bg-primary));
+}
+
+.page-suggestion-list.is-leaving .page-suggestion,
+.page-suggestion.is-removing {
+  opacity: 0;
+  transform: translateY(-4px);
+  animation: none;
+}
+
+.page-suggestion-text {
+  min-width: 0;
+  padding: 8px 4px 8px 14px;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.page-suggestion-dismiss {
+  flex: none;
+  width: 24px;
+  height: 24px;
+  margin-right: 6px;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--text-secondary);
+  font-size: 15px;
+  line-height: 1;
+  opacity: 0;
+  cursor: pointer;
+  transition: opacity 120ms var(--ease-standard);
+}
+
+.page-suggestion:hover .page-suggestion-dismiss,
+.page-suggestion-dismiss:focus-visible {
+  opacity: 1;
+}
+
+@media (hover: none) {
+  .page-suggestion-dismiss {
+    opacity: 1;
+  }
+}
+
+.page-suggestion-dismiss:hover {
+  background: color-mix(in srgb, var(--text-primary) 10%, transparent);
+}
+
+.page-suggestion-reload {
+  margin-top: 6px;
+  padding: 4px 2px;
+  border: 0;
+  background: none;
+  color: var(--text-secondary);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.page-suggestion-reload:hover:not(:disabled) {
+  color: var(--text-primary);
+}
+
+.page-suggestion-reload:disabled {
+  opacity: 0.5;
+  cursor: progress;
+}
+
+@keyframes page-suggestion-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-suggestion {
+    animation: none;
+  }
+}

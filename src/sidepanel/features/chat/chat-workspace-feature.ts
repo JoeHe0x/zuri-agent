@@ -40,6 +40,7 @@ import { createElementPickerFeature } from "./element-picker-feature.js";
 import { createGoalStripFeature } from "./goal-strip-feature.js";
 import { createMarkdownFeature, renderMarkdown } from "./markdown-feature.js";
 import { createMathFeature } from "./math-feature.js";
+import { createPageSuggestionsFeature } from "./page-suggestions-feature.js";
 import { createQueuedFollowupsFeature } from "./queued-followups-feature.js";
 import { createSlashMenuFeature } from "./slash-menu-feature.js";
 import { createTranscriptProjection } from "./transcript/projection.js";
@@ -281,6 +282,11 @@ export function createChatWorkspaceFeature(options: ChatWorkspaceOptions) {
     preserveViewportDuringDockLayout: scroll.preserveViewportDuringDockLayout,
     sendMessage: options.send,
     stopCurrentRun: () => runController?.stop() === true,
+  });
+  createPageSuggestionsFeature({
+    root: select("#page-suggestions"), messagesEl, extensions,
+    submit: text => { composer.setValue(text); return composer.send(); },
+    request: options.request,
   });
   transcript = createTranscriptRenderer({
     messagesEl,

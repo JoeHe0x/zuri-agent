@@ -142,7 +142,8 @@ import {
   isAutomationSessionFamily as isAutomationSessionTree,
 } from "./automation/runtime.js";
 import { ensureQingzhouTabGroupForWindow } from "../shared/tab-groups.js";
-import { buildSessionTitleMessages } from "./agent/prompts.js";
+import { buildPageSuggestionMessages, buildSessionTitleMessages } from "./agent/prompts.js";
+import { createPageSuggestions } from "./services/page-suggestions.js";
 import { nowBeijingDateTime } from "../shared/time-utils.js";
 import {
   annotateSecurityGuardrailTab,
@@ -635,6 +636,11 @@ const skillNetwork = createSkillNetworkService({
   declarativeNetRequest: chrome.declarativeNetRequest,
   runtime: chrome.runtime,
 });
+const pageSuggestions = createPageSuggestions({
+  getRuntimeConfig: getCurrentRuntimeConfig,
+  llmChat,
+  buildMessages: buildPageSuggestionMessages,
+});
 const platformCommands = createPlatformCommands({
   sessionSupervisor,
   getBridgeConfig: getQingzhouMcpBridgeConfig,
@@ -940,6 +946,7 @@ const backgroundApi = createBackgroundApi({
   },
   ui: {
     sidePanelOpen: (sender: chrome.runtime.MessageSender) => sidepanelChannel.hasPorts(sender?.tab?.windowId ?? -1),
+    pageSuggestions: pageSuggestions.suggest,
     startElementPicker: platformCommands.startElementPicker,
     confirmElementPicker: platformCommands.confirmElementPicker,
     cancelElementPicker: platformCommands.cancelElementPicker,
