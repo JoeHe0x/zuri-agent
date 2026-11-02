@@ -10,8 +10,6 @@ interface SlashOptions {
 import { createElementReferenceToken } from "../../../shared/element-reference.js";
 import { escapeHtml, escapeHtmlAttribute } from "../../ui/ui-utils.js";
 
-const SLASH_MENU_LIMIT = 12;
-
 export const BUILTIN_SLASH_COMMANDS = Object.freeze([
   Object.freeze({
     kind: "command",
@@ -250,19 +248,20 @@ function resolveFilter(filter: string) {
   return sources().some(source => source.id === filter) ? filter : "all";
 }
 
-const collapsedSlashGroups = new Set<string>();
+// Skill groups start collapsed; the set holds the ones the user expanded.
+const expandedSlashGroups = new Set<string>();
 
 function getVisibleSlashItems(items: SlashItem[] = [], filter = "all") {
   const byFilter = filter === "all" ? items : items.filter(item => item.kind === filter);
-  const visibleItems = slashMenuState.query ? byFilter : byFilter.filter(item => !item.group || !collapsedSlashGroups.has(item.group.id));
-  return visibleItems.slice(0, SLASH_MENU_LIMIT);
+  const visibleItems = slashMenuState.query ? byFilter : byFilter.filter(item => !item.group || expandedSlashGroups.has(item.group.id));
+  return visibleItems;
 }
 
 function getSlashEmptyText(filter: string) {
   return sources().find(source => source.id === filter)?.emptyText || t("noMatchingResources");
 }
 
-const kindRank = (kind: string) => kind === "command" ? -1 : kind === "skill" ? 0 : 1;
+const kindRank = (kind: string) => kind === "skill" ? -2 : kind === "command" ? -1 : 1;
 const SLASH_ICONS: Record<string, string> = {
   skill: '<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/>',
   command: '<path d="M8 20 16 4"/>',
@@ -287,7 +286,7 @@ function renderSlashMenu() {
     return;
   }
   menu.classList.remove("hidden");
-  if (!slashMenuState.items.length && (slashMenuState.query || slashMenuState.mention || !collapsedSlashGroups.size)) {
+  if (!slashMenuState.items.length && (slashMenuState.query || slashMenuState.mention || !slashMenuState.allItems.some(item => item.group))) {
     menu.innerHTML = `<div class="slash-empty">${escapeHtml(getSlashEmptyText(slashMenuState.filter))}</div>`;
     return;
   }
@@ -300,7 +299,7 @@ function renderSlashMenu() {
   // Collapsed groups have no visible rows, so headers are emitted ahead of the first row that follows them.
   const groupHeaders = (upTo?: string) => groupIds.filter(id => !emitted.has(id) && (upTo === undefined || id <= upTo)).map(id => {
     emitted.add(id);
-    const collapsed = collapsedSlashGroups.has(id);
+    const collapsed = !expandedSlashGroups.has(id);
     return `<button class="slash-group slash-group-toggle" type="button" data-slash-group-toggle="${escapeHtmlAttribute(id)}" aria-expanded="${!collapsed}">${collapsed ? "▸" : "▾"} ${escapeHtml(groups.get(id)!.label)} <span>${groups.get(id)!.count}</span></button>`;
   }).join("");
   const slashHeader = (item: SlashItem, index: number) => {
@@ -385,7 +384,7 @@ function closeSlashMenu() {
     const target = event.target instanceof Element ? event.target : event.target instanceof Node ? event.target.parentElement : null;
     const groupId = target?.closest<HTMLElement>("[data-slash-group-toggle]")?.dataset.slashGroupToggle;
     if (groupId) {
-      if (!collapsedSlashGroups.delete(groupId)) collapsedSlashGroups.add(groupId);
+      if (!expandedSlashGroups.delete(groupId)) expandedSlashGroups.add(groupId);
       void refreshOpenSlashMenu();
       return;
     }
