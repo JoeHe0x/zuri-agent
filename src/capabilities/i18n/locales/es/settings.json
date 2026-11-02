@@ -266,5 +266,6 @@
   "settings.removeAccessRuleShort": "Quitar regla",
   "settings.addSiteRateLimitShort": "Limitar frecuencia",
   "settings.removeSiteRateLimitShort": "Quitar límite",
-  "settings.updateModelSettingsShort": "Actualizar ajustes"
+  "settings.updateModelSettingsShort": "Actualizar ajustes",
+  "settings.floatingBall": "Botón flotante"
 }

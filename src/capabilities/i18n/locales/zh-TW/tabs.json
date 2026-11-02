@@ -54,5 +54,6 @@
   "tabs.modeFailed": "無法切換頁面模式。請關閉此分頁的開發人員工具後重試，或開啟新分頁。",
   "tabs.modeResumeRequired": "頁面模式需要恢復。請結束目前的頁面腳本，重新觀察頁面後再繼續。",
   "tabs.navigationFailed": "頁面導覽失敗，請檢查目標網址或網路連線後重試。",
-  "tabs.navigationTabClosed": "導覽期間分頁已關閉，請重新開啟頁面。"
+  "tabs.navigationTabClosed": "導覽期間分頁已關閉，請重新開啟頁面。",
+  "tabs.noMatchingTabs": "沒有符合的分頁"
 }

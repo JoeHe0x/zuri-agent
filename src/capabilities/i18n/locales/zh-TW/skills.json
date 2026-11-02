@@ -365,5 +365,6 @@
   "skills.importSkillFromPageShort": "從頁面匯入技能",
   "skills.importGitSkillRepositoryShort": "匯入 Git 技能儲存庫",
   "skills.installSkillToGitShort": "將技能安裝至儲存庫",
-  "skills.runSkillScriptShort": "執行技能指令碼"
+  "skills.runSkillScriptShort": "執行技能指令碼",
+  "skills.addSkill": "新增技能"
 }

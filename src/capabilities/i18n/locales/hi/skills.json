@@ -365,5 +365,6 @@
   "skills.importSkillFromPageShort": "पेज से आयात करें",
   "skills.importGitSkillRepositoryShort": "Git से आयात करें",
   "skills.installSkillToGitShort": "Git में इंस्टॉल करें",
-  "skills.runSkillScriptShort": "स्किल स्क्रिप्ट चलाएँ"
+  "skills.runSkillScriptShort": "स्किल स्क्रिप्ट चलाएँ",
+  "skills.addSkill": "स्किल जोड़ें"
 }

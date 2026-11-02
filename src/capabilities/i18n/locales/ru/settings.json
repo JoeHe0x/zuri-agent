@@ -266,5 +266,6 @@
   "settings.removeAccessRuleShort": "Удалить правило",
   "settings.addSiteRateLimitShort": "Добавить лимит",
   "settings.removeSiteRateLimitShort": "Удалить лимит",
-  "settings.updateModelSettingsShort": "Обновить настройки"
+  "settings.updateModelSettingsShort": "Обновить настройки",
+  "settings.floatingBall": "Плавающая кнопка"
 }

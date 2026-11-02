@@ -85,9 +85,8 @@ test("provider groups stay localized across all public catalog languages", () =>
 });
 
 test("product names agree across the UI, content script and native extension labels", () => {
-  const localNames = { "zh-CN": "轻舟", "zh-TW": "輕舟", ja: "軽舟" };
-  for (const pack of packs) {
-    const expected = localNames[pack.language] || "qz";
+    for (const pack of packs) {
+    const expected = "Zuri";
     withPack(pack, messages => {
       assert.equal(panelText("brand"), expected, `${pack.language} panel`);
       assert.equal(createContentLanguageSnapshot().messages.brand, expected, `${pack.language} content script`);

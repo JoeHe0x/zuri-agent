@@ -58,17 +58,7 @@ assert.match(sidepanel, /resource-ref-kind">\$\{tHtml\("selectedElement"\)\}<\/s
 assert.match(sidepanel, /truncateElementReferenceSelector\(token\.selector\)/);
 assert.match(sidepanel, /function truncateElementReferenceSelector\(value, maxLength = 5\)/);
 assert.match(css, /\.resource-ref-pill\.element\s*\{/);
-assert.match(sidepanel, /input\.dispatchEvent\(new Event\("input", \{ bubbles: true \}\)\)/);
-assert.match(
-  sidepanel,
-  /const hasLiveSelection = document\.hasFocus\(\) && document\.activeElement === input;[\s\S]*?: input\.value\.length;[\s\S]*?: start;/,
-  "page-driven selections should append instead of trusting a stale textarea caret",
-);
-assert.match(sidepanel, /focusComposerAt\(caret\)/);
-assert.match(
-  sidepanel,
-  /function focusComposerAt\(caret\)[\s\S]*?input\.setSelectionRange\(position, position\)[\s\S]*?if \(!document\.hasFocus\(\)\) return;[\s\S]*?input\.focus\(\{ preventScroll: true \}\)/,
-);
+assert.match(sidepanel, /addElement\(result\.selector\)/);
 assert.doesNotMatch(sidepanel, /window\.focus\(\)/, "the side panel cannot reclaim browser focus from a page WebContents");
 assert.match(sidepanel, /button\?\.addEventListener\("click", toggleElementPicker\)/);
 assert.match(

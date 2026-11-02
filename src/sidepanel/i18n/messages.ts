@@ -342,7 +342,7 @@ export default defineMessages("core", {
   optionNumber: { "zh-CN": "选项 {number}", en: "Option {number}" },
   noImage: { "zh-CN": "无图", en: "No image" },
   noImagesToPreview: { "zh-CN": "没有可预览的图片", en: "No images to preview" },
-  brand: { "zh-CN": "轻舟", en: "qz" },
+  brand: { "zh-CN": "Zuri", en: "Zuri" },
   newChat: { "zh-CN": "新对话", en: "New chat" },
   settings: { "zh-CN": "设置", en: "Settings" },
   renameConversation: { "zh-CN": "重命名对话", en: "Rename chat" },

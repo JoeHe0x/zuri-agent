@@ -1,0 +1,8 @@
+{
+  "provider-anthropic.allProviders": "Все провайдеры",
+  "provider-anthropic.signInWithYourClaudeAccountToUseClaude": "Войдите в аккаунт Claude Pro или Max, чтобы использовать модели Claude. На последней странице может появиться ошибка подключения к localhost — это нормально, расширение завершит вход автоматически.",
+  "provider-anthropic.theLoginSessionExpiredStartClaudeLoginAgain": "Сессия входа истекла. Войдите в Claude снова.",
+  "provider-anthropic.signInToClaudeInSettingsFirst": "Сначала войдите в Claude в настройках.",
+  "provider-anthropic.claudeSignInFailed": "Не удалось войти в Claude: {reason}",
+  "provider-anthropic.loginCanceledStartAgain": "Вход отменён. Начните заново."
+}

@@ -266,5 +266,6 @@
   "settings.removeAccessRuleShort": "Regel entfernen",
   "settings.addSiteRateLimitShort": "Rate begrenzen",
   "settings.removeSiteRateLimitShort": "Ratenlimit aufheben",
-  "settings.updateModelSettingsShort": "Optionen ändern"
+  "settings.updateModelSettingsShort": "Optionen ändern",
+  "settings.floatingBall": "Schwebende Schaltfläche"
 }

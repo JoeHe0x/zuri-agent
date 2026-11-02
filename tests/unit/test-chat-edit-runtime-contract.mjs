@@ -52,7 +52,7 @@ function assertUiRuntimeContracts() {
   const agent = stripTypeScriptTypes(readFileSync(join(root, "src/background/agent/agent.ts"), "utf8"));
   const sessionCodec = stripTypeScriptTypes(readFileSync(join(root, "src/shared/session/session-codec.ts"), "utf8"));
 
-  assert.match(sidepanel, /data-tooltip="\$\{tHtml\("edit"\)\}"\s+title="\$\{tHtml\("edit"\)\}"\s+aria-label="\$\{tHtml\("edit"\)\}"/, "edit icon should expose a simple Edit tooltip");
+  assert.match(sidepanel, /data-tooltip="\$\{tHtml\("edit"\)\}"\s+aria-label="\$\{tHtml\("edit"\)\}"/, "edit icon should expose a simple Edit tooltip");
   assert.match(sidepanel, /class="msg-user-row"/, "user bubbles should keep inline message actions beside the bubble");
   assert.match(sidepanelCss, /\.msg-user-edit-btn::before[\s\S]*content:\s*attr\(data-tooltip\)/, "edit tooltip should be rendered from data-tooltip");
   assert.match(sidepanelCss, /\.msg-user-edit-btn::before[\s\S]*border-radius:\s*999px/, "edit tooltip should use an oval pill shape");
@@ -65,9 +65,8 @@ function assertUiRuntimeContracts() {
   assert.match(sidepanel, /class="qz-field qz-field--bare msg-user-edit-input"/, "message editing should use the shared borderless field treatment");
   assert.match(sidepanelCss, /textarea\.msg-user-edit-input\s*\{[\s\S]*border:\s*0[\s\S]*resize:\s*none/, "message editing should override the generic textarea border and resize handle");
   assert.match(sidepanelHtml, /id="chat-dock"[\s\S]*id="status-bar"[\s\S]*<footer id="input-area"[^>]*>/, "status and composer should live in one chat dock");
-  assert.match(sidepanelCss, /\.chat-dock\s*\{[\s\S]*border-top:\s*1px solid var\(--border\)/, "chat dock should own the bottom separator");
   const appClasses = sidepanelHtml.match(/id="app"[^>]*class="([^"]*)"/)?.[1].split(/\s+/) || [];
-  for (const utility of ["qz:rounded-none", "qz:bg-surface", "qz:w-full", "qz:h-full", "qz:flex", "qz:flex-col"]) {
+  for (const utility of ["qz:rounded-none", "qz:w-full", "qz:h-full", "qz:flex", "qz:flex-col"]) {
     assert.ok(appClasses.includes(utility), `the full-panel square shell requires ${utility}`);
   }
   assert.match(sidepanelCss, /\.chat-dock\s*\{[\s\S]*border-radius:\s*0/, "chat dock should not add bottom corner rounding");

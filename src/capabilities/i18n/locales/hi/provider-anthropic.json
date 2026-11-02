@@ -1,0 +1,8 @@
+{
+  "provider-anthropic.allProviders": "सभी प्रदाता",
+  "provider-anthropic.signInWithYourClaudeAccountToUseClaude": "Claude Pro या Max खाते से साइन इन करके Claude मॉडल इस्तेमाल करें। आखिरी पेज पर localhost का कनेक्शन त्रुटि दिख सकती है; यह सामान्य है, एक्सटेंशन साइन-इन अपने आप पूरा कर लेगा।",
+  "provider-anthropic.theLoginSessionExpiredStartClaudeLoginAgain": "साइन-इन सत्र समाप्त हो गया है। Claude में फिर से साइन इन करें।",
+  "provider-anthropic.signInToClaudeInSettingsFirst": "पहले सेटिंग में Claude में साइन इन करें।",
+  "provider-anthropic.claudeSignInFailed": "Claude साइन-इन विफल: {reason}",
+  "provider-anthropic.loginCanceledStartAgain": "साइन-इन रद्द किया गया। फिर से शुरू करें।"
+}

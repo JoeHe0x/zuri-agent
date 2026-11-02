@@ -757,30 +757,7 @@
   color: var(--accent);
 }
 
-.slash-kind {
-  min-width: 38px;
-  color: var(--text-muted);
-  font-family: var(--font-mono);
-  font-size: 9px;
-  text-transform: uppercase;
-}
-
-.slash-kind.data {
-  color: var(--green);
-}
-
-.slash-kind.command {
-  color: var(--accent);
-}
-
-.slash-main {
-  min-width: 0;
-  display: grid;
-  gap: 1px;
-}
-
-.slash-title,
-.slash-subtitle {
+.slash-title {
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
@@ -791,7 +768,6 @@
   font-weight: 600;
 }
 
-.slash-subtitle,
 .slash-meta,
 .slash-empty {
   color: var(--text-muted);

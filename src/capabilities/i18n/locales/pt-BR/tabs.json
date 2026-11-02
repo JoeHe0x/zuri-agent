@@ -54,5 +54,6 @@
   "tabs.modeFailed": "Não foi possível alterar o modo. Feche as ferramentas de desenvolvedor desta aba e tente novamente ou abra uma nova aba.",
   "tabs.modeResumeRequired": "É necessário restaurar o modo da página. Encerre o script atual e observe a página novamente antes de continuar.",
   "tabs.navigationFailed": "Não foi possível navegar até a página. Verifique a URL de destino ou a conexão de rede e tente novamente.",
-  "tabs.navigationTabClosed": "A aba foi fechada durante a navegação. Abra a página novamente."
+  "tabs.navigationTabClosed": "A aba foi fechada durante a navegação. Abra a página novamente.",
+  "tabs.noMatchingTabs": "Nenhuma aba correspondente"
 }

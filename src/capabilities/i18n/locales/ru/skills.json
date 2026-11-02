@@ -365,5 +365,6 @@
   "skills.importSkillFromPageShort": "Импорт со страницы",
   "skills.importGitSkillRepositoryShort": "Импорт из Git",
   "skills.installSkillToGitShort": "Установить в Git",
-  "skills.runSkillScriptShort": "Скрипт навыка"
+  "skills.runSkillScriptShort": "Скрипт навыка",
+  "skills.addSkill": "Добавить навык"
 }

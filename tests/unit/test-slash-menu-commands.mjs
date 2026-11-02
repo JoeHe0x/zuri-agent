@@ -65,14 +65,9 @@ try {
   ] }, controller.signal);
   const feature = createSlashMenuFeature({ input, menu, chips: { innerHTML: "", classList: { toggle() {} }, addEventListener() {} }, references: extensions });
   await feature.update();
-  assert.match(menu.innerHTML, /data-slash-filter="command"/u);
-  assert.match(menu.innerHTML, />command: 1</u);
-  assert.match(menu.innerHTML, /class="slash-kind command">命令</u);
-  assert.match(menu.innerHTML, /data-slash-filter="data_store"[^>]*>data: 1</u);
-  assert.match(menu.innerHTML, /data-slash-filter="skill"[^>]*>skill: 1</u);
+  assert.match(menu.innerHTML, /class="slash-group"[^>]*>命令</u);
   assert.match(menu.innerHTML, /2 行 · 2026-09-18/u);
   assert.match(menu.innerHTML, /站点技能/u);
-  assert.match(menu.innerHTML, /data-slash-filter="notes"[^>]*>notes: 1</u);
   assert.match(menu.innerHTML, /&lt;Note&gt;/u, "custom source labels must remain text");
   assert.ok(menu.innerHTML.indexOf("站点指南") < menu.innerHTML.indexOf("places"), "matching site skills retain their higher priority");
   for (const [query, token] of [["places", "[data_store: places]"], ["draft", "@note(draft)"]]) {
@@ -95,8 +90,8 @@ try {
   await feature.update();
   controller.abort();
   await feature.refresh();
-  assert.doesNotMatch(menu.innerHTML, /data-slash-filter="(?:data_store|skill|notes)"/u);
-  assert.match(menu.innerHTML, />command: 1</u, "removing capability references leaves framework commands usable");
+  assert.doesNotMatch(menu.innerHTML, /站点指南|places|Draft/u);
+  assert.match(menu.innerHTML, /class="slash-group"[^>]*>命令</u, "removing capability references leaves framework commands usable");
 } finally {
   globalThis.document = previousDocument;
 }

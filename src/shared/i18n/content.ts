@@ -3,7 +3,7 @@ import { createTranslator, getLocale } from "./index.js";
 
 // Content scripts are injected into every page; keep their catalog independent of the tool host.
 export const contentMessages = defineMessages("content", {
-  brand: { "zh-CN": "轻舟", en: "qz" },
+  brand: { "zh-CN": "Zuri", en: "Zuri" },
   noStableSelector: { "zh-CN": "无法为该元素生成稳定 selector", en: "Could not generate a stable selector for this element" },
   importFailed: { "zh-CN": "会话导入失败", en: "Could not import the chat" },
 });

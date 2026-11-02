@@ -1,5 +1,5 @@
 {
-  "manifest.extensionName": "軽舟",
+  "manifest.extensionName": "Zuri",
   "manifest.extensionDescription": "軽舟はブラウザーで使えるAIエージェントのワークスペースです。",
   "manifest.switchModel": "モデルのプリセットをすばやく切り替える"
 }
