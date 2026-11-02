@@ -247,6 +247,7 @@ export function createChatWorkspaceFeature(options: ChatWorkspaceOptions) {
     button: btnPickElement,
     input: inputEl,
     request: options.request,
+    addElement: slashMenu.addElement,
     closeSlashMenu: slashMenu.close,
     showToast: toast.show,
     isComposing: () => composer?.isComposing() === true,

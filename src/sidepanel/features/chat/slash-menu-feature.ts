@@ -7,6 +7,7 @@ interface SlashOptions {
   onInputChanged?(): void; onCommand?(command: NonNullable<ReturnType<typeof parseSlashCommandText>>): Promise<unknown>;
 }
 
+import { createElementReferenceToken } from "../../../shared/element-reference.js";
 import { escapeHtml, escapeHtmlAttribute } from "../../ui/ui-utils.js";
 
 const SLASH_MENU_LIMIT = 12;
@@ -61,6 +62,8 @@ export function createSlashMenuFeature(options: SlashOptions) {
   let mentionsExpanded = false;
   // Selected Skills show as compact chips and join the prompt as [skill: name] tokens at send.
   let skills: SlashItem[] = [];
+  // Picked page elements share the chip row and join the prompt as [css: selector] tokens at send.
+  let elements: string[] = [];
   const tabKey = (item: SlashItem) => item.name.match(/ #(\d+)/)?.[1] || item.name;
   const sharedItems = () => [
     ...(currentTab ? [currentTab] : []),
@@ -70,14 +73,18 @@ export function createSlashMenuFeature(options: SlashOptions) {
   function renderMentions() {
     const items = sharedItems();
     const shown = mentionsExpanded ? items : items.slice(0, 1);
-    options.chips.classList.toggle("hidden", !items.length && !skills.length);
+    options.chips.classList.toggle("hidden", !items.length && !skills.length && !elements.length);
     options.chips.innerHTML = shown.map((item, index) => `
       <span class="mention-chip" title="${escapeHtmlAttribute(item.title)}">
         ${item.icon ? `<img class="mention-chip-icon" src="${escapeHtmlAttribute(item.icon)}" alt="">` : `<span class="mention-chip-icon"></span>`}
         <span class="mention-chip-title">${escapeHtml(t("sharingTab", { title: item.title }))}</span>
         ${index === 0 && items.length > 1 ? `<button class="mention-chip-more" type="button" data-mention-toggle aria-expanded="${mentionsExpanded}">${mentionsExpanded ? tHtml("showLess") : `+${items.length - 1}`}</button>` : ""}
         <button class="mention-chip-remove" type="button" data-mention-remove="${index}" aria-label="${tHtml("remove")}">×</button>
-      </span>`).join("") + (skills.length ? `<div class="skill-chips">${skills.map((item, index) => `
+      </span>`).join("") + (skills.length || elements.length ? `<div class="skill-chips">${elements.map((selector, index) => `
+      <span class="skill-chip" title="${escapeHtmlAttribute(selector)}">
+        <span class="skill-chip-title">${escapeHtml(t("selectedElement"))}: ${escapeHtml(selector.split(/\s>\s/).pop() || selector)}</span>
+        <button class="skill-chip-remove" type="button" data-element-remove="${index}" aria-label="${tHtml("remove")}">×</button>
+      </span>`).join("")}${skills.map((item, index) => `
       <span class="skill-chip" title="${escapeHtmlAttribute(item.subtitle || item.title)}">
         <span class="skill-chip-title">${escapeHtml(item.title)}</span>
         <button class="skill-chip-remove" type="button" data-skill-remove="${index}" aria-label="${tHtml("remove")}">×</button>
@@ -85,6 +92,13 @@ export function createSlashMenuFeature(options: SlashOptions) {
   }
   options.chips.addEventListener("click", (event) => {
     const target = event.target as Element | null;
+    const elementButton = target?.closest<HTMLElement>("[data-element-remove]");
+    if (elementButton) {
+      elements.splice(Number(elementButton.dataset.elementRemove), 1);
+      renderMentions();
+      input.focus();
+      return;
+    }
     const skillButton = target?.closest<HTMLElement>("[data-skill-remove]");
     if (skillButton) {
       skills.splice(Number(skillButton.dataset.skillRemove), 1);
@@ -353,8 +367,13 @@ function closeSlashMenu() {
     refresh: refreshOpenSlashMenu,
     close: closeSlashMenu,
     isOpen: () => slashMenuState.open,
-    mentionTokens: () => [...sharedItems(), ...skills].map(item => `[${item.kind}: ${item.name}]`).join(" "),
-    clearMentions() { mentions = []; skills = []; renderMentions(); },
+    mentionTokens: () => [...sharedItems(), ...skills].map(item => `[${item.kind}: ${item.name}]`).concat(elements.map(selector => createElementReferenceToken({ selector }))).join(" "),
+    clearMentions() { mentions = []; skills = []; elements = []; renderMentions(); },
+    addElement(selector: unknown) {
+      const css = String(selector || "").replace(/[\r\n]+/g, " ").trim();
+      if (css && !elements.includes(css)) elements.push(css);
+      renderMentions();
+    },
     isTabShared: (item: SlashItem) => sharedItems().some(shared => tabKey(shared) === tabKey(item)),
     toggleTab(item: SlashItem) {
       const key = tabKey(item);

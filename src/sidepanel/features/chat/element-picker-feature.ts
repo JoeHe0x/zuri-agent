@@ -4,18 +4,18 @@ import type { PortMessage } from "../app/port-client.js";
 interface ElementPickerOptions {
   input: HTMLTextAreaElement; button?: HTMLButtonElement | null;
   request?(type: string, payload: PortMessage, timeout: number): Promise<PortMessage>;
-  closeSlashMenu?(): void; isComposing?(): boolean;
+  addElement?(selector: unknown): void; closeSlashMenu?(): void; isComposing?(): boolean;
   showToast?(message: unknown, options: { tone: string; anchorEl: Element | null }): void;
 }
 interface PickerRequest { id: number; tabId: number; confirming?: boolean }
 
-import { createElementReferenceToken } from "../../../shared/element-reference.js";
 import { getEffectiveTabUrl } from "../../../shared/tab-utils.js";
 
 export function createElementPickerFeature(options: ElementPickerOptions) {
   const button = options.button || null;
   const input = options.input;
   const sendRequest: NonNullable<ElementPickerOptions["request"]> = options.request || (async () => ({}));
+  const addElement = options.addElement || (() => {});
   const closeSlashMenu = options.closeSlashMenu || (() => {});
   const showToast = options.showToast || (() => {});
   const isComposing = options.isComposing || (() => false);
@@ -97,7 +97,7 @@ async function toggleElementPicker() {
     const result = await sendRequest("start_element_picker", { tabId: tab.id }, 65000);
     if (elementPickerRequest !== pickerRequest) return;
     if (result?.selector) {
-      insertPickedElementSelector(result.selector);
+      addElement(result.selector);
     } else if (result?.error) {
       showToast(result.error, { tone: "error", anchorEl: button });
     }
@@ -138,37 +138,6 @@ async function cancelActiveElementPicker() {
   } catch (_err) {
     // The page may have navigated or closed; local picker state is already clear.
   }
-}
-
-function insertPickedElementSelector(value: unknown) {
-  const reference = createElementReferenceToken({
-    selector: value,
-  });
-  if (!reference) return;
-  const hasLiveSelection = document.hasFocus() && document.activeElement === input;
-  const start = hasLiveSelection && Number.isInteger(input.selectionStart)
-    ? input.selectionStart
-    : input.value.length;
-  const end = hasLiveSelection && Number.isInteger(input.selectionEnd)
-    ? input.selectionEnd
-    : start;
-  const before = input.value.slice(0, start);
-  const after = input.value.slice(end);
-  const leading = before && !/\s$/.test(before) ? "\n" : "";
-  const trailing = after && !/^\s/.test(after) ? "\n" : " ";
-  const inserted = `${leading}${reference}${trailing}`;
-  input.value = `${before}${inserted}${after}`;
-  const caret = before.length + inserted.length;
-  input.dispatchEvent(new Event("input", { bubbles: true }));
-  focusComposerAt(caret);
-}
-
-function focusComposerAt(caret: number) {
-  const position = Math.max(0, Math.min(input.value.length, Number(caret) || 0));
-  input.setSelectionRange(position, position);
-  input.scrollTop = input.scrollHeight;
-  if (!document.hasFocus()) return;
-  input.focus({ preventScroll: true });
 }
 
   document.addEventListener("keydown", (event) => {

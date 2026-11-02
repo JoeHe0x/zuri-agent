@@ -51,7 +51,7 @@ assert.match(sidepanel, /button\.classList\.toggle\("hidden", !available\)/);
 assert.doesNotMatch(sidepanel, /当前页面不支持选择元素|无法读取当前页面/);
 assert.match(sidepanel, /button\.title = active \? t\("confirmSelectionHint"\)/);
 assert.match(sidepanel, /if \(elementPickerRequest\) \{[\s\S]*?await confirmActiveElementPicker\(\);[\s\S]*?return;/);
-assert.match(sidepanel, /createElementReferenceToken\(\{[\s\S]*?selector: value/);
+assert.match(sidepanel, /addElement\(result\.selector\)/);
 assert.match(sidepanel, /findElementReferenceTokens\(source\)/);
 assert.match(sidepanel, /resource-ref-pill element/);
 assert.match(sidepanel, /resource-ref-kind">\$\{tHtml\("selectedElement"\)\}<\/span>/);
