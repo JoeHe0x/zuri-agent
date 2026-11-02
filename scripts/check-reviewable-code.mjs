@@ -208,10 +208,10 @@ export function inspectJavaScript(source, file = "input.js", depth = 0) {
     const line = token.loc.start.line;
     codeTokensByLine.set(line, (codeTokensByLine.get(line) || 0) + 1);
   }
-  const maxStatements = Math.max(0, ...statementsByLine.values());
-  const maxCodeTokens = Math.max(0, ...codeTokensByLine.values());
+  const maxStatements = [...statementsByLine.values()].reduce((a, v) => Math.max(a, v), 0);
+  const maxCodeTokens = [...codeTokensByLine.values()].reduce((a, v) => Math.max(a, v), 0);
   const metrics = { bytes: Buffer.byteLength(source), lines: source.split("\n").length,
-    maxLine: Math.max(...source.split("\n").map(line => line.length)), maxCodeTokens, maxStatements,
+    maxLine: source.split("\n").reduce((max, line) => Math.max(max, line.length), 0), maxCodeTokens, maxStatements,
     bindings: bindings.size, shortBindings, embeddedScripts: embedded.size };
   if (/\.min\.(?:m?js|cjs)(?:$|#)/iu.test(file) || maxStatements > 12 || maxCodeTokens > 1200 ||
       bindings.size > 80 && shortBindings / bindings.size > 0.6) {

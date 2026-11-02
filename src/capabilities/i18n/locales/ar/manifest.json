@@ -1,5 +1,5 @@
 {
-  "manifest.extensionName": "Zuri",
+  "manifest.extensionName": "Zuri Agent",
   "manifest.extensionDescription": "qz مساحة عمل لوكلاء الذكاء الاصطناعي في متصفحك.",
   "manifest.switchModel": "التبديل السريع بين إعدادات النماذج المحفوظة"
 }

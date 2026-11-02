@@ -26,6 +26,13 @@
   }
 }
 
+.welcome-wordmark {
+  width: min(220px, 70%);
+  height: auto;
+  color: var(--text-primary, currentColor);
+  margin-bottom: 14px;
+}
+
 .welcome-subtitle {
   white-space: pre-line;
   font-size: 13px;
