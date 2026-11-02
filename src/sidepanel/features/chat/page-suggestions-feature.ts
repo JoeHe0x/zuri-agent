@@ -43,8 +43,8 @@ export function createPageSuggestionsFeature(options: {
 
   let keys: Key[] = [];
   let generated: string[] = [];
-  // Follow-ups belong to one assistant message; they disappear when another message becomes the last one.
-  let followUps: { anchor: Element; items: string[] } | null = null;
+  // Follow-ups belong to one assistant message and the page it was answered on; once either changes, the page's own chips take over.
+  let followUps: { anchor: Element; items: string[]; pageKey?: string } | null = null;
   const lastExchange = () => {
     const assistant = [...messagesEl.querySelectorAll(".msg-assistant")].pop();
     const user = [...messagesEl.querySelectorAll(".msg-user .msg-content")].pop();
@@ -62,12 +62,14 @@ export function createPageSuggestionsFeature(options: {
   function render() {
     const landing = messagesEl.dataset.chatState === "landing";
     if (landing) followUps = null;
-    const following = !landing && !!followUps && followUps.anchor === lastExchange()?.assistant && options.getRunStatus() === "idle";
+    const last = landing ? null : lastExchange()?.assistant;
+    const fresh = !!followUps && followUps.anchor === last && followUps.pageKey === page?.key;
+    const following = !landing && !!last && options.getRunStatus() === "idle" && (fresh || !!page);
     root.hidden = landing ? !page : !following;
     // Follow-ups sit under the reply they belong to; otherwise the chips stay above the composer.
-    if (following) followUps!.anchor.after(root);
+    if (following) last!.after(root);
     else if (root.parentElement !== home.parent) home.parent.insertBefore(root, home.next);
-    const base = landing ? (generated.length ? generated : keys.map(key => t(key))) : following ? followUps!.items : [];
+    const base = landing ? (generated.length ? generated : keys.map(key => t(key))) : following ? (fresh ? followUps!.items : generated.length ? generated : keys.map(key => t(key))) : [];
     const texts = base.filter(text => !hidden().has(text));
     const shown = [...list.children].map(child => child.firstElementChild?.textContent);
     if (texts.length === shown.length && texts.every((text, index) => text === shown[index])) return;
@@ -148,7 +150,7 @@ export function createPageSuggestionsFeature(options: {
     if (!last || options.getRunStatus() !== "idle") return;
     const items = (await request(page?.tabId ?? 0, exclude, { user: last.user, assistant: last.text })).filter(text => !exclude.includes(text));
     if (items.length && last.assistant === lastExchange()?.assistant) {
-      followUps = { anchor: last.assistant, items };
+      followUps = { anchor: last.assistant, items, pageKey: page?.key };
       render();
     }
   }
