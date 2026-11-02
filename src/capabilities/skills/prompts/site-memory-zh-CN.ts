@@ -4,7 +4,7 @@ export const description = "记住并持续改进某个网站的操作经验，�
 export const content = [
   "# 站点记忆",
   "",
-  "每个网站维护一个站点 Skill，命名为 `site-memory-<注册域名，点换成连字符>`（例如 `site-memory-sayweee-com`），`scope:\"site\"`，`domains:[\"<注册域名>\"]`。站点 Skill 在匹配的页面上自动载入，之后的任务无需额外设置就能看到它。通过 `skill-workbench`（`manage_skill`）创建和修改。",
+  "每个网站维护一个站点 Skill，命名为 `site-memory-<注册域名，点换成连字符>`（例如 `site-memory-example-com`），`scope:\"site\"`，`domains:[\"<注册域名>\"]`。站点 Skill 在匹配的页面上自动载入，之后的任务无需额外设置就能看到它。通过 `skill-workbench`（`manage_skill`）创建和修改。",
   "",
   "## 使用",
   "",

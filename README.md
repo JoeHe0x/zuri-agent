@@ -1,14 +1,14 @@
 <p align="center">
-  <img src="src/icons/icon128.png" alt="qz logo" width="80" height="80">
+  <img src="src/icons/icon128.png" alt="Zuri logo" width="80" height="80">
 </p>
-<h1 align="center">qz</h1>
-<p align="center">English · <a href="README.zh-CN.md">简体中文</a> · <a href="https://alibaba.github.io/qz-browser-agent/">Website</a></p>
+<h1 align="center">Zuri</h1>
+<p align="center">English · <a href="README.zh-CN.md">简体中文</a> · <a href="https://joehe0x.github.io/zuri-agent/">Website</a></p>
 <p align="center">Open-source, local-first browser agent</p>
 <p align="center">Bring your own model · Research · Automate · Extract</p>
 
 <div align="center">
 
-[![Chrome Web Store](https://img.shields.io/chrome-web-store/v/dknbdgkgoinlgjpfebapkklbmjjgdblm?label=Chrome%20Web%20Store&logo=googlechrome&logoColor=white)](https://chromewebstore.google.com/detail/dknbdgkgoinlgjpfebapkklbmjjgdblm) [![npm](https://img.shields.io/npm/v/qz-browser-agent?logo=npm)](https://www.npmjs.com/package/qz-browser-agent) [![License](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE) [![Developer checks](https://github.com/alibaba/qz-browser-agent/actions/workflows/ci.yml/badge.svg)](https://github.com/alibaba/qz-browser-agent/actions/workflows/ci.yml)
+[![Chrome Web Store](https://img.shields.io/chrome-web-store/v/dknbdgkgoinlgjpfebapkklbmjjgdblm?label=Chrome%20Web%20Store&logo=googlechrome&logoColor=white)](https://chromewebstore.google.com/detail/dknbdgkgoinlgjpfebapkklbmjjgdblm) [![npm](https://img.shields.io/npm/v/qz-browser-agent?logo=npm)](https://www.npmjs.com/package/qz-browser-agent) [![License](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE) [![Developer checks](https://github.com/JoeHe0x/zuri-agent/actions/workflows/ci.yml/badge.svg)](https://github.com/JoeHe0x/zuri-agent/actions/workflows/ci.yml)
 
 </div>
 
@@ -19,7 +19,7 @@ qz is an open-source browser agent that runs in your own browser as a Chrome ext
 </p>
 
 <p align="center">
-  <a href="#make-your-agents-actually-good-at-browsing"><img src="docs/images/connect-command.svg" alt="npx skills add alibaba/qz-browser-agent -g" height="52"></a>
+  <a href="#make-your-agents-actually-good-at-browsing"><img src="docs/images/connect-command.svg" alt="npx skills add JoeHe0x/zuri-agent -g" height="52"></a>
 </p>
 
 ![qz collecting Hangzhou photos from Wikipedia](docs/images/workspace.png)
@@ -130,7 +130,7 @@ Use qz to find this week's hottest AI agent projects on GitHub and send me a wee
 <details id="manual-installation">
 <summary>Can't access the Chrome Web Store? Install manually</summary>
 
-1. Download the ZIP from the [latest release](https://github.com/alibaba/qz-browser-agent/releases/latest) and extract it.
+1. Download the ZIP from the [latest release](https://github.com/JoeHe0x/zuri-agent/releases/latest) and extract it.
 2. Open `chrome://extensions` and enable **Developer mode**.
 3. Click **Load unpacked** and select the extracted `qz-browser-agent-extension` folder.
 4. Open the side panel and configure a model as described above.
@@ -143,7 +143,7 @@ Agents like Grok Bot, Claude Code, Codex, and pi can hand web tasks to qz. qz ru
 
 1. **Install the Skill** so your agent knows how to use qz.
    ```bash
-   npx skills add alibaba/qz-browser-agent -g
+   npx skills add JoeHe0x/zuri-agent -g
    ```
 2. **Pair once.** Requires Node.js 22 or later. The command pairs automatically with your default browser.
    ```bash

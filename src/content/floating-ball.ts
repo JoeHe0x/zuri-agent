@@ -10,9 +10,9 @@ export {};
   const TOP_KEY = "floatingBallTop";
   const SIZE = 44;
   const DRAG_THRESHOLD = 4;
-  const w = window as Window & { __WEEE_FLOATING_BALL?: boolean };
-  if (w.__WEEE_FLOATING_BALL || !chrome.runtime?.id) return;
-  w.__WEEE_FLOATING_BALL = true;
+  const w = window as Window & { __ZURI_FLOATING_BALL?: boolean };
+  if (w.__ZURI_FLOATING_BALL || !chrome.runtime?.id) return;
+  w.__ZURI_FLOATING_BALL = true;
 
   const clampTop = (top: number) => Math.min(Math.max(0, top), Math.max(0, window.innerHeight - SIZE));
   let host: HTMLElement | null = null;

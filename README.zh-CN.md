@@ -1,14 +1,14 @@
 <p align="center">
-  <img src="src/icons/icon128.png" alt="qz logo" width="80" height="80">
+  <img src="src/icons/icon128.png" alt="Zuri logo" width="80" height="80">
 </p>
-<h1 align="center">轻舟（qz）</h1>
-<p align="center"><a href="README.md">English</a> · 简体中文 · <a href="https://alibaba.github.io/qz-browser-agent/">官网</a></p>
+<h1 align="center">Zuri</h1>
+<p align="center"><a href="README.md">English</a> · 简体中文 · <a href="https://joehe0x.github.io/zuri-agent/">官网</a></p>
 <p align="center">开源、本地优先的浏览器 Agent</p>
 <p align="center">支持任意模型 · 调研 · 自动化 · 数据提取</p>
 
 <div align="center">
 
-[![Chrome Web Store](https://img.shields.io/chrome-web-store/v/dknbdgkgoinlgjpfebapkklbmjjgdblm?label=Chrome%20Web%20Store&logo=googlechrome&logoColor=white)](https://chromewebstore.google.com/detail/dknbdgkgoinlgjpfebapkklbmjjgdblm) [![npm](https://img.shields.io/npm/v/qz-browser-agent?logo=npm)](https://www.npmjs.com/package/qz-browser-agent) [![License](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE) [![Developer checks](https://github.com/alibaba/qz-browser-agent/actions/workflows/ci.yml/badge.svg)](https://github.com/alibaba/qz-browser-agent/actions/workflows/ci.yml)
+[![Chrome Web Store](https://img.shields.io/chrome-web-store/v/dknbdgkgoinlgjpfebapkklbmjjgdblm?label=Chrome%20Web%20Store&logo=googlechrome&logoColor=white)](https://chromewebstore.google.com/detail/dknbdgkgoinlgjpfebapkklbmjjgdblm) [![npm](https://img.shields.io/npm/v/qz-browser-agent?logo=npm)](https://www.npmjs.com/package/qz-browser-agent) [![License](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE) [![Developer checks](https://github.com/JoeHe0x/zuri-agent/actions/workflows/ci.yml/badge.svg)](https://github.com/JoeHe0x/zuri-agent/actions/workflows/ci.yml)
 
 </div>
 
@@ -19,7 +19,7 @@
 </p>
 
 <p align="center">
-  <a href="#让你的-agent-更会用浏览器"><img src="docs/images/connect-command.svg" alt="npx skills add alibaba/qz-browser-agent -g" height="52"></a>
+  <a href="#让你的-agent-更会用浏览器"><img src="docs/images/connect-command.svg" alt="npx skills add JoeHe0x/zuri-agent -g" height="52"></a>
 </p>
 
 ![轻舟从 Wikipedia 采集杭州照片](docs/images/workspace-zh-CN.png)
@@ -130,7 +130,7 @@ https://github.com/user-attachments/assets/3203bc89-ef26-4f66-86cc-b602a912a1ab
 <details id="手动安装">
 <summary>无法访问 Chrome 应用商店？手动安装</summary>
 
-1. 下载[最新版本](https://github.com/alibaba/qz-browser-agent/releases/latest)中的 ZIP 安装包并解压。
+1. 下载[最新版本](https://github.com/JoeHe0x/zuri-agent/releases/latest)中的 ZIP 安装包并解压。
 2. 打开 `chrome://extensions`，启用**开发者模式**。
 3. 点击**加载已解压的扩展程序**，选择解压后的 `qz-browser-agent-extension` 文件夹。
 4. 打开侧边栏，按上面的说明配置模型。
@@ -143,7 +143,7 @@ Grok Bot、Claude Code、Codex、pi 等 Agent 遇到网页任务时，可以把�
 
 1. **安装 Skill**：让你的 Agent 学会怎么调用轻舟。
    ```bash
-   npx skills add alibaba/qz-browser-agent -g
+   npx skills add JoeHe0x/zuri-agent -g
    ```
 2. **配对一次**：需要 Node.js 22 及以上版本，运行后会自动在你的默认浏览器里完成配对。
    ```bash

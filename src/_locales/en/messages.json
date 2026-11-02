@@ -1,9 +1,9 @@
 {
   "extensionName": {
-    "message": "qz"
+    "message": "Zuri"
   },
   "extensionDescription": {
-    "message": "qz is an AI agent workspace in your browser."
+    "message": "Zuri is an AI agent workspace in your browser."
   },
   "switchModel": {
     "message": "Quickly switch model presets"

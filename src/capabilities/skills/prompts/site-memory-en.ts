@@ -4,7 +4,7 @@ export const description = "Remember and improve what you learn about operating 
 export const content = [
   "# Site Memory",
   "",
-  "Keep one site Skill per website, named `site-memory-<registrable-domain with dots as hyphens>` (for example `site-memory-sayweee-com`), with `scope:\"site\"` and `domains:[\"<registrable-domain>\"]`. Site Skills load automatically on matching pages, so later tasks see it without extra setup. Create and edit it through `skill-workbench` (`manage_skill`).",
+  "Keep one site Skill per website, named `site-memory-<registrable-domain with dots as hyphens>` (for example `site-memory-example-com`), with `scope:\"site\"` and `domains:[\"<registrable-domain>\"]`. Site Skills load automatically on matching pages, so later tasks see it without extra setup. Create and edit it through `skill-workbench` (`manage_skill`).",
   "",
   "## Use it",
   "",

@@ -5,9 +5,7 @@ import type { WorkspaceExtensions } from "../app/workspace-extensions.js";
 type Key = Parameters<typeof t>[0];
 
 const GENERIC: Key[] = ["suggestSummarizePage", "suggestKeyPoints", "suggestAskPage"];
-const WEEE_PRODUCT: Key[] = ["suggestWeeeRecipe", "suggestWeeeSimilar", "suggestAskPage"];
 const BY_HOST: [RegExp, Key[]][] = [
-  [/^(www\.)?sayweee\.com$|^(www\.)?weee\.com$/, ["suggestWeeeDeals", "suggestWeeeFind", "suggestAskPage"]],
   [/^(mail\.google\.com|outlook\.(live|office)\.com)$/, ["suggestMailRecent", "suggestMailDraft", "suggestAskPage"]],
   [/(^|\.)(youtube\.com|bilibili\.com)$/, ["suggestVideoSummary", "suggestKeyPoints", "suggestAskPage"]],
   [/^github\.com$/, ["suggestRepoExplain", "suggestSummarizePage", "suggestAskPage"]],
@@ -15,8 +13,7 @@ const BY_HOST: [RegExp, Key[]][] = [
 
 export function pageSuggestionKeys(url: string): Key[] {
   try {
-    const { hostname, pathname } = new URL(url);
-    if (/^(www\.)?weee\.com$/.test(hostname) && /\/product\//.test(pathname)) return WEEE_PRODUCT;
+    const { hostname } = new URL(url);
     return BY_HOST.find(([pattern]) => pattern.test(hostname))?.[1] || GENERIC;
   } catch {
     return GENERIC;
