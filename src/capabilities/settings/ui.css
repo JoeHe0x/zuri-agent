@@ -305,25 +305,31 @@ details[open] > .cli-address-summary .cli-address-chevron {
   right: 0;
   bottom: calc(100% + 6px);
   z-index: 60;
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 1px;
-  min-width: 180px;
-  max-width: 280px;
+  min-width: min(240px, calc(100vw - 24px));
+  max-width: min(360px, calc(100vw - 24px));
   max-height: 240px;
   padding: 4px;
-  overflow: auto;
+  overflow-y: auto;
+  overscroll-behavior: contain;
   /* Opaque so the transcript behind the menu never shows through. */
-  --qz-popover-surface: var(--bg-elevated);
-  background: var(--bg-elevated);
+  --qz-popover-surface: var(--popover-surface);
+  background-color: var(--popover-surface);
   backdrop-filter: none;
+  opacity: 1;
+  animation: none;
 }
 
 .model-menu-list.hidden { display: none; }
 
 .model-menu-item {
+  flex: none;
   display: grid;
-  grid-template-columns: minmax(0, 1fr);
+  grid-template-columns: 16px minmax(0, 1fr);
   align-items: center;
+  gap: 8px;
   padding: 5px 8px;
   border: 0;
   border-radius: var(--radius-md);
@@ -337,9 +343,19 @@ details[open] > .cli-address-summary .cli-address-chevron {
 .model-menu-item:hover,
 .model-menu-item[aria-selected="true"] { background: var(--bg-tertiary); }
 
-.model-menu-item > span,
-.model-menu-item > small { grid-column: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.model-menu-item > small { color: var(--text-muted); font-size: 10px; }
+.model-menu-item > span:not(.model-menu-icon) { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.model-menu-icon {
+  display: grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  flex: none;
+  color: var(--text-secondary);
+}
+
+.model-menu-trigger > span:not(.model-menu-icon) { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.model-menu-trigger .model-menu-icon { width: 14px; height: 14px; }
 
 .model-menu.hidden {
   display: none;

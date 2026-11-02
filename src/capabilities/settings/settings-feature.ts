@@ -1,5 +1,6 @@
 import { t, getLocale } from "./i18n.js";
 import type { UiActivation, UiSettingsPort, UiSettingsSection } from "#sdk/sidepanel";
+import { providerIconSvg } from "./provider-icons.js";
 import { normalizeProviderModelOptions } from "#sdk/shared/models";
 import type { ModelCapabilityMatch } from "#sdk/shared/models";
 import { optionalSessionId as normalizeSessionIdValue } from "#sdk/sidepanel/sessions";
@@ -2132,13 +2133,78 @@ export function createSettingsFeature(options: SettingsFeatureOptions) {
   function setModelMenuOpen(open: boolean) {
     modelMenuList?.classList.toggle("hidden", !open);
     modelMenuTrigger?.setAttribute("aria-expanded", String(open));
+    if (open) void renderModelMenu();
   }
+
+  function providerBadge(provider: string, model: string) {
+    const badge = document.createElement("span");
+    badge.className = "model-menu-icon";
+    badge.setAttribute("aria-hidden", "true");
+    // Static, build-time SVG strings; no external input reaches innerHTML.
+    badge.innerHTML = providerIconSvg(provider, model);
+    return badge;
+  }
+
+  async function renderModelMenu() {
+    const config = lastSettingsConfig;
+    const provider = String(config?.provider || "");
+    const activeModel = String(config?.model || "");
+    if (!modelMenuList || !provider) return;
+    const presets = Array.isArray(config?.presets) ? config.presets : [];
+    // Fixed order and content: every configured provider (first-seen order) lists all its models,
+    // so the list does not change with the selected model.
+    const providers = [...new Set([...presets.map(preset => preset.provider), provider])];
+    const saved = (id: string) => presets.filter(preset => preset.provider === id).map(preset => preset.model);
+    const keyFor = (id: string) => {
+      const apiKey = providerNeedsApiKey(id) ? getRememberedProviderApiKey(id) || (id === provider ? String(config?.apiKey || "") : "") : "";
+      return { provider: id, apiKey, credentialVersion: hashModelCachePart(apiKey) };
+    };
+    const merge = (id: string, models: readonly { id: string }[] = []) => ({ id, models: [...new Set([...models.map(model => model.id), ...saved(id)])] });
+    const paint = (groups: { id: string; models: string[] }[]) => {
+      const scrollTop = modelMenuList.scrollTop;
+      modelMenuList.replaceChildren(...groups.flatMap(group => group.models.map(model => {
+        const item = document.createElement("button");
+        item.type = "button";
+        item.className = "model-menu-item";
+        item.setAttribute("role", "option");
+        item.setAttribute("aria-selected", String(group.id === provider && model === activeModel));
+        item.dataset.provider = group.id;
+        item.dataset.model = model;
+        const presetId = presets.find(preset => preset.provider === group.id && preset.model === model)?.id;
+        if (presetId) item.dataset.presetId = presetId;
+        const name = document.createElement("span");
+        name.textContent = model;
+        item.append(providerBadge(group.id, model), name);
+        return item;
+      })));
+      modelMenuList.scrollTop = scrollTop;
+    };
+    // Paint at once from cache/saved presets so the menu is never empty, then refine after loading.
+    paint(providers.map(id => merge(id, isCustomProvider(id) ? [] : modelOptionsController.peek(keyFor(id))?.models)));
+    modelMenuList.querySelector("[aria-selected=true]")?.scrollIntoView({ block: "nearest" });
+    const groups = await Promise.all(providers.map(async id => {
+      if (isCustomProvider(id)) return merge(id);
+      try { return merge(id, (await modelOptionsController.load(keyFor(id))).models); } catch { return merge(id); } // fall back to saved presets
+    }));
+    if (!modelMenuList.classList.contains("hidden")) paint(groups);
+  }
+
+  async function switchModel(item: HTMLElement) {
+    const { presetId, provider, model } = item.dataset;
+    if (presetId) return applyModelPreset(presetId);
+    if (!provider || !model) return;
+    // shortcut: contextWindow/vision are dropped so Background applies the provider defaults, not the new model's own.
+    const { contextWindow: _contextWindow, vision: _vision, ...config } = lastSettingsConfig || {};
+    const result = await request("save_config", { config: { ...config, provider, model, modelLabel: model, activePresetId: "", apiKey: providerNeedsApiKey(provider) ? getRememberedProviderApiKey(provider) : "" } }, 45000);
+    if (result.config) populateSettings(result.config);
+  }
+
   modelMenuTrigger?.addEventListener("click", () => setModelMenuOpen(modelMenuList?.classList.contains("hidden") ?? false), { signal: options.signal });
   modelMenuList?.addEventListener("click", event => {
-    const presetId = (event.target as Element).closest<HTMLElement>("[data-preset-id]")?.dataset.presetId;
+    const item = (event.target as Element).closest<HTMLElement>(".model-menu-item");
     setModelMenuOpen(false);
-    if (!presetId) return;
-    applyModelPreset(presetId).catch(error => {
+    if (!item) return;
+    switchModel(item).catch(error => {
       showToast(errorMessage(error) || t("couldNotSwitchModelsPleaseTryAgain"), { tone: "error" });
     });
   }, { signal: options.signal });
@@ -2153,34 +2219,16 @@ export function createSettingsFeature(options: SettingsFeatureOptions) {
     const model = String(config?.modelLabel || config?.model || "").trim();
     setModelMenuOpen(false);
     if (!provider || !model) {
-      modelMenuTrigger.textContent = "";
+      modelMenuTrigger.replaceChildren();
       currentModelIndicator.title = "";
       currentModelIndicator.classList.add("hidden");
       renderGptConnectHint();
       return;
     }
-    const activeId = String(config?.activePresetId || "");
-    const presets = Array.isArray(config?.presets) ? config.presets : [];
-    const entries = presets.map(preset => ({ id: preset.id, model: preset.model, provider: preset.provider }));
-    // The active config may not match a saved preset; show it as the current, non-switchable entry.
-    if (!presets.some(preset => preset.id === activeId)) entries.unshift({ id: "", model, provider });
-    modelMenuList.replaceChildren(...entries.map(entry => {
-      const item = document.createElement("button");
-      item.type = "button";
-      item.className = "model-menu-item";
-      item.setAttribute("role", "option");
-      const selected = entry.id === activeId;
-      item.setAttribute("aria-selected", String(selected));
-      if (entry.id) item.dataset.presetId = entry.id;
-      const name = document.createElement("span");
-      name.textContent = entry.model;
-      const sub = document.createElement("small");
-      sub.textContent = getProviderDisplayName(entry.provider);
-      item.append(name, sub);
-      return item;
-    }));
     const text = `${getProviderDisplayName(provider)} - ${model}`;
-    modelMenuTrigger.textContent = model;
+    const label = document.createElement("span");
+    label.textContent = model;
+    modelMenuTrigger.replaceChildren(providerBadge(provider, model), label);
     currentModelIndicator.title = text;
     currentModelIndicator.classList.remove("hidden");
     renderGptConnectHint();
