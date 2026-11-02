@@ -4,7 +4,7 @@ import type { PortMessage } from "../app/port-client.js";
 interface ElementPickerOptions {
   input: HTMLTextAreaElement; button?: HTMLButtonElement | null;
   request?(type: string, payload: PortMessage, timeout: number): Promise<PortMessage>;
-  addElement?(selector: unknown): void; closeSlashMenu?(): void; isComposing?(): boolean;
+  addElement?(selector: unknown, preview?: string): void; closeSlashMenu?(): void; isComposing?(): boolean;
   showToast?(message: unknown, options: { tone: string; anchorEl: Element | null }): void;
 }
 interface PickerRequest { id: number; tabId: number; confirming?: boolean }
@@ -97,7 +97,7 @@ async function toggleElementPicker() {
     const result = await sendRequest("start_element_picker", { tabId: tab.id }, 65000);
     if (elementPickerRequest !== pickerRequest) return;
     if (result?.selector) {
-      addElement(result.selector);
+      addElement(result.selector, typeof result.preview === "string" ? result.preview : "");
     } else if (result?.error) {
       showToast(result.error, { tone: "error", anchorEl: button });
     }

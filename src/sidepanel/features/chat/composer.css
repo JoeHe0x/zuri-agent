@@ -681,6 +681,20 @@
   line-height: 20px;
 }
 
+.skill-chip:has(.skill-chip-preview) {
+  gap: 6px;
+  padding: 4px 4px 4px 4px;
+  border-radius: 12px;
+}
+
+.skill-chip-preview {
+  flex: none;
+  max-width: 96px;
+  max-height: 40px;
+  border-radius: 8px;
+  object-fit: contain;
+}
+
 .skill-chip-title {
   min-width: 0;
   overflow: hidden;

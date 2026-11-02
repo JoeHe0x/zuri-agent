@@ -74,6 +74,7 @@ export function createSlashMenuFeature(options: SlashOptions) {
   let skills: SlashItem[] = [];
   // Picked page elements share the chip row and join the prompt as [css: selector] tokens at send.
   let elements: string[] = [];
+  const elementPreviews = new Map<string, string>();
   const tabKey = (item: SlashItem) => item.name.match(/ #(\d+)/)?.[1] || item.name;
   const sharedItems = () => [
     ...(currentTab ? [currentTab] : []),
@@ -92,7 +93,7 @@ export function createSlashMenuFeature(options: SlashOptions) {
         <button class="mention-chip-remove" type="button" data-mention-remove="${index}" aria-label="${tHtml("remove")}">×</button>
       </span>`).join("") + (skills.length || elements.length ? `<div class="skill-chips">${elements.map((selector, index) => `
       <span class="skill-chip" title="${escapeHtmlAttribute(selector)}">
-        <span class="skill-chip-title">${escapeHtml(t("selectedElement"))}: ${escapeHtml(selector.split(/\s>\s/).pop() || selector)}</span>
+        ${elementPreviews.get(selector) ? `<img class="skill-chip-preview" src="${escapeHtmlAttribute(elementPreviews.get(selector)!)}" alt="">` : ""}<span class="skill-chip-title">${escapeHtml(t("selectedElement"))}: ${escapeHtml(selector.split(/\s>\s/).pop() || selector)}</span>
         <button class="skill-chip-remove" type="button" data-element-remove="${index}" aria-label="${tHtml("remove")}">×</button>
       </span>`).join("")}${skills.map((item, index) => `
       <span class="skill-chip" title="${escapeHtmlAttribute(item.subtitle || item.title)}">
@@ -405,10 +406,11 @@ function closeSlashMenu() {
     close: closeSlashMenu,
     isOpen: () => slashMenuState.open,
     mentionTokens: () => [...sharedItems(), ...skills].map(item => `[${item.kind}: ${item.name}]`).concat(elements.map(selector => createElementReferenceToken({ selector }))).join(" "),
-    clearMentions() { mentions = []; skills = []; elements = []; renderMentions(); },
-    addElement(selector: unknown) {
+    clearMentions() { mentions = []; skills = []; elements = []; elementPreviews.clear(); renderMentions(); },
+    addElement(selector: unknown, preview = "") {
       const css = String(selector || "").replace(/[\r\n]+/g, " ").trim();
       if (css && !elements.includes(css)) elements.push(css);
+      if (css && preview) elementPreviews.set(css, preview);
       renderMentions();
     },
     isSkillSelected: (item: SlashItem) => skills.some(skill => skill.name === item.name),

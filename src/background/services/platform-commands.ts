@@ -2,6 +2,8 @@ import { t } from "../../shared/i18n/backend.js";
 import { listDataTables } from "../../shared/data-store.js";
 import { isWebTab } from "../../shared/tab-utils.js";
 
+interface PickedRect { x: number; y: number; width: number; height: number; viewportWidth: number }
+
 interface PlatformCommandsOptions<Context> {
   sessionSupervisor: { size(): number };
   getBridgeConfig(): Promise<unknown>;
@@ -36,10 +38,31 @@ export function createPlatformCommands<Context>({
   async function runElementPicker(action: string, tabId: unknown) {
     const tab = await resolveElementPickerTab(tabId);
     const result = await sendToContent(tab.id!, action);
+    const picked = result && typeof result === "object" ? result as { rect?: PickedRect | null } : null;
+    const preview = picked?.rect ? await captureElementPreview(tab.windowId, picked.rect) : "";
     return {
       tabId: tab.id,
-      ...(result && typeof result === "object" ? result : { result }),
+      ...(picked || { result }),
+      preview,
     };
+  }
+
+  // The preview is best-effort; a failed capture leaves the text chip.
+  async function captureElementPreview(windowId: number, rect: PickedRect) {
+    try {
+      await new Promise(resolve => setTimeout(resolve, 80)); // let the picker overlay disappear
+      const image = await createImageBitmap(await (await fetch(await chrome.tabs.captureVisibleTab(windowId, { format: "png" }))).blob());
+      const scale = image.width / rect.viewportWidth;
+      const outScale = Math.min(1, 320 / (rect.width * scale), 240 / (rect.height * scale));
+      const canvas = new OffscreenCanvas(Math.max(1, Math.round(rect.width * scale * outScale)), Math.max(1, Math.round(rect.height * scale * outScale)));
+      canvas.getContext("2d")!.drawImage(image, rect.x * scale, rect.y * scale, rect.width * scale, rect.height * scale, 0, 0, canvas.width, canvas.height);
+      const bytes = new Uint8Array(await (await canvas.convertToBlob({ type: "image/jpeg", quality: 0.8 })).arrayBuffer());
+      let binary = "";
+      for (let i = 0; i < bytes.length; i += 0x8000) binary += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+      return `data:image/jpeg;base64,${btoa(binary)}`;
+    } catch (_error) {
+      return "";
+    }
   }
 
   function startElementPicker(tabId: unknown) {

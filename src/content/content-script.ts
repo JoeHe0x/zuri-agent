@@ -1400,6 +1400,7 @@ const errorMessage = (error: unknown) => error instanceof Error ? error.message 
         ok: true,
         status: "selected",
         selector: generatePickedSelector(target),
+        rect: pickedElementRect(target),
       };
       finishElementPicker(result);
       return result;
@@ -1412,6 +1413,14 @@ const errorMessage = (error: unknown) => error instanceof Error ? error.message 
       finishElementPicker(result);
       return result;
     }
+  }
+
+  // Viewport-clamped box in CSS pixels; Background crops the tab capture with it.
+  function pickedElementRect(target: Element) {
+    const box = target.getBoundingClientRect();
+    const x = Math.max(0, box.left), y = Math.max(0, box.top);
+    const width = Math.min(window.innerWidth, box.right) - x, height = Math.min(window.innerHeight, box.bottom) - y;
+    return width > 1 && height > 1 ? { x, y, width, height, viewportWidth: window.innerWidth } : null;
   }
 
   function finishElementPicker(result: unknown) {
