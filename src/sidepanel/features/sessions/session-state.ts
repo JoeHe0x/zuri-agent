@@ -895,7 +895,7 @@ function deriveRuntimeContextUsage(event: SessionViewEvent, source: Fields, prev
   const cacheHitRate = rate == null ? null : nonNegativeNumber(rate);
   return {
     contextUsage: usage,
-    contextUsageText: String(source.contextUsageText || formatContextUsageText(inputTokensEstimate, contextWindow, cacheHitRate)),
+    contextUsageText: String(source.contextUsageText || formatContextUsageText(inputTokensEstimate, contextWindow)),
     contextWindow,
     inputTokensEstimate,
     cacheHitRate,

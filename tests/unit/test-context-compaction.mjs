@@ -614,11 +614,10 @@ function assertContextUsageHasSingleSourceOfTruth() {
 
   assert.match(
     extractFunction(chatRunController, "handleContextUsage"),
-    /formatContextUsageText\(event\.inputTokensEstimate, event\.contextWindow, event\.cacheHitRate\)/,
+    /formatContextUsageText\(event\.inputTokensEstimate, event\.contextWindow\)/,
     "ctx should use the send-window estimate, never raw provider token usage",
   );
   assert.equal(formatContextUsageText(57000, 64000), "ctx 57k/64k");
-  assert.equal(formatContextUsageText(57000, 64000, 0.923), "ctx 57k/64k · cache 92%");
   assert.equal(formatContextUsageText(undefined, 32000), "", "missing estimate must not show a provider usage fallback");
 }
 

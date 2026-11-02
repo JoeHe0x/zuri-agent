@@ -5,7 +5,6 @@ import type { createSidepanelEventRouter } from "../app/sidepanel-event-router.j
 import type { createSessionNavigationFeature } from "../sessions/session-navigation-feature.js";
 import type { createPerfTrace } from "../dev/perf-trace.js";
 import type { PortMessage } from "../app/port-client.js";
-import type { parseSlashCommandText } from "./slash-menu-feature.js";
 import { record } from "../../tools/renderer-input.js";
 type RunOptions = Parameters<typeof createChatRunController>[0];
 type QueueOptions = NonNullable<Parameters<typeof createQueuedFollowupsFeature>[0]>;
@@ -42,7 +41,8 @@ import { createMarkdownFeature, renderMarkdown } from "./markdown-feature.js";
 import { createMathFeature } from "./math-feature.js";
 import { createPageSuggestionsFeature } from "./page-suggestions-feature.js";
 import { createQueuedFollowupsFeature } from "./queued-followups-feature.js";
-import { createSlashMenuFeature } from "./slash-menu-feature.js";
+import { createUsagePanelFeature } from "./usage-panel-feature.js";
+import { createSlashMenuFeature, parseSlashCommandText } from "./slash-menu-feature.js";
 import { createTranscriptProjection } from "./transcript/projection.js";
 import { createTranscriptReconcileFeature } from "./transcript/recovery.js";
 import { createTranscriptRenderer } from "./transcript/renderer.js";
@@ -89,6 +89,11 @@ export function createChatWorkspaceFeature(options: ChatWorkspaceOptions) {
   const plusMenuEl = root.createElement("div");
   plusMenuEl.className = "qz-popover qz-menu input-slash-menu composer-plus-menu hidden";
   inputArea.insertBefore(plusMenuEl, attachmentsEl);
+  const usagePanelEl = root.createElement("div");
+  usagePanelEl.className = "qz-popover input-slash-menu composer-plus-menu usage-panel hidden";
+  inputArea.insertBefore(usagePanelEl, attachmentsEl);
+  createUsagePanelFeature({ button: select("#context-usage"), panel: usagePanelEl, getSessionId: options.getCurrentSessionId, request: options.request,
+    compact: () => executeSlashCommand(parseSlashCommandText("/compact")!) });
   const fileInput = root.createElement("input");
   fileInput.type = "file"; fileInput.multiple = true; fileInput.hidden = true;
   fileInput.addEventListener("change", () => { void composer.addFiles([...(fileInput.files || [])]); fileInput.value = ""; });

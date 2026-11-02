@@ -101,6 +101,7 @@ import { compareBeijingDateTimeDesc, nowBeijingDateTime } from "../../shared/tim
 import { localizeToolFailurePayload } from "../../shared/tools/tool-error-localization.js";
 import { assertMessageDocumentOwnership } from "../../shared/documents/document-attachments.js";
 import { extractUserMessageImages } from "../../shared/session/conversation-edit.js";
+import { cacheStatsFromUsage } from "../llm/token-accounting.js";
 import { summarizeQueuedUserMessage } from "../agent/message-queue.js";
 import { createKeyedSerialQueue } from "../internal/serial-queue.js";
 import { formatTraceFields, trace } from "../trace.js";
@@ -1244,6 +1245,26 @@ async function getSessionHistoryRuntime(sessionId: string) {
   };
 }
 
+/** Per-request usage plus the current context composition, for the Side Panel usage panel. */
+async function getSessionUsageRuntime(sessionId: string) {
+  const id = normalizeSessionId(sessionId);
+  const agent = await agentHost.getAgent(id);
+  const steps = agent.messages.flatMap(message => message.role === "assistant" && message._usage ? [cacheStatsFromUsage(message._usage)] : [])
+    .filter(step => step.input > 0 || step.output > 0);
+  const state = await agent.getContextUsageState();
+  const used = Number(state.inputTokensEstimate) || 0;
+  const tools = Math.min(used, Number(state.toolDefinitionTokens) || 0);
+  const system = Math.min(used - tools, Number(state.systemPromptTokens) || 0);
+  return {
+    sessionId: id,
+    steps,
+    context: {
+      window: Number(state.contextWindow) || 0, used, tools, system, messages: used - tools - system,
+      buffer: Number(state.compactReserveTokens) || 0, toolList: state.toolTokens || [],
+    },
+  };
+}
+
 function clearSessionGoalFromApi(sessionId: string, source = "api", signal?: AbortSignal) {
   return clearSessionGoalRuntime({ sessionId, source, signal });
 }
@@ -2155,6 +2176,7 @@ function sessionError(code: string, message: string) {
     resetSessionRuntime,
     compactSessionContextRuntime,
     getSessionHistoryRuntime,
+    getSessionUsageRuntime,
     clearSessionGoalFromApi,
     restoreSessionFromApi,
     getLastMessagesRuntime,

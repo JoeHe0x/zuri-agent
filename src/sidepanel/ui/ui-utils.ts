@@ -134,11 +134,10 @@ export function formatTokenCount(value: unknown) {
   return String(Math.round(n));
 }
 
-export function formatContextUsageText(inputTokensEstimate: unknown, contextWindow: unknown, cacheHitRate?: unknown): string {
+export function formatContextUsageText(inputTokensEstimate: unknown, contextWindow: unknown): string {
   if (!inputTokensEstimate) return "";
   const windowText = contextWindow ? `/${formatTokenCount(contextWindow)}` : "";
-  const cache = cacheHitRate == null || !Number.isFinite(Number(cacheHitRate)) ? "" : ` · cache ${Math.round(Number(cacheHitRate) * 100)}%`;
-  return `ctx ${formatTokenCount(inputTokensEstimate)}${windowText}${cache}`;
+  return `ctx ${formatTokenCount(inputTokensEstimate)}${windowText}`;
 }
 
 /** "warn" from 80%, "danger" from 90% of the context window; "" when the window is unknown. */

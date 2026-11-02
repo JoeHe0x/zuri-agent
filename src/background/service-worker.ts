@@ -911,6 +911,7 @@ const backgroundApi = createBackgroundApi({
     snapshot: mcpRuntime.getSnapshot,
     messages: mcpRuntime.getMessages,
     history: sessionCommands.getSessionHistoryRuntime,
+    usage: sessionCommands.getSessionUsageRuntime,
     clearGoal: sessionCommands.clearSessionGoalFromApi,
     restore: sessionCommands.restoreSessionFromApi,
   },

@@ -76,7 +76,8 @@ export function cacheStatsFromUsage(value: unknown) {
   const write = firstFiniteNumber(usage.cache_creation_input_tokens);
   // OpenAI prompt_tokens already includes cached tokens; Anthropic and Codex input_tokens exclude them.
   const input = firstFiniteNumber(usage.prompt_tokens) || firstFiniteNumber(usage.input_tokens) + read + write;
-  return { input, read, write };
+  const output = firstFiniteNumber(usage.output_tokens, usage.completion_tokens);
+  return { input, read, write, output };
 }
 
 function providerStateTextLength(value: unknown): number {

@@ -105,6 +105,7 @@ export function createSidepanelTransport(api: BackgroundApi, {
     clear_goal: { method: "sessions.clearGoal", response: "goal_cleared", args: (message, port) => [message.sessionId, message.source || "ui", port?.signal], requestOnly: true },
     get_history: { method: "sessions.history", response: "history", args: message => [message.sessionId] },
     restore_session: { method: "sessions.restore", response: "session_restored", args: message => [message.sessionId, message.session ?? message.messages] },
+    get_usage: { method: "sessions.usage", response: "usage", args: message => [message.sessionId] },
     get_state: { method: "sessions.state", response: "state", args: message => [message.sessionId] },
   };
 

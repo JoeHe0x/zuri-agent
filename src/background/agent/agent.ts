@@ -712,6 +712,12 @@ export class Agent {
         usageAnchorTokens: estimate.usageTokens,
         estimatedTrailingTokens: estimate.trailingTokens,
         toolSchemaTokens: estimate.toolSchemaTokens,
+        toolDefinitionTokens: estimate.toolSchemaTokens || estimateToolSchemaTokens(toolSchemas),
+        toolTokens: toolSchemas
+          .map(schema => ({ name: String(record(record(schema).function).name || ""), tokens: estimateToolSchemaTokens([schema]) }))
+          .sort((a, b) => b.tokens - a.tokens),
+        systemPromptTokens: this.messages[0]?.role === "system" ? this._estimateStoredMessageTokens(this.messages[0]) : 0,
+        compactReserveTokens: Math.max(0, this._contextWindow(runProfile) - this._compactThreshold(runProfile)),
         messageTokensEstimate: estimate.messageTokens,
         usageAnchorMessageIndex: estimate.lastUsageIndex,
         contextBoundaryId: estimate.boundaryId,
