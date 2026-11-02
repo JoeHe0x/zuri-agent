@@ -550,49 +550,14 @@
   isolation: isolate;
 }
 
-.slash-filters {
-  position: sticky;
-  top: -6px;
-  z-index: 2;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin: -6px -6px 0;
-  padding: 6px 6px 7px;
-  border-bottom: 1px solid color-mix(in srgb, var(--border) 64%, transparent);
-  background: var(--popover-surface);
-  box-shadow: 0 1px 0 color-mix(in srgb, var(--bg-primary) 72%, transparent);
-}
-
-.slash-filter-btn {
-  border: none;
-  border-radius: 999px;
-  background: transparent;
-  color: var(--text-muted);
-  cursor: pointer;
-  font-family: var(--font-mono);
-  font-size: 10px;
-  line-height: 1.6;
-  padding: 2px 8px;
-  transition: var(--transition-surface);
-}
-
-.slash-filter-btn:hover,
-.slash-filter-btn.active {
-  background: color-mix(in srgb, var(--accent-subtle) 82%, transparent);
-  color: var(--text-secondary);
-}
-
 .slash-item {
   width: 100%;
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  display: flex;
   align-items: center;
   gap: 8px;
-  padding: 7px 8px;
+  padding: 6px 8px;
   border: none;
-  border-top: 1px solid color-mix(in srgb, var(--border) 72%, transparent);
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   background: transparent;
   color: var(--text-primary);
   text-align: start;
@@ -600,14 +565,9 @@
   transition: var(--transition-surface);
 }
 
-.slash-item:first-child {
-  border-top-color: transparent;
-}
-
 .slash-item:hover,
 .slash-item.active {
   background: color-mix(in srgb, var(--accent-subtle) 76%, transparent);
-  transform: translateX(1px);
 }
 
 .mention-chips {
@@ -683,6 +643,34 @@
   border-radius: 3px;
 }
 
+.slash-group {
+  padding: 8px 8px 4px;
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.slash-group:first-child {
+  padding-top: 2px;
+}
+
+.slash-icon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--text-muted) 14%, transparent);
+  color: var(--text-secondary);
+}
+
+.slash-icon.command {
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+  color: var(--accent);
+}
+
 .slash-kind {
   min-width: 38px;
   color: var(--text-muted);
@@ -725,6 +713,10 @@
 }
 
 .slash-meta {
+  margin-inline-start: auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 

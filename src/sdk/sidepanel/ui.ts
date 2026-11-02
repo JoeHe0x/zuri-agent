@@ -34,6 +34,8 @@ export interface UiToastOptions {
 export interface UiReferenceItem {
   kind: string; name: string; label: string; title: string; subtitle: string; meta: string;
   priority: number; search: string; token?: string; icon?: string; current?: boolean;
+  /** Makes the item an action row: selecting it runs this instead of inserting a token. */
+  run?(): void;
 }
 export interface UiReferenceSource {
   id: string; label: string; className?: string; order?: number;

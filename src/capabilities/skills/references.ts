@@ -3,7 +3,7 @@ import type { UiReferenceSource } from "#sdk/sidepanel";
 import { isBuiltinSkill } from "#sdk/shared/skills";
 import { getSkillDisplayName, matchSiteSkillsForUrls, SKILL_SCOPE_RESIDENT, type SkillRecord } from "#sdk/shared/skills";
 
-export function createSkillReferences(list: () => Promise<SkillRecord[]>, siteUrls: () => Promise<string[]>): UiReferenceSource {
+export function createSkillReferences(list: () => Promise<SkillRecord[]>, siteUrls: () => Promise<string[]>, addSkill: () => void): UiReferenceSource {
   return {
     id: "skill", label: t("skills"), menuLabel: "Skill", filterLabel: "skill", className: "skill", order: 20,
     emptyText: t("noMatchingSkills"),
@@ -12,7 +12,9 @@ export function createSkillReferences(list: () => Promise<SkillRecord[]>, siteUr
       signal.throwIfAborted();
       const enabled = skills.filter(skill => skill.name && skill.status !== "disabled");
       const siteNames = new Set(matchSiteSkillsForUrls(enabled, urls, { limit: 20 }).map(skill => skill.name));
-      return enabled.map(skill => {
+      const add = { kind: "skill", name: "add-skill", label: t("addSkill"), title: t("addSkill"), subtitle: "", meta: "", priority: 0, run: addSkill,
+        search: `add skill ${t("addSkill")}`.toLowerCase() };
+      return [...enabled.map(skill => {
         const displayName = getSkillDisplayName(skill) || skill.name;
         return {
           kind: "skill", name: skill.name, label: displayName, title: displayName,
@@ -21,7 +23,7 @@ export function createSkillReferences(list: () => Promise<SkillRecord[]>, siteUr
           priority: siteNames.has(skill.name) ? 0 : 2,
           search: [skill.name, displayName, skill.description, skill.scope, ...(skill.domains || []), ...(skill.urlPatterns || [])].join(" ").toLowerCase(),
         };
-      });
+      }), add];
     },
   };
 }

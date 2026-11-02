@@ -177,10 +177,11 @@ async function loadSlashResources(query = "", { includeCommands = true, mention 
   const q = String(query || "").trim().toLowerCase();
   const references = await options.references?.listReferences() || [];
   const commandItems = includeCommands ? BUILTIN_SLASH_COMMANDS : [];
-  return [...commandItems, ...references]
+  const all: SlashItem[] = [...commandItems, ...references];
+  return all
     .filter(item => (item.kind === "tab") === mention)
     .filter(item => !q || item.search.includes(q))
-    .sort((a, b) => a.priority - b.priority || a.title.localeCompare(b.title, getLocale()));
+    .sort((a, b) => Number(!!a.run) - Number(!!b.run) || kindRank(a.kind) - kindRank(b.kind) || a.kind.localeCompare(b.kind) || a.priority - b.priority || a.title.localeCompare(b.title, getLocale()));
 }
 
 async function refreshOpenSlashMenu() {
@@ -215,26 +216,18 @@ function getVisibleSlashItems(items: SlashItem[] = [], filter = "all") {
   return visibleItems.slice(0, SLASH_MENU_LIMIT);
 }
 
-function getSlashCounts(items: SlashItem[] = []) {
-  const counts = new Map<string, number>();
-  for (const item of items) counts.set(item.kind, (counts.get(item.kind) || 0) + 1);
-  return counts;
-}
-
-function renderSlashFilterBar(counts: ReturnType<typeof getSlashCounts>, filter: string) {
-  return `
-    <div class="slash-filters" role="group" aria-label="${tHtml("filterTypes")}">
-      ${sources().map(source => {
-        const active = filter === "all" || filter === source.id;
-        return `<button class="slash-filter-btn ${active ? "active" : ""}" type="button" data-slash-filter="${escapeHtmlAttribute(source.id)}" aria-pressed="${String(active)}">${escapeHtml(source.filterLabel || source.label)}: ${counts.get(source.id) || 0}</button>`;
-      }).join("\n")}
-    </div>
-  `;
-}
-
 function getSlashEmptyText(filter: string) {
   return sources().find(source => source.id === filter)?.emptyText || t("noMatchingResources");
 }
+
+const kindRank = (kind: string) => kind === "skill" ? 0 : kind === "command" ? 2 : 1;
+const SLASH_ICONS: Record<string, string> = {
+  skill: '<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/>',
+  command: '<path d="M8 20 16 4"/>',
+  add: '<path d="M12 5v14M5 12h14"/>',
+  data: '<rect x="4" y="5" width="16" height="14" rx="2"/><path d="M4 10h16M10 10v9"/>',
+};
+const slashIcon = (kind: string) => `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${SLASH_ICONS[kind] || SLASH_ICONS.data}</svg>`;
 
 function slashKindLabel(item: Pick<SlashItem, "kind">) {
   const source = sources().find(source => source.id === item.kind);
@@ -252,19 +245,19 @@ function renderSlashMenu() {
     return;
   }
   menu.classList.remove("hidden");
-  const counts = getSlashCounts(slashMenuState.allItems);
-  const filterBar = slashMenuState.mention ? "" : renderSlashFilterBar(counts, slashMenuState.filter || "all");
   if (!slashMenuState.items.length) {
-    menu.innerHTML = `${filterBar}<div class="slash-empty">${escapeHtml(getSlashEmptyText(slashMenuState.filter))}</div>`;
+    menu.innerHTML = `<div class="slash-empty">${escapeHtml(getSlashEmptyText(slashMenuState.filter))}</div>`;
     return;
   }
-  menu.innerHTML = `${filterBar}${slashMenuState.items.map((item, index) => slashMenuState.mention ? `
+  menu.innerHTML = `${slashMenuState.items.map((item, index) => slashMenuState.mention ? `
     <button class="qz-menu-item slash-item slash-tab ${index === slashMenuState.selected ? "active" : ""}" type="button" data-slash-index="${index}">
       ${item.icon ? `<img class="slash-tab-icon" src="${escapeHtmlAttribute(item.icon)}" alt="">` : `<span class="slash-tab-icon"></span>`}
       <span class="slash-title">${escapeHtml(item.title)}</span>
     </button>` : `
+    ${item.run ? (slashMenuState.items[index - 1]?.run ? "" : `<div class="composer-menu-sep" role="separator"></div>`)
+      : !index || item.kind !== slashMenuState.items[index - 1].kind ? `<div class="slash-group" role="presentation">${escapeHtml(slashKindLabel(item))}</div>` : ""}
     <button class="qz-menu-item slash-item ${index === slashMenuState.selected ? "active" : ""}" type="button" data-slash-index="${index}">
-      <span class="slash-kind ${escapeHtmlAttribute(slashKindClass(item))}">${escapeHtml(slashKindLabel(item))}</span>
+      <span class="slash-icon ${escapeHtmlAttribute(slashKindClass(item))}">${slashIcon(item.run ? "add" : item.kind)}</span>
       <span class="slash-main">
         <span class="slash-title">${escapeHtml(item.title)}</span>
         ${item.subtitle ? `<span class="slash-subtitle">${escapeHtml(item.subtitle)}</span>` : ""}
@@ -273,19 +266,6 @@ function renderSlashMenu() {
     </button>
   `).join("")}`;
   menu.querySelector(".slash-item.active")?.scrollIntoView({ block: "nearest" });
-}
-
-function toggleSlashFilter(kind = "") {
-  if (!sources().some(source => source.id === kind)) return;
-  const nextFilter = slashMenuState.filter === kind ? "all" : kind;
-  slashMenuState = {
-    ...slashMenuState,
-    filter: nextFilter,
-    selected: 0,
-    items: getVisibleSlashItems(slashMenuState.allItems, nextFilter),
-  };
-  renderSlashMenu();
-  input.focus();
 }
 
 function selectSlashItem(index: number) {
@@ -299,6 +279,13 @@ function selectSlashItem(index: number) {
     closeSlashMenu();
     onInputChanged();
     input.focus();
+    return;
+  }
+  if (item.run) {
+    input.value = input.value.slice(0, slashMenuState.start) + input.value.slice(slashMenuState.end).replace(/^ /, "");
+    closeSlashMenu();
+    onInputChanged();
+    item.run();
     return;
   }
   const token = item.token || (item.kind === "command" ? "" : `[${item.kind}: ${item.name}]`);
@@ -327,11 +314,6 @@ function closeSlashMenu() {
   menu.addEventListener("mousedown", (event) => {
     event.preventDefault();
     const target = event.target instanceof Element ? event.target : event.target instanceof Node ? event.target.parentElement : null;
-    const filterEl = target?.closest<HTMLElement>("[data-slash-filter]");
-    if (filterEl) {
-      toggleSlashFilter(filterEl.dataset.slashFilter);
-      return;
-    }
     const itemEl = target?.closest<HTMLElement>("[data-slash-index]");
     if (!itemEl) return;
     selectSlashItem(Number(itemEl.dataset.slashIndex));

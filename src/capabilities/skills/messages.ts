@@ -69,6 +69,7 @@ export default defineMessages("skills", {
   skillDeleted: { "zh-CN": "已删除 skill", en: "Skill deleted" },
   skillNotDeleted: { "zh-CN": "未删除 skill", en: "Skill not deleted" },
   skills: { "zh-CN": "技能", en: "Skills" },
+  addSkill: { "zh-CN": "添加技能", en: "Add skill" },
   noMatchingSkills: { "zh-CN": "没有匹配的技能", en: "No matching skills" },
   builtInSkill: { "zh-CN": "内置技能", en: "Built-in skill" },
   residentSkill: { "zh-CN": "常驻技能", en: "Always-active skill" },
