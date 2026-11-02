@@ -158,6 +158,7 @@ export function reduceSessionRuntimePatch(previous: Partial<SessionRuntime> = {}
         contextUsage: event.usage || previous.contextUsage || {},
         contextWindow: event.contextWindow || previous.contextWindow || 0,
         inputTokensEstimate: event.inputTokensEstimate || previous.inputTokensEstimate || 0,
+        cacheHitRate: event.cacheHitRate ?? previous.cacheHitRate ?? null,
         contextEstimateSource: event.contextEstimateSource || previous.contextEstimateSource || "",
         usageAnchorTokens: event.usageAnchorTokens || previous.usageAnchorTokens || 0,
         estimatedTrailingTokens: event.estimatedTrailingTokens || previous.estimatedTrailingTokens || 0,

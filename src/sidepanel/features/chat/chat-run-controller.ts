@@ -519,14 +519,14 @@ function updateStatusText() {
 
 function handleContextUsage(event: PortMessage) {
   if (!contextUsageEl) return;
-  contextUsageEl.title = formatContextUsageText(event.inputTokensEstimate, event.contextWindow);
+  contextUsageEl.title = formatContextUsageText(event.inputTokensEstimate, event.contextWindow, event.cacheHitRate);
   contextUsageEl.dataset.level = contextUsageLevel(event.inputTokensEstimate, event.contextWindow);
   contextUsageEl.style.setProperty("--pct", String(contextUsagePercent(event.inputTokensEstimate, event.contextWindow)));
 }
 
 function handleRuntimeContextUsage(runtime: Record<string, unknown> | null = {}) {
   if (!contextUsageEl) return;
-  contextUsageEl.title = formatContextUsageText(runtime?.inputTokensEstimate, runtime?.contextWindow);
+  contextUsageEl.title = formatContextUsageText(runtime?.inputTokensEstimate, runtime?.contextWindow, runtime?.cacheHitRate);
   contextUsageEl.dataset.level = contextUsageLevel(runtime?.inputTokensEstimate, runtime?.contextWindow);
   contextUsageEl.style.setProperty("--pct", String(contextUsagePercent(runtime?.inputTokensEstimate, runtime?.contextWindow)));
 }

@@ -15,7 +15,7 @@ export type TrackerView = Omit<SessionTracker, "status" | "startedAt" | "steps" 
 export interface ClientRuntime extends Pick<SessionRuntime, "status" | "running" | "pendingStart" | "runId" | "waitForm" | "contextUsage">, Fields {
   waitId: string; waitMessage: string; waitTitle: string;
   currentTool: ReturnType<typeof normalizeSessionCurrentTool>; currentToolName: string; currentToolStartedAt: string;
-  contextUsageText: string; contextWindow: number; inputTokensEstimate: number;
+  contextUsageText: string; contextWindow: number; inputTokensEstimate: number; cacheHitRate: number | null;
   tracker: TrackerView | null; goal: GoalView | null;
   workingTab: ReturnType<typeof normalizeSessionWorkingTab>; workingTabId: number | null; workingUrl: string; workingTitle: string;
   visitedTaskSites: ReturnType<typeof normalizeSessionTaskSites>;
@@ -465,6 +465,7 @@ function normalizeRuntime(runtime: unknown, previous: ClientRuntime = createDefa
     contextUsageText: String(merged.contextUsageText || ""),
     contextWindow: nonNegativeNumber(merged.contextWindow),
     inputTokensEstimate: nonNegativeNumber(merged.inputTokensEstimate),
+    cacheHitRate: merged.cacheHitRate == null ? null : nonNegativeNumber(merged.cacheHitRate),
     tracker: normalizeSessionTracker(merged.tracker),
     goal: normalizeSessionGoal(merged.goal),
     workingTab: normalizeSessionWorkingTab(merged.workingTab),
@@ -648,6 +649,7 @@ function createDefaultRuntime(): ClientRuntime {
     contextUsageText: "",
     contextWindow: 0,
     inputTokensEstimate: 0,
+    cacheHitRate: null,
     tracker: null,
     goal: null,
     workingTab: null,
@@ -870,7 +872,7 @@ function deriveRuntimeGoal(event: SessionViewEvent, source: Fields, previous: Cl
 }
 
 function deriveRuntimeContextUsage(event: SessionViewEvent, source: Fields, previous: ClientRuntime) {
-  const hasRuntimeUsage = ["contextUsage", "contextUsageText", "contextWindow", "inputTokensEstimate"]
+  const hasRuntimeUsage = ["contextUsage", "contextUsageText", "contextWindow", "inputTokensEstimate", "cacheHitRate"]
     .some(key => Object.prototype.hasOwnProperty.call(source, key));
   if (event.type !== "context_usage" && !hasRuntimeUsage) {
     return {
@@ -878,6 +880,7 @@ function deriveRuntimeContextUsage(event: SessionViewEvent, source: Fields, prev
       contextUsageText: previous.contextUsageText,
       contextWindow: previous.contextWindow,
       inputTokensEstimate: previous.inputTokensEstimate,
+      cacheHitRate: previous.cacheHitRate,
     };
   }
   const usage = normalizeObjectOrNull(event.usage ?? source.contextUsage);
@@ -888,11 +891,14 @@ function deriveRuntimeContextUsage(event: SessionViewEvent, source: Fields, prev
       ?? usage?.input_tokens,
   );
   const contextWindow = nonNegativeNumber(event.contextWindow ?? source.contextWindow ?? usage?.contextWindow);
+  const rate = event.cacheHitRate ?? source.cacheHitRate ?? previous.cacheHitRate;
+  const cacheHitRate = rate == null ? null : nonNegativeNumber(rate);
   return {
     contextUsage: usage,
-    contextUsageText: String(source.contextUsageText || formatContextUsageText(inputTokensEstimate, contextWindow)),
+    contextUsageText: String(source.contextUsageText || formatContextUsageText(inputTokensEstimate, contextWindow, cacheHitRate)),
     contextWindow,
     inputTokensEstimate,
+    cacheHitRate,
   };
 }
 

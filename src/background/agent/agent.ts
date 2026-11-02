@@ -298,6 +298,7 @@ export class Agent {
   _compactionState: Facts | null = null;
   _contextUsageSeq = 0;
   _lastContextUsageSnapshot: ContextUsageSnapshot | null = null;
+  _cacheHitRate: number | null = null;
 
   steeringQueue = new MessageQueue<AgentMessage>("all");
   followUpQueue = new MessageQueue<AgentMessage>("one-at-a-time");
@@ -314,6 +315,7 @@ export class Agent {
   private _toolRegistrySnapshot: unknown = null;
   _skillToolRegistrySnapshot: ReturnType<AgentServices['getSkillToolRegistrySnapshot']> | null = null;
   _loadedSkillToolNames = new Set<string>();
+  _observationCallIds = new Map<string, string>();
   _pendingContextEvents: AgentMessage[] = [];
   _followUpRunTimer: ReturnType<typeof setTimeout> | null = null;
   _unstartedPrompt: { checkpoint: number; clientMessageId: string } | null = null;
@@ -1091,6 +1093,7 @@ export class Agent {
       this._llmCallSeq = 0;
       this._contextUsageSeq = 0;
       this._lastContextUsageSnapshot = null;
+      this._cacheHitRate = null;
       this._currentRunId = runId;
       started = true;
       this._unstartedPrompt = null;
@@ -2215,6 +2218,7 @@ export class Agent {
       type: "context_usage",
       sessionId: this.sessionId,
       ...snapshot,
+      cacheHitRate: this._cacheHitRate,
       source: extra.source || (hasEstimate ? "send_window" : "provider_usage"),
       ...extra,
     });
@@ -2247,7 +2251,10 @@ export class Agent {
   _emitProviderContextUsage(usage: unknown) {
     if (!usage || typeof usage !== "object") return;
     const cache = cacheStatsFromUsage(usage);
-    if (cache.input > 0) this._trace(`cache_usage ${safeTraceJson({ ...cache, hitRate: Number((cache.read / cache.input).toFixed(3)) })}`);
+    if (cache.input > 0) {
+      this._cacheHitRate = Number((cache.read / cache.input).toFixed(3));
+      this._trace(`cache_usage ${safeTraceJson({ ...cache, hitRate: this._cacheHitRate })}`);
+    }
     this._emitContextUsage({ source: "provider_usage", usage });
   }
 
@@ -2726,6 +2733,7 @@ export class Agent {
           type: "tool_execution_end", spanId: this._makeToolSpanId(id), toolCallId: id, toolName,
           ...toolIdentityEventFields(toolIdentity), args, result, isError,
         });
+        if (!isError) this._supersedeObservation(id, toolName, args);
         for (const msg of this._buildToolResultMessages(id, result, isError, toolName)) {
           if (msg?.role === "tool") toolMessages.push(msg);
           else followUpMessages.push(msg);
@@ -2831,6 +2839,18 @@ export class Agent {
       },
     }).finally(() => flushLedger(true));
     return [...toolMessages, ...followUpMessages];
+  }
+
+  /** Observations describe the current page, so a repeat of the same call on the same tab makes the earlier result stale. */
+  _supersedeObservation(toolCallId: string, toolName: string, args: unknown) {
+    if (!this._toolModelPolicy(toolName).supersedable || !this._trimOldToolResultsEnabled()) return;
+    const input = record(args);
+    const key = JSON.stringify([toolName, input._tabId ?? null, Object.entries(input).filter(([name]) => !name.startsWith("_")).sort(([a], [b]) => a.localeCompare(b))]);
+    const previousId = this._observationCallIds.get(key);
+    this._observationCallIds.set(key, toolCallId);
+    if (!previousId) return;
+    const stale = this.messages.find(msg => msg?.role === "tool" && msg.tool_call_id === previousId);
+    if (stale) stale.trim = true;
   }
 
   async _applyToolResultEffects(toolName: string, result: unknown, isError: boolean) {

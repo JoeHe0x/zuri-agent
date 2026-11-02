@@ -73,6 +73,7 @@ await assertExplicitCompactionCanBeAborted();
 await assertStandaloneCompactionBlocksFollowUpRuns();
 await assertFailedCompactionRollsBackStagedMessages();
 await assertAgentUsesStableToolResultPruning();
+await assertAgentSupersedesRepeatedObservations();
 await assertAgentLimitsImageMessagesWithinOneRound();
 await assertImageMessageLimitBoundaries();
 await assertImageMessageLimitInvalidatesUsageAnchor();
@@ -613,10 +614,11 @@ function assertContextUsageHasSingleSourceOfTruth() {
 
   assert.match(
     extractFunction(chatRunController, "handleContextUsage"),
-    /formatContextUsageText\(event\.inputTokensEstimate, event\.contextWindow\)/,
+    /formatContextUsageText\(event\.inputTokensEstimate, event\.contextWindow, event\.cacheHitRate\)/,
     "ctx should use the send-window estimate, never raw provider token usage",
   );
-  assert.equal(formatContextUsageText(57000, 64000), "ctx 57k/64k · 89%");
+  assert.equal(formatContextUsageText(57000, 64000), "ctx 57k/64k");
+  assert.equal(formatContextUsageText(57000, 64000, 0.923), "ctx 57k/64k · cache 92%");
   assert.equal(formatContextUsageText(undefined, 32000), "", "missing estimate must not show a provider usage fallback");
 }
 
@@ -1482,14 +1484,14 @@ async function assertImageMessageLimitBoundaries() {
   for (const count of [0, 1, 7, 8, 9, 10]) {
     agent.messages = [system(), user("one round"), ...frames.slice(0, count)];
     assert.deepEqual(agent._buildSendMessages().filter(message => countImages([message])).map(messageText),
-      frames.slice(0, count).slice(-8).map(messageText), `the fixed eight-message window handles ${count} image messages`);
+      frames.slice(0, count).slice(count > 8 ? Math.ceil((count - 8) / 4) * 4 : 0).map(messageText), `the batched eight-message window handles ${count} image messages`);
   }
 
   const old = userWithImages("older", 2);
   const roundPruned = { ...userWithImages("round-pruned", 3), trim: true };
   const recent = Array.from({ length: 7 }, (_, index) => userWithImages(`recent ${index}`, 1));
   agent.messages = [system(), old, roundPruned, ...recent];
-  assert.equal(countImages(agent._buildSendMessages()), 7, "already round-pruned messages still occupy their raw recency position");
+  assert.equal(countImages(agent._buildSendMessages()), 5, "already round-pruned messages still occupy their raw recency position; nine messages drop one batch of four");
   agent._runProfile.model.trimOldToolResults = false;
   assert.equal(countImages(agent._buildSendMessages()), 12, "the existing pruning switch disables both policies");
   assert.equal(roundPruned.trim, true, "disabling projection does not rewrite stored markers");
@@ -1499,12 +1501,12 @@ async function assertImageMessageLimitBoundaries() {
   const retained = Array.from({ length: 9 }, (_, index) => userWithImages(`post-compact ${index}`, 1));
   agent.messages = [system(), ...frames, compact, ...retained];
   const prepared = agent._buildPreparedSendWindow();
-  assert.deepEqual(prepared.sendMessages.filter(message => countImages([message])).map(messageText), retained.slice(-8).map(messageText));
+  assert.deepEqual(prepared.sendMessages.filter(message => countImages([message])).map(messageText), retained.slice(4).map(messageText));
 
   const remote = user([{ type: "image_url", image_url: { url: "https://fixture.test/image.png" } }]);
   agent.messages = [system(), ...frames.slice(0, 8), remote];
   const remoteWindow = agent._buildPreparedSendWindow();
-  assert.equal(countImages(remoteWindow.sendMessages), 8, "remote image blocks count before the gateway validates their source");
+  assert.equal(countImages(remoteWindow.sendMessages), 5, "remote image blocks count before the gateway validates their source");
   assert.equal(remoteWindow.sendMessages.at(-1).content[0].image_url.url, "https://fixture.test/image.png");
 }
 
@@ -1522,7 +1524,7 @@ async function assertImageMessageLimitInvalidatesUsageAnchor() {
   assert.equal(next.contextEstimate.source, "estimate", "evicting an older image changes the request prefix and invalidates its usage anchor");
   assert.notEqual(next.sendUsageContextFingerprint, prepared.sendUsageContextFingerprint);
   assert.equal(next.contextEstimate.tokens, estimateTokens(next.sendMessages) + estimateToolSchemaTokens(tools));
-  assert.equal(countImages(next.sendMessages), 8);
+  assert.equal(countImages(next.sendMessages), 5);
   assert.equal(countImages(agent.messages), 9);
 }
 
@@ -1537,6 +1539,27 @@ function userWithImages(text, count, origin = "user") {
 
 function countImages(messages) {
   return messages.reduce((count, message) => count + (Array.isArray(message?.content) ? message.content.filter(part => part?.type === "image_url").length : 0), 0);
+}
+
+async function assertAgentSupersedesRepeatedObservations() {
+  const agent = await createBudgetTestAgent("supersede-observation", { contextWindow: 26000 });
+  agent._toolModelPolicy = name => ({ supersedable: name === "get_ax_tree" });
+  const first = toolResult("ax_1", "tree before click");
+  const sibling = toolResult("ax_sub", "subtree");
+  const other = toolResult("other", "same call on another tab");
+  const second = toolResult("ax_2", "tree after click");
+  agent.messages = [system(), first, sibling, other];
+
+  agent._supersedeObservation("call_ax_1", "get_ax_tree", { _tabId: 1, root: "root", _pageUrl: "https://a.test/1" });
+  agent._supersedeObservation("call_ax_sub", "get_ax_tree", { _tabId: 1, root: "uid:x" });
+  agent._supersedeObservation("call_other", "get_ax_tree", { _tabId: 2, root: "root" });
+  agent._supersedeObservation("call_note", "run_script", { _tabId: 1 });
+  assert.deepEqual([first.trim, sibling.trim, other.trim], [undefined, undefined, undefined]);
+
+  agent.messages.push(second);
+  agent._supersedeObservation("call_ax_2", "get_ax_tree", { _tabId: 1, root: "root", _pageUrl: "https://a.test/2" });
+  assert.equal(first.trim, true, "the same call on the same tab replaces the earlier result, whatever the page URL");
+  assert.deepEqual([sibling.trim, other.trim, second.trim], [undefined, undefined, undefined]);
 }
 
 async function assertAgentUsesStableToolResultPruning() {

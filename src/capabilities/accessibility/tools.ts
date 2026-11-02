@@ -779,7 +779,7 @@ async function embedChildFrameNodes(send: CdpCommand, nodes: AxNode[], depth?: n
 registerTool({
   name: "get_ax_tree",
   behavior: { parallelRead: true, timeoutResult: { kind: "read", pending: "main document accessibility tree" } },
-  model: { projectResult: projectAxResultForModel },
+  model: { projectResult: projectAxResultForModel, supersedable: true },
   get description() { return toolT("getAxTreeDescription", { targetGrammar: ELEMENT_TARGET_GRAMMAR }); },
   get parameters() { return {
     type: "object",

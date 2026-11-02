@@ -18,7 +18,7 @@ export type ContextUsageSnapshot = {
   messageTokensEstimate: number; usageAnchorMessageIndex: number; contextBoundaryId: string;
 };
 export type ContextUsageDetails = {
-  source?: string; phase?: string; compacted?: boolean; budgetStatus?: string; usage?: unknown;
+  source?: string; phase?: string; compacted?: boolean; budgetStatus?: string; usage?: unknown; cacheHitRate?: number | null;
   toolSchemas?: object[];
 };
 export type AgentRetryDetails = {

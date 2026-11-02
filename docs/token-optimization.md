@@ -28,6 +28,15 @@ Findings come from reading the code; none are measured on a live run yet.
    `write`, and `hitRate` (`read / input`). It reads Anthropic, Codex, and OpenAI usage shapes through
    `cacheStatsFromUsage` in `src/background/llm/token-accounting.ts`.
 
+4. **Superseded observations.** A tool with `model.supersedable` (`get_ax_tree`, `read_article`,
+   `read_dom`, `find_elements`) replaces its earlier result when the same call with the same arguments
+   runs again on the same tab. `_supersedeObservation` in `agent.ts` marks the earlier result `trim`
+   at once, so it becomes a placeholder; the cache rewrite covers only the last step. Different roots,
+   tabs, and tools are untouched, and the mapping is in memory, so it resets on restart. Plan step 2
+   still covers clearing by recent tool calls.
+5. **Cache hit rate in the UI.** The context ring tooltip shows `ctx 57k/64k Â· cache 92%` instead of
+   the window percentage. `Agent` sends `cacheHitRate` with each `context_usage` event.
+
 Scope by provider: only item 1 is Anthropic-specific. It covers the `anthropic` protocol, which
 includes Kimi Code. OpenAI-compatible endpoints (OpenAI, DeepSeek, Fireworks, and similar) cache an
 identical prefix automatically and take no markers; Codex already sends `prompt_cache_key`. Items 2
@@ -53,7 +62,7 @@ Run in order. Check the cache hit rate (see Measuring) before starting steps 2â€
    the remainder in a Data table or document and return a prefix, the total length, and a stable
    id. Reuse an existing chunk protocol for paging. Set smaller default node count and depth for
    `get_ax_tree` and `read_dom`.
-2. **Clear superseded observations.** When a tab has a newer observation (AX tree, DOM,
+2. **Clear superseded observations (partly shipped, item 4).** When a tab has a newer observation (AX tree, DOM,
    screenshot), replace the older one with a placeholder. Clear in batches that free enough tokens to
    pay for one cache rewrite (Anthropic's `clear_at_least`). Count protection in recent tool calls
    instead of user rounds, and lower the 20% / 50% ratios. Keep the URL or id so the observation can

@@ -171,6 +171,7 @@ const touch = createCdpTouch({ ToolExecutionError });
 
 registerTool({
   name: "read_article",
+  model: { supersedable: true },
   behavior: { parallelRead: true, timeoutResult: { kind: "read", pending: "article extraction" } },
   get description() { return toolT("readArticleDescription"); },
   get parameters() { return {
@@ -203,6 +204,7 @@ registerTool({
 
 registerTool({
   name: "read_dom",
+  model: { supersedable: true },
   behavior: { timeoutResult: { kind: "read", pending: "DOM extraction" } },
   get description() { return toolT("readDomDescription"); },
   get parameters() { return {
@@ -224,6 +226,7 @@ registerTool({
 
 registerTool({
   name: "find_elements",
+  model: { supersedable: true },
   behavior: { parallelRead: true, timeoutResult: { kind: "read", pending: "element scan" } },
   get description() { return toolT("findElementsDescription"); },
   get parameters() { return {

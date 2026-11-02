@@ -53,6 +53,8 @@ export interface ToolModelPolicy {
   pageUrlArgument?: string;
   omitArguments?: readonly string[];
   preserveResult?: boolean;
+  /** A newer result of the same call on the same tab replaces this one in the model context. */
+  supersedable?: boolean;
   imagePrompt?: string;
   projectResult?(result: unknown): unknown;
 }
