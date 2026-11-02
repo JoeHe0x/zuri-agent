@@ -189,7 +189,7 @@ test("Traditional Chinese native labels stay localized without a contributed tra
   const file = "_locales/zh_TW/messages.json";
   await put(source, file, await readFile(new URL(`../../src/${file}`, import.meta.url), "utf8"));
   const expected = {
-    extensionName: { message: "輕舟" },
+    extensionName: { message: "Zuri" },
     extensionDescription: { message: "輕舟是瀏覽器中的 AI 助理工作區。" },
     switchModel: { message: "快速切換模型預設組合" },
   };
