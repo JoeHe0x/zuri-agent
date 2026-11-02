@@ -78,7 +78,7 @@ async function screenshotSettings(browser) {
     await page.setViewportSize({ width: 320, height: 900 });
     await page.locator("#btn-settings").click();
     await page.locator("#settings-tab-advanced").click();
-    await page.locator("#cli-toggle").waitFor();
+    await page.locator("#settings-panel-advanced").waitFor();
     for (const colorScheme of ["light", "dark"]) {
       await page.emulateMedia({ colorScheme });
       await page.screenshot({ path: join(output, `actual-${browser.name}-${colorScheme}.png`), animations: "disabled" });

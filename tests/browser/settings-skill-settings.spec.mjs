@@ -49,48 +49,6 @@ const SECOND_SETTING = Object.freeze({
 test.describe("advanced model settings", () => {
   test.use({ colorScheme: "light", viewport: { width: 430, height: 900 } });
 
-  test("defaults request limiting off and saves an explicit opt-in through the shared settings action", async ({ page }) => {
-    await page.locator("#btn-settings").click();
-    await page.evaluate(() => window.__qzEmitPortMessage({
-      type: "config",
-      config: {
-        provider: "bailian",
-        providerLabel: "百炼",
-        apiKey: "test-key",
-        model: "deepseek-v4-flash",
-        contextWindow: 1000000,
-        trimOldToolResults: true,
-        vision: false,
-        debugMode: false,
-        activePresetId: "",
-        presets: [],
-        providerApiKeys: { bailian: "test-key" },
-        securityGuardrails: { rules: [], siteOpenRateLimits: [], order: [] },
-      },
-    }));
-    await page.locator("#settings-tab-advanced").click();
-
-    const requestRateLimit = page.locator("#cfg-request-rate-limit");
-    await expect(page.locator("label.settings-toggle-row", { has: requestRateLimit }).locator(".advanced-setting-title"))
-      .toHaveText("模型限速");
-    await expect(requestRateLimit).not.toBeChecked();
-    await expect(page.locator("#btn-save-settings")).toBeDisabled();
-
-    await requestRateLimit.check();
-    await expect(page.locator("#settings-save-status")).toHaveText("有未保存修改");
-    await expect(page.locator("#btn-save-settings")).toBeEnabled();
-    await page.locator("#btn-save-settings").click();
-
-    const save = await latestRequest(page, "save_config");
-    expect(save.config.requestRateLimit).toBe(true);
-    await emitResponse(page, save, "config_saved", {
-      config: { ...save.config, contextWindow: 1000000, providerLabel: "百炼", requestRateLimit: true, presets: [] },
-    });
-    await expect(page.locator("#settings-panel")).toBeVisible();
-    await expect(page.locator("#settings-save-status")).toHaveText("已保存");
-    await expect(page.locator("#btn-save-settings")).toBeDisabled();
-  });
-
   test("shows only Codex request-supported reasoning values and defaults to medium", async ({ page }) => {
     await page.locator("#btn-settings").click();
     await page.evaluate(async () => {

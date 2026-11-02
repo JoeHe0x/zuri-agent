@@ -64,7 +64,6 @@ import { createProviderPicker } from "./provider-picker.js";
 const MODEL_SUGGESTION_LIMIT = 8;
 const CONTEXT_WINDOW_CUSTOM_VALUE = "__custom";
 const SKILL_SETTINGS_SEARCH_THRESHOLD = 6;
-const SHORTCUT_BINDINGS_REFRESH_MS = 1000;
 
 export function createSettingsFeature(options: SettingsFeatureOptions) {
   if (typeof options.request !== "function") throw new Error("settings request adapter is required");
@@ -182,6 +181,7 @@ export function createSettingsFeature(options: SettingsFeatureOptions) {
   let pendingSettingsOpenIntent: SetupIntent | null = null;
   let currentSettingsTab = "model";
   let sectionActive = false;
+  let requestRateLimit = false; // no Settings control; kept so saving does not reset a value set through update_config
   let panelOpenGeneration = -1;
   const saveState = { saveLabel: t("saveConfiguration"), disabled: true };
   let settingsSavedSnapshot: ReturnType<typeof normalizeSettingsConfigSnapshot> | null = null;
@@ -374,7 +374,6 @@ export function createSettingsFeature(options: SettingsFeatureOptions) {
       closeModelSuggestions();
       closeModelParameterSuggestions();
     }
-    syncShortcutBindingsRefresh();
     updateSettingsSaveState();
   }
 
@@ -401,7 +400,6 @@ export function createSettingsFeature(options: SettingsFeatureOptions) {
     closeModelSuggestions();
     closeModelParameterSuggestions();
     setGuardrailStatus("");
-    syncShortcutBindingsRefresh();
   }
 
   function invalidateSettingsSaves() {
@@ -801,97 +799,6 @@ export function createSettingsFeature(options: SettingsFeatureOptions) {
 
   function setSkillSettingsCardBusy(card: HTMLElement, busy: boolean) {
     card?.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLButtonElement>("input, select, button").forEach(control => { control.disabled = busy; });
-  }
-
-  const shortcutRows = [
-    {
-      command: "_execute_action",
-      value: $("#side-panel-shortcut-value"),
-      button: $<HTMLButtonElement>("#btn-edit-side-panel-shortcut"),
-      title: t("openQingzhou"),
-    },
-    {
-      command: "open-model-preset-switcher",
-      value: $("#model-switcher-shortcut-value"),
-      button: $<HTMLButtonElement>("#btn-edit-model-switcher-shortcut"),
-      title: t("switchModel"),
-    },
-  ];
-  let shortcutRefreshSeq = 0;
-  let shortcutRefreshTimer = 0;
-
-  async function refreshShortcutBindings() {
-    const requestSeq = ++shortcutRefreshSeq;
-    try {
-      const commands = await chrome.commands.getAll();
-      if (requestSeq !== shortcutRefreshSeq) return;
-      for (const row of shortcutRows) {
-        if (!row.value || !row.button) continue;
-        const shortcut = String(commands.find(item => item.name === row.command)?.shortcut || "").trim();
-        const label = formatShortcutLabel(shortcut);
-        const title = shortcut
-          ? t("clickToChange", { command: String(row.title), shortcut: String(shortcut) })
-          : t("noShortcutForClickToSetOne", { command: String(row.title) });
-        if (row.value.textContent !== label) row.value.textContent = label;
-        if (row.button.title !== title) row.button.title = title;
-      }
-    } catch (_err) {
-      if (requestSeq !== shortcutRefreshSeq) return;
-      for (const row of shortcutRows) {
-        if (row.value && row.value.textContent !== t("notSet")) row.value.textContent = t("notSet");
-        if (row.button && row.button.title !== t("openChromeShortcutSettings")) {
-          row.button.title = t("openChromeShortcutSettings");
-        }
-      }
-    }
-  }
-
-  function formatShortcutLabel(shortcut: unknown) {
-    const value = String(shortcut || "").trim();
-    if (!value) return t("notSet");
-    const tokens = value
-      .replace(/⌘/g, "+Command+")
-      .replace(/⇧/g, "+Shift+")
-      .replace(/⌥/g, "+Option+")
-      .replace(/⌃/g, "+Ctrl+")
-      .split("+")
-      .map(item => item.trim())
-      .filter(Boolean)
-      .map(item => ({
-        command: "Command",
-        macctrl: "Ctrl",
-        control: "Ctrl",
-        ctrl: "Ctrl",
-        option: "Option",
-        alt: "Alt",
-        shift: "Shift",
-      })[item.toLowerCase()] || item);
-    const modifiers = ["Command", "Ctrl", "Option", "Alt", "Shift"];
-    const ordered = [
-      ...modifiers.filter(modifier => tokens.includes(modifier)),
-      ...tokens.filter(token => !modifiers.includes(token)),
-    ];
-    return ordered.map(token => token === "Command" ? "⌘" : token).join(" + ");
-  }
-
-  function refreshShortcutBindingsIfVisible() {
-    if (!sectionActive || currentSettingsTab !== "advanced") return;
-    refreshShortcutBindings();
-  }
-
-  function syncShortcutBindingsRefresh() {
-    const shouldRefresh = sectionActive
-      && currentSettingsTab === "advanced"
-      && document.visibilityState === "visible";
-    if (!shouldRefresh) {
-      if (shortcutRefreshTimer) window.clearInterval(shortcutRefreshTimer);
-      shortcutRefreshTimer = 0;
-      return;
-    }
-    refreshShortcutBindings();
-    if (!shortcutRefreshTimer) {
-      shortcutRefreshTimer = window.setInterval(refreshShortcutBindingsIfVisible, SHORTCUT_BINDINGS_REFRESH_MS);
-    }
   }
 
   function renderSecurityGuardrails() {
@@ -1408,7 +1315,7 @@ export function createSettingsFeature(options: SettingsFeatureOptions) {
     closeModelParameterSuggestions();
   }, { signal: options.signal });
 
-  ["#cfg-apikey", "#cfg-model", "#cfg-context-window", "#cfg-trim-old-tool-results", "#cfg-vision", "#cfg-request-rate-limit", "#cfg-debug-mode", "#cfg-custom-protocol", "#cfg-custom-endpoint", "#cfg-custom-preset-name"].forEach((selector) => {
+  ["#cfg-apikey", "#cfg-model", "#cfg-context-window", "#cfg-trim-old-tool-results", "#cfg-vision", "#cfg-debug-mode", "#cfg-custom-protocol", "#cfg-custom-endpoint", "#cfg-custom-preset-name"].forEach((selector) => {
     $(selector)!.addEventListener("input", markSettingsPresetDirtyIfNeeded, { signal: options.signal });
     $(selector)!.addEventListener("change", markSettingsPresetDirtyIfNeeded, { signal: options.signal });
   });
@@ -1421,18 +1328,11 @@ export function createSettingsFeature(options: SettingsFeatureOptions) {
   customEndpointInput?.addEventListener("blur", () => applyCustomEndpointCompletion(), { signal: options.signal });
   customEndpointInput?.addEventListener("keydown", handleCustomEndpointKeydown, { signal: options.signal });
 
-  ["#btn-edit-side-panel-shortcut", "#btn-edit-model-switcher-shortcut"].forEach((selector) => {
-    $(selector)?.addEventListener("click", async () => {
-      await chrome.tabs.create({ url: "chrome://extensions/shortcuts" });
-    }, { signal: options.signal });
-  });
   const floatingBall = $<HTMLInputElement>("#cfg-floating-ball");
   void chrome.storage.local.get("floatingBallEnabled").then(items => { if (floatingBall) floatingBall.checked = items.floatingBallEnabled !== false; }).catch(() => {});
   floatingBall?.addEventListener("change", () => {
     void chrome.storage.local.set({ floatingBallEnabled: floatingBall.checked }).catch(() => {});
   }, { signal: options.signal });
-  window.addEventListener("focus", refreshShortcutBindingsIfVisible, { signal: options.signal });
-  document.addEventListener("visibilitychange", syncShortcutBindingsRefresh, { signal: options.signal });
 
   $<HTMLSelectElement>("#cfg-custom-protocol")!.addEventListener("change", () => {
     updateCustomEndpointPlaceholder();
@@ -1468,9 +1368,8 @@ export function createSettingsFeature(options: SettingsFeatureOptions) {
     resetModelCapabilityMatch();
     renderSettingsPresetOptions();
     populateModelFields(config, !providerNeedsApiKey(provider) ? "" : (config.apiKey || ""));
-    $<HTMLInputElement>("#cfg-request-rate-limit")!.checked = config.requestRateLimit === true;
+    requestRateLimit = config.requestRateLimit === true;
     $<HTMLInputElement>("#cfg-debug-mode")!.checked = config.debugMode === true;
-    refreshShortcutBindingsIfVisible();
     setDebugMode(config.debugMode === true);
     $<HTMLSelectElement>("#cfg-preset")!.value = currentSettingsPresets.some(p => p.id === currentSettingsActivePresetId)
       ? currentSettingsActivePresetId
@@ -1919,7 +1818,7 @@ export function createSettingsFeature(options: SettingsFeatureOptions) {
       contextWindow: $<HTMLInputElement>("#cfg-context-window")!.value,
       trimOldToolResults: $<HTMLInputElement>("#cfg-trim-old-tool-results")!.checked,
       vision: $<HTMLSelectElement>("#cfg-vision")!.value === "true",
-      requestRateLimit: $<HTMLInputElement>("#cfg-request-rate-limit")!.checked,
+      requestRateLimit,
       debugMode: $<HTMLInputElement>("#cfg-debug-mode")!.checked,
     };
   }
@@ -3328,7 +3227,6 @@ export function createSettingsFeature(options: SettingsFeatureOptions) {
     resetModelCapabilityMatch();
     invalidateSettingsSaves();
     cancelProviderModelsLoad();
-    if (shortcutRefreshTimer) window.clearInterval(shortcutRefreshTimer);
     modelPresetSwitcher.closeIfOpen();
     providerPicker.dispose();
     closeModelSuggestions();

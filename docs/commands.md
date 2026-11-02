@@ -392,17 +392,15 @@ Open `result.url` in that Profile and verify its online UUID with `browsers --js
 opening it; omit it to preserve an existing name or allocate `default`, `browser-2`, and so on.
 `connect --name work` opens the URL and also returns without waiting for pairing. Neither mode
 accepts `--client`. See [platform launch commands](cli.md#pair-a-selected-browser-from-the-shell).
-Pairing is also available in **qz Settings → Advanced → CLI**.
 
 `--client NAME|UUID` selects a browser for task and resource commands. With one online browser,
 selection is automatic; with several, it is required. Unknown or offline selections fail without
-falling back. Names are persistent and case-sensitive. Disconnect one profile in its qz Settings;
-`stop` stops the service and disconnects all browsers. To release an offline name, run
+falling back. Names are persistent and case-sensitive. `stop` stops the service and disconnects all browsers. To release an offline name, run
 `npm run qz -- browsers forget NAME`. Each command and its suggested next steps remain bound to
 the resolved profile UUID.
 
-Connections require opening a pairing URL or the settings action. Ordinary connection failures
-pause after three attempts; reopen the URL in that Profile or use its settings to retry. Use the current CLI and extension together. Source edits do not
+Connections require opening a pairing URL. Ordinary connection failures
+pause after three attempts; reopen the URL in that Profile to retry. Use the current CLI and extension together. Source edits do not
 restart a working service. To update, finish current tasks, run `stop`, update and reload the extension, then run `connect`. See
 [connection and upgrade details](cli.md#connect-and-stop).
 

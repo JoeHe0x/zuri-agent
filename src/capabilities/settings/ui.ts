@@ -1,7 +1,6 @@
 import type { UiExtensionAPI } from "#sdk/sidepanel";
 import type { SettingsConfig } from "#sdk/shared/settings";
 import { createSettingsFeature } from "./settings-feature.js";
-import { createCliConnection } from "./cli-connection.js";
 import { createOnboardingFeature } from "./onboarding-feature.js";
 
 /** Settings, connection notices and first-use guidance share the package's config projection. */
@@ -21,7 +20,6 @@ export default function (qz: UiExtensionAPI) {
     }
   }
   qz.onDispose(() => { for (const node of mountedNodes) node.parentNode?.removeChild(node); });
-  const cliConnection = createCliConnection(qz);
   let onboarding: ReturnType<typeof createOnboardingFeature> | undefined;
   const settings = createSettingsFeature({
     root, signal, settings: qz.settings, request: qz.request, send: qz.send,
@@ -75,15 +73,10 @@ export default function (qz: UiExtensionAPI) {
       case "ui_notice_hide": settings.hideGptConnectHint(); break;
       case "ui_clear_landing_history": onboarding?.clearLandingHistory(); break;
       case "ui_onboarding_reset": onboarding?.reset({ clearStorage: true, render: false }); break;
-      case "ui_close_transient": cliConnection.close(); settings.closePresetSwitcherIfOpen(); settings.closeProviderPickerIfOpen(); settings.closeModelSuggestionsIfOpen(); break;
+      case "ui_close_transient": settings.closePresetSwitcherIfOpen(); settings.closeProviderPickerIfOpen(); settings.closeModelSuggestionsIfOpen(); break;
     }
   });
-  for (const section of settings.settingsSections) qz.registerSettings(section.id === "advanced" ? {
-    ...section,
-    activate(context) { void cliConnection.activate(context);return section.activate?.(context); },
-    deactivate() { cliConnection.deactivate();return section.deactivate?.(); },
-  } : section);
-  qz.registerOverlay({ id: "cli-connection", priority: 100, close: cliConnection.close, blocksFocus: cliConnection.isOpen });
+  for (const section of settings.settingsSections) qz.registerSettings(section);
   qz.registerOverlay({
       id: "model-picker", priority: 90,
       close: () => settings.closePresetSwitcherIfOpen() || settings.closeProviderPickerIfOpen() || settings.closeModelSuggestionsIfOpen(),
@@ -91,7 +84,6 @@ export default function (qz: UiExtensionAPI) {
   });
   qz.onDispose(() => {
       onboarding?.stop();
-      cliConnection.deactivate();
       settings.dispose();
       qz.chat.messages.querySelector(".welcome-onboarding")?.remove();
       qz.chat.messages.querySelector("#welcome")?.classList.remove("onboarding-dismissed");

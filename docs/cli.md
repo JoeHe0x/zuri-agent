@@ -115,12 +115,12 @@ run `qz connect --port 18766`; an existing service on another port remains runni
 reports its address. The extension connects only to its configured address.
 
 The connection page can be closed once `qz browsers` shows the profile online. Connections start
-only through `qz connect` or **qz Settings → Advanced → CLI → Connect CLI**. For ordinary connection
+only through `qz connect`. For ordinary connection
 failures, the extension makes at most three recovery attempts, 30 seconds apart, then pauses.
 After a browser or background restart, it may first wait once for the previous connection to expire.
-Click **Connect CLI** in that browser's settings to retry.
+Run `qz connect` again to retry.
 
-To disconnect one browser, click **Disconnect: NAME** in its qz Settings. `qz stop` stops the local
+`qz stop` stops the local
 service and disconnects every browser and MCP client using it. Browser tasks already running
 remain in the extension; stopping the service does not cancel them. Use `qz cancel TASK_ID` to stop
 a task, adding `--client NAME|UUID` when needed.
@@ -208,9 +208,7 @@ pairing mode and follows the existing-service behavior above.
 
 ### Add and select browsers
 
-You can also pair from **qz Settings → Advanced → CLI** in the intended profile. Enter a distinct
-browser identifier and connect. Use the service address printed by `qz status` in **Local service address** if
-its port differs from 18765. Names use 1–64 letters, digits, underscores, or hyphens, beginning with
+Pair a profile by opening its pairing URL. Names use 1–64 letters, digits, underscores, or hyphens, beginning with
 a letter or digit; names are case-sensitive. UUID-shaped names are reserved for profile IDs.
 
 ```bash

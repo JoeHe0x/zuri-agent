@@ -262,27 +262,6 @@ Confirm that `browsers --json` lists that Profile online, and use its UUID for t
 operation. URL creation alone does not establish a connection. `--name` should update only the
 Profile opening that URL; verify other Profiles keep their names and remain usable.
 
-The Settings UI fixture runs with `npm test -- playwright settings-cli-connection.spec.mjs --workers 1`.
-It covers local-only status reads, immediate connect/disconnect, editable conflicts, endpoint recovery,
-stale replies after another panel disconnects, draft and focus preservation, and narrow layouts in
-both color schemes across all 12 languages. Its screenshots use deterministic
-transport fixtures; the stress test captures the loaded extension against a real service.
-
-Run the [current Settings connection test](background/mcp-connection-settings-e2e.mjs) with:
-
-```bash
-node tests/background/mcp-connection-settings-e2e.mjs
-```
-
-It builds the current production extension into a temporary directory, loads it in an independent
-Chrome Profile, and uses the real Settings controls to read status, name a connection, preserve
-inputs after an unavailable-service error, connect, and disconnect. An actual CLI/MCP round trip
-runs a browser page task using a deterministic local model. It captures real 320px Settings in light
-and dark themes for disconnected, naming, unavailable, and connected states, plus the allow-only
-access-rule hint. Reports and screenshots
-are saved under `tests/results/multi-browser/settings-<timestamp>/`. The test cleans up its browser,
-service, registry, and temporary Profile and does not use an existing user connection.
-
 The resource scenario uses an isolated profile and temporary download directory to exercise CLI
 table CSV/XLSX exports, image ZIP exports, exact deletion, shared asset retention, Skill packages,
 and settings updates. It reads the saved files and verifies their contents. The user-input scenario

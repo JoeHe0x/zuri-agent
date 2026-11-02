@@ -153,6 +153,19 @@ async function respondToConfigSave(page, request, error = "") {
   }, { request, error, config, key: configFixtureKey });
 }
 
+// Any model-tab edit gives the Advanced save a configuration draft to commit with the language.
+async function draftContextWindow(page) {
+  await page.locator('[data-settings-tab="model"]').click();
+  await page.locator("#cfg-context-preset").selectOption("256K");
+  await page.locator('[data-settings-tab="advanced"]').click();
+}
+
+async function expectContextWindowDraft(page) {
+  await page.locator('[data-settings-tab="model"]').click();
+  await expect(page.locator("#cfg-context-preset")).toHaveValue("256K");
+  await page.locator('[data-settings-tab="advanced"]').click();
+}
+
 async function savedLanguage(page) {
   return page.evaluate(async () => (await import("/extension/sdk/shared/i18n.js")).readLanguagePreference());
 }
@@ -161,18 +174,13 @@ test("one Advanced save persists the language and model configuration drafts tog
   await openApp(page);
   await openLanguage(page);
   const select = page.locator("#i18n-language-select");
-  const rateLimit = page.locator("#cfg-request-rate-limit");
-  expect((await select.boundingBox()).y).toBeLessThan((await rateLimit.boundingBox()).y);
   await select.selectOption("ja");
-  await rateLimit.check();
   await page.locator('[data-settings-tab="model"]').click();
   await page.locator("#cfg-context-preset").selectOption("256K");
   await page.locator('[data-settings-tab="advanced"]').click();
   await expect(select).toHaveValue("ja");
-  await expect(rateLimit).toBeChecked();
   await page.locator("#btn-save-settings").click();
   const request = await configSaveRequest(page);
-  expect(request.config.requestRateLimit).toBe(true);
   expect(request.config.contextWindow).toBe("256K");
   await expect.poll(() => savedLanguage(page)).toBe("ja");
   expect(await page.evaluate(() => window.__panelLoads)).toBe(1);
@@ -183,7 +191,6 @@ test("one Advanced save persists the language and model configuration drafts tog
   await expect(page.locator("#settings-panel")).toBeVisible();
   await expect(page.locator("#btn-save-settings")).toBeDisabled();
   await expect.poll(() => savedLanguage(page)).toBe("ja");
-  await expect(rateLimit).toBeChecked();
   await page.locator('[data-settings-tab="model"]').click();
   await expect(page.locator("#cfg-context-preset")).toHaveValue("256K");
   await expect(page.locator("#btn-save-settings")).toBeDisabled();
@@ -194,7 +201,7 @@ for (const failedContribution of ["language", "configuration"]) {
     await openApp(page);
     await openLanguage(page);
     await page.locator("#i18n-language-select").selectOption("ko");
-    await page.locator("#cfg-request-rate-limit").check();
+    await draftContextWindow(page);
     await holdNextStorageWrite(page);
     await page.locator("#btn-save-settings").click();
     await page.waitForFunction(() => Boolean(window.__languageWrite));
@@ -215,7 +222,7 @@ for (const failedContribution of ["language", "configuration"]) {
     await expect(status).toHaveAttribute("data-tone", "error");
     await expect(page.locator("#btn-save-settings")).toBeEnabled();
     await expect(page.locator("#i18n-language-select")).toHaveValue("ko");
-    await expect(page.locator("#cfg-request-rate-limit")).toBeChecked();
+    await expectContextWindowDraft(page);
     await expect.poll(() => savedLanguage(page)).toBe(failedContribution === "language" ? "system" : "ko");
     await page.locator("#btn-save-settings").click();
     if (failedContribution === "configuration") await respondToConfigSave(page, await configSaveRequest(page, 2));
@@ -224,7 +231,7 @@ for (const failedContribution of ["language", "configuration"]) {
     await expect(page.locator("#btn-save-settings")).toBeDisabled();
     await expect(page.locator("#settings-save-status")).not.toHaveAttribute("data-tone", "error");
     await expect.poll(() => savedLanguage(page)).toBe("ko");
-    await expect(page.locator("#cfg-request-rate-limit")).toBeChecked();
+    await expectContextWindowDraft(page);
   });
 }
 
@@ -263,7 +270,7 @@ test("saving other preferences with an unchanged language does not reload the pa
   await openLanguage(page);
   await page.locator("#i18n-language-select").selectOption("ja");
   await page.locator("#i18n-language-select").selectOption("system");
-  await page.locator("#cfg-request-rate-limit").check();
+  await draftContextWindow(page);
   await page.locator("#btn-save-settings").click();
   await respondToConfigSave(page, await configSaveRequest(page));
   await expect(page.locator("#btn-save-settings")).toBeDisabled();
@@ -288,7 +295,7 @@ test("a cancelled committed language write waits for a successful save after reo
   await expect(page.locator("html")).toHaveAttribute("lang", "en");
   await openLanguage(page);
   await expect(page.locator("#i18n-language-select")).toHaveValue("ja");
-  await page.locator("#cfg-request-rate-limit").check();
+  await draftContextWindow(page);
   await page.locator("#btn-save-settings").click();
   await respondToConfigSave(page, await configSaveRequest(page));
   await expectReload(page, "ja");

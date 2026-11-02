@@ -50,9 +50,8 @@ async function auditView(page, rootSelector, messages, name, testInfo) {
         const key = element.getAttribute(marker);
         if (!key) continue;
         // These placeholders are replaced by loaded state; explicit assertions below
-        // cover their final values and shortcut descriptions.
-        if (["settings-save-status", "btn-save-settings", "side-panel-shortcut-value", "model-switcher-shortcut-value"].includes(element.id)) continue;
-        if (attribute === "title" && ["btn-edit-side-panel-shortcut", "btn-edit-model-switcher-shortcut"].includes(element.id)) continue;
+        // cover their final values.
+        if (["settings-save-status", "btn-save-settings"].includes(element.id)) continue;
         if (element.id === "sessions-search" && attribute === "placeholder") continue;
         if (element.closest("#btn-save-skill-edit-top")) continue;
         const expected = catalog[id(key)];
@@ -149,8 +148,6 @@ for (const width of [320, 360, 430]) {
           await audit("#settings-panel", "settings-model");
           await page.locator("#settings-tab-advanced").click();
           await expect(page.locator("#guardrail-rule-action")).toHaveAttribute("aria-label", t("settings.accessAction"));
-          await expect(page.locator("#btn-edit-side-panel-shortcut")).toHaveAttribute("title", t("settings.clickToChange", { command: t("settings.openQingzhou"), shortcut: "Ctrl+Shift+K" }));
-          await expect(page.locator("#btn-edit-model-switcher-shortcut")).toHaveAttribute("title", t("settings.clickToChange", { command: t("settings.switchModel"), shortcut: "Ctrl+Shift+M" }));
           await expect(page.locator("#i18n-language-select")).toBeVisible();
           const languageText = await page.locator("#i18n-language-select").evaluate(select => {
             const style = getComputedStyle(select);

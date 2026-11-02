@@ -320,69 +320,6 @@ test("renders a compact Spotlight-style surface for a long preset list", async (
     .toHaveText(modelSnapshot["kimi-code-plan-cn"].name);
 });
 
-test("advanced settings presents both Chrome shortcuts with one visual contract", async ({ page }) => {
-  await openSidepanel(page, configForPreset(PRESETS[0]));
-  await page.locator("#btn-settings").click();
-  await page.locator("#settings-tab-advanced").click();
-
-  const sidePanelButton = page.locator("#btn-edit-side-panel-shortcut");
-  const switcherButton = page.locator("#btn-edit-model-switcher-shortcut");
-  await expect(sidePanelButton.locator("kbd")).toHaveText("Ctrl + Shift + K");
-  await expect(switcherButton.locator("kbd")).toHaveText("Ctrl + Shift + M");
-  await expect(sidePanelButton.locator("xpath=preceding-sibling::*[1]")).toHaveText("唤起轻舟");
-  await expect(switcherButton.locator("xpath=preceding-sibling::*[1]")).toHaveText("切换模型");
-  expect(await sidePanelButton.getAttribute("class")).toBe(await switcherButton.getAttribute("class"));
-
-  await switcherButton.click();
-  await expect.poll(async () => page.evaluate(() => window.__qzCreatedTabs.at(-1)?.url)).toBe("chrome://extensions/shortcuts");
-
-  await page.evaluate(() => {
-    window.__qzCommands = [
-      { name: "_execute_action", shortcut: "Ctrl+Shift+J" },
-      { name: "open-model-preset-switcher", shortcut: "Ctrl+Shift+L" },
-    ];
-  });
-  await expect(sidePanelButton.locator("kbd")).toHaveText("Ctrl + Shift + J");
-  await expect(switcherButton.locator("kbd")).toHaveText("Ctrl + Shift + L");
-
-  await page.locator("#settings-tab-model").click();
-  const readsAfterLeavingAdvanced = await page.evaluate(() => window.__qzCommandsGetAllCount);
-  await page.waitForTimeout(1200);
-  expect(await page.evaluate(() => window.__qzCommandsGetAllCount)).toBe(readsAfterLeavingAdvanced);
-
-  await page.locator("#settings-tab-advanced").click();
-  await expect.poll(async () => page.evaluate(() => window.__qzCommandsGetAllCount)).toBeGreaterThan(readsAfterLeavingAdvanced);
-  await page.locator("#btn-close-settings").click();
-  const readsAfterClosingSettings = await page.evaluate(() => window.__qzCommandsGetAllCount);
-  await page.waitForTimeout(1200);
-  expect(await page.evaluate(() => window.__qzCommandsGetAllCount)).toBe(readsAfterClosingSettings);
-});
-
-test("keeps the keyboard flow recoverable when preset application fails", async ({ page }) => {
-  await openSidepanel(page, configForPreset(PRESETS[0]));
-  await emitShortcut(page);
-  const dialog = page.locator("#model-preset-switcher");
-  const input = page.locator("#model-preset-switcher-input");
-  await input.fill("kimi");
-  await input.press("Enter");
-  await page.waitForFunction(() => window.__qzPostedMessages.some(message => message.type === "apply_model_preset"));
-  const requestId = await page.evaluate(() => {
-    return window.__qzPostedMessages.findLast(message => message.type === "apply_model_preset")?.requestId;
-  });
-  await page.evaluate((id) => window.__qzEmitPortMessage({
-    type: "error",
-    requestId: id,
-    message: "模型服务暂时不可用",
-  }), requestId);
-
-  await expect(dialog).toBeVisible();
-  await expect(input).toBeFocused();
-  await expect(page.locator("#model-preset-switcher-status")).toHaveText("模型服务暂时不可用");
-  await input.press("Escape");
-  await expect(dialog).toBeHidden();
-  await expect(page.locator("#input")).toBeFocused();
-});
-
 test("defers shortcut focus until the Side Panel document reports real focus", async ({ page }) => {
   await openSidepanel(page, configForPreset(PRESETS[0]));
   await installPresetFocusProbe(page);
