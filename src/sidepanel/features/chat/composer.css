@@ -1117,7 +1117,8 @@
 .composer-plus-btn {
   --qz-control-size: 32px;
   flex: 0 0 32px;
-  border: 1px solid var(--border);
+  border: 0;
+  background: var(--control-hover-fill);
   border-radius: 50%;
   color: var(--text-secondary);
 }
