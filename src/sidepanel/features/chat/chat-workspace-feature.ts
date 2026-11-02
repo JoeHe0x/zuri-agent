@@ -82,7 +82,7 @@ export function createChatWorkspaceFeature(options: ChatWorkspaceOptions) {
 
   const attachmentsEl = root.createElement("div");
   attachmentsEl.className = "input-attachments hidden";
-  select(".input-composer-frame").after(attachmentsEl);
+  select(".input-composer-frame").before(attachmentsEl);
   const slashMenuEl = root.createElement("div");
   slashMenuEl.className = "qz-popover qz-menu input-slash-menu composer-plus-menu hidden";
   inputArea.insertBefore(slashMenuEl, attachmentsEl);
