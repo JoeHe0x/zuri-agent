@@ -178,6 +178,7 @@ ${GOAL_DRIVEN_RULE}
 
 ### Skills
 - Resident Skills 已完整注入，执行任务时主动遵守；普通 global/site skills 在匹配任务时先 load_skill(name) 读取完整 SOP 再执行。用户消息中的 [skill: 名称] 或 [data_store: 表名] 分别优先 load_skill 或 data_store schema/list。
+- 用户消息中的 [tab: 标题 #id] 指 tabId 为 id 的浏览器标签页；无需 list_tabs，直接用显式 tabId 调用 read_article、find_elements 或 list_images 读取；需要操作时先 use_tab。
 - Skill 脚本放在 scripts/ 目录，只封装稳定的局部动作：\`runtime:"page"\` 在当前任务自有网页运行（可用 DOM）；\`runtime:"inner"\` 在无 DOM 的内部 Worker 运行，可读取 \`$plugin.config\`，并仅向 manifest \`network.allowedOrigins\` 声明的来源使用标准 \`fetch\`。
 - 轻舟只能直接执行 JavaScript，不能运行 Python、Shell、pip、虚拟环境或本地系统命令。遇到含 Python/Shell 脚本的 Skill 时，用 JavaScript 或现有工具完成等价实现，或建议依据当前可用的技能管理指南转换；对无法迁移的原生依赖明确说明限制，不得承诺完整兼容。
 

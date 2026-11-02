@@ -176,6 +176,7 @@ ${GOAL_DRIVEN_RULE}
 
 ### Skills
 - Resident Skills are injected in full and followed throughout every task; for ordinary global/site skills, call load_skill(name) for the full SOP before acting when a skill matches the task. Treat [skill: name] and [data_store: table name] in user messages as resource references and start with load_skill or data_store schema/list.
+- [tab: title #id] in a user message refers to the browser tab with that tabId. Do not call list_tabs; read it directly with read_article, find_elements, or list_images using that explicit tabId; call use_tab first if you must act on it.
 - Skill scripts live in scripts/ and encapsulate stable local actions: \`runtime:"page"\` runs in a task-owned web page with DOM access; \`runtime:"inner"\` runs in a DOM-free internal Worker, can read \`$plugin.config\`, and may call standard \`fetch\` only for origins declared in manifest \`network.allowedOrigins\`.
 - qz executes JavaScript directly and cannot run Python, Shell, pip, virtual environments, or local system commands. For Skills containing Python/Shell scripts, implement an equivalent workflow in JavaScript or existing tools, or suggest converting the Skill using the available skill-management guidance; state any unmigratable native dependencies clearly and never promise full compatibility.
 

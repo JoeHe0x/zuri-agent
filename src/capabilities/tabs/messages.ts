@@ -10,6 +10,7 @@ export default defineMessages("tabs", {
   "modeCancelled": { "zh-CN": "页面模式切换已取消。", en: "Page mode change cancelled." },
   "modeResumeRequired": { "zh-CN": "页面模式需要恢复。请结束当前页面脚本，重新观察页面后再继续。", en: "Page mode needs restoring. Finish the current page script, then observe the page again before continuing." },
   "modeFailed": { "zh-CN": "无法切换页面模式。请关闭该标签页的开发者工具后重试，或重新打开页面。", en: "Couldn't change page mode. Close DevTools for this tab and try again, or open a new tab." },
+  "noMatchingTabs": { "zh-CN": "没有匹配的标签页", en: "No matching tabs" },
   "tabs": { "zh-CN": "标签页", en: "Tabs" },
   "tab": { "zh-CN": "标签页 {tabId}", en: "Tab {tabId}" },
   "current": { "zh-CN": "当前", en: "Current" },

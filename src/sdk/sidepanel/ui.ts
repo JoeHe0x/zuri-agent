@@ -33,7 +33,7 @@ export interface UiToastOptions {
 }
 export interface UiReferenceItem {
   kind: string; name: string; label: string; title: string; subtitle: string; meta: string;
-  priority: number; search: string; token?: string;
+  priority: number; search: string; token?: string; icon?: string; current?: boolean;
 }
 export interface UiReferenceSource {
   id: string; label: string; className?: string; order?: number;

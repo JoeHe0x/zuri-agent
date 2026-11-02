@@ -2,7 +2,7 @@ import { getLocale } from "../../../shared/i18n/index.js";
 import { t, tHtml } from "../../i18n/index.js";
 import type { UiReferenceItem as SlashItem, WorkspaceExtensions } from "../app/workspace-extensions.js";
 interface SlashOptions {
-  input: HTMLTextAreaElement; menu: HTMLElement;
+  input: HTMLTextAreaElement; menu: HTMLElement; chips: HTMLElement;
   references?: Pick<WorkspaceExtensions, "referenceSources" | "listReferences">;
   onInputChanged?(): void; onCommand?(command: NonNullable<ReturnType<typeof parseSlashCommandText>>): Promise<unknown>;
 }
@@ -53,6 +53,58 @@ export function createSlashMenuFeature(options: SlashOptions) {
 
   let slashMenuState = createClosedMenuState();
   let slashResourcesSeq = 0;
+  // `@` mentions live as chips above the input and join the prompt as [kind: name] tokens at send.
+  // The current tab is shared by default until dismissed; several chips collapse to the first one.
+  let mentions: SlashItem[] = [];
+  let currentTab: SlashItem | null = null;
+  let dismissedTab = "";
+  let mentionsExpanded = false;
+  const tabKey = (item: SlashItem) => item.name.match(/ #(\d+)/)?.[1] || item.name;
+  const sharedItems = () => [
+    ...(currentTab ? [currentTab] : []),
+    ...mentions.filter(item => !currentTab || tabKey(item) !== tabKey(currentTab)),
+  ];
+
+  function renderMentions() {
+    const items = sharedItems();
+    const shown = mentionsExpanded ? items : items.slice(0, 1);
+    options.chips.classList.toggle("hidden", !items.length);
+    options.chips.innerHTML = shown.map((item, index) => `
+      <span class="mention-chip" title="${escapeHtmlAttribute(item.title)}">
+        ${item.icon ? `<img class="mention-chip-icon" src="${escapeHtmlAttribute(item.icon)}" alt="">` : `<span class="mention-chip-icon"></span>`}
+        <span class="mention-chip-title">${escapeHtml(t("sharingTab", { title: item.title }))}</span>
+        ${index === 0 && items.length > 1 ? `<button class="mention-chip-more" type="button" data-mention-toggle aria-expanded="${mentionsExpanded}">${mentionsExpanded ? tHtml("showLess") : `+${items.length - 1}`}</button>` : ""}
+        <button class="mention-chip-remove" type="button" data-mention-remove="${index}" aria-label="${tHtml("remove")}">×</button>
+      </span>`).join("");
+  }
+  options.chips.addEventListener("click", (event) => {
+    const target = event.target as Element | null;
+    if (target?.closest("[data-mention-toggle]")) {
+      mentionsExpanded = !mentionsExpanded;
+      renderMentions();
+      return;
+    }
+    const button = target?.closest<HTMLElement>("[data-mention-remove]");
+    if (!button) return;
+    const item = sharedItems()[Number(button.dataset.mentionRemove)];
+    if (item === currentTab) { dismissedTab = tabKey(item); currentTab = null; }
+    else mentions = mentions.filter(mention => mention !== item);
+    if (sharedItems().length < 2) mentionsExpanded = false;
+    renderMentions();
+    input.focus();
+  });
+
+  async function refreshCurrentTab() {
+    const current = (await options.references?.listReferences() || []).find(item => item.current);
+    currentTab = current && tabKey(current) !== dismissedTab ? current : null;
+    renderMentions();
+  }
+  if (typeof chrome !== "undefined" && chrome.tabs?.onActivated) {
+    const refresh = () => void refreshCurrentTab().catch(() => {});
+    chrome.tabs.onActivated.addListener(refresh);
+    chrome.tabs.onUpdated.addListener((_id, change) => { if (change.title || change.status === "complete") refresh(); });
+  }
+  void refreshCurrentTab().catch(() => {});
 
 function handleSlashMenuKeydown(event: KeyboardEvent) {
   if (!slashMenuState.open) return false;
@@ -87,7 +139,7 @@ async function updateSlashMenu() {
     return;
   }
   const seq = ++slashResourcesSeq;
-  const resources = await loadSlashResources(trigger.query, { includeCommands: trigger.commandEligible });
+  const resources = await loadSlashResources(trigger.query, { includeCommands: trigger.commandEligible, mention: trigger.mention });
   if (seq !== slashResourcesSeq) return;
   const filter = slashMenuState.open ? resolveFilter(slashMenuState.filter) : "all";
   slashMenuState = {
@@ -100,6 +152,7 @@ async function updateSlashMenu() {
     allItems: resources,
     items: getVisibleSlashItems(resources, filter),
     commandEligible: trigger.commandEligible,
+    mention: trigger.mention,
   };
   renderSlashMenu();
 }
@@ -108,22 +161,24 @@ function getSlashTrigger() {
   const cursor = input.selectionStart ?? input.value.length;
   if (cursor !== (input.selectionEnd ?? cursor)) return null;
   const before = input.value.slice(0, cursor);
-  const match = before.match(/(^|\s)\/([^\s/\[\]]*)$/u);
+  const match = before.match(/(^|\s)([/@])([^\s/@\[\]]*)$/u);
   if (!match) return null;
-  const start = before.length - match[2].length - 1;
+  const start = before.length - match[3].length - 1;
   return {
     start,
     end: cursor,
-    query: match[2] || "",
-    commandEligible: !input.value.slice(0, start).trim() && !input.value.slice(cursor).trim(),
+    query: match[3] || "",
+    mention: match[2] === "@",
+    commandEligible: match[2] === "/" && !input.value.slice(0, start).trim() && !input.value.slice(cursor).trim(),
   };
 }
 
-async function loadSlashResources(query = "", { includeCommands = true } = {}): Promise<SlashItem[]> {
+async function loadSlashResources(query = "", { includeCommands = true, mention = false } = {}): Promise<SlashItem[]> {
   const q = String(query || "").trim().toLowerCase();
   const references = await options.references?.listReferences() || [];
   const commandItems = includeCommands ? BUILTIN_SLASH_COMMANDS : [];
   return [...commandItems, ...references]
+    .filter(item => (item.kind === "tab") === mention)
     .filter(item => !q || item.search.includes(q))
     .sort((a, b) => a.priority - b.priority || a.title.localeCompare(b.title, getLocale()));
 }
@@ -133,7 +188,7 @@ async function refreshOpenSlashMenu() {
   const seq = ++slashResourcesSeq;
   try {
     const resources = await loadSlashResources(slashMenuState.query, {
-      includeCommands: slashMenuState.commandEligible,
+      includeCommands: slashMenuState.commandEligible, mention: slashMenuState.mention,
     });
     if (seq !== slashResourcesSeq || !slashMenuState.open) return;
     const filter = resolveFilter(slashMenuState.filter);
@@ -198,12 +253,16 @@ function renderSlashMenu() {
   }
   menu.classList.remove("hidden");
   const counts = getSlashCounts(slashMenuState.allItems);
-  const filterBar = renderSlashFilterBar(counts, slashMenuState.filter || "all");
+  const filterBar = slashMenuState.mention ? "" : renderSlashFilterBar(counts, slashMenuState.filter || "all");
   if (!slashMenuState.items.length) {
     menu.innerHTML = `${filterBar}<div class="slash-empty">${escapeHtml(getSlashEmptyText(slashMenuState.filter))}</div>`;
     return;
   }
-  menu.innerHTML = `${filterBar}${slashMenuState.items.map((item, index) => `
+  menu.innerHTML = `${filterBar}${slashMenuState.items.map((item, index) => slashMenuState.mention ? `
+    <button class="qz-menu-item slash-item slash-tab ${index === slashMenuState.selected ? "active" : ""}" type="button" data-slash-index="${index}">
+      ${item.icon ? `<img class="slash-tab-icon" src="${escapeHtmlAttribute(item.icon)}" alt="">` : `<span class="slash-tab-icon"></span>`}
+      <span class="slash-title">${escapeHtml(item.title)}</span>
+    </button>` : `
     <button class="qz-menu-item slash-item ${index === slashMenuState.selected ? "active" : ""}" type="button" data-slash-index="${index}">
       <span class="slash-kind ${escapeHtmlAttribute(slashKindClass(item))}">${escapeHtml(slashKindLabel(item))}</span>
       <span class="slash-main">
@@ -232,6 +291,16 @@ function toggleSlashFilter(kind = "") {
 function selectSlashItem(index: number) {
   const item = slashMenuState.items[index];
   if (!item) return;
+  if (slashMenuState.mention) {
+    if (!mentions.some(mention => mention.name === item.name)) mentions.push(item);
+    renderMentions();
+    input.value = input.value.slice(0, slashMenuState.start) + input.value.slice(slashMenuState.end).replace(/^ /, "");
+    input.setSelectionRange(slashMenuState.start, slashMenuState.start);
+    closeSlashMenu();
+    onInputChanged();
+    input.focus();
+    return;
+  }
   const token = item.token || (item.kind === "command" ? "" : `[${item.kind}: ${item.name}]`);
   if (!token) {
     closeSlashMenu();
@@ -279,6 +348,8 @@ function closeSlashMenu() {
     refresh: refreshOpenSlashMenu,
     close: closeSlashMenu,
     isOpen: () => slashMenuState.open,
+    mentionTokens: () => sharedItems().map(item => `[${item.kind}: ${item.name}]`).join(" "),
+    clearMentions() { mentions = []; renderMentions(); },
     parseCommand: parseSlashCommandText,
     executeCommand: (command: NonNullable<ReturnType<typeof parseSlashCommandText>>) => onCommand(command),
   };
@@ -295,5 +366,6 @@ function createClosedMenuState() {
     allItems: [] as SlashItem[],
     items: [] as SlashItem[],
     commandEligible: false,
+    mention: false,
   };
 }

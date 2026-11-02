@@ -669,17 +669,19 @@ export function createComposerFeature(options: ComposerOptions) {
     if (draftIsBusy() || draftHasError()) return;
     if (commandRuns.has(normalizeSessionId(getSessionId()))) return;
     captureInputText();
-    const text = replaceLoneSurrogates(input.value.trim());
+    const typed = replaceLoneSurrogates(input.value.trim());
+    // The default shared tab alone never makes a message; shared tabs prefix typed text only.
+    const text = typed ? [slashMenu.mentionTokens(), typed].filter(Boolean).join(" ") : "";
     const images = activeDraft.images.slice();
     const documents = activeDraft.documents.map(item => item.document).filter((item): item is MessageDocument => Boolean(item));
     if (!text && !images.length && !documents.length) return;
-    const command = slashMenu.parseCommand(text);
+    const command = slashMenu.parseCommand(typed);
     if (command) {
       if (images.length || documents.length) {
         showError(t("commandAttachments"));
         return;
       }
-      await executeSlashCommand(command, text);
+      await executeSlashCommand(command, typed);
       return;
     }
     if (elementPicker.isActive()) elementPicker.cancel();
@@ -709,6 +711,7 @@ export function createComposerFeature(options: ComposerOptions) {
       return;
     }
 
+    slashMenu.clearMentions();
     playSendDeparture();
     markOnboardingActivated();
     hideWelcome();

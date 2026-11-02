@@ -84,6 +84,9 @@ export function createChatWorkspaceFeature(options: ChatWorkspaceOptions) {
   const slashMenuEl = root.createElement("div");
   slashMenuEl.className = "qz-popover qz-menu input-slash-menu hidden";
   inputArea.insertBefore(slashMenuEl, attachmentsEl);
+  const mentionChipsEl = root.createElement("div");
+  mentionChipsEl.className = "mention-chips hidden";
+  select(".input-wrapper").before(mentionChipsEl);
   installImageLightbox(messagesEl);
 
   const math = createMathFeature();
@@ -204,6 +207,7 @@ export function createChatWorkspaceFeature(options: ChatWorkspaceOptions) {
   const slashMenu = createSlashMenuFeature({
     input: inputEl,
     menu: slashMenuEl,
+    chips: mentionChipsEl,
     references: extensions,
     onInputChanged: () => composer?.syncInputState(),
     onCommand: executeSlashCommand,

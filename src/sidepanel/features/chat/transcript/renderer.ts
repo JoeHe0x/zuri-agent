@@ -2063,10 +2063,16 @@ function renderUserTextWithResourcePills(text: unknown) {
 
   let lastIndex = 0;
   let html = "";
+  let tabChips = "";
   for (const token of tokens) {
     if (token.start < lastIndex) continue;
     html += escapeHtml(source.slice(lastIndex, token.start)).replace(/\n/g, "<br>");
-    if (token.kind === "element") {
+    if (token.kind === "tab") {
+      // A tab token is "title #tabId origin"; the origin only feeds the favicon. Tabs render as chips below the text.
+      const tab = String(token.name).match(/^(.*?) #\d+(?: (\S+))?$/);
+      const icon = tab?.[2] ? `<img class="resource-ref-icon" src="${escapeHtml(chrome.runtime.getURL("/_favicon/") + `?pageUrl=${encodeURIComponent(tab[2])}&size=32`)}" alt="">` : "";
+      tabChips += `<span class="user-tab-chip" title="${escapeHtml(tab ? tab[1] : token.name)}">${icon}<span class="user-tab-chip-title">${escapeHtml(tab ? tab[1] : token.name)}</span></span>`;
+    } else if (token.kind === "element") {
       html += `<span class="resource-ref-pill element" title="${escapeHtml(token.raw)}">`
         + `<span class="resource-ref-kind">${tHtml("selectedElement")}</span>`
         + `<span class="element-ref-selector">${escapeHtml(truncateElementReferenceSelector(token.selector))}</span>`
@@ -2083,7 +2089,7 @@ function renderUserTextWithResourcePills(text: unknown) {
     lastIndex = token.end;
   }
   html += escapeHtml(source.slice(lastIndex)).replace(/\n/g, "<br>");
-  return html;
+  return tabChips ? `${html.trim()}<div class="user-tab-chips">${tabChips}</div>` : html;
 }
 
 function truncateElementReferenceSelector(value: unknown, maxLength = 5) {

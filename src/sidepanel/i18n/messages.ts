@@ -368,6 +368,8 @@ export default defineMessages("core", {
   switchToolDetails: { "zh-CN": "切换工具调用详情", en: "Browse tool calls" },
   removeImage: { "zh-CN": "移除图片", en: "Remove image" },
   removeFile: { "zh-CN": "移除文件", en: "Remove file" },
+  sharingTab: { "zh-CN": "正在共享“{title}”", en: "Sharing “{title}”" },
+  showLess: { "zh-CN": "收起", en: "Show less" },
   remove: { "zh-CN": "移除", en: "Remove" },
   notSent: { "zh-CN": "未发送", en: "Not sent" },
   resend: { "zh-CN": "重发", en: "Resend" },

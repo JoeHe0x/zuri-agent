@@ -60,7 +60,7 @@ try {
     { id: "notes", label: "笔记", menuLabel: "<Note>", filterLabel: "notes", order: 30,
       list: async () => [{ kind: "notes", name: "draft", label: "Draft", title: "Draft", subtitle: "", meta: "笔记", priority: 3, search: "draft", token: "@note(draft)" }] },
   ] }, controller.signal);
-  const feature = createSlashMenuFeature({ input, menu, references: extensions });
+  const feature = createSlashMenuFeature({ input, menu, chips: { innerHTML: "", classList: { toggle() {} }, addEventListener() {} }, references: extensions });
   await feature.update();
   assert.match(menu.innerHTML, /data-slash-filter="command"/u);
   assert.match(menu.innerHTML, />command: 1</u);
