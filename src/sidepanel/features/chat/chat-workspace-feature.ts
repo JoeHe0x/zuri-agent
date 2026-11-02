@@ -117,7 +117,7 @@ export function createChatWorkspaceFeature(options: ChatWorkspaceOptions) {
   select("#btn-more").addEventListener("click", () => extensions.invoke("open-sessions"));
   const mentionChipsEl = root.createElement("div");
   mentionChipsEl.className = "mention-chips hidden";
-  select(".input-wrapper").before(mentionChipsEl);
+  select(".input-wrapper").prepend(mentionChipsEl);
   installImageLightbox(messagesEl);
 
   const math = createMathFeature();

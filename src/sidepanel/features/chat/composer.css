@@ -1095,6 +1095,14 @@
   row-gap: 6px;
 }
 
+/* Shared-tab, Skill and element chips sit inside the box, above the text; the box grows to fit. */
+.input-wrapper > .mention-chips {
+  order: -2;
+  flex: 1 0 100%;
+  min-width: 0;
+  padding: 0;
+}
+
 .input-wrapper > #input {
   order: -1;
   flex: 1 0 100%;
