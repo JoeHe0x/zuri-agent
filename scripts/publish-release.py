@@ -260,7 +260,7 @@ def load_manifest(extension_dir: Path) -> dict:
             raise SystemExit(f"{manifest_path} has invalid default locale messages: {error}") from error
     brand_text = (name + " " + description).lower()
     # Keep localized and historical names; the short international name must be a whole word.
-    known_brand = any(brand in brand_text for brand in ("轻舟", "輕舟", "軽舟", "qingzhou")) or re.search(r"\bqz\b", brand_text)
+    known_brand = any(brand in brand_text for brand in ("轻舟", "輕舟", "軽舟", "qingzhou", "zuri")) or re.search(r"\bqz\b", brand_text)
     if data.get("manifest_version") != 3 or not known_brand:
         raise SystemExit(f"{manifest_path} does not look like the qz extension manifest")
     return data
