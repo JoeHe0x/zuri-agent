@@ -269,6 +269,7 @@ export default defineMessages("settings", {
   loading: { "zh-CN": "读取中", en: "Loading" },
   changeTheSwitchModelShortcut: { "zh-CN": "修改切换模型快捷键", en: "Change the Switch model shortcut" },
   modelRateLimiting: { "zh-CN": "模型限速", en: "Rate limit requests" },
+  floatingBall: { "zh-CN": "悬浮球", en: "Floating ball" },
   debugMode: { "zh-CN": "调试模式", en: "Debug mode" },
   newAccessRule: { "zh-CN": "新增访问规则", en: "Add access rule" },
   newRule: { "zh-CN": "新增规则", en: "Add rule" },

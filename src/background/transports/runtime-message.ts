@@ -94,6 +94,17 @@ export function createRuntimeMessageTransport(api: BackgroundApi, {
       return false;
     }
 
+    if (type === "side_panel_state") {
+      sendResponse({ ok: true, open: call("ui.sidePanelOpen", sender) === true });
+      return false;
+    }
+
+    if (type === "open_side_panel") {
+      // Same gesture-sensitive open as session export; the floating ball ignores needsConsent.
+      sendResponse({ ok: true, ...object(call("exchange.revealForImport", sender)) });
+      return false;
+    }
+
     if (type === "session_export_import_request") {
       respondAsync(
         () => call("exchange.importFromPage", message, sender),

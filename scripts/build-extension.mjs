@@ -36,6 +36,7 @@ export const EXTENSION_ENTRIES = Object.freeze([
   { path: "content/article-extractor.js", format: "iife" },
   { path: "content/run-script-tool-bridge.js", format: "iife" },
   { path: "content/content-script.js", format: "iife" },
+  { path: "content/floating-ball.js", format: "iife" },
   { path: "runner-sandbox.js", format: "iife" },
   { path: "shared/mathjax-config.js", format: "iife" },
 ].map(Object.freeze));

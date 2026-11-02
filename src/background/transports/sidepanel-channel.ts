@@ -10,6 +10,8 @@ interface PendingEvent { event: Fields; timer: ReturnType<typeof setTimeout>; wi
 interface ChannelOptions {
   normalizeSessionId?(value: unknown): string; getRuntime?(id: string): Fields;
   trace?(message: string): unknown; streamTraceEnabled?: boolean;
+  /** Called when a window's first Side Panel attaches or its last one disconnects. */
+  onWindowPresence?(windowId: number, open: boolean): void;
 }
 const object = (value: unknown): Fields => value && typeof value === "object" && !Array.isArray(value) ? value as Fields : {};
 
@@ -53,6 +55,7 @@ export function createSidepanelChannel({
   getRuntime = () => ({ status: "idle", running: false }),
   trace = () => {},
   streamTraceEnabled = false,
+  onWindowPresence = () => {},
 }: ChannelOptions = {}) {
   const ports = new Set<Port>();
   const nativePorts = new WeakMap<Port, Port>();
@@ -105,7 +108,9 @@ export function createSidepanelChannel({
         native.onDisconnect.removeListener(cleanup);
         connections.delete(port);
         ports.delete(port);
+        const windowId = portWindowIds.get(port);
         portWindowIds.delete(port);
+        if (windowId != null && ![...portWindowIds.values()].includes(windowId)) onWindowPresence(windowId, false);
         for (const pending of dynamicContextRequests.values()) if (pending.port === port) pending.disconnect();
       };
       connections.set(port, cleanup);
@@ -116,6 +121,7 @@ export function createSidepanelChannel({
             const windowId = normalizeWindowId(message.windowId);
             if (windowId === null) throw new Error("sidepanel_attach requires windowId");
             portWindowIds.set(port, windowId);
+            onWindowPresence(windowId, true);
             deliverPending(port, pending => pending.windowId === windowId);
             if (message.requestId) {
               port.postMessage({ type: "sidepanel_attached", requestId: message.requestId, windowId });

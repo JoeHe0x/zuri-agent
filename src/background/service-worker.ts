@@ -240,6 +240,12 @@ const sidepanelChannel = createSidepanelChannel({
   normalizeSessionId,
   getRuntime: sessionId => sessionCommands?.getSessionRuntimeState(sessionId) || { status: "idle", running: false },
   trace: llmTrace,
+  // The floating ball hides while its window's Side Panel is open.
+  onWindowPresence: (windowId, open) => {
+    void chrome.tabs.query({ windowId }).then(tabs => {
+      for (const tab of tabs) if (tab.id != null) chrome.tabs.sendMessage(tab.id, { type: "side_panel_visibility", open }).catch(() => {});
+    }).catch(() => {});
+  },
 });
 const broadcast = sidepanelChannel.broadcast;
 const chromeWindowTarget = createChromeWindowTarget({
@@ -933,6 +939,7 @@ const backgroundApi = createBackgroundApi({
     revealForImport: sessionExchangeBridge.revealForImport,
   },
   ui: {
+    sidePanelOpen: (sender: chrome.runtime.MessageSender) => sidepanelChannel.hasPorts(sender?.tab?.windowId ?? -1),
     startElementPicker: platformCommands.startElementPicker,
     confirmElementPicker: platformCommands.confirmElementPicker,
     cancelElementPicker: platformCommands.cancelElementPicker,
@@ -998,7 +1005,7 @@ const backgroundApi = createBackgroundApi({
     stream: sidepanelChannel.recordStreamTrace,
   },
 }, path => {
-  if (["system.ready", "system.contentLanguage", "system.sessionImportLabels", "system.ping", "system.acceptDataConsent", "exchange.revealForImport", "system.mcpConnectionStatus", "system.disconnectMcp", "sessions.stop"].includes(path)) return;
+  if (["system.ready", "system.contentLanguage", "system.sessionImportLabels", "system.ping", "system.acceptDataConsent", "exchange.revealForImport", "ui.sidePanelOpen", "system.mcpConnectionStatus", "system.disconnectMcp", "sessions.stop"].includes(path)) return;
   dataConsent.assertAccepted();
 });
 

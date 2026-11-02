@@ -1427,6 +1427,11 @@ export function createSettingsFeature(options: SettingsFeatureOptions) {
       await chrome.tabs.create({ url: "chrome://extensions/shortcuts" });
     }, { signal: options.signal });
   });
+  const floatingBall = $<HTMLInputElement>("#cfg-floating-ball");
+  void chrome.storage.local.get("floatingBallEnabled").then(items => { if (floatingBall) floatingBall.checked = items.floatingBallEnabled !== false; }).catch(() => {});
+  floatingBall?.addEventListener("change", () => {
+    void chrome.storage.local.set({ floatingBallEnabled: floatingBall.checked }).catch(() => {});
+  }, { signal: options.signal });
   window.addEventListener("focus", refreshShortcutBindingsIfVisible, { signal: options.signal });
   document.addEventListener("visibilitychange", syncShortcutBindingsRefresh, { signal: options.signal });
 
