@@ -215,7 +215,7 @@ async function checkManagementIntent() {
     [
       {
         role: "system",
-        content: `${SYSTEM_PROMPT}\n\n## 可用 Skills（经验库）\n- qingzhou-management（轻舟管理）: ${getBuiltinQingzhouManagementDescription()}`,
+        content: `${SYSTEM_PROMPT}\n\n## 可用 Skills（经验库）\n- qingzhou-management（Agent管理）: ${getBuiltinQingzhouManagementDescription()}`,
       },
       {
         role: "user",

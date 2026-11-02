@@ -41,7 +41,7 @@ const registered = names.map(name => {
   return { name, title: tool.title, description: tool.description, parameters: tool.parameters,
     noImages: tool.model?.noImages, imagePrompt: tool.model?.imagePrompt };
 });
-const aliases = ['技能工作台', 'Skill workbench', '文档处理', 'Document processing', '轻舟管理', 'Qingzhou settings', 'qz settings', 'MCP 接入', 'MCP integration', '站点技能生成器', 'Site Skill Builder'];
+const aliases = ['技能工作台', 'Skill workbench', '文档处理', 'Document processing', 'Agent管理', '轻舟管理', 'Qingzhou settings', 'qz settings', 'MCP 接入', 'MCP integration', '站点技能生成器', 'Site Skill Builder'];
 process.stdout.write(JSON.stringify({
   registered,
   schemas: tools.getToolSchemas(options),

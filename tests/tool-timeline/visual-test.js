@@ -78,7 +78,7 @@ function resetVisualToolPresentationState() {
 const BUILTIN_WRAPPED_TOOL_GROUPS = [
   {
     id: "qingzhou-management",
-    displayName: "轻舟管理",
+    displayName: "Agent管理",
     category: { id: "meta", label: "系统" },
     tools: [
       wrappedTool("qingzhou_management__manage_settings", "manage_settings", getToolDisplayName("manage_settings")),

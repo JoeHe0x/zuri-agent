@@ -24,7 +24,7 @@ const messages = defineMessages("settings-model", {
     en: "Optional deduplication key (suppresses duplicates within 2 minutes); defaults to title+message.",
   },
   managementDisplayName: {
-    "zh-CN": "轻舟管理",
+    "zh-CN": "Agent管理",
     en: "qz settings",
   },
   managementDescription: {
@@ -160,7 +160,7 @@ const messages = defineMessages("settings-model", {
     en: "Partial field key/value patch for update (keys must match setting.fields[].key from get).",
   },
   managementManifestTitle: {
-    "zh-CN": "轻舟管理 Skill 工具清单",
+    "zh-CN": "Agent管理 Skill 工具清单",
     en: "qz settings Skill tool manifest",
   },
   managementManifestDescription: {
@@ -168,11 +168,11 @@ const messages = defineMessages("settings-model", {
     en: "Declares on-demand tools for model settings, Skill settings, and access guardrails.",
   },
   managementScriptDescription: {
-    "zh-CN": "轻舟管理 host runtime 脚本。",
+    "zh-CN": "Agent管理 host runtime 脚本。",
     en: "qz settings host runtime script.",
   },
   builtinContent: {
-    "zh-CN": `# 轻舟管理
+    "zh-CN": `# Agent管理
 
 用户可以通过对话读取和调整轻舟自身的模型、Provider、预设、高级设置、Skill 配置与访问边界。收到这类要求时使用本 Skill 完成，不要求用户再去轻舟设置页重复操作；没有用户要求时，不自行修改配置。
 

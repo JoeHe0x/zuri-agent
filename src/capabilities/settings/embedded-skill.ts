@@ -111,7 +111,7 @@ export const getBuiltinQingzhouManagementResources = () => (createSkillHostResou
 }));
 
 export default {
-  aliases: ["轻舟管理", "Qingzhou settings", "qz settings"],
+  aliases: ["Agent管理", "轻舟管理", "Qingzhou settings", "qz settings"],
   name: BUILTIN_QINGZHOU_MANAGEMENT_SKILL_NAME, get displayName() { return getBuiltinQingzhouManagementDisplayName(); },
   get description() { return getBuiltinQingzhouManagementDescription(); }, get content() { return getBuiltinQingzhouManagementContent(); },
   get resources() { return getBuiltinQingzhouManagementResources(); }, order: 2,

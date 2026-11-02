@@ -160,7 +160,7 @@ const managementManifest = JSON.parse(loadedSkill.resources.find(resource => res
 assert.equal(managementManifest.id, "qingzhou-management");
 assert.deepEqual(managementManifest.tools.map(tool => tool.name), ["manage_settings", "manage_guardrails", "manage_skill_settings"]);
 const skillCatalog = await skills.buildSkillPromptSection();
-assert.match(skillCatalog, /qingzhou-management（轻舟管理）/);
+assert.match(skillCatalog, /qingzhou-management（Agent管理）/);
 assert.match(skillCatalog, /通过对话管理轻舟自身的模型、Provider、模型请求参数、预设/);
 await assert.rejects(
   () => skills.updateSkill(managementSkill.BUILTIN_QINGZHOU_MANAGEMENT_SKILL_NAME, { description: "x" }),
