@@ -58,6 +58,12 @@ for (const primitive of [
 }
 
 const independentButtonClasses = new Set([
+  "qz-menu-item",
+  "model-menu-trigger",
+  "skill-chip-remove",
+  "mention-chip-remove",
+  "mention-chip-more",
+  "slash-group-toggle",
   // Tabs, segmented controls and filter chips.
   "tab-btn",
   "sessions-mode-btn",

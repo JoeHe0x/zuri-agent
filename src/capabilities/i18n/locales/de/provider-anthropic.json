@@ -1,0 +1,8 @@
+{
+  "provider-anthropic.allProviders": "Alle Anbieter",
+  "provider-anthropic.signInWithYourClaudeAccountToUseClaude": "Melde dich mit deinem Claude-Pro- oder -Max-Konto an, um Claude-Modelle zu nutzen. Auf der letzten Seite kann ein Verbindungsfehler zu localhost erscheinen; das ist normal, die Erweiterung schließt die Anmeldung automatisch ab.",
+  "provider-anthropic.theLoginSessionExpiredStartClaudeLoginAgain": "Die Anmeldesitzung ist abgelaufen. Melde dich erneut bei Claude an.",
+  "provider-anthropic.signInToClaudeInSettingsFirst": "Melde dich zuerst in den Einstellungen bei Claude an.",
+  "provider-anthropic.claudeSignInFailed": "Claude-Anmeldung fehlgeschlagen: {reason}",
+  "provider-anthropic.loginCanceledStartAgain": "Anmeldung abgebrochen. Starte erneut."
+}

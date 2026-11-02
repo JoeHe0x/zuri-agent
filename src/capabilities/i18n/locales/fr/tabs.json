@@ -54,5 +54,6 @@
   "tabs.modeFailed": "Impossible de changer de mode. Fermez les outils de développement de cet onglet et réessayez, ou ouvrez un nouvel onglet.",
   "tabs.modeResumeRequired": "Le mode de page doit être rétabli. Terminez le script en cours, puis observez à nouveau la page avant de continuer.",
   "tabs.navigationFailed": "La navigation a échoué. Vérifiez l’URL de destination ou la connexion réseau, puis réessayez.",
-  "tabs.navigationTabClosed": "L’onglet a été fermé pendant la navigation. Rouvrez la page."
+  "tabs.navigationTabClosed": "L’onglet a été fermé pendant la navigation. Rouvrez la page.",
+  "tabs.noMatchingTabs": "Aucun onglet correspondant"
 }

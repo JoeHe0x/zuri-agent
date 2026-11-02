@@ -266,5 +266,6 @@
   "settings.removeAccessRuleShort": "Supprimer une règle",
   "settings.addSiteRateLimitShort": "Limiter le débit",
   "settings.removeSiteRateLimitShort": "Retirer la limite",
-  "settings.updateModelSettingsShort": "Modifier les réglages"
+  "settings.updateModelSettingsShort": "Modifier les réglages",
+  "settings.floatingBall": "Bouton flottant"
 }

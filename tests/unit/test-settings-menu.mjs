@@ -974,7 +974,7 @@ test("custom Anthropic chat posts to the configured messages endpoint", async ()
   assert.equal(call.auth, "custom-anthropic-key");
   assert.equal(call.headers["anthropic-version"], "2023-06-01");
   assert.equal(body.model, "claude-compatible");
-  assert.equal(body.messages[0].content, "hello");
+  assert.deepEqual(body.messages[0].content, [{ type: "text", text: "hello", cache_control: { type: "ephemeral" } }]);
 });
 
 test("custom presets include protocol and endpoint in the upsert key", async () => {

@@ -365,5 +365,6 @@
   "skills.importSkillFromPageShort": "ページから取込",
   "skills.importGitSkillRepositoryShort": "Gitから取込",
   "skills.installSkillToGitShort": "Gitにインストール",
-  "skills.runSkillScriptShort": "スキルスクリプト実行"
+  "skills.runSkillScriptShort": "スキルスクリプト実行",
+  "skills.addSkill": "スキルを追加"
 }

@@ -54,5 +54,6 @@
   "tabs.modeFailed": "表示モードを変更できませんでした。このタブの開発者ツールを閉じて再試行するか、新しいタブを開いてください。",
   "tabs.modeResumeRequired": "ページモードの復元が必要です。実行中のページスクリプトを終了し、ページを再確認してから続けてください。",
   "tabs.navigationFailed": "ページへの移動に失敗しました。URL またはネットワーク接続を確認してから再試行してください。",
-  "tabs.navigationTabClosed": "移動中にタブが閉じられました。ページを開き直してください。"
+  "tabs.navigationTabClosed": "移動中にタブが閉じられました。ページを開き直してください。",
+  "tabs.noMatchingTabs": "一致するタブはありません"
 }

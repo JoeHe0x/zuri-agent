@@ -1,0 +1,8 @@
+{
+  "provider-anthropic.allProviders": "جميع المزوّدين",
+  "provider-anthropic.signInWithYourClaudeAccountToUseClaude": "سجّل الدخول بحساب Claude Pro أو Max لاستخدام نماذج Claude. قد تعرض الصفحة الأخيرة خطأ اتصال بـ localhost، وهذا طبيعي، وستكمل الإضافة تسجيل الدخول تلقائيًا.",
+  "provider-anthropic.theLoginSessionExpiredStartClaudeLoginAgain": "انتهت صلاحية جلسة تسجيل الدخول. سجّل الدخول إلى Claude مرة أخرى.",
+  "provider-anthropic.signInToClaudeInSettingsFirst": "سجّل الدخول إلى Claude من الإعدادات أولًا.",
+  "provider-anthropic.claudeSignInFailed": "فشل تسجيل الدخول إلى Claude: {reason}",
+  "provider-anthropic.loginCanceledStartAgain": "تم إلغاء تسجيل الدخول. ابدأ من جديد."
+}

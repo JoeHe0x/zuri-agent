@@ -54,5 +54,6 @@
   "tabs.modeFailed": "페이지 모드를 변경할 수 없습니다. 이 탭의 개발자 도구를 닫고 다시 시도하거나 새 탭을 여세요.",
   "tabs.modeResumeRequired": "페이지 모드를 복원해야 합니다. 현재 페이지 스크립트를 종료하고 페이지를 다시 확인한 후 계속하세요.",
   "tabs.navigationFailed": "페이지 이동에 실패했습니다. 대상 URL 또는 네트워크 연결을 확인한 후 다시 시도하세요.",
-  "tabs.navigationTabClosed": "페이지 이동 중 탭이 닫혔습니다. 페이지를 다시 여세요."
+  "tabs.navigationTabClosed": "페이지 이동 중 탭이 닫혔습니다. 페이지를 다시 여세요.",
+  "tabs.noMatchingTabs": "일치하는 탭이 없습니다"
 }

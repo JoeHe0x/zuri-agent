@@ -365,5 +365,6 @@
   "skills.importSkillFromPageShort": "استيراد من صفحة",
   "skills.importGitSkillRepositoryShort": "استيراد من Git",
   "skills.installSkillToGitShort": "تثبيت في Git",
-  "skills.runSkillScriptShort": "تشغيل سكربت مهارة"
+  "skills.runSkillScriptShort": "تشغيل سكربت مهارة",
+  "skills.addSkill": "إضافة مهارة"
 }

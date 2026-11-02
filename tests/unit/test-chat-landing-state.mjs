@@ -40,8 +40,8 @@ test("only the explicit landing state changes the messages scroller", () => {
   assert.doesNotMatch(css, /#messages:has\([^)]*\.welcome/u);
 });
 
-test("context usage stays quiet for the first user message", () => {
-  const contextUsageEl = { textContent: "" };
+test("context usage shows in the ring tooltip from the first user message", () => {
+  const contextUsageEl = { title: "", dataset: {}, style: { setProperty() {} } };
   const transcript = [{ type: "user", text: "第一条消息" }];
   const controller = createChatRunController({
     messagesEl: { querySelector: () => null },
@@ -53,9 +53,9 @@ test("context usage stays quiet for the first user message", () => {
   });
 
   controller.handleContextUsage({ inputTokensEstimate: 1200, contextWindow: 1_000_000 });
-  assert.equal(contextUsageEl.textContent, "");
+  assert.equal(contextUsageEl.title, "ctx 1.2k/1M");
 
   transcript.push({ type: "assistant", text: "第一轮回复" }, { type: "user", text: "第二条消息" });
   controller.handleRuntimeContextUsage({ inputTokensEstimate: 2400, contextWindow: 1_000_000 });
-  assert.equal(contextUsageEl.textContent, "ctx 2.4k/1M");
+  assert.equal(contextUsageEl.title, "ctx 2.4k/1M");
 });

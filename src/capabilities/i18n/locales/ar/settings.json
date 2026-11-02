@@ -266,5 +266,6 @@
   "settings.removeAccessRuleShort": "حذف قاعدة وصول",
   "settings.addSiteRateLimitShort": "إضافة حد للطلبات",
   "settings.removeSiteRateLimitShort": "حذف حد للطلبات",
-  "settings.updateModelSettingsShort": "تحديث الإعدادات"
+  "settings.updateModelSettingsShort": "تحديث الإعدادات",
+  "settings.floatingBall": "الزر العائم"
 }

@@ -266,5 +266,6 @@
   "settings.removeAccessRuleShort": "접근 규칙 삭제",
   "settings.addSiteRateLimitShort": "요청 제한 추가",
   "settings.removeSiteRateLimitShort": "요청 제한 삭제",
-  "settings.updateModelSettingsShort": "설정 업데이트"
+  "settings.updateModelSettingsShort": "설정 업데이트",
+  "settings.floatingBall": "플로팅 버튼"
 }

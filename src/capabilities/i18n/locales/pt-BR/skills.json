@@ -365,5 +365,6 @@
   "skills.importSkillFromPageShort": "Importar da página",
   "skills.importGitSkillRepositoryShort": "Importar do Git",
   "skills.installSkillToGitShort": "Instalar no Git",
-  "skills.runSkillScriptShort": "Script de habilidade"
+  "skills.runSkillScriptShort": "Script de habilidade",
+  "skills.addSkill": "Adicionar skill"
 }

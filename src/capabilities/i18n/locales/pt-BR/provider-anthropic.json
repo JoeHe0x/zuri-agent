@@ -1,0 +1,8 @@
+{
+  "provider-anthropic.allProviders": "Todos os provedores",
+  "provider-anthropic.signInWithYourClaudeAccountToUseClaude": "Entre com sua conta Claude Pro ou Max para usar os modelos Claude. A última página pode mostrar um erro de conexão com localhost; isso é normal e a extensão conclui o login automaticamente.",
+  "provider-anthropic.theLoginSessionExpiredStartClaudeLoginAgain": "A sessão de login expirou. Entre no Claude novamente.",
+  "provider-anthropic.signInToClaudeInSettingsFirst": "Entre primeiro no Claude em Configurações.",
+  "provider-anthropic.claudeSignInFailed": "Falha ao entrar no Claude: {reason}",
+  "provider-anthropic.loginCanceledStartAgain": "Login cancelado. Comece de novo."
+}

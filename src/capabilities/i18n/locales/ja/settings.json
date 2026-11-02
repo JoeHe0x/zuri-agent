@@ -266,5 +266,6 @@
   "settings.removeAccessRuleShort": "アクセスルール削除",
   "settings.addSiteRateLimitShort": "レート制限を追加",
   "settings.removeSiteRateLimitShort": "レート制限を削除",
-  "settings.updateModelSettingsShort": "設定を更新"
+  "settings.updateModelSettingsShort": "設定を更新",
+  "settings.floatingBall": "フローティングボタン"
 }

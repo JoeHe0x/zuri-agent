@@ -266,5 +266,6 @@
   "settings.removeAccessRuleShort": "पहुँच नियम हटाएँ",
   "settings.addSiteRateLimitShort": "दर सीमा जोड़ें",
   "settings.removeSiteRateLimitShort": "दर सीमा हटाएँ",
-  "settings.updateModelSettingsShort": "सेटिंग्स अपडेट करें"
+  "settings.updateModelSettingsShort": "सेटिंग्स अपडेट करें",
+  "settings.floatingBall": "फ़्लोटिंग बटन"
 }

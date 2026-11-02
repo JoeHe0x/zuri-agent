@@ -1,0 +1,8 @@
+{
+  "provider-anthropic.allProviders": "所有服務商",
+  "provider-anthropic.signInWithYourClaudeAccountToUseClaude": "使用 Claude Pro/Max 帳號登入後即可呼叫 Claude 模型。授權後最後一頁可能提示無法存取 localhost，屬正常現象，擴充功能會自動完成登入。",
+  "provider-anthropic.theLoginSessionExpiredStartClaudeLoginAgain": "登入工作階段已失效，請重新開始 Claude 登入。",
+  "provider-anthropic.signInToClaudeInSettingsFirst": "請先在設定中完成 Claude 登入。",
+  "provider-anthropic.claudeSignInFailed": "Claude 登入失敗：{reason}",
+  "provider-anthropic.loginCanceledStartAgain": "登入已取消，請重新開始。"
+}

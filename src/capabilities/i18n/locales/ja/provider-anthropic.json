@@ -1,0 +1,8 @@
+{
+  "provider-anthropic.allProviders": "すべてのプロバイダー",
+  "provider-anthropic.signInWithYourClaudeAccountToUseClaude": "Claude Pro/Max アカウントでログインすると、Claude モデルを利用できます。最後のページで localhost に接続できないと表示されることがありますが問題ありません。拡張機能が自動でログインを完了します。",
+  "provider-anthropic.theLoginSessionExpiredStartClaudeLoginAgain": "ログインセッションの有効期限が切れました。Claude に再度ログインしてください。",
+  "provider-anthropic.signInToClaudeInSettingsFirst": "まず設定で Claude にログインしてください。",
+  "provider-anthropic.claudeSignInFailed": "Claude のログインに失敗しました：{reason}",
+  "provider-anthropic.loginCanceledStartAgain": "ログインをキャンセルしました。やり直してください。"
+}

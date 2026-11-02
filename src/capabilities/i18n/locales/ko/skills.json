@@ -365,5 +365,6 @@
   "skills.importSkillFromPageShort": "페이지에서 가져오기",
   "skills.importGitSkillRepositoryShort": "Git에서 가져오기",
   "skills.installSkillToGitShort": "Git에 설치",
-  "skills.runSkillScriptShort": "스킬 스크립트 실행"
+  "skills.runSkillScriptShort": "스킬 스크립트 실행",
+  "skills.addSkill": "스킬 추가"
 }

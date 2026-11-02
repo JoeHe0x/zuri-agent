@@ -1,6 +1,9 @@
 import assert from "node:assert/strict";
 import { createComposerFeature } from "../../src/sidepanel/features/chat/composer-feature.js";
 
+globalThis.document ??= { createElement: () => createElement() };
+globalThis.HTMLTextAreaElement ??= class { get value() { return this._value ?? ""; } set value(next) { this._value = next; } };
+globalThis.ResizeObserver ??= class { observe() {} disconnect() {} };
 await failedImageNormalizationPreservesStoredDraft();
 await draftsFollowSessionSwitches();
 await concurrentFirstWritesCreateOneSession();
@@ -512,6 +515,8 @@ function createFixture({
       close() {},
       executeCommand: async () => ({ ok: true }),
       handleKeydown: () => false,
+      mentionTokens: () => "",
+      clearMentions() {},
       isOpen: () => false,
       parseCommand: () => null,
       update() {},
@@ -590,8 +595,11 @@ function createElement(values = {}) {
       add: (...names) => names.forEach(name => classes.add(name)),
       remove: (...names) => names.forEach(name => classes.delete(name)),
       contains: name => classes.has(name),
+      toggle: (name, force) => { if (force ?? !classes.has(name)) classes.add(name); else classes.delete(name); },
     },
     focus() {},
+    before() {},
+    setAttribute() {},
     querySelectorAll: () => [],
   }, values);
 }

@@ -266,5 +266,6 @@
   "settings.removeAccessRuleShort": "移除存取規則",
   "settings.addSiteRateLimitShort": "新增站點流控",
   "settings.removeSiteRateLimitShort": "移除站點流控",
-  "settings.updateModelSettingsShort": "更新模型設定"
+  "settings.updateModelSettingsShort": "更新模型設定",
+  "settings.floatingBall": "浮動球"
 }

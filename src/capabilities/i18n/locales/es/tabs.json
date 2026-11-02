@@ -54,5 +54,6 @@
   "tabs.modeFailed": "No se pudo cambiar el modo. Cierra las herramientas de desarrollo de esta pestaña y vuelve a intentarlo, o abre otra pestaña.",
   "tabs.modeResumeRequired": "Es necesario restaurar el modo de página. Termina el script actual y vuelve a observar la página antes de continuar.",
   "tabs.navigationFailed": "No se pudo navegar a la página. Comprueba la URL de destino o la conexión de red e inténtalo de nuevo.",
-  "tabs.navigationTabClosed": "La pestaña se cerró durante la navegación. Vuelve a abrir la página."
+  "tabs.navigationTabClosed": "La pestaña se cerró durante la navegación. Vuelve a abrir la página.",
+  "tabs.noMatchingTabs": "No hay pestañas coincidentes"
 }

@@ -54,5 +54,6 @@
   "tabs.modeFailed": "Der Seitenmodus konnte nicht geändert werden. Schließe die Entwicklertools dieses Tabs und versuche es erneut oder öffne einen neuen Tab.",
   "tabs.modeResumeRequired": "Der Seitenmodus muss wiederhergestellt werden. Beende das aktuelle Seitenskript und prüfe die Seite erneut, bevor du fortfährst.",
   "tabs.navigationFailed": "Die Navigation ist fehlgeschlagen. Prüfe die Ziel-URL oder die Netzwerkverbindung und versuche es erneut.",
-  "tabs.navigationTabClosed": "Der Tab wurde während der Navigation geschlossen. Öffne die Seite erneut."
+  "tabs.navigationTabClosed": "Der Tab wurde während der Navigation geschlossen. Öffne die Seite erneut.",
+  "tabs.noMatchingTabs": "Keine passenden Tabs"
 }
