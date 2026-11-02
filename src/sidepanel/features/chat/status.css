@@ -257,7 +257,15 @@
   padding: 10px 12px 8px;
   font-size: 12px;
   font-variant-numeric: tabular-nums;
+  overflow: hidden;
 }
+
+/* The request list scrolls itself; the panel only caps its height. */
+.composer-plus-menu.usage-panel:not(.hidden) { display: flex; flex-direction: column; }
+.usage-panel > .usage-tabs { flex: none; }
+.usage-view { display: flex; flex: 0 1 auto; flex-direction: column; min-height: 0; }
+.usage-view > * { flex: none; }
+.usage-view > .usage-list { flex: 0 1 auto; min-height: 0; }
 
 .usage-tabs { display: flex; gap: 4px; margin-bottom: 10px; }
 .usage-tab { padding: 3px 10px; border: 0; border-radius: var(--radius-pill); background: transparent; color: var(--text-muted); font: inherit; cursor: pointer; }
