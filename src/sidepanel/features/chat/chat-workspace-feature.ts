@@ -108,7 +108,7 @@ export function createChatWorkspaceFeature(options: ChatWorkspaceOptions) {
         hint: item.current ? t("currentTabHint") : "", checked: slashMenu.isTabShared(item), keepOpen: true, run: () => slashMenu.toggleTab(item) })),
       ...(tabs.length > 3 ? [{ id: "more-tabs", label: showAllTabs ? t("fewerTabs") : t("moreTabs"), chevron: true, keepOpen: true,
         icon: '<circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/>', run: () => { showAllTabs = !showAllTabs; } }] : []),
-      ...visibleSkills.map((item, index) => ({ id: `skill:${item.name}`, label: item.title, iconUrl: item.icon, separator: index === 0,
+      ...visibleSkills.map((item, index) => ({ id: `skill:${item.name}`, label: item.title, iconUrl: item.icon, icon: '<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/>', hint: item.meta, tooltip: item.subtitle, separator: index === 0,
         checked: slashMenu.isSkillSelected(item), keepOpen: true, run: () => slashMenu.toggleSkill(item) })),
       ...(skills.length > 3 ? [{ id: "more-skills", label: showAllSkills ? t("fewerSkills") : t("moreSkills"), chevron: true, keepOpen: true,
         icon: '<circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/>', run: () => { showAllSkills = !showAllSkills; } }] : []),

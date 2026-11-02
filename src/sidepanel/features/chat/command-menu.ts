@@ -6,7 +6,7 @@ export interface MenuItem {
   /** Re-renders the open menu after `run` instead of closing it. */
   keepOpen?: boolean;
   /** Favicon URL, muted trailing text and a check mark for toggle rows. */
-  iconUrl?: string; hint?: string; checked?: boolean;
+  iconUrl?: string; hint?: string; tooltip?: string; checked?: boolean;
 }
 
 /** Opens a popover of commands from a button; arrow keys move, Esc closes and returns focus. */
@@ -32,7 +32,7 @@ export function createCommandMenu({ button, menu, extensions, list }: {
         : command.icon ? `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${command.icon}</svg>` : "";
       const trail = command.checked ? `<svg class="composer-menu-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8.5 12.5 2.5 2.5 4.5-5"/></svg>`
         : command.chevron ? `<svg class="composer-menu-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>` : "";
-      return `${command.separator && index ? `<div class="composer-menu-sep" role="separator"></div>` : ""}<button class="qz-menu-item" role="menuitem" type="button" data-index="${index}">${icon}<span class="composer-menu-label">${escapeHtml(command.label)}</span>${command.hint ? `<span class="composer-menu-hint">${escapeHtml(command.hint)}</span>` : ""}${trail}</button>`;
+      return `${command.separator && index ? `<div class="composer-menu-sep" role="separator"></div>` : ""}<button class="qz-menu-item" role="menuitem" type="button" data-index="${index}"${command.tooltip ? ` title="${escapeHtml(command.tooltip)}"` : ""}>${icon}<span class="composer-menu-label">${escapeHtml(command.label)}</span>${command.hint ? `<span class="composer-menu-hint">${escapeHtml(command.hint)}</span>` : ""}${trail}</button>`;
     }).join("");
     return commands.length;
   }
