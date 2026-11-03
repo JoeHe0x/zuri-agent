@@ -180,6 +180,24 @@
   line-height: 1.35;
 }
 
+.settings-update {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 2px;
+}
+
+.settings-update[hidden] {
+  display: none;
+}
+
+.settings-update-label {
+  min-width: 0;
+  color: var(--accent-strong, var(--text));
+  font-size: 12px;
+  font-weight: 600;
+}
+
 .settings-save-state .qz-btn--primary {
   min-width: 112px;
   margin-top: 0;

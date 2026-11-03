@@ -71,6 +71,12 @@
           </svg>
         </button>
         </div>
+        <button id="btn-update-notice" class="qz-icon-btn qz-icon-btn--md icon-btn hidden" type="button" title="发现新版本" data-i18n-title="core.updateNotice" aria-label="发现新版本" data-i18n-aria-label="core.updateNotice">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M6 9a6 6 0 1 1 12 0c0 6 2.5 7.5 2.5 7.5h-17S6 15 6 9Z"/>
+            <path d="M10 20a2 2 0 0 0 4 0"/>
+          </svg>
+        </button>
         <button id="btn-settings" class="qz-icon-btn qz-icon-btn--md icon-btn" title="设置" data-i18n-title="core.settings">
           <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <path d="M9.4 4.2 10 2h4l.6 2.2c.2.1.5.2.7.3l2.1-1.1 2.8 2.8-1.1 2.1.3.7 2.2.6v4l-2.2.6-.3.7 1.1 2.1-2.8 2.8-2.1-1.1-.7.3-.6 2.2h-4l-.6-2.2-.7-.3-2.1 1.1-2.8-2.8 1.1-2.1-.3-.7-2.2-.6v-4L4.6 9l.3-.7-1.1-2.1 2.8-2.8 2.1 1.1.7-.3Z"/>
@@ -188,6 +194,11 @@
           <div class="settings-status-stack qz:grid qz:min-w-0 qz:gap-1">
             <div id="settings-save-status" class="settings-save-status qz:grid qz:min-w-0 qz:grid-cols-[6px_minmax(0,1fr)] qz:items-start qz:gap-1.75" role="status" aria-live="polite" data-i18n="core.loadingSettings">正在读取配置</div>
             <div id="settings-version-muted" class="settings-version-muted qz:truncate"></div>
+            <div id="settings-update" class="settings-update" hidden>
+              <span id="settings-update-label" class="settings-update-label qz:truncate"></span>
+              <a id="settings-update-link" class="qz-btn qz-btn--primary qz-btn--sm" href="https://github.com/JoeHe0x/zuri-agent/releases" target="_blank" rel="noopener noreferrer" data-i18n="core.download">下载</a>
+              <button id="settings-open-extensions" class="qz-btn qz-btn--secondary qz-btn--sm" type="button" data-i18n="core.openExtensionsPage">扩展页</button>
+            </div>
           </div>
           <button id="btn-save-settings" class="qz-btn qz-btn--primary " type="button" disabled data-i18n="core.saveSettings">保存配置</button>
         </div>

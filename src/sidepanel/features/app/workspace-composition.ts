@@ -87,7 +87,7 @@ export function createWorkspaceComposition(options: WorkspaceOptions) {
     });
   };
   const decisions = createDecisionDialogFeature({ root, hideToast: chat.toast.hide });
-  const settingsShell = createSettingsShell(root);
+  const settingsShell = createSettingsShell(root, undefined, chat.toast.show);
   const sessionExport = createSessionExportFeature({
     request: port.request, normalizeSessionId, getCurrentSessionId,
     projectTranscript: transcript => chat.projection.visibleHistory(transcript),

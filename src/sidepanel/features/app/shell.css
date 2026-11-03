@@ -73,6 +73,24 @@
   stroke: currentColor;
 }
 
+#btn-update-notice {
+  position: relative;
+  color: var(--accent-strong, var(--accent));
+  background: var(--accent-subtle);
+}
+
+#btn-update-notice::after {
+  content: "";
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--red);
+  box-shadow: 0 0 0 2px var(--bg-primary);
+}
+
 .icon-btn.recording {
   color: var(--red);
   background: var(--danger-subtle);

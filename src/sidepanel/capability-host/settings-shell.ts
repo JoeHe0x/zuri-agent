@@ -1,4 +1,5 @@
 import { t } from "../i18n/index.js";
+import { loadUpdateNotice, isNewerVersion, type UpdateNotice } from "../../shared/update-notice.js";
 import type { UiOverlay, UiSettingsPort, UiSettingsSection } from "../../sdk/sidepanel/ui.js";
 
 type SectionState = Parameters<UiSettingsPort["setState"]>[1];
@@ -19,7 +20,7 @@ interface SectionCatalog {
 }
 
 /** The shell owns navigation and cancellation; each contribution owns its form and draft. */
-export function createSettingsShell(root: Document, onError: (error: unknown) => void = console.warn) {
+export function createSettingsShell(root: Document, onError: (error: unknown) => void = console.warn, notify: (message: string, options: object) => void = () => {}) {
   const panel = root.querySelector<HTMLElement>("#settings-panel")!;
   const content = panel.querySelector<HTMLElement>(".settings-content")!;
   const tabs = panel.querySelector<HTMLElement>(".settings-tabs")!;
@@ -323,6 +324,26 @@ export function createSettingsShell(root: Document, onError: (error: unknown) =>
   }, { signal: events.signal });
   const currentVersion = globalThis.chrome?.runtime?.getManifest?.()?.version;
   if (version) version.textContent = currentVersion ? t("currentVersion", { version: currentVersion }) : "";
+  const update = panel.querySelector<HTMLElement>("#settings-update");
+  const updateLink = panel.querySelector<HTMLAnchorElement>("#settings-update-link");
+  const bell = root.querySelector<HTMLElement>("#btn-update-notice");
+  let noticeUrl = updateLink?.href || "";
+  const showNotice = (notice: UpdateNotice | undefined | null) => {
+    const latest = notice?.latest || "";
+    const newer = !!currentVersion && !!notice && isNewerVersion(latest, currentVersion);
+    if (update) update.hidden = !newer;
+    bell?.classList.toggle("hidden", !newer);
+    if (!newer || !updateLink) return;
+    noticeUrl = notice.url || noticeUrl;
+    updateLink.href = noticeUrl;
+    panel.querySelector("#settings-update-label")!.textContent = t("updateAvailable", { version: latest });
+  };
+  bell?.addEventListener("click", () => notify(t("updateToastMessage", { current: currentVersion }), {
+    key: "app-update", title: panel.querySelector("#settings-update-label")?.textContent || "", tone: "info", durationMs: 0, toggle: true,
+    actionLabel: t("download"), onAction: () => chrome.tabs.create({ url: noticeUrl }),
+  }), { signal: events.signal });
+  panel.querySelector("#settings-open-extensions")?.addEventListener("click", () => { void chrome.tabs.create({ url: "chrome://extensions" }).catch(() => {}); }, { signal: events.signal });
+  void loadUpdateNotice(events.signal).then(showNotice).catch(() => {});
   const overlay: UiOverlay = {
     id: "settings-shell", priority: 80,
     close: () => { if (!open) return false; close(); return true; },
