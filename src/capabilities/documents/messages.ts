@@ -75,6 +75,7 @@ export default defineMessages("documents", {
   "artifactIssueVerdict": { "zh-CN": "verdict {count} 字（上限约 90）", en: "verdict is {count} characters (limit about 90)" },
   "artifactIssueMeta": { "zh-CN": "meta 有 {count} 项（最多 3）", en: "meta has {count} items (at most 3)" },
   "artifactIssueSummary": { "zh-CN": "summary 超过 3 条或单条过长", en: "summary has more than 3 bullets or an overlong bullet" },
+  "artifactIssueTable": { "zh-CN": "表格有 {count} 列（最多 6）", en: "a table has {count} columns (at most 6)" },
   "artifactIssueColours": { "zh-CN": "有 {count} 处写死的颜色（#hex / rgb / hsl）", en: "{count} hard-coded colours (#hex / rgb / hsl)" },
   "artifactIssueRemote": { "zh-CN": "引用了外部脚本、图片或样式", en: "references remote scripts, images, or styles" },
   "unsupportedDocumentOutputFormat": { "zh-CN": "不支持的文档输出格式：{format}", en: "Unsupported document output format: {format}" },

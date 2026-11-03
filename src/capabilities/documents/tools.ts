@@ -112,6 +112,8 @@ function artifactIssues(html: string) {
   const summary = html.match(/<ul[^>]*class="[^"]*\bsummary\b[^"]*"[^>]*>([\s\S]*?)<\/ul>/i)?.[1];
   const bullets = summary?.match(/<li[^>]*>[\s\S]*?<\/li>/gi) ?? [];
   if (bullets.length > 3 || bullets.some(item => text(item).length > 45)) issues.push(t("artifactIssueSummary"));
+  const widest = Math.max(0, ...(html.match(/<table[\s\S]*?<\/table>/gi) ?? []).map(table => (table.match(/<tr[\s\S]*?<\/tr>/i)?.[0].match(/<t[hd][\s>]/gi) ?? []).length));
+  if (widest > 6) issues.push(t("artifactIssueTable", { count: widest }));
   const styled = html.replace(/<style[^>]*>([\s\S]*?)<\/style>/gi, (_match, css: string) => `<style>${css.replace(/:root\s*\{[^}]*\}/g, "")}</style>`);
   const colours = styled.match(/(?<=[:\s,(]|(?:fill|stroke|color)=["'])#[0-9a-f]{3,8}\b(?=[^{}]*[;}"'])|\b(?:rgba?|hsla?)\(/gi)?.length ?? 0;
   if (colours) issues.push(t("artifactIssueColours", { count: colours }));
