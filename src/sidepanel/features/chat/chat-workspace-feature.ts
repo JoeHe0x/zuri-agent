@@ -42,7 +42,7 @@ import { createMathFeature } from "./math-feature.js";
 import { createPageSuggestionsFeature } from "./page-suggestions-feature.js";
 import { createQueuedFollowupsFeature } from "./queued-followups-feature.js";
 import { createUsagePanelFeature } from "./usage-panel-feature.js";
-import { createSlashMenuFeature, parseSlashCommandText } from "./slash-menu-feature.js";
+import { createSlashMenuFeature, parseSlashCommandText, skillUses } from "./slash-menu-feature.js";
 import { createTranscriptProjection } from "./transcript/projection.js";
 import { createTranscriptReconcileFeature } from "./transcript/recovery.js";
 import { createTranscriptRenderer } from "./transcript/renderer.js";
@@ -106,7 +106,7 @@ export function createChatWorkspaceFeature(options: ChatWorkspaceOptions) {
     list: async () => {
       const tabs = (await extensions.listReferences()).filter(item => item.kind === "tab").sort((a, b) => a.priority - b.priority);
       const visibleTabs = showAllTabs ? tabs : tabs.slice(0, 3);
-      const skills = (await extensions.listReferences()).filter(item => item.kind === "skill" && !item.run && !item.token).sort((a, b) => a.priority - b.priority || a.title.localeCompare(b.title));
+      const skills = (await extensions.listReferences()).filter(item => item.kind === "skill" && !item.run && !item.token).sort((a, b) => a.priority - b.priority || skillUses(b) - skillUses(a) || a.title.localeCompare(b.title));
       const visibleSkills = showAllSkills ? skills : skills.slice(0, 3);
       return [
       ...visibleTabs.map(item => ({ id: `tab:${item.name}`, label: item.title, iconUrl: item.icon,

@@ -22,7 +22,7 @@ export function createSkillReferences(list: () => Promise<SkillRecord[]>, siteUr
           ...(group ? { group: { id: group.id, label: group.label }, ...(group.icon ? { icon: chrome.runtime.getURL(group.icon) } : {}) } : {}),
           subtitle: skill.description || "",
           meta: isBuiltinSkill(skill) ? t("builtInSkill") : skill.scope === SKILL_SCOPE_RESIDENT ? t("residentSkill") : siteNames.has(skill.name) ? t("siteSkill") : t("skills"),
-          priority: group ? -1 : siteNames.has(skill.name) ? 0 : 2,
+          priority: group ? 1 : siteNames.has(skill.name) ? 0 : 2,
           search: [skill.name, displayName, skill.description, skill.scope, ...(skill.domains || []), ...(skill.urlPatterns || [])].join(" ").toLowerCase(),
         };
       }), add];

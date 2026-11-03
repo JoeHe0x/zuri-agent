@@ -51,6 +51,19 @@ export function parseSlashCommandText(value: unknown = "") {
   };
 }
 
+// Per-skill send counts rank the slash menu; they live in this browser only.
+const SKILL_USAGE_KEY = "zuri-skill-usage";
+function readSkillUsage(): Record<string, number> {
+  try { return JSON.parse(globalThis.localStorage?.getItem(SKILL_USAGE_KEY) || "{}") || {}; } catch { return {}; }
+}
+export const skillUses = (item: SlashItem) => item.kind === "skill" ? Number(readSkillUsage()[item.name]) || 0 : 0;
+function recordSkillUsage(names: string[]) {
+  if (!names.length) return;
+  const usage = readSkillUsage();
+  for (const name of names) usage[name] = (Number(usage[name]) || 0) + 1;
+  try { globalThis.localStorage?.setItem(SKILL_USAGE_KEY, JSON.stringify(usage)); } catch { /* ranking is best effort */ }
+}
+
 export function createSlashMenuFeature(options: SlashOptions) {
   const input = options.input;
   const menu = options.menu;
@@ -219,7 +232,7 @@ async function loadSlashResources(query = "", { includeCommands = true, mention 
   return all
     .filter(item => (item.kind === "tab") === mention)
     .filter(item => !q || item.search.includes(q))
-    .sort((a, b) => Number(!!a.run) - Number(!!b.run) || kindRank(a.kind) - kindRank(b.kind) || a.kind.localeCompare(b.kind) || a.priority - b.priority || (a.group?.id || "").localeCompare(b.group?.id || "") || a.title.localeCompare(b.title, getLocale()));
+    .sort((a, b) => Number(!!a.run) - Number(!!b.run) || kindRank(a.kind) - kindRank(b.kind) || a.kind.localeCompare(b.kind) || a.priority - b.priority || (a.group?.id || "").localeCompare(b.group?.id || "") || skillUses(b) - skillUses(a) || a.title.localeCompare(b.title, getLocale()));
 }
 
 async function refreshOpenSlashMenu() {
@@ -406,7 +419,8 @@ function closeSlashMenu() {
     close: closeSlashMenu,
     isOpen: () => slashMenuState.open,
     mentionTokens: () => [...sharedItems(), ...skills].map(item => `[${item.kind}: ${item.name}]`).concat(elements.map(selector => createElementReferenceToken({ selector }))).join(" "),
-    clearMentions() { mentions = []; skills = []; elements = []; elementPreviews.clear(); renderMentions(); },
+    // Called once a message is sent, so the chosen Skills count as used.
+    clearMentions() { recordSkillUsage(skills.map(skill => skill.name)); mentions = []; skills = []; elements = []; elementPreviews.clear(); renderMentions(); },
     addElement(selector: unknown, preview = "") {
       const css = String(selector || "").replace(/[\r\n]+/g, " ").trim();
       if (css && !elements.includes(css)) elements.push(css);
