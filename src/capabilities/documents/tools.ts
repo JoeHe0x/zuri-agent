@@ -98,7 +98,7 @@ function shouldNudgeArtifactDesign(html: string, context: ToolContext) {
 }
 
 // Host-side checks for the zuri-artifact rules: first-screen text budget, colours only through :root variables, no remote resources.
-// Limits match the skill; CJK and Latin text are both counted in characters, so the Latin limits are loose.
+// Limits are the skill's (20/60/30) plus slack (30/90/45). Text is counted in characters, which is looser for CJK than for Latin: 30 Latin characters is only about 5 words.
 function artifactIssues(html: string) {
   const text = (fragment: string) => fragment.replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ").replace(/\s+/g, " ").trim();
   const issues: string[] = [];
@@ -114,10 +114,17 @@ function artifactIssues(html: string) {
   if (bullets.length > 3 || bullets.some(item => text(item).length > 45)) issues.push(t("artifactIssueSummary"));
   const widest = Math.max(0, ...(html.match(/<table[\s\S]*?<\/table>/gi) ?? []).map(table => (table.match(/<tr[\s\S]*?<\/tr>/i)?.[0].match(/<t[hd][\s>]/gi) ?? []).length));
   if (widest > 6) issues.push(t("artifactIssueTable", { count: widest }));
-  const styled = html.replace(/<style[^>]*>([\s\S]*?)<\/style>/gi, (_match, css: string) => `<style>${css.replace(/:root\s*\{[^}]*\}/g, "")}</style>`);
-  const colours = styled.match(/(?<=[:\s,(]|(?:fill|stroke|color)=["'])#[0-9a-f]{3,8}\b(?=[^{}]*[;}"'])|\b(?:rgba?|hsla?)\(/gi)?.length ?? 0;
+  // Colours are only read from CSS (<style> minus :root, style="" values) and SVG paint attributes, so body text such as "PR #404" is never flagged.
+  const css = [...html.matchAll(/<style[^>]*>([\s\S]*?)<\/style>/gi)].map(m => m[1].replace(/:root\s*\{[^}]*\}/g, ""));
+  const inline = [...html.matchAll(/\sstyle\s*=\s*"([^"]*)"|\sstyle\s*=\s*'([^']*)'/gi)].map(m => m[1] ?? m[2]);
+  const paint = [...html.matchAll(/\s(?:fill|stroke|stop-color)\s*=\s*["']([^"']*)["']/gi)].map(m => m[1].trim()).filter(v => !/^(?:var\(|url\(|none$|currentcolor$|inherit$|transparent$)/i.test(v));
+  const literal = /(?<=[:\s,(])#[0-9a-f]{3,8}\b(?=[^{}]*(?:[;})]|$))|\b(?:rgba?|hsla?|hwb|lab|lch|oklab|oklch)\(/gi;
+  const colours = [...css, ...inline].reduce((sum, part) => sum + (part.match(literal)?.length ?? 0), 0) + paint.length;
   if (colours) issues.push(t("artifactIssueColours", { count: colours }));
-  if (/<(?:script|img|iframe|source)\b[^>]*\bsrc\s*=\s*["']?(?:https?:)?\/\//i.test(html) || /<link\b[^>]*\bhref\s*=\s*["']?(?:https?:)?\/\//i.test(html) || /@import\s+(?:url\()?["']?(?:https?:)?\/\//i.test(html)) issues.push(t("artifactIssueRemote"));
+  const remoteUrl = /(?:https?:)?\/\//i;
+  const remoteAttr = /<(?:script|img|iframe|source|video|audio|embed|link)\b[^>]*\b(?:src|href|poster)\s*=\s*["']?(?:https?:)?\/\//i.test(html) || /<object\b[^>]*\bdata\s*=\s*["']?(?:https?:)?\/\//i.test(html) || /\bsrcset\s*=\s*["']\s*(?:https?:)?\/\//i.test(html);
+  const remoteCss = [...css, ...inline].some(part => /@import\s+(?:url\()?["']?(?:https?:)?\/\//i.test(part) || new RegExp(`url\\(\\s*["']?${remoteUrl.source}`, "i").test(part));
+  if (remoteAttr || remoteCss) issues.push(t("artifactIssueRemote"));
   return issues;
 }
 function artifactLintProblem(html: string, context: ToolContext) {

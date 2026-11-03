@@ -31,6 +31,7 @@ const messages = defineMessages("artifact", {
 - 颜色只用在状态和被比较的那一组数据上；标题、正文、数值一律用墨色，不给文字、粗体或标题染色，不用多个强调色。
 - 字号只有三档：标题 1.25rem、章节 0.9375rem、正文和表格 13–15px；用字重和灰度区分层次，不靠加大字号。
 - 表格不超过 6 列，约 5 列最佳；更宽的转置，或拆成两张，或把次要列改写进说明文字。
+- 首屏元素的标签照套件骨架写：\`h1\`、\`p.verdict\`、\`p.meta\`（内含 \`span\`）、\`ul.summary\`；宿主按这些标签检查文字量，换成 \`div\` 或 \`ol\` 不会被跳过，只会失去检查提示。
 - 通篇是"结论—证据—来源"，不要写给读者的话（"本报告旨在…"）、过程叙述（"我首先查询了…"）和结尾总结。
 - 只用读取到的真实数据，不为填满网格凑数字或放占位值；\`.note\` 只给风险和必须看到的结果，不当默认开头；每张图表和每个面板都要支撑所在章节标题里的论点。
 - 保存时宿主会检查：首屏文字配额、写死的颜色（\`:root\` 之外的 #hex / rgb / hsl）、外部脚本图片样式；不符合会被退回，按提示修正后再保存。
@@ -126,6 +127,7 @@ Readers scan first and should see the conclusion first. Every filler sentence di
 - Colour marks status and the compared group only. Titles, body text, and values stay in ink; no coloured text, coloured bold, or multiple accents.
 - Three type sizes: title 1.25rem, section 0.9375rem, body and tables 13–15px. Separate levels with weight and grey, not size.
 - Tables have at most 6 columns, about 5 at best; transpose a wider one, split it in two, or move minor columns into the description text.
+- Write first-screen elements with the kit skeleton's tags: \`h1\`, \`p.verdict\`, \`p.meta\` (with \`span\` items), \`ul.summary\`. The host checks text length on these tags; other tags are not checked.
 - The page reads conclusion, evidence, source. No addressing the reader ("This report aims to…"), no narrating process ("I first queried…"), no closing summary.
 - Use only real data you have read; do not invent numbers to fill a grid or leave placeholder values. Use \`.note\` for risks and results the reader must not miss, not as a default opener. Every chart and panel must back the point in its section title.
 - On save the host checks the first-screen text budget, hard-coded colours (#hex / rgb / hsl outside \`:root\`), and remote scripts, images, or styles; a page that fails is sent back, so fix what it lists and save again.
