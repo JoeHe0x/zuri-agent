@@ -4,8 +4,8 @@ import { createTranslator } from "#sdk/shared/i18n";
 /** Model documentation is separate from the eager UI translation catalog. */
 const messages = defineMessages("documents-model", {
   saveFile: {
-    "zh-CN": "将文本内容（文本、JSON、CSV、HTML、Markdown、SVG 等）保存到用户下载目录，返回 downloadId、filename、mimeType 和 size。filename 省略时根据内容和 MIME 自动生成文件名。",
-    en: "Save text content (plain text, JSON, CSV, HTML, Markdown, SVG, etc.) to the user's Downloads folder, returning downloadId, filename, mimeType, and size. Automatically generates a filename from content and MIME type when filename is omitted.",
+    "zh-CN": "将文本内容（文本、JSON、CSV、HTML、Markdown、SVG 等）保存到用户下载目录，返回 downloadId、filename、mimeType 和 size。filename 省略时根据内容和 MIME 自动生成文件名。生成给人阅读的分析、审计、对比或仪表盘页面（HTML）时，先加载 zuri-artifact skill 并按其组件搭页面；数据、代码和纯文本文件无需。",
+    en: "Save text content (plain text, JSON, CSV, HTML, Markdown, SVG, etc.) to the user's Downloads folder, returning downloadId, filename, mimeType, and size. Automatically generates a filename from content and MIME type when filename is omitted. When producing an HTML page for people to read (analysis, audit, comparison, dashboard), load the zuri-artifact skill first and build the page from its components; data, code, and plain text files do not need it.",
   },
   saveFilename: {
     "zh-CN": "可选保存文件名（如 results.md、data.json、report.csv）；省略时自动生成 qingzhou-output-时间戳.*。",
@@ -191,6 +191,8 @@ const messages = defineMessages("documents-model", {
 - 支持输出：docx、xlsx、pdf、html、txt、csv。
 - \`title\` 只作为文档元数据和未填写 filename 时的默认文件名，不会自动写入正文；需要可见标题时使用 \`{type:"heading",level:1,text:"标题"}\` block。
 - 直接传 blocks 时每项都必须显式填写 type，例如 \`{type:"heading",text:"标题",level:1}\`、\`{type:"paragraph",text:"正文"}\`、\`{type:"list",items:["事项"]}\`、\`{type:"table",columns:["列名"],rows:[["值"]]}\`。不要使用 \`{heading:...}\`、\`{table:true}\`、\`{list:[...]}\` 简写。
+- 要生成精致的报告、对比或仪表盘页面时，先加载 \`zuri-artifact\` skill。
+- 报告类内容用 \`{type:"metrics",columns:["label","value","note"],rows:[["总评","B+","一句话解读"]]}\` 放关键指标卡（每行一张），用 \`{type:"callout",kind:"critical"|"warning"|"success"|"info",title,text}\` 突出严重问题、警告和快速收益；HTML/PDF 渲染为指标卡和色调提示框，Word/TXT 自动降级为表格和段落。数字和结论只来自已读取的内容。
 - Word/PDF 的普通编号清单使用 list 或 paragraph；heading 只用于真实章节，避免污染目录。
 - Excel 的 columns 使用稳定原始表头；rows 的每个元素就是一行：对象行写成 \`rows:[{"公司":"A"},{"公司":"B"}]\`，数组行写成 \`rows:[["A"],["B"]]\`，不要写成 \`rows:[[{"公司":"A"},{"公司":"B"}]]\`，同一张表不要混用两种行结构。CSV 只支持一个 table/sheet。大表优先通过 data_store 或解析后的 docModel 处理。
 - 长文档必须分块读取。正文结果已经是整理后的 Markdown，不需要再处理 blocks；不要为了总结而把全部 chunk 或大表复制进上下文。
@@ -227,6 +229,8 @@ Process web attachments, Office, PDF, HTML, CSV, text, Markdown, code, configura
 - Supported outputs: docx, xlsx, pdf, html, txt, csv.
 - \`title\` is document metadata and the default filename when filename is omitted. It is not inserted into the body. For a visible title, add a \`{type:"heading",level:1,text:"Title"}\` block.
 - Every directly supplied block must specify type, for example \`{type:"heading",text:"Title",level:1}\`, \`{type:"paragraph",text:"Body"}\`, \`{type:"list",items:["Item"]}\`, or \`{type:"table",columns:["Column"],rows:[["Value"]]}\`. Do not use shorthand such as \`{heading:...}\`, \`{table:true}\`, or \`{list:[...]}\`.
+- To produce a polished report, comparison, or dashboard page, load the \`zuri-artifact\` skill first.
+- For reports, put key figures in \`{type:"metrics",columns:["label","value","note"],rows:[["Overall","B+","One-line reading"]]}\` (one card per row) and call out severe issues, warnings, and quick wins with \`{type:"callout",kind:"critical"|"warning"|"success"|"info",title,text}\`. HTML and PDF render metric cards and tinted note boxes; Word and TXT fall back to a table and paragraphs. Use only numbers and conclusions drawn from content you have read.
 - Use list or paragraph for ordinary numbered items in Word/PDF. Reserve heading for actual sections to avoid cluttering the table of contents.
 - For Excel, preserve stable original headers in columns. Each rows element is one row: use \`rows:[{"Company":"A"},{"Company":"B"}]\` for object rows or \`rows:[["A"],["B"]]\` for array rows, never \`rows:[[{"Company":"A"},{"Company":"B"}]]\`. Do not mix the two row shapes in a sheet. CSV supports one table/sheet. Prefer data_store or a parsed docModel for large tables.
 - Read long documents in chunks. Text results are already normalized Markdown; no further blocks processing is needed. Do not copy every chunk or a large table into context just to summarize it.

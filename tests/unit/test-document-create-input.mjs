@@ -271,3 +271,57 @@ test("document links and images reject executable or nonportable URL schemes", (
     sheets: [],
   }).valid, true);
 });
+
+const reportBlocks = [
+  { type: "heading", level: 1, text: "Audit" },
+  { type: "metrics", columns: ["label", "value", "note"], rows: [["Overall", "B+", "solid foundation"], ["Critical", 2, ""]] },
+  { type: "callout", kind: "critical", title: "Missing schema", text: "No JSON-LD found <b>on</b> 3 pages." },
+  { type: "callout", text: "Plain note" },
+];
+
+test("callout and metrics blocks validate, and unsupported tones or fields are reported", () => {
+  assert.equal(validateDirectDocumentCreateInput({ blocks: reportBlocks }).valid, true);
+  const bad = validateDirectDocumentCreateInput({ blocks: [
+    { type: "callout", kind: "fatal", text: "x" },
+    { type: "callout", title: "no text" },
+    { type: "metrics", rows: [] },
+    { type: "metrics", columns: ["a"], rows: [["1"]], kind: "info" },
+  ] });
+  assert.equal(bad.valid, false);
+  const paths = bad.issues.map(issue => issue.path);
+  assert.ok(paths.includes("blocks[0].kind"));
+  assert.ok(paths.includes("blocks[1].text"));
+  assert.ok(paths.includes("blocks[2]"));
+  assert.ok(paths.includes("blocks[3]"));
+  assert.equal(summarizeDocumentContent({ blocks: [{ type: "metrics", columns: ["a"], rows: [["1"]] }] }).meaningful, true);
+});
+
+test("HTML renders callouts and metric cards with escaped text and a default tone", () => {
+  const html = buildDocumentHtml({ blocks: reportBlocks });
+  assert.match(html, /<div class="metric"><div class="metric-label">Overall<\/div><div class="metric-value">B\+<\/div><div class="metric-note">solid foundation<\/div><\/div>/);
+  assert.equal((html.match(/class="metric-note"/g) || []).length, 1, "an empty note renders no element");
+  assert.match(html, /<aside class="callout" data-kind="critical" role="note"><p class="callout-title">Missing schema<\/p><p>No JSON-LD found &lt;b&gt;on&lt;\/b&gt; 3 pages\.<\/p><\/aside>/);
+  assert.match(html, /data-kind="info"/);
+});
+
+test("DOCX and TXT keep callout and metrics content as basic blocks", async () => {
+  const txt = new TextDecoder().decode(await createDocumentBytes({ format: "txt", blocks: reportBlocks }));
+  assert.match(txt, /Missing schema: No JSON-LD found/);
+  assert.match(txt, /Overall\tB\+\tsolid foundation/);
+  const model = await parseDocumentBytes(await createDocumentBytes({ format: "docx", blocks: reportBlocks }), { filename: "audit.docx" });
+  assert.ok(model.blocks.some(block => block.type === "table" && block.rows.some(row => row.label === "Overall")));
+  assert.ok(model.blocks.some(block => block.type === "paragraph" && /Missing schema: No JSON-LD/.test(block.text)));
+});
+
+test("generated report HTML keeps the design floor: tokenized colour, no tracked caps, no pure black or white", () => {
+  const html = buildDocumentHtml({ blocks: reportBlocks, sheets: [{ name: "S", columns: ["a"], rows: [["1"]] }] });
+  const css = html.match(/<style>([\s\S]*?)<\/style>/)[1];
+  const rules = css.replace(/\/\*[\s\S]*?\*\//g, "");
+  const outsideTokens = rules.replace(/:root\s*\{[^}]*\}/g, "");
+  assert.equal(/#[0-9a-f]{3,8}\b|\brgba?\(|\bhsla?\(|\boklch\(/i.test(outsideTokens.replace(/color-mix\([^;]*\)/g, "")), false, "colours live in :root tokens");
+  assert.equal(/#(?:000|fff)\b|oklch\((?:0|100)%/i.test(rules), false, "no pure black or white");
+  assert.equal(/text-transform:\s*uppercase|letter-spacing:\s*\.0[4-9]|letter-spacing:\s*\.[1-9]/.test(rules), false, "no tracked caps labels");
+  assert.equal(/transition:\s*all/.test(rules), false);
+  assert.match(rules, /html, body \{ overflow-x: clip; \}/);
+  assert.match(html, /<meta name="viewport"/);
+});
