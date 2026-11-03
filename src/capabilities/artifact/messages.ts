@@ -1,6 +1,6 @@
 import { defineMessages } from "#sdk/shared/i18n-definition";
 
-/** Artifact guidance for the model. Rules follow Hallmark's Floor/Reflex split, rewritten for reports. */
+/** Artifact guidance for the model: a floor of fixed rules, then defaults that need a real reason. */
 const messages = defineMessages("artifact", {
   displayName: { "zh-CN": "Artifact（预览）", en: "Artifact (Preview)" },
   description: {
@@ -49,7 +49,7 @@ const messages = defineMessages("artifact", {
 
 ## 怎么做
 
-- 分析、审计、对比、简报、仪表盘都做成同一种产物：自包含的 HTML 页面。先 \`load_skill_resource\` 读 \`references/components.md\`（组件套件，必读），做审计或对比时必读 \`references/audit-and-compare.md\`，页面里有任何数字对比时必读 \`references/charts.md\`（数字对比先画图，不要用表格代替），需要时间线、对比、清单、占比条、大数字、流程漏斗、待确认事项和数据范围时再读 \`references/components-extra.md\`，需要特定气质再读 \`references/themes/\` 下一个主题（实验、审计、监控类用 \`instrument\`；趋势图卡片和仪表盘用 \`shadcn-charts\`），然后用 \`save_file\` 写自包含的 \`.html\`，页面开头保留 \`<!-- zuri-artifact -->\` 戳记，侧边栏会预览。分析类页面也走这条路径，不要手写一套新 CSS。
+- 分析、审计、对比、简报、仪表盘都做成同一种产物：自包含的 HTML 页面。先 \`load_skill_resource\` 读 \`references/components.md\`（组件套件，必读），做审计或对比时必读 \`references/audit-and-compare.md\`，页面里有任何数字对比时必读 \`references/charts.md\`（数字对比先画图，不要用表格代替），需要时间线、对比、清单、占比条、大数字、流程漏斗、待确认事项和数据范围时再读 \`references/components-extra.md\`，需要特定气质再读 \`references/themes/\` 下一个主题（实验、审计、监控类用 \`instrument\`；趋势图卡片和仪表盘用 \`console-charts\`），然后用 \`save_file\` 写自包含的 \`.html\`，页面开头保留 \`<!-- zuri-artifact -->\` 戳记，侧边栏会预览。分析类页面也走这条路径，不要手写一套新 CSS。
 
 ## 底线（不可违反）
 
@@ -143,7 +143,7 @@ After: Meat fills the top slots because of the ranking score; rerank only filter
 
 ## How to build it
 
-- Reports, audits, comparisons, briefs, and dashboards are all the same kind of artifact: one self-contained HTML page. Read \`references/components.md\` with \`load_skill_resource\` (the component kit, required), read \`references/audit-and-compare.md\` for an audit or a comparison, read \`references/charts.md\` whenever the page compares numbers (draw a chart first; do not substitute a table), read \`references/components-extra.md\` for a trail, diff, checklist, ratio bar, big figure, pipeline funnel, open items, or data scope, and read one theme under \`references/themes/\` when a specific character is needed (\`instrument\` for experiment, audit, and monitoring content; \`shadcn-charts\` for trend chart cards and dashboards), then write a self-contained \`.html\` with \`save_file\`, keeping the \`<!-- zuri-artifact -->\` stamp at the top; the side panel previews it. Analysis pages take this path too; do not hand-write a new stylesheet.
+- Reports, audits, comparisons, briefs, and dashboards are all the same kind of artifact: one self-contained HTML page. Read \`references/components.md\` with \`load_skill_resource\` (the component kit, required), read \`references/audit-and-compare.md\` for an audit or a comparison, read \`references/charts.md\` whenever the page compares numbers (draw a chart first; do not substitute a table), read \`references/components-extra.md\` for a trail, diff, checklist, ratio bar, big figure, pipeline funnel, open items, or data scope, and read one theme under \`references/themes/\` when a specific character is needed (\`instrument\` for experiment, audit, and monitoring content; \`console-charts\` for trend chart cards and dashboards), then write a self-contained \`.html\` with \`save_file\`, keeping the \`<!-- zuri-artifact -->\` stamp at the top; the side panel previews it. Analysis pages take this path too; do not hand-write a new stylesheet.
 
 ## Floor (never broken)
 
@@ -728,7 +728,7 @@ A graphite ground in three lightness steps: the ground, a panel, and the deepest
 </div>
 \`\`\`
 
-- 图表卡片仿 shadcn 的结构：\`h3\` 标题 + \`.desc\` 一行灰色说明（写明日期范围或口径）+ 图 + \`.foot\`（一句加粗的结论，一行灰色注释）。没有结论可写时省略 \`.foot\`。
+- 图表卡片的结构：\`h3\` 标题 + \`.desc\` 一行灰色说明（写明日期范围或口径）+ 图 + \`.foot\`（一句加粗的结论，一行灰色注释）。没有结论可写时省略 \`.foot\`。
 - 配色：同一色相的明度梯度 \`--s1\`（最浅）到 \`--s4\`（最深），不用多色；基线用最浅或 \`--muted\`，被比较的组用 \`--s3\`。
 - 图的笔法：只画水平虚线网格（不超过 4 条），不画坐标轴线和刻度线，标签灰色、缩写（10/25、1月）；折线 2px、不画数据点；面积图只用 14% 的纯色填充，不用渐变；柱 4px 圆角。
 - 静态页面没有悬停提示，所以每个数值都要直接标在条尾或线端。
@@ -819,7 +819,7 @@ Hard rules: draw numeric comparisons first; tables are for configuration attribu
 </div>
 \`\`\`
 
-- Chart cards follow shadcn's structure: an \`h3\` title, a one-line grey \`.desc\` (date range or definition), the chart, then \`.foot\` (one bold conclusion and one grey note). Omit \`.foot\` when there is no conclusion to state.
+- Chart card structure: an \`h3\` title, a one-line grey \`.desc\` (date range or definition), the chart, then \`.foot\` (one bold conclusion and one grey note). Omit \`.foot\` when there is no conclusion to state.
 - Colour: one hue in a lightness ramp, \`--s1\` (lightest) to \`--s4\` (deepest), never many hues; the baseline takes the lightest step or \`--muted\`, the compared group takes \`--s3\`.
 - Drawing: horizontal dashed gridlines only (at most four), no axis lines or tick marks, grey abbreviated labels (10/25, Jan); 2px lines with no data dots; area charts use a flat 14% fill, never a gradient; bars have 4px radius.
 - A static page has no hover tooltip, so label every value at the end of its bar or line.
@@ -959,10 +959,10 @@ After reading \`components.md\`, read this for an audit or a comparison, and app
 - A comparison matrix is a case where a table is the right form; use one per page. Draw numeric comparisons with \`charts.md\` separately and do not repeat the same numbers.
 - Put the recommendation before the matrix in one \`.note\` (at most 80 words: who to pick, who it suits, the biggest trade-off); after the matrix, list each option's worst-fit scenario with \`.cols\`.`,
   },
-  themeShadcn: {
-    "zh-CN": `# 主题：shadcn 图表
+  themeConsole: {
+    "zh-CN": `# 主题：控制台图表
 
-仿成熟 SaaS 面板的图表卡片：大圆角、宽松内边距、单一蓝色色阶、平滑面积图。规格来自 shadcn/ui 图表页的实测。这是 \`components.md\`、\`charts.md\` 之上的一层覆盖。
+成熟 SaaS 控制台风格的图表卡片：大圆角、宽松内边距、单一蓝色色阶、平滑面积图。这是 \`components.md\`、\`charts.md\` 之上的一层覆盖。
 
 \`\`\`css
 /* 追加在 components.md 与 charts.md 的样式之后，覆盖变量 */
@@ -1013,12 +1013,12 @@ After reading \`components.md\`, read this for an audit or a comparison, and app
 - 图的结构：不画轴线和刻度线，x 轴标签缩写；水平网格 5 条含底线，半透明；面积用 40% 纯色，或同一色相的渐变（5% 处 .8 到 95% 处 .1），不跨色相。
 - 静态页面没有悬停提示：在线端标最新值，或在左侧留 3–4 个刻度；不要隐藏 y 轴后一个数字也不标。
 - 两个系列用 \`--s2\` 和 \`--s1\`（深在上），堆叠面积不超过 3 个系列，同一色相不同明度。
-- 卡片尾部 \`.foot\` 的结论必须来自数据本身，自行汇总的涨跌幅标注"自行汇总"，不要照抄示例数字。
+- 卡片尾部 \`.foot\` 的结论必须来自数据本身，自行汇总的涨跌幅标注"自行汇总"，不要沿用示例里的数值数字。
 - 与 \`charts.md\` 的取舍：本主题卡片 12px 圆角、24px 内边距，允许同色相渐变和 40% 填充；仍然不用纯黑纯白，按钮不用药丸形，正文不低于 15px。
 - 适用：趋势类时间序列、仪表盘卡片网格。类别比较用横条，占比用 \`.split\`，超过 7 个类别用表格；样本不足时遵守 \`charts.md\` 的小样本规则。`,
-    en: `# Theme: shadcn charts
+    en: `# Theme: console charts
 
-Chart cards in the style of a mature SaaS console: large radius, generous padding, a single blue ramp, smooth area charts. The specs come from measurements of the shadcn/ui charts page. This is a layer over \`components.md\` and \`charts.md\`.
+Chart cards in the style of a mature SaaS console: large radius, generous padding, a single blue ramp, smooth area charts. This is a layer over \`components.md\` and \`charts.md\`.
 
 \`\`\`css
 /* Append after the components.md and charts.md styles; this overrides the variables */

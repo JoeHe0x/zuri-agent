@@ -98,7 +98,7 @@ function shouldNudgeArtifactDesign(html: string, context: ToolContext) {
 }
 
 // Host-side checks for the zuri-artifact rules: first-screen text budget, colours only through :root variables, no remote resources.
-// Limits mirror the skill; CJK and Latin text are both counted in characters, so the Latin limits are loose.
+// Limits match the skill; CJK and Latin text are both counted in characters, so the Latin limits are loose.
 function artifactIssues(html: string) {
   const text = (fragment: string) => fragment.replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ").replace(/\s+/g, " ").trim();
   const issues: string[] = [];
