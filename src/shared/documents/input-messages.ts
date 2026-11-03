@@ -12,12 +12,40 @@ const messages = defineMessages("document-input", {
     "en": "Each array element is one row: use rows:[{\"Column\":\"Value\"},{\"Column\":\"Value\"}] for object rows, or rows:[[\"Value1\",\"Value2\"],[\"Value3\",\"Value4\"]] for array rows. Do not wrap all rows in another array. Do not mix the two row formats in one table."
   },
   "blockType": {
-    "zh-CN": "内容块类型；每个 block 都必须显式填写。",
-    "en": "Block type. Specify this for every block."
+    "zh-CN": "内容块类型；每个 block 都必须显式填写。callout 是带色调的提示框（用于严重问题、警告、快速收益）；metrics 是一行指标卡，columns 依次为 label、value、note，rows 每行一张卡。",
+    "en": "Block type. Specify this for every block. callout is a tinted note box for critical issues, warnings, or quick wins. metrics is a row of metric cards: columns are label, value, note in that order, and each row is one card."
   },
   "blockText": {
-    "zh-CN": "paragraph、heading、code 的正文；link 的显示文本。",
-    "en": "Body text for paragraph, heading, or code; display text for link."
+    "zh-CN": "paragraph、heading、code、callout 的正文；link 的显示文本。",
+    "en": "Body text for paragraph, heading, code, or callout; display text for link."
+  },
+  "calloutKind": {
+    "zh-CN": "callout 的色调：info（默认）、success、warning、critical。",
+    "en": "Callout tone: info (default), success, warning, or critical."
+  },
+  "calloutTitle": {
+    "zh-CN": "callout 的简短标题，可省略。",
+    "en": "Short callout title. Optional."
+  },
+  "calloutKindInvalid": {
+    "zh-CN": "callout.kind 只能是 info、success、warning 或 critical。",
+    "en": "callout.kind must be info, success, warning, or critical."
+  },
+  "calloutTitleExample": {
+    "zh-CN": "需要处理",
+    "en": "Needs attention"
+  },
+  "calloutTextExample": {
+    "zh-CN": "说明问题、依据和影响。",
+    "en": "State the issue, its evidence, and its impact."
+  },
+  "metricExample": {
+    "zh-CN": "总评分",
+    "en": "Overall score"
+  },
+  "metricNoteExample": {
+    "zh-CN": "较上期 +4",
+    "en": "+4 vs last period"
   },
   "headingLevel": {
     "zh-CN": "heading 级别，默认 1。",

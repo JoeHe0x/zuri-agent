@@ -61,9 +61,14 @@ registerTool({
     required: ["content"],
   } as const; },
   timeout: { defaultMs: 15000, maxMs: 120000 },
-  execute: async ({ filename = "", content, mimeType }) => {
+  execute: async ({ filename = "", content, mimeType }, _signal, context = {}) => {
     const text = String(content ?? "");
     mimeType = resolveSaveFileMimeType(filename, mimeType, text);
+    if (mimeType === "text/html" && shouldNudgeArtifactDesign(text, context)) {
+      throw new ToolExecutionError("ARTIFACT_DESIGN_REQUIRED", t("artifactDesignRequired"), { skill: "zuri-artifact", resources: ["references/components.md", "references/charts.md"] });
+    }
+    const textProblem = mimeType === "text/html" ? artifactTextProblem(text, context) : "";
+    if (textProblem) throw new ToolExecutionError("ARTIFACT_TEXT_TOO_LONG", t("artifactTextTooLong", { issues: textProblem }), { skill: "zuri-artifact" });
     filename = resolveSaveFileFilename(filename, mimeType);
     // Use a data URL because Service Workers lack URL.createObjectURL.
     const base64 = btoa(unescape(encodeURIComponent(text)));
@@ -72,6 +77,47 @@ registerTool({
     return { downloadId: id, filename, mimeType, size: text.length };
   },
 });
+
+// A full HTML page without the design stamp, or a stamped one with over-long first-screen text, is sent back once per run; a repeat call goes through, so an explicit raw-HTML request is never blocked.
+const ARTIFACT_NUDGE_MIN_CHARS = 1500;
+const artifactNudged = new Set<string>();
+const artifactLinted = new Set<string>();
+function firstInRun(seen: Set<string>, context: ToolContext) {
+  if (!context.sessionId || !context.runId) return false;
+  const key = `${context.sessionId}:${context.runId}`;
+  if (seen.has(key)) return false;
+  if (seen.size >= 64) seen.delete(seen.values().next().value as string);
+  seen.add(key);
+  return true;
+}
+function isFullHtmlPage(html: string) {
+  return html.length >= ARTIFACT_NUDGE_MIN_CHARS && /^\s*(?:<!--[\s\S]*?-->\s*)*(?:<!doctype\s+html|<html[\s>])/i.test(html);
+}
+function shouldNudgeArtifactDesign(html: string, context: ToolContext) {
+  return isFullHtmlPage(html) && !/<!--\s*zuri-artifact/i.test(html) && firstInRun(artifactNudged, context);
+}
+
+// Limits mirror the text budget in the zuri-artifact skill; CJK and Latin text are both counted in characters, so the Latin limits are loose.
+function artifactTextIssues(html: string) {
+  const text = (fragment: string) => fragment.replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ").replace(/\s+/g, " ").trim();
+  const issues: string[] = [];
+  const h1 = html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i)?.[1];
+  if (h1 !== undefined && text(h1).length > 30) issues.push(t("artifactIssueTitle", { count: text(h1).length }));
+  const verdict = html.match(/<p[^>]*class="[^"]*\bverdict\b[^"]*"[^>]*>([\s\S]*?)<\/p>/i)?.[1];
+  if (verdict !== undefined && text(verdict).length > 90) issues.push(t("artifactIssueVerdict", { count: text(verdict).length }));
+  const meta = html.match(/<p[^>]*class="[^"]*\bmeta\b[^"]*"[^>]*>([\s\S]*?)<\/p>/i)?.[1];
+  const metaItems = meta?.match(/<span[\s>]/gi)?.length ?? 0;
+  if (metaItems > 3) issues.push(t("artifactIssueMeta", { count: metaItems }));
+  const summary = html.match(/<ul[^>]*class="[^"]*\bsummary\b[^"]*"[^>]*>([\s\S]*?)<\/ul>/i)?.[1];
+  const bullets = summary?.match(/<li[^>]*>[\s\S]*?<\/li>/gi) ?? [];
+  if (bullets.length > 3 || bullets.some(item => text(item).length > 45)) issues.push(t("artifactIssueSummary"));
+  return issues;
+}
+function artifactTextProblem(html: string, context: ToolContext) {
+  if (!isFullHtmlPage(html) || !/<!--\s*zuri-artifact/i.test(html)) return "";
+  const issues = artifactTextIssues(html);
+  return issues.length && firstInRun(artifactLinted, context) ? issues.join("；") : "";
+}
 
 const SAVE_FILE_MIME_BY_EXTENSION: Readonly<Record<string, string>> = Object.freeze({
   json: "application/json",

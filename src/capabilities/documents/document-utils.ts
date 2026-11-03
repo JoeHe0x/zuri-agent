@@ -4,6 +4,7 @@ import { createZipBytes, openZip } from "#sdk/shared/format";
 import * as pdfjsLib from "pdfjs-dist/build/pdf.mjs";
 import { WorkerMessageHandler as pdfJsWorkerMessageHandler } from "pdfjs-dist/build/pdf.worker.mjs";
 import { CODE_FILENAMES, isCodeDocumentExtension, isCodeDocumentMime } from "#sdk/shared/documents";
+import { DOCUMENT_CALLOUT_KINDS } from "#sdk/shared/document-input";
 import {
   buildDocumentContentChunks,
 } from "#sdk/shared/documents";
@@ -15,7 +16,7 @@ type Data = Record<string, unknown>;
 interface ListItem { text: string; children: ListItem[] }
 interface Block extends DocumentBlock {
   text?: string; name?: string; level?: number; columns?: string[]; rows?: Data[]; items?: ListItem[];
-  ordered?: boolean; url?: string; caption?: string; alt?: string; language?: string;
+  ordered?: boolean; url?: string; caption?: string; alt?: string; language?: string; kind?: string; title?: string;
   _pageNumber?: number; _fontSize?: number;
 }
 interface PdfLine { pageNumber: number; x: number; y: number; size: number; text: string }
@@ -40,24 +41,56 @@ export function createWorkbookBytes({ title = "", blocks = [], sheets = [] }: Do
 export function buildDocumentHtml({ title = "", blocks = [], sheets = [] }: DocumentContent = {}) {
   const body = [];
   const safeTitle = escapeHtml(title || firstText(blocks) || "Document");
-  body.push("<!doctype html><html><head><meta charset=\"utf-8\">");
+  body.push("<!doctype html><html><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">");
   body.push(`<title>${safeTitle}</title>`);
   body.push("<style>");
   body.push(`
+    /* Report skin. Floor: every colour is a token, no pure black or white, no tracked caps, capped container, 16px body. */
     @page { size: A4; margin: 18mm 16mm; }
-    body { color: #171717; font: 14px/1.72 -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; }
-    h1, h2, h3 { line-height: 1.25; margin: 22px 0 10px; page-break-after: avoid; }
-    h1 { font-size: 26px; } h2 { font-size: 21px; } h3 { font-size: 17px; }
-    p { margin: 8px 0; white-space: pre-wrap; }
-    a { color: #1d4ed8; text-decoration: none; }
-    img { max-width: 100%; height: auto; margin: 10px 0; }
-    figure { margin: 14px 0; } figcaption { color: #737373; font-size: 12px; }
-    pre { margin: 12px 0 16px; padding: 10px 12px; border: 1px solid #e5e7eb; border-radius: 6px; background: #f8fafc; overflow: auto; white-space: pre; }
-    code { font: 12px/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; }
-    table { width: 100%; border-collapse: collapse; margin: 14px 0 20px; page-break-inside: auto; }
-    th, td { border: 1px solid #d6d6d6; padding: 7px 9px; text-align: left; vertical-align: top; word-break: break-word; }
-    th { background: #f5f5f5; font-weight: 700; }
-    .sheet-title { margin-top: 26px; color: #525252; font-size: 13px; letter-spacing: .04em; text-transform: uppercase; }
+    :root {
+      color-scheme: light dark;
+      --paper: oklch(98.6% .004 250); --surface: oklch(96.2% .006 250); --ink: oklch(24% .02 255); --muted: oklch(48% .02 255); --rule: oklch(88% .008 250);
+      --accent: oklch(46% .12 250); --info: var(--accent); --success: oklch(47% .1 155); --warning: oklch(52% .12 70); --critical: oklch(48% .16 27);
+      --font: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root { --paper: oklch(20% .012 255); --surface: oklch(24% .014 255); --ink: oklch(93% .008 250); --muted: oklch(72% .015 250); --rule: oklch(34% .015 255);
+        --accent: oklch(76% .11 250); --success: oklch(76% .13 155); --warning: oklch(80% .13 75); --critical: oklch(74% .15 27); }
+    }
+    @media print {
+      :root { --paper: oklch(99% .002 250); --surface: oklch(96% .004 250); --ink: oklch(24% .02 255); --muted: oklch(45% .02 255); --rule: oklch(86% .006 250);
+        --accent: oklch(42% .12 250); --success: oklch(42% .1 155); --warning: oklch(46% .12 70); --critical: oklch(44% .16 27); }
+      body { padding: 0; }
+    }
+    * { box-sizing: border-box; }
+    html, body { overflow-x: clip; }
+    body { max-width: 52rem; margin: 0 auto; padding: clamp(20px, 5vw, 56px) clamp(16px, 4vw, 24px) 72px; background: var(--paper); color: var(--ink); font: 16px/1.65 var(--font); -webkit-font-smoothing: antialiased; }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.25; margin: 2em 0 .5em; font-weight: 650; text-wrap: balance; overflow-wrap: break-word; page-break-after: avoid; }
+    h1 { margin-top: 0; font-size: clamp(28px, 5vw, 36px); line-height: 1.15; letter-spacing: -.01em; }
+    h2 { font-size: 24px; padding-top: .6em; border-top: 1px solid var(--rule); } h1 + h2 { border-top: 0; padding-top: 0; }
+    h3 { font-size: 19px; } h4, h5, h6 { font-size: 16px; color: var(--muted); }
+    p { max-width: 65ch; margin: 0 0 1em; white-space: pre-wrap; overflow-wrap: break-word; }
+    ul, ol { max-width: 65ch; margin: 0 0 1.1em; padding-left: 1.4em; } li { margin: .3em 0; } li::marker { color: var(--muted); }
+    a { color: var(--accent); text-underline-offset: 3px; } a:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 2px; }
+    img { display: block; max-width: 100%; height: auto; border-radius: 6px; }
+    figure { margin: 1.6em 0; } figcaption { margin-top: .5em; color: var(--muted); font-size: 14px; }
+    pre { margin: 1.2em 0; padding: 14px 16px; border: 1px solid var(--rule); border-radius: 6px; background: var(--surface); overflow: auto; white-space: pre; }
+    code { font: 13px/1.6 var(--mono); }
+    .table-wrap { margin: 1.4em 0 1.8em; overflow-x: auto; border: 1px solid var(--rule); border-radius: 6px; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; line-height: 1.5; font-variant-numeric: tabular-nums; }
+    th, td { padding: 9px 14px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--rule); overflow-wrap: break-word; }
+    th { background: var(--surface); font-size: 13px; font-weight: 650; color: var(--muted); }
+    tbody tr:last-child td { border-bottom: 0; }
+    .sheet-title { margin-top: 2em; font-size: 20px; }
+    .metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 10rem), 1fr)); gap: 12px; margin: 1.4em 0; }
+    .metric { min-width: 0; padding: 14px 16px; border: 1px solid var(--rule); border-radius: 6px; background: var(--surface); break-inside: avoid; }
+    .metric-label, .metric-note { color: var(--muted); font-size: 14px; line-height: 1.4; overflow-wrap: break-word; }
+    .metric-value { margin: 4px 0; font-size: 30px; font-weight: 650; line-height: 1.1; font-variant-numeric: tabular-nums; overflow-wrap: break-word; }
+    .callout { --tone: var(--info); max-width: 65ch; margin: 1.4em 0; padding: 12px 16px; border: 1px solid color-mix(in oklch, var(--tone) 45%, var(--paper)); border-radius: 6px; background: color-mix(in oklch, var(--tone) 9%, var(--paper)); break-inside: avoid; }
+    .callout[data-kind="success"] { --tone: var(--success); } .callout[data-kind="warning"] { --tone: var(--warning); } .callout[data-kind="critical"] { --tone: var(--critical); }
+    .callout p { margin: 0; } .callout .callout-title { margin-bottom: .25em; font-weight: 650; color: var(--tone); }
+    @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
   `);
   body.push("</style></head><body>");
   for (const block of normalizeBlocks(blocks)) body.push(blockToHtml(block));
@@ -742,7 +775,7 @@ function extractExcelText(xml: string) {
 }
 
 export async function createDocxBytes({ title = "", blocks = [], sheets = [] }: DocumentContent = {}) {
-  const normalizedBlocks = [...normalizeBlocks(blocks), ...sheetsToBlocks(normalizeSheets(sheets))];
+  const normalizedBlocks = [...normalizeBlocks(blocks).map(flattenRichBlock), ...sheetsToBlocks(normalizeSheets(sheets))];
   const body = normalizedBlocks.map((block, index) => blockToWordXml(block, index)).join("");
   const files = [
     { name: "[Content_Types].xml", data: contentTypesXml("docx") },
@@ -889,6 +922,11 @@ function blockToHtml(block: Block) {
     return `<h${level}>${escapeHtml(block.text || "")}</h${level}>`;
   }
   if (block.type === "table") return tableToHtml(block.columns, block.rows);
+  if (block.type === "metrics") return metricsToHtml(block.columns, block.rows);
+  if (block.type === "callout") {
+    const title = block.title ? `<p class="callout-title">${escapeHtml(block.title)}</p>` : "";
+    return `<aside class="callout" data-kind="${escapeAttr(block.kind || "info")}" role="note">${title}<p>${escapeHtml(block.text || "")}</p></aside>`;
+  }
   if (block.type === "list") {
     const tag = block.ordered ? "ol" : "ul";
     return `<${tag}>${(block.items || []).map(item => listItemToHtml(item, tag)).join("")}</${tag}>`;
@@ -911,7 +949,17 @@ function blockToHtml(block: Block) {
 function tableToHtml(columnsInput: readonly string[] = [], rowsInput: readonly Data[] = []) {
   const columns = Array.isArray(columnsInput) && columnsInput.length ? columnsInput.map(String) : inferSheetColumns(rowsInput);
   const rows = Array.isArray(rowsInput) ? rowsInput : [];
-  return `<table><thead><tr>${columns.map(column => `<th>${escapeHtml(column)}</th>`).join("")}</tr></thead><tbody>${rows.map(row => `<tr>${columns.map(column => `<td>${escapeHtml(valueToText(row?.[column]))}</td>`).join("")}</tr>`).join("")}</tbody></table>`;
+  return `<div class="table-wrap"><table><thead><tr>${columns.map(column => `<th>${escapeHtml(column)}</th>`).join("")}</tr></thead><tbody>${rows.map(row => `<tr>${columns.map(column => `<td>${escapeHtml(valueToText(row?.[column]))}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
+}
+
+/** Columns are positional: label, value, note. */
+function metricsToHtml(columnsInput: readonly string[] = [], rowsInput: readonly Data[] = []) {
+  const [label, value, note] = columnsInput;
+  const cards = (Array.isArray(rowsInput) ? rowsInput : []).map(row => {
+    const noteText = note ? valueToText(row?.[note]) : "";
+    return `<div class="metric"><div class="metric-label">${escapeHtml(valueToText(row?.[label]))}</div><div class="metric-value">${escapeHtml(valueToText(row?.[value]))}</div>${noteText ? `<div class="metric-note">${escapeHtml(noteText)}</div>` : ""}</div>`;
+  });
+  return `<div class="metrics">${cards.join("")}</div>`;
 }
 
 function listItemToHtml(item: ListItem | string, parentTag: string): string {
@@ -1143,8 +1191,9 @@ function blocksToPlainText(blocks: unknown = [], sheets: unknown = []) {
   return parts.filter(Boolean).join("\n\n");
 }
 
-function blockPlainText(block: Block) {
-  if (!block) return "";
+function blockPlainText(input: Block) {
+  if (!input) return "";
+  const block = flattenRichBlock(input);
   if (block.type === "heading") return `${"#".repeat(Math.max(1, Number(block.level) || 1))} ${block.text || ""}`;
   if (block.type === "table") {
     const columns = Array.isArray(block.columns) && block.columns.length ? block.columns : inferSheetColumns(block.rows || []);
@@ -1161,6 +1210,11 @@ function normalizeBlock(input: unknown): Block {
   const block = record(input);
   if (block.type === "heading") return { type: "heading", level: Math.max(1, Math.min(6, Number(block.level) || 1)), text: String(block.text || "") };
   if (block.type === "table") return normalizeTableBlock(block);
+  if (block.type === "metrics") return { ...normalizeTableBlock(block), type: "metrics" };
+  if (block.type === "callout") {
+    const kind = String(block.kind);
+    return { type: "callout", kind: DOCUMENT_CALLOUT_KINDS.includes(kind) ? kind : "info", title: String(block.title || ""), text: String(block.text || "") };
+  }
   if (block.type === "list") return normalizeListBlock(block);
   if (block.type === "link") return { type: "link", text: String(block.text || ""), url: String(block.url || "") };
   if (block.type === "image") return { type: "image", url: String(block.url || ""), alt: String(block.alt || ""), caption: String(block.caption || "") };
@@ -1174,6 +1228,13 @@ function normalizeBlock(input: unknown): Block {
     };
   }
   return { type: "paragraph", text: String(block.text ?? block.content ?? "") };
+}
+
+/** Word and plain text have no tinted boxes or cards; fall back to the nearest basic block. */
+function flattenRichBlock(block: Block): Block {
+  if (block.type === "callout") return { type: "paragraph", text: [block.title, block.text].filter(Boolean).join(": ") };
+  if (block.type === "metrics") return { ...block, type: "table" };
+  return block;
 }
 
 function normalizeTableBlock(block: Data = {}) {

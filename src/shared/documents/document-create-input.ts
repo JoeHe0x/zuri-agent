@@ -13,7 +13,11 @@ export const DOCUMENT_BLOCK_TYPES = Object.freeze([
   "link",
   "image",
   "code",
+  "callout",
+  "metrics",
 ]);
+
+export const DOCUMENT_CALLOUT_KINDS = Object.freeze(["info", "success", "warning", "critical"]);
 
 const DOCUMENT_BLOCK_TYPE_SET = new Set(DOCUMENT_BLOCK_TYPES);
 const DOCUMENT_LINK_PROTOCOLS = new Set(["http:", "https:", "mailto:", "tel:"]);
@@ -53,6 +57,8 @@ export const DOCUMENT_BLOCK_INPUT_SCHEMA = Object.freeze({
     language: { type: "string", get description() { return t("codeLanguage"); } },
     startLine: { type: "integer", minimum: 1, get description() { return t("codeStart"); } },
     endLine: { type: "integer", minimum: 1, get description() { return t("codeEnd"); } },
+    kind: { type: "string", enum: DOCUMENT_CALLOUT_KINDS, get description() { return t("calloutKind"); } },
+    title: { type: "string", get description() { return t("calloutTitle"); } },
   } as const),
 } as const);
 
@@ -90,6 +96,8 @@ export const DOCUMENT_BLOCK_EXAMPLES = Object.freeze({
   link: Object.freeze({ type: "link", text: t("reference"), url: "https://example.com" }),
   image: Object.freeze({ type: "image", url: "https://example.com/image.png", alt: t("illustration") }),
   code: Object.freeze({ type: "code", language: "javascript", text: "const answer = 42;" }),
+  callout: Object.freeze({ type: "callout", kind: "warning", title: t("calloutTitleExample"), text: t("calloutTextExample") }),
+  metrics: Object.freeze({ type: "metrics", columns: ["label", "value", "note"], rows: [[t("metricExample"), "82", t("metricNoteExample")]] }),
 });
 
 const BLOCK_ALLOWED_KEYS = Object.freeze({
@@ -100,6 +108,8 @@ const BLOCK_ALLOWED_KEYS = Object.freeze({
   link: new Set(["type", "text", "url"]),
   image: new Set(["type", "url", "alt", "caption"]),
   code: new Set(["type", "text", "language", "startLine", "endLine"]),
+  callout: new Set(["type", "text", "kind", "title"]),
+  metrics: new Set(["type", "columns", "rows"]),
 });
 
 /** Validates only direct document_create payloads. Parsed docModels keep their tolerant internal contract. */
@@ -152,7 +162,7 @@ export function summarizeDocumentContent({ title = "", blocks = [], sheets = [] 
       const listSummary = summarizeListItems(block.items);
       summary.listItems += listSummary.count;
       summary.textChars += listSummary.textChars;
-    } else if (block.type === "table") {
+    } else if (block.type === "table" || block.type === "metrics") {
       summary.tables += 1;
       summary.tabularSources += 1;
       summary.tableRows += Array.isArray(block.rows) ? block.rows.length : 0;
@@ -161,7 +171,7 @@ export function summarizeDocumentContent({ title = "", blocks = [], sheets = [] 
     else if (block.type === "image") summary.images += 1;
     else if (block.type === "code") summary.codeBlocks += 1;
 
-    if (!["list", "table"].includes(String(block.type))) {
+    if (!["list", "table", "metrics"].includes(String(block.type))) {
       summary.textChars += String(block.text || block.caption || block.alt || block.url || "").trim().length;
     }
   }
@@ -211,10 +221,17 @@ function validateBlock(block: unknown, path: string, collector: IssueCollector) 
     });
   }
 
-  if (["paragraph", "heading", "code"].includes(type)) validateRequiredText(block.text, `${path}.text`, collector);
+  if (["paragraph", "heading", "code", "callout"].includes(type)) validateRequiredText(block.text, `${path}.text`, collector);
   if (type === "heading" && block.level != null && (typeof block.level !== "number" || !Number.isInteger(block.level) || block.level < 1 || block.level > 6)) {
     collector.add(`${path}.level`, "range", t("headingRange"), { received: block.level });
   }
+  if (type === "callout") {
+    if (block.kind != null && !DOCUMENT_CALLOUT_KINDS.includes(block.kind as string)) {
+      collector.add(`${path}.kind`, "enum", t("calloutKindInvalid"), { received: block.kind, expected: DOCUMENT_CALLOUT_KINDS });
+    }
+    validateOptionalString(block.title, `${path}.title`, collector);
+  }
+  if (type === "metrics") validateTabularValue(block, path, collector);
   if (type === "list") validateListBlock(block, path, collector);
   if (type === "table") {
     if (block.name != null) validateSheetName(block.name, `${path}.name`, collector);
