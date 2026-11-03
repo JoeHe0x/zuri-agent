@@ -79,6 +79,7 @@ import {
 } from "../skills/skill-tool-runtime.js";
 import { createCdpRuntime } from "./cdp-runtime.js";
 import { confirmDebuggerReattach } from "./debugger-reattach.js";
+import { confirmPageDialog } from "./page-dialog-confirm.js";
 import { createElementRuntime } from "./element-runtime.js";
 import { callMcpServerTool, inspectMcpServer } from "../mcp/mcp-client.js";
 
@@ -1537,6 +1538,7 @@ const {
   isRunCurrent: isCdpRunCurrent,
   authorizeRunTab: authorizeRunCdpTab,
   confirmUserReattach: access => confirmDebuggerReattach(access, getToolRuntimeDependencies(access.context)),
+  confirmPageDialog: access => confirmPageDialog(access, getToolRuntimeDependencies(access.context)),
 });
 
 function isCdpRunCurrent({ sessionId, runId, context = {} }: { sessionId: string; runId: string; context?: ToolContext }) {

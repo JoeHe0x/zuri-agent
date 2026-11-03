@@ -14,8 +14,11 @@ interface CdpState {
   recoveryPromise: Promise<void> | null;
   idlePromise: Promise<void> | null;
   attachPromise: Promise<void> | null; detachPromise: Promise<void> | null;
+  /** Latest tool context, used to reach the Session when a page dialog opens between tool calls. */
+  context?: ToolContext;
 }
 interface DebuggerApi {
+  onEvent?: { addListener(listener: (source: chrome.debugger.DebuggerSession, method: string, params?: object) => void): void };
   onDetach?: { addListener(listener: (source: chrome.debugger.Debuggee, reason: string) => void): void };
   attach(target: chrome.debugger.Debuggee, version: string): Promise<void>;
   detach(target: chrome.debugger.Debuggee): Promise<void>;
@@ -30,6 +33,8 @@ interface CdpHost {
   authorizeRunTab?: ((access: RunAccess & { tabId: number }) => Promise<unknown>) | null;
   /** Asks whether a run may re-attach after the user dismissed the debugging bar; false refuses control. */
   confirmUserReattach?: ((access: RunAccess & { tabId: number; signal?: AbortSignal | null }) => Promise<boolean>) | null;
+  /** Asks the user to accept (true) or dismiss (false) a page's confirm/prompt dialog. */
+  confirmPageDialog?: ((access: RunAccess & { tabId: number; message: string }) => Promise<boolean>) | null;
   debuggerApi?: DebuggerApi;
 }
 type CdpOperation<T> = (target: chrome.debugger.Debuggee, send: CdpCommand) => T | Promise<T>;
@@ -40,6 +45,7 @@ export function createCdpRuntime({
   isRunCurrent = null,
   authorizeRunTab = null,
   confirmUserReattach = null,
+  confirmPageDialog = null,
   debuggerApi = globalThis.chrome?.debugger,
 }: CdpHost) {
   const tabs = new Map<number, CdpState>();
@@ -64,6 +70,24 @@ export function createCdpRuntime({
       tabs.delete(tabId);
     }
   });
+
+  // A native dialog blocks every other CDP command until answered. Informational ones are accepted;
+  // confirm/prompt wait for the user's decision and are dismissed when it is refused or unavailable.
+  debuggerApi?.onEvent?.addListener((source, method, params) => {
+    const state = tabs.get(Number(source.tabId));
+    if (method !== "Page.javascriptDialogOpening" || source.sessionId || !state?.attached) return;
+    const { type, message, defaultPrompt } = record(params);
+    const answer = (accept: boolean) => debuggerApi.sendCommand({ tabId: source.tabId }, "Page.handleJavaScriptDialog",
+      { accept, ...(accept && type === "prompt" ? { promptText: String(defaultPrompt ?? "") } : {}) }).catch(() => {});
+    if (type === "alert" || type === "beforeunload") { void answer(true); return; }
+    void (confirmPageDialog
+      ? confirmPageDialog({ tabId: state.tabId, context: state.context || {}, sessionId: state.sessionId || "", runId: state.runId || "", message: String(message ?? "") })
+      : Promise.resolve(false)).catch(() => false).then(answer);
+  });
+
+  function enableDialogEvents(state: CdpState) {
+    void debuggerApi.sendCommand(state.target, "Page.enable").catch(() => {});
+  }
 
   async function ensureDebugger(tabId: unknown, context: ToolContext = {}): Promise<CdpState> {
     const owner = runOwner(tabId, context);
@@ -179,6 +203,7 @@ export function createCdpRuntime({
       tabs.set(id, state);
     }
 
+    state.context = context;
     if (state.attached) return state;
     if (!state.attachPromise) {
       state.attachPromise = (async () => {
@@ -187,6 +212,7 @@ export function createCdpRuntime({
           state.attached = true;
           state.userDetached = false;
           state.connectionId = ++connectionSeq;
+          enableDialogEvents(state);
         } catch (err) {
           if (tabs.get(id) === state) tabs.delete(id);
           assertStateActive(state);
@@ -408,6 +434,7 @@ export function createCdpRuntime({
         state.attached = true;
         state.userDetached = false;
         state.connectionId = ++connectionSeq;
+        enableDialogEvents(state);
       });
       await state.attachPromise;
       check();
