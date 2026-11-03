@@ -67,8 +67,8 @@ registerTool({
     if (mimeType === "text/html" && shouldNudgeArtifactDesign(text, context)) {
       throw new ToolExecutionError("ARTIFACT_DESIGN_REQUIRED", t("artifactDesignRequired"), { skill: "zuri-artifact", resources: ["references/components.md", "references/charts.md"] });
     }
-    const textProblem = mimeType === "text/html" ? artifactTextProblem(text, context) : "";
-    if (textProblem) throw new ToolExecutionError("ARTIFACT_TEXT_TOO_LONG", t("artifactTextTooLong", { issues: textProblem }), { skill: "zuri-artifact" });
+    const lintProblem = mimeType === "text/html" ? artifactLintProblem(text, context) : "";
+    if (lintProblem) throw new ToolExecutionError("ARTIFACT_LINT", t("artifactLint", { issues: lintProblem }), { skill: "zuri-artifact" });
     filename = resolveSaveFileFilename(filename, mimeType);
     // Use a data URL because Service Workers lack URL.createObjectURL.
     const base64 = btoa(unescape(encodeURIComponent(text)));
@@ -97,8 +97,9 @@ function shouldNudgeArtifactDesign(html: string, context: ToolContext) {
   return isFullHtmlPage(html) && !/<!--\s*zuri-artifact/i.test(html) && firstInRun(artifactNudged, context);
 }
 
-// Limits mirror the text budget in the zuri-artifact skill; CJK and Latin text are both counted in characters, so the Latin limits are loose.
-function artifactTextIssues(html: string) {
+// Host-side checks for the zuri-artifact rules: first-screen text budget, colours only through :root variables, no remote resources.
+// Limits mirror the skill; CJK and Latin text are both counted in characters, so the Latin limits are loose.
+function artifactIssues(html: string) {
   const text = (fragment: string) => fragment.replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ").replace(/\s+/g, " ").trim();
   const issues: string[] = [];
   const h1 = html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i)?.[1];
@@ -111,11 +112,15 @@ function artifactTextIssues(html: string) {
   const summary = html.match(/<ul[^>]*class="[^"]*\bsummary\b[^"]*"[^>]*>([\s\S]*?)<\/ul>/i)?.[1];
   const bullets = summary?.match(/<li[^>]*>[\s\S]*?<\/li>/gi) ?? [];
   if (bullets.length > 3 || bullets.some(item => text(item).length > 45)) issues.push(t("artifactIssueSummary"));
+  const styled = html.replace(/<style[^>]*>([\s\S]*?)<\/style>/gi, (_match, css: string) => `<style>${css.replace(/:root\s*\{[^}]*\}/g, "")}</style>`);
+  const colours = styled.match(/(?<=[:\s,(]|(?:fill|stroke|color)=["'])#[0-9a-f]{3,8}\b(?=[^{}]*[;}"'])|\b(?:rgba?|hsla?)\(/gi)?.length ?? 0;
+  if (colours) issues.push(t("artifactIssueColours", { count: colours }));
+  if (/<(?:script|img|iframe|source)\b[^>]*\bsrc\s*=\s*["']?(?:https?:)?\/\//i.test(html) || /<link\b[^>]*\bhref\s*=\s*["']?(?:https?:)?\/\//i.test(html) || /@import\s+(?:url\()?["']?(?:https?:)?\/\//i.test(html)) issues.push(t("artifactIssueRemote"));
   return issues;
 }
-function artifactTextProblem(html: string, context: ToolContext) {
+function artifactLintProblem(html: string, context: ToolContext) {
   if (!isFullHtmlPage(html) || !/<!--\s*zuri-artifact/i.test(html)) return "";
-  const issues = artifactTextIssues(html);
+  const issues = artifactIssues(html);
   return issues.length && firstInRun(artifactLinted, context) ? issues.join("；") : "";
 }
 
