@@ -1,8 +1,7 @@
 import { defineMessages } from "#sdk/shared/i18n-definition";
-import { createTranslator } from "#sdk/shared/i18n";
 
-/** Report design guidance for the model. Rules follow Hallmark's Floor/Reflex split, rewritten for reports. */
-const messages = defineMessages("documents-artifact", {
+/** Artifact guidance for the model. Rules follow Hallmark's Floor/Reflex split, rewritten for reports. */
+const messages = defineMessages("artifact", {
   displayName: { "zh-CN": "Artifact（预览）", en: "Artifact (Preview)" },
   description: {
     "zh-CN": "分析、调研、审计、评测对比类任务的交付规范：用户让你分析一个实验、一份数据、一个页面或一个产品，并要给出可阅读、可转发的结论时，在开始分析前就加载它。它决定要收集哪些证据，并把结果做成精致的报告、审计、对比、简报或仪表盘文件。单个事实、简短问答、原样下载和格式转换无需加载。",
@@ -1210,4 +1209,4 @@ Built for side-by-side judgment, with a teal accent on a neutral ground. Fits pr
   },
 });
 
-export const reportDesignT = createTranslator(messages);
+export default messages;

@@ -1,4 +1,4 @@
-import { reportDesignT as t } from "./artifact-messages.js";
+import { t } from "./i18n.js";
 
 const resource = (path: string, key: "themeResearch" | "themeDashboard" | "themeComparison" | "themeKit" | "themeKitExtra" | "themeCharts" | "themeAudit" | "themeShadcn" | "themeInstrument") => ({
   path, type: "reference", get title() { return t(key).split("\n", 1)[0].replace(/^#\s*/, ""); }, get content() { return t(key); },
