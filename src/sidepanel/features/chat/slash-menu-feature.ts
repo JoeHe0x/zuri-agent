@@ -146,14 +146,18 @@ export function createSlashMenuFeature(options: SlashOptions) {
   });
 
   async function refreshCurrentTab() {
-    const current = (await options.references?.listReferences() || []).find(item => item.current);
+    let current: SlashItem | undefined;
+    try { current = (await options.references?.listReferences() || []).find(item => item.current); } catch { /* keep going: a stale chip would share the wrong page */ }
     currentTab = current && tabKey(current) !== dismissedTab ? current : null;
     renderMentions();
   }
   if (typeof chrome !== "undefined" && chrome.tabs?.onActivated) {
-    const refresh = () => void refreshCurrentTab().catch(() => {});
-    chrome.tabs.onActivated.addListener(refresh);
-    chrome.tabs.onUpdated.addListener((_id, change) => { if (change.title || change.status === "complete") refresh(); });
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const refresh = () => { clearTimeout(timer); timer = setTimeout(() => void refreshCurrentTab(), 150); };
+    // Dismissing the chip only applies to that tab until the user switches away.
+    chrome.tabs.onActivated.addListener(() => { dismissedTab = ""; refresh(); });
+    chrome.tabs.onUpdated.addListener((_id, change, tab) => { if (tab.active && (change.title || change.status === "complete")) refresh(); });
+    chrome.windows?.onFocusChanged.addListener(refresh);
   }
   void refreshCurrentTab().catch(() => {});
 
