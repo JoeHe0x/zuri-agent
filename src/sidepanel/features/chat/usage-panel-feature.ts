@@ -3,6 +3,7 @@ import { contextUsageLevel, contextUsagePercent, formatContextUsageText, formatT
 import type { PortMessage } from "../app/port-client.js";
 
 interface UsageStep { input: number; read: number; write: number; output: number }
+interface ReplayEntry { role: string; text: string; tools: { name: string; args: string; result: string }[]; cache: UsageStep | null }
 interface ContextBreakdown {
   window: number; used: number; tools: number; system: number; messages: number; buffer: number;
   toolList: { name: string; tokens: number }[];
@@ -31,8 +32,10 @@ function el(tag: string, className: string, text = "") {
 /** Click the context ring: a "Context" tab with the window composition and a "Cache" tab with per-request hit rates. */
 export function createUsagePanelFeature(options: UsagePanelOptions) {
   const { button, panel } = options;
-  let tab: "context" | "cache" = "context";
+  let tab: "context" | "cache" | "replay" = "context";
   let steps: UsageStep[] = [];
+  let timeline: ReplayEntry[] = [];
+  const replayOpen = new Set<number>();
   let context: ContextBreakdown | null = null;
   let toolsOpen = false;
 
@@ -134,16 +137,60 @@ export function createUsagePanelFeature(options: UsagePanelOptions) {
     return view;
   }
 
+  /** History in order; each assistant turn carries the same cache_usage numbers the trace records. */
+  function renderReplay() {
+    const view = el("div", "usage-view");
+    if (!timeline.length) {
+      view.append(el("div", "usage-empty", t("usageEmpty")));
+      return view;
+    }
+    const list = el("div", "usage-list usage-replay");
+    timeline.forEach((entry, index) => {
+      const row = el("div", `usage-step usage-step--${entry.role}`);
+      row.tabIndex = 0;
+      row.setAttribute("role", "button");
+      row.setAttribute("aria-expanded", String(replayOpen.has(index)));
+      row.append(el("span", "usage-who", entry.role === "user" ? t("replayYou") : t("replayAgent")));
+      row.append(el("span", "usage-text", entry.text || entry.tools.map(tool => tool.name).join(" · ")));
+      const tail = entry.cache && entry.cache.input > 0 ? el("span", `usage-tail${ratio(entry.cache.read, entry.cache.input) < HIT_WATERLINE ? " usage-meta--low" : ""}`, percent(entry.cache.read, entry.cache.input)) : null;
+      if (tail) row.append(tail);
+      if (entry.tools.length) row.append(el("span", "usage-tool-calls", entry.tools.map(tool => tool.name).join(" · ")));
+      const cache = entry.cache;
+      if (cache && cache.input > 0) {
+        const meta = el("span", `usage-meta${ratio(cache.read, cache.input) < HIT_WATERLINE ? " usage-meta--low" : ""}`, t("replayCache", { rate: percent(cache.read, cache.input), input: formatTokenCount(cache.input), output: formatTokenCount(cache.output) }));
+        meta.title = t("usageRowTip", { read: formatTokenCount(cache.read), input: formatTokenCount(cache.input) });
+        row.append(meta);
+      }
+      const detail = el("div", "usage-detail");
+      detail.hidden = !replayOpen.has(index);
+      for (const tool of entry.tools) {
+        const block = el("div", "usage-call");
+        block.append(el("b", "usage-call-name", tool.name));
+        if (tool.args) block.append(el("code", "usage-call-body", tool.args));
+        if (tool.result) block.append(el("code", "usage-call-body usage-call-result", tool.result));
+        detail.append(block);
+      }
+      if (cache && cache.input > 0) detail.append(el("span", "usage-meta", t("replayCacheDetail", { read: formatTokenCount(cache.read), write: formatTokenCount(cache.write), fresh: formatTokenCount(Math.max(0, cache.input - cache.read - cache.write)) })));
+      row.append(detail);
+      const toggle = () => { const open = detail.hidden; detail.hidden = !open; row.setAttribute("aria-expanded", String(open)); if (open) replayOpen.add(index); else replayOpen.delete(index); };
+      row.addEventListener("click", toggle);
+      row.addEventListener("keydown", event => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); toggle(); } });
+      list.append(row);
+    });
+    view.append(list);
+    return view;
+  }
+
   function render() {
     const tabs = el("div", "usage-tabs");
-    for (const [key, label] of [["context", t("usageTabContext")], ["cache", t("usageTabCache")]] as const) {
+    for (const [key, label] of [["context", t("usageTabContext")], ["cache", t("usageTabCache")], ["replay", t("usageTabReplay")]] as const) {
       const item = el("button", "usage-tab", label) as HTMLButtonElement;
       item.type = "button";
       item.setAttribute("aria-pressed", String(tab === key));
       item.addEventListener("click", () => { tab = key; render(); });
       tabs.append(item);
     }
-    panel.replaceChildren(tabs, tab === "context" ? renderContext() : renderCache());
+    panel.replaceChildren(tabs, tab === "context" ? renderContext() : tab === "cache" ? renderCache() : renderReplay());
   }
 
   async function load() {
@@ -152,6 +199,7 @@ export function createUsagePanelFeature(options: UsagePanelOptions) {
     try {
       const reply = await options.request("get_usage", { sessionId }, 3000);
       steps = Array.isArray(reply.steps) ? reply.steps as UsageStep[] : [];
+      timeline = Array.isArray(reply.timeline) ? reply.timeline as ReplayEntry[] : [];
       context = (reply.context as ContextBreakdown | undefined) ?? null;
       // The ring only hears about send-time snapshots; sync it to the fresh estimate so both show one number.
       if (context?.used) {
@@ -161,6 +209,7 @@ export function createUsagePanelFeature(options: UsagePanelOptions) {
       }
     } catch (_err) {
       steps = [];
+      timeline = [];
       context = null;
     }
     render();

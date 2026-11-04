@@ -1251,6 +1251,16 @@ async function getSessionUsageRuntime(sessionId: string) {
   const agent = await agentHost.getAgent(id);
   const steps = agent.messages.flatMap(message => message.role === "assistant" && message._usage ? [cacheStatsFromUsage(message._usage)] : [])
     .filter(step => step.input > 0 || step.output > 0);
+  const textOf = (content: unknown, max: number) => (Array.isArray(content) ? content : [content])
+    .map(part => typeof part === "string" ? part : String((part as { text?: unknown } | null)?.text ?? "")).join("\n").trim().slice(0, max);
+  const results = new Map(agent.messages.flatMap(message => message.role === "tool" && message.tool_call_id ? [[message.tool_call_id, textOf(message.content, 600)] as const] : []));
+  const timeline = agent.messages.flatMap(message => {
+    if (message.role !== "user" && message.role !== "assistant") return [];
+    const text = textOf(message.content, 1500);
+    const tools = (message.tool_calls ?? []).map(call => ({ name: call.function?.name || "tool", args: (typeof call.function?.arguments === "string" ? call.function.arguments : JSON.stringify(call.function?.arguments ?? "")).slice(0, 400), result: results.get(call.id) ?? "" }));
+    if (!text && !tools.length) return [];
+    return [{ role: message.role, text, tools, cache: message._usage ? cacheStatsFromUsage(message._usage) : null }];
+  });
   const state = await agent.getContextUsageState();
   const used = Number(state.inputTokensEstimate) || 0;
   const tools = Math.min(used, Number(state.toolDefinitionTokens) || 0);
@@ -1258,6 +1268,7 @@ async function getSessionUsageRuntime(sessionId: string) {
   return {
     sessionId: id,
     steps,
+    timeline,
     context: {
       window: Number(state.contextWindow) || 0, used, tools, system, messages: used - tools - system,
       buffer: Number(state.compactReserveTokens) || 0, toolList: state.toolTokens || [],
