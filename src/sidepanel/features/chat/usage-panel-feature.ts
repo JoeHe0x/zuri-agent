@@ -17,7 +17,6 @@ interface UsagePanelOptions {
 
 /** Hit rate at or above this reads as healthy; the cache tab draws it as a waterline. */
 const HIT_WATERLINE = 0.8;
-const RECENT_STEPS = 8;
 const WHO_USER = '<circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/>';
 const WHO_AGENT = '<rect x="4" y="8" width="16" height="12" rx="3"/><path d="M12 8V4.5M9 13.5v1M15 13.5v1"/>';
 const ratio = (part: number, whole: number) => whole > 0 ? part / whole : 0;
@@ -118,12 +117,10 @@ export function createUsagePanelFeature(options: UsagePanelOptions) {
     const sum = (key: keyof UsageStep) => steps.reduce((total, step) => total + step[key], 0);
     // The first request is always a cold start, so it is neither flagged low nor picked as costliest.
     const costliest = steps.length > 2 ? steps.reduce((best, step, i) => i > 0 && step.input - step.read > steps[best].input - steps[best].read ? i : best, 1) : -1;
-    const firstShown = Math.max(0, steps.length - RECENT_STEPS);
     const head = el("div", "usage-head");
     head.append(el("span", "usage-rate", percent(sum("read"), sum("input"))), el("span", "usage-caption", t("usageCacheCaption", { count: steps.length })));
     const list = el("div", "usage-list");
     steps.forEach((step, index) => {
-      if (index < firstShown) return;
       const rate = ratio(step.read, step.input);
       const row = el("div", `usage-row${index === costliest ? " usage-row--top" : ""}${index > 0 && rate < HIT_WATERLINE ? " usage-row--low" : ""}`);
       row.title = t("usageRowTip", { read: formatTokenCount(step.read), input: formatTokenCount(step.input) });
@@ -135,7 +132,7 @@ export function createUsagePanelFeature(options: UsagePanelOptions) {
       row.append(el("span", "usage-n", String(index + 1)), track, el("span", "usage-in", formatTokenCount(step.input)), el("span", "usage-pct", percent(step.read, step.input)));
       list.append(row);
     });
-    view.append(head, list, el("div", "usage-note", t("usageWaterline", { rate: Math.round(HIT_WATERLINE * 100) }) + (firstShown ? ` ${t("usageRecent", { n: RECENT_STEPS })}` : "")));
+    view.append(head, list, el("div", "usage-note", t("usageWaterline", { rate: Math.round(HIT_WATERLINE * 100) })));
     return view;
   }
 

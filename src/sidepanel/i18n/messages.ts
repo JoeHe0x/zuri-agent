@@ -59,7 +59,6 @@ export default defineMessages("core", {
   usageWaterline: { "zh-CN": "虚线为 {rate}% 水位线，低于它的请求以红色显示", en: "Dashed line marks {rate}%; requests below it are red" },
   usageRunway: { "zh-CN": "距自动压缩约 {tokens}", en: "About {tokens} until auto-compact" },
   usageCompactSoon: { "zh-CN": "即将自动压缩", en: "Auto-compact is near" },
-  usageRecent: { "zh-CN": "仅显示最近 {n} 次。", en: "Showing the last {n}." },
   usageEmpty: { "zh-CN": "还没有用量数据", en: "No usage yet" },
   uploadFiles: { "zh-CN": "上传文件", en: "Upload files" },
   currentTabHint: { "zh-CN": "当前标签页", en: "Current tab" },
