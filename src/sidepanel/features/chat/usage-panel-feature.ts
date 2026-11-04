@@ -173,7 +173,9 @@ export function createUsagePanelFeature(options: UsagePanelOptions) {
     const areaRect = area.getBoundingClientRect();
     const buttonRect = button.getBoundingClientRect();
     panel.style.bottom = `${Math.round(areaRect.bottom - buttonRect.top + 4)}px`;
-    panel.style.insetInlineEnd = `${Math.max(0, Math.round(areaRect.right - buttonRect.right))}px`;
+    // Keep the left edge inside the area (12px gutter) when the ring sits far from the right edge.
+    const maxEnd = Math.max(0, areaRect.width - panel.offsetWidth - 12);
+    panel.style.insetInlineEnd = `${Math.min(maxEnd, Math.max(0, Math.round(areaRect.right - buttonRect.right)))}px`;
   }
 
   button.addEventListener("click", () => {
