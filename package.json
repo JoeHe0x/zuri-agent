@@ -2,9 +2,6 @@
   "name": "zuri-agent",
   "private": true,
   "type": "module",
-  "allowScripts": {
-    "esbuild": true
-  },
   "engines": {
     "node": ">=24"
   },
