@@ -2,6 +2,7 @@ import { t } from "./i18n.js";
 import type { ProviderDefinition } from "#sdk/background/providers";
 import { clearClaudeAuth, getClaudeAuthStatus, pollClaudeLogin, startClaudeLogin } from "./auth.js";
 import { listModels } from "./models.js";
+import { modelOptions } from "./options.js";
 
 const BASE_URL = "https://api.anthropic.com";
 
@@ -19,7 +20,7 @@ export default {
     endpoint: `${BASE_URL}/v1/messages`,
     anthropicVersion: "2023-06-01",
     staticModels: STATIC_MODELS,
-    listModels,
+    listModels, modelOptions,
     requiresApiKey: false,
     auth: {
       label: "Claude",

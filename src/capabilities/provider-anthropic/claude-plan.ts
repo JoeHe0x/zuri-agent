@@ -1,5 +1,7 @@
 import { chatAnthropic, chatStreamAnthropic } from "./adapter.js";
 import { resolveClaudeAuth } from "./auth.js";
+import { modelOptions } from "./options.js";
+import { normalizeProviderModelOptions } from "#sdk/shared/models";
 import type { ModelMessage } from "#sdk/shared/models";
 import type { ProviderDefinition, ModelEvent, ModelOptions, RuntimeConfig } from "#sdk/background/providers";
 
@@ -9,20 +11,20 @@ const BETAS = "claude-code-20250219,oauth-2025-04-20,interleaved-thinking-2025-0
 // Keeps custom tool names (e.g. "read", "bash") from colliding with Claude Code's built-in tools.
 const TOOL_PREFIX = "_";
 
-async function prepare(messages: ModelMessage[], signal: AbortSignal | undefined, options: ModelOptions) {
+async function prepare(messages: ModelMessage[], signal: AbortSignal | undefined, options: ModelOptions, config: RuntimeConfig) {
   const { token } = await resolveClaudeAuth(signal);
   return {
     messages: [{ role: "system", content: CLAUDE_CODE_IDENTITY } as ModelMessage, ...messages],
-    options: { ...options, providerDefinition: { ...options.providerDefinition, anthropicToolPrefix: TOOL_PREFIX } as ProviderDefinition, baseHeaders: { ...options.baseHeaders, "x-app": "cli" }, headers: { ...options.headers, Authorization: `Bearer ${token}`, "anthropic-beta": BETAS } },
+    options: { ...options, providerDefinition: { ...options.providerDefinition, anthropicToolPrefix: TOOL_PREFIX, anthropicRequestDefaults: { ...options.providerDefinition?.anthropicRequestDefaults, output_config: { effort: normalizeProviderModelOptions(config, modelOptions).codexReasoningEffort } } } as ProviderDefinition, baseHeaders: { ...options.baseHeaders, "x-app": "cli" }, headers: { ...options.headers, Authorization: `Bearer ${token}`, "anthropic-beta": BETAS } },
   };
 }
 
 export async function chatClaudePlan(messages: ModelMessage[], tools: object[], signal: AbortSignal | undefined, options: ModelOptions, config: RuntimeConfig) {
-  const prepared = await prepare(messages, signal, options);
+  const prepared = await prepare(messages, signal, options, config);
   return chatAnthropic(prepared.messages, tools, signal, prepared.options, { ...config, apiKey: "" });
 }
 
 export async function* chatStreamClaudePlan(messages: ModelMessage[], tools: object[], signal: AbortSignal | undefined, options: ModelOptions, config: RuntimeConfig): AsyncGenerator<ModelEvent> {
-  const prepared = await prepare(messages, signal, options);
+  const prepared = await prepare(messages, signal, options, config);
   yield* chatStreamAnthropic(prepared.messages, tools, signal, prepared.options, { ...config, apiKey: "" });
 }

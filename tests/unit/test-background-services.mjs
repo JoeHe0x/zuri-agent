@@ -71,6 +71,8 @@ async function configRuntimeKeepsPersistedAndLiveStateInLockstep() {
   assert.deepEqual(saved.customProtocols, customProtocols);
   assert.deepEqual(savedGuardrails, { rules: [{ id: "new" }] });
   assert.equal(clears, 1);
+  await runtime.save({ provider: "deepseek", model: "m2", codexReasoningEffort: "high" });
+  assert.equal(clears, 1, "saving the same model and window keeps the usage estimate");
 
   assert.equal((await runtime.savePreset({ provider: "deepseek", model: "m3" })).preset, "saved");
   assert.equal((await runtime.applyPreset("m4")).preset, "applied");

@@ -258,9 +258,9 @@
   display: flex;
   flex-direction: column;
   gap: 1px;
-  min-width: min(240px, calc(100vw - 24px));
-  max-width: min(360px, calc(100vw - 24px));
-  max-height: 240px;
+  /* Fixed width: the list is repainted after models load and must not resize. */
+  width: min(320px, calc(100vw - 24px));
+  max-height: 280px;
   padding: 4px;
   overflow-y: auto;
   overscroll-behavior: contain;
@@ -294,6 +294,42 @@
 .model-menu-item[aria-selected="true"] { background: var(--bg-tertiary); }
 
 .model-menu-item > span:not(.model-menu-icon) { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.model-menu-title {
+  flex: none;
+  padding: 4px 8px 3px;
+  color: var(--text-secondary);
+  font: 600 11px/1.3 var(--font-sans);
+}
+.model-menu-effort-item { grid-template-columns: auto auto minmax(0, 1fr); gap: 8px; padding: 7px 8px; }
+.model-menu-effort-item em {
+  padding: 1px 6px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--text-secondary);
+  font: normal 10px/1.4 var(--font-sans);
+}
+.model-menu-effort-item em.is-warn {
+  border-color: transparent;
+  background: color-mix(in srgb, var(--red) 14%, transparent);
+  color: var(--red);
+}
+.model-menu-effort-item[aria-selected="true"]::after {
+  content: "✓";
+  grid-column: 3;
+  justify-self: end;
+  color: var(--text-primary);
+  font-size: 13px;
+}
+.model-menu-effort-badge {
+  flex: none;
+  padding: 1px 5px;
+  border-radius: 999px;
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  font-size: 10px;
+  line-height: 1.4;
+}
 
 .model-menu-icon {
   display: grid;

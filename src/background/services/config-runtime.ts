@@ -40,6 +40,7 @@ export function createConfigRuntime({
   async function save(inputConfig: Record<string, unknown> = {}, signal?: AbortSignal) {
     signal?.throwIfAborted();
     const writesGuardrails = Object.prototype.hasOwnProperty.call(inputConfig, "securityGuardrails");
+    const previous = await getCurrentRuntimeConfig();
     const config = await saveConfig(inputConfig, signal);
     try {
       signal?.throwIfAborted();
@@ -52,7 +53,9 @@ export function createConfigRuntime({
       await updateRuntimeConfig(config, { clearUsage: true });
       throw error;
     }
-    return updateRuntimeConfig(config, { clearUsage: true });
+    // Provider options such as effort keep the window, so the usage estimate stays valid.
+    const sameWindow = previous?.provider === config.provider && previous?.model === config.model && previous?.contextWindow === config.contextWindow;
+    return updateRuntimeConfig(config, { clearUsage: !sameWindow });
   }
 
   function setRuntime(config: RuntimeConfig = {}) {

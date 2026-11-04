@@ -2029,10 +2029,37 @@ export function createSettingsFeature(options: SettingsFeatureOptions) {
     populateSettings(result.config);
   }
 
+  let menuStep: "model" | "effort" = "model";
+  const menuTitle = (text: string) => Object.assign(document.createElement("div"), { className: "model-menu-title", textContent: text });
+
   function setModelMenuOpen(open: boolean) {
+    menuStep = "model";
     modelMenuList?.classList.toggle("hidden", !open);
     modelMenuTrigger?.setAttribute("aria-expanded", String(open));
     if (open) void renderModelMenu();
+  }
+
+  // Step two: pick the effort of the model just chosen (providers without model options skip it).
+  function showEffortStep(config = lastSettingsConfig) {
+    const [option] = providerSummary(String(config?.provider || ""))?.modelOptions || [];
+    if (!modelMenuList || !option) return setModelMenuOpen(false);
+    menuStep = "effort";
+    modelMenuList.classList.remove("hidden");
+    modelMenuTrigger?.setAttribute("aria-expanded", "true");
+    const current = normalizeProviderModelOptions(config || {}, [option])[option.key];
+    modelMenuList.replaceChildren(menuTitle(option.label), ...option.options.map(choice => {
+      const item = document.createElement("button");
+      item.type = "button";
+      item.className = "model-menu-item model-menu-effort-item";
+      item.setAttribute("role", "option");
+      item.setAttribute("aria-selected", String(choice.value === current));
+      item.dataset.optionKey = option.key;
+      item.dataset.optionValue = choice.value;
+      const name = Object.assign(document.createElement("span"), { textContent: choice.label });
+      const badge = choice.value === option.defaultValue ? t("effortRecommended") : choice.value === "max" ? t("effortMoreUsage") : "";
+      item.append(name, ...(badge ? [Object.assign(document.createElement("em"), { textContent: badge, className: choice.value === "max" ? "is-warn" : "" })] : []));
+      return item;
+    }));
   }
 
   function providerBadge(provider: string, model: string) {
@@ -2060,8 +2087,9 @@ export function createSettingsFeature(options: SettingsFeatureOptions) {
     };
     const merge = (id: string, models: readonly { id: string; label?: string }[] = []) => ({ id, models: [...new Map([...models, ...saved(id)].map(model => [model.id, model] as const).reverse()).values()].reverse() });
     const paint = (groups: { id: string; models: { id: string; label?: string }[] }[]) => {
+      if (menuStep !== "model") return;
       const scrollTop = modelMenuList.scrollTop;
-      modelMenuList.replaceChildren(...groups.flatMap(group => group.models.map(({ id: model, label }) => {
+      modelMenuList.replaceChildren(menuTitle(t("modelMenuTitle")), ...groups.flatMap(group => group.models.map(({ id: model, label }) => {
         const item = document.createElement("button");
         item.type = "button";
         item.className = "model-menu-item";
@@ -2099,25 +2127,39 @@ export function createSettingsFeature(options: SettingsFeatureOptions) {
     if (result.config) populateSettings(result.config);
   }
 
+  async function setProviderOption({ optionKey, optionValue }: DOMStringMap) {
+    if (!optionKey || !lastSettingsConfig) return;
+    const result = await request("save_config", { config: { ...lastSettingsConfig, [optionKey]: optionValue } }, 45000);
+    if (result.config) populateSettings(result.config);
+  }
+
   modelMenuTrigger?.addEventListener("click", () => setModelMenuOpen(modelMenuList?.classList.contains("hidden") ?? false), { signal: options.signal });
   modelMenuList?.addEventListener("click", event => {
     const item = (event.target as Element).closest<HTMLElement>(".model-menu-item");
-    setModelMenuOpen(false);
     if (!item) return;
-    switchModel(item).catch(error => {
-      showToast(errorMessage(error) || t("couldNotSwitchModelsPleaseTryAgain"), { tone: "error" });
-    });
+    const fail = (error: unknown) => showToast(errorMessage(error) || t("couldNotSwitchModelsPleaseTryAgain"), { tone: "error" });
+    if (item.dataset.optionKey) {
+      setModelMenuOpen(false);
+      setProviderOption(item.dataset).catch(fail);
+      return;
+    }
+    const hasEffort = (providerSummary(item.dataset.provider || "")?.modelOptions || []).length > 0;
+    if (!hasEffort) setModelMenuOpen(false);
+    const sameModel = item.dataset.provider === lastSettingsConfig?.provider && item.dataset.model === lastSettingsConfig?.model;
+    (sameModel ? Promise.resolve() : switchModel(item)).then(() => { if (hasEffort) showEffortStep(); }, error => { setModelMenuOpen(false); fail(error); });
   }, { signal: options.signal });
   root.addEventListener("click", event => {
     if (!currentModelIndicator?.contains(event.target as Node)) setModelMenuOpen(false);
   }, { signal: options.signal });
   root.addEventListener("keydown", event => { if (event.key === "Escape") setModelMenuOpen(false); }, { signal: options.signal });
 
+  let indicatorKey = "";
   function updateCurrentModelIndicator(config = lastSettingsConfig) {
     if (!currentModelIndicator || !modelMenuTrigger || !modelMenuList) return;
     const provider = String(config?.provider || "").trim();
     const model = String(config?.modelLabel || config?.model || "").trim();
-    setModelMenuOpen(false);
+    if (`${provider}\n${model}` !== indicatorKey) setModelMenuOpen(false);
+    indicatorKey = `${provider}\n${model}`;
     if (!provider || !model) {
       modelMenuTrigger.replaceChildren();
       currentModelIndicator.title = "";
@@ -2128,7 +2170,10 @@ export function createSettingsFeature(options: SettingsFeatureOptions) {
     const text = `${getProviderDisplayName(provider)} - ${model}`;
     const label = document.createElement("span");
     label.textContent = model;
-    modelMenuTrigger.replaceChildren(providerBadge(provider, model), label);
+    const [effort] = providerSummary(provider)?.modelOptions || [];
+    const effortLabel = effort?.options.find(choice => choice.value === normalizeProviderModelOptions(config || {}, [effort])[effort.key])?.label;
+    const badge = effortLabel ? Object.assign(document.createElement("span"), { className: "model-menu-effort-badge", textContent: effortLabel }) : null;
+    modelMenuTrigger.replaceChildren(providerBadge(provider, model), label, ...(badge ? [badge] : []));
     currentModelIndicator.title = text;
     currentModelIndicator.classList.remove("hidden");
     renderGptConnectHint();
