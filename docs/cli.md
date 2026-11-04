@@ -21,11 +21,11 @@ your provider and model in Settings. A development build in Firefox uses
 Run the published package with npx:
 
 ```bash
-npx qz-browser-agent@latest connect
-npx qz-browser-agent@latest create "Summarize the current page." --stream
+npx zuri-agent-extension@latest connect
+npx zuri-agent-extension@latest create "Summarize the current page." --stream
 ```
 
-`npx qz-browser-agent@latest install` opens the same Chrome Web Store page. For a manual ZIP
+`npx zuri-agent-extension@latest install` opens the same Chrome Web Store page. For a manual ZIP
 installation, download the [latest GitHub release](https://github.com/alibaba/qz-browser-agent/releases/latest)
 and follow the [manual installation steps](https://github.com/alibaba/qz-browser-agent/blob/main/README.md#manual-installation).
 
@@ -37,10 +37,10 @@ or from their own qz Settings. To choose Firefox, return the URL and open it the
 [Load qz in Firefox](#load-qz-in-firefox).
 
 The examples and suggested next commands use `qz`. Replace it with
-`npx qz-browser-agent@latest`, or install the command globally:
+`npx zuri-agent-extension@latest`, or install the command globally:
 
 ```sh
-npm install --global qz-browser-agent@latest
+npm install --global zuri-agent-extension@latest
 qz --version
 ```
 
@@ -240,12 +240,12 @@ Use the current CLI and extension together. Updating the npm package leaves the 
 in place; `qz status` reports an available update. Restart the connection to use the updated package:
 
 1. Use the latest CLI and let current tasks finish.
-2. Run `npx --yes qz-browser-agent@latest stop`. This disconnects all browsers using that service.
+2. Run `npx --yes zuri-agent-extension@latest stop`. This disconnects all browsers using that service.
 3. Update the extension that profile is running. Chrome: install from the
    [Chrome Web Store](https://chromewebstore.google.com/detail/dknbdgkgoinlgjpfebapkklbmjjgdblm),
    or replace a manual ZIP and reload it at `chrome://extensions`. Firefox development: run
    `npm run build:firefox` and reload the temporary add-on at `about:debugging`.
-4. Run `npx --yes qz-browser-agent@latest connect`, then reconnect additional profiles using their
+4. Run `npx --yes zuri-agent-extension@latest connect`, then reconnect additional profiles using their
    pairing URL or settings.
 
 ## Connect an MCP client

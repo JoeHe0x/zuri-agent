@@ -13,7 +13,7 @@ import { assertNoRemoteCode } from "../../scripts/check-no-remote-code.mjs";
 import { assertReviewableCode } from "../../scripts/check-reviewable-code.mjs";
 import { checkStore } from "../../scripts/check-store.mjs";
 
-const zip = resolve(process.argv[2] || "dist/releases/0.1.5/webstore/qz-browser-agent-extension-0.1.5.webstore.zip");
+const zip = resolve(process.argv[2] || "dist/releases/0.1.5/webstore/zuri-agent-extension-0.1.5.webstore.zip");
 const evidenceDir = resolve(process.argv[3] || "tests/results/final-store-zip");
 const work = await mkdtemp(join(tmpdir(), "qz-final-store-"));
 const extension = join(work, "extension");

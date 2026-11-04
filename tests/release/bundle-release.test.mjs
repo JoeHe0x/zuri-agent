@@ -165,7 +165,7 @@ test("public package audit checks bundled code, paths and resource credentials",
   const zip = join(work, "fixture.zip");
   const write = (path, source) => execFileSync("python3", ["-c",
     "import sys,zipfile; archive=zipfile.ZipFile(sys.argv[1],'w'); archive.writestr(sys.argv[2],sys.argv[3]); archive.close()",
-    zip, `qz-browser-agent-extension/${path}`, source]);
+    zip, `zuri-agent-extension/${path}`, source]);
   write("background/service-worker.js", 'const feature = "normal local runtime";');
   assert.doesNotThrow(() => assertPublicReleasePackage(zip));
   for (const [path, source] of [
@@ -199,33 +199,33 @@ test("release publisher packages bundles and records auditable metadata", async 
 
   const releaseDir = join(output, version);
   const metadata = JSON.parse(await readFile(join(releaseDir, "version.json"), "utf8"));
-  assert.equal(metadata.package, `qz-browser-agent-extension-${version}.zip`);
-  assert.equal(metadata.packageRoot, "qz-browser-agent-extension");
+  assert.equal(metadata.package, `zuri-agent-extension-${version}.zip`);
+  assert.equal(metadata.packageRoot, "zuri-agent-extension");
   assert.equal(metadata.bundling.enabled, true);
   assert.equal(metadata.bundling.entries.length, 2);
   assert.equal(metadata.bundling.outputFiles, 2 + metadata.bundling.chunks.length);
   assert.ok(metadata.bundling.chunks.length > 0);
   assert.ok(metadata.bundling.removedFiles > 100);
-  const zipPath = join(releaseDir, `qz-browser-agent-extension-${version}.zip`);
+  const zipPath = join(releaseDir, `zuri-agent-extension-${version}.zip`);
   assertPublicReleasePackage(zipPath);
   const entries = zipEntries(zipPath);
-  const runtimeFileCount = entries.filter(path => path.startsWith("qz-browser-agent-extension/") && !path.startsWith("qz-browser-agent-extension/vendor/licenses/")).length;
+  const runtimeFileCount = entries.filter(path => path.startsWith("zuri-agent-extension/") && !path.startsWith("zuri-agent-extension/vendor/licenses/")).length;
   assert.ok(runtimeFileCount < 85, `expected compact runtime resources, received ${runtimeFileCount} files excluding bundled dependency licenses`);
-  assert.ok(entries.includes("qz-browser-agent-extension/background/service-worker.js"));
-  assert.ok(entries.includes("qz-browser-agent-extension/sidepanel/sidepanel.js"));
-  for (const chunk of metadata.bundling.chunks) assert.ok(entries.includes(`qz-browser-agent-extension/${chunk.output}`));
-  assert.ok(entries.includes("qz-browser-agent-extension/vendor/pdf.mjs"));
+  assert.ok(entries.includes("zuri-agent-extension/background/service-worker.js"));
+  assert.ok(entries.includes("zuri-agent-extension/sidepanel/sidepanel.js"));
+  for (const chunk of metadata.bundling.chunks) assert.ok(entries.includes(`zuri-agent-extension/${chunk.output}`));
+  assert.ok(entries.includes("zuri-agent-extension/vendor/pdf.mjs"));
   assert.ok(entries.includes("version.json"));
-  assert.equal(entries.includes("qz-browser-agent-extension/background/agent/agent.js"), false);
-  assert.equal(entries.includes("qz-browser-agent-extension/sidepanel/app.js"), false);
+  assert.equal(entries.includes("zuri-agent-extension/background/agent/agent.js"), false);
+  assert.equal(entries.includes("zuri-agent-extension/sidepanel/app.js"), false);
   assert.equal(entries.some(path => path.endsWith("/README.md")), false);
   for (const name of RELEASE_NOTICES) {
-    assert.deepEqual(zipBytes(zipPath, `qz-browser-agent-extension/${name}`), await readFile(join(ROOT, name)));
+    assert.deepEqual(zipBytes(zipPath, `zuri-agent-extension/${name}`), await readFile(join(ROOT, name)));
   }
 
-  const provenance = zipJson(zipPath, "qz-browser-agent-extension/vendor/provenance.json");
+  const provenance = zipJson(zipPath, "zuri-agent-extension/vendor/provenance.json");
   for (const [path, asset] of Object.entries(provenance.assets)) {
-    assert.equal(sha256(zipBytes(zipPath, `qz-browser-agent-extension/${path}`)), asset.sha256, `packaged dependency hash: ${path}`);
+    assert.equal(sha256(zipBytes(zipPath, `zuri-agent-extension/${path}`)), asset.sha256, `packaged dependency hash: ${path}`);
   }
   const innerMetadata = zipJson(zipPath, "version.json");
   assert.equal(innerMetadata.packageRoot, metadata.packageRoot);
@@ -261,7 +261,7 @@ test("Web Store publisher removes the upload ZIP when storecheck rejects CSP", a
   assert.notEqual(result.status, 0);
   assert.match(result.stderr, /storecheck blocked/);
   const output = join(work, version, "webstore");
-  await assert.rejects(stat(join(output, `qz-browser-agent-extension-${version}.webstore.zip`)), { code: "ENOENT" });
+  await assert.rejects(stat(join(output, `zuri-agent-extension-${version}.webstore.zip`)), { code: "ENOENT" });
   const report = JSON.parse(await readFile(join(output, "storecheck.json"), "utf8"));
   assert.ok(report.blocking.some(finding => finding.ruleId === "csp/unsafe-eval"));
 });
@@ -275,9 +275,9 @@ test("publisher compiles TS without bundling and rejects obsolete minifier confi
   const args = [join(ROOT, "scripts/publish-release.py"), "--version", "0.0.0.943", "--source", "worktree",
     "--extension-dir", source, "--output-dir", work, "--no-bundle"];
   execFileSync("python3", [...args, "--no-minify"], { cwd: ROOT, stdio: "pipe" });
-  const zipPath = join(work, "0.0.0.943/qz-browser-agent-extension-0.0.0.943.zip");
+  const zipPath = join(work, "0.0.0.943/zuri-agent-extension-0.0.0.943.zip");
   const entries = zipEntries(zipPath);
-  assert.ok(entries.includes("qz-browser-agent-extension/shared/release-typescript-probe.js"));
+  assert.ok(entries.includes("zuri-agent-extension/shared/release-typescript-probe.js"));
   assert.equal(entries.some(path => path.endsWith(".map") || (!path.includes("/vendor/") && path.endsWith(".ts"))), false);
   const mismatch = spawnSync("python3", [...args, "--terser-version", "0.0.0"], { cwd: ROOT, encoding: "utf8" });
   assert.notEqual(mismatch.status, 0);
@@ -312,8 +312,8 @@ test("release debug maps trace readable bundles from Unicode and spaced checkout
   execFileSync("python3", [join(repo, "scripts/publish-release.py"), "--version", version,
     "--source", "worktree", "--extension-dir", source, "--output-dir", work,
   ], { cwd: repo, stdio: "pipe", timeout: 120_000, env: { ...process.env, NODE_OPTIONS: "" } });
-  const zip = join(work, version, `qz-browser-agent-extension-${version}.zip`);
-  const debug = join(work, version, `qz-browser-agent-extension-${version}.debug.zip`);
+  const zip = join(work, version, `zuri-agent-extension-${version}.zip`);
+  const debug = join(work, version, `zuri-agent-extension-${version}.debug.zip`);
   const metadata = zipJson(debug, "manifest.json");
   assert.equal(metadata.localOnly, true);
   assert.equal(metadata.source, "worktree");
@@ -321,26 +321,26 @@ test("release debug maps trace readable bundles from Unicode and spaced checkout
   assert.equal(metadata.package.sha256, await fileDigest(zip));
   const installed = zipEntries(zip);
   for (const name of RELEASE_NOTICES) {
-    assert.deepEqual(zipBytes(zip, `qz-browser-agent-extension/${name}`), await readFile(join(repo, name)));
+    assert.deepEqual(zipBytes(zip, `zuri-agent-extension/${name}`), await readFile(join(repo, name)));
   }
   assert.equal(installed.some(path => path.endsWith(".map")), false);
   for (const [asset, upstream] of [
     ["vendor/tabulator/tabulator.min.css", "tabulator-tables/dist/css/tabulator.min.css"],
   ]) {
-    assert.deepEqual(zipBytes(zip, `qz-browser-agent-extension/${asset}`), await readFile(join(ROOT, "node_modules", upstream)));
+    assert.deepEqual(zipBytes(zip, `zuri-agent-extension/${asset}`), await readFile(join(ROOT, "node_modules", upstream)));
     assert.deepEqual(zipBytes(debug, `maps/${asset}.map`), await readFile(join(ROOT, "node_modules", `${upstream}.map`)));
   }
   for (const asset of ["vendor/pdf.mjs", "vendor/pdf.worker.mjs", "vendor/mathjax/startup.js"]) {
     assert.ok(zipJson(debug, `maps/${asset}.map`).sourcesContent.length > 0, `${asset} retains its reviewed build inputs`);
-    assert.doesNotMatch(zipBytes(zip, `qz-browser-agent-extension/${asset}`).toString(), /new Function\s*\(|LT \+ SCRIPT/);
+    assert.doesNotMatch(zipBytes(zip, `zuri-agent-extension/${asset}`).toString(), /new Function\s*\(|LT \+ SCRIPT/);
   }
-  const provenance = zipJson(zip, "qz-browser-agent-extension/vendor/provenance.json");
+  const provenance = zipJson(zip, "zuri-agent-extension/vendor/provenance.json");
   assert.equal(Object.keys(provenance.assets).some(path => path.endsWith(".map")), false);
   assert.equal(installed.some(path => /qingzhou-(?:debug|build)/.test(path)), false);
   const runtime = "background/service-worker.js";
   const readZip = (path, entry) => execFileSync("python3", ["-c",
     "import sys,zipfile; sys.stdout.buffer.write(zipfile.ZipFile(sys.argv[1]).read(sys.argv[2]))", path, entry], { maxBuffer: 32 * 1024 * 1024 });
-  const generated = readZip(zip, `qz-browser-agent-extension/${runtime}`).toString();
+  const generated = readZip(zip, `zuri-agent-extension/${runtime}`).toString();
   assert.doesNotMatch(generated, /sourceMappingURL/);
   const index = generated.indexOf('"release-map-probe"');
   assert.ok(index >= 0);
@@ -353,7 +353,7 @@ test("release debug maps trace readable bundles from Unicode and spaced checkout
   const build = zipJson(debug, "build.json");
   const worker = build.embeddedDebugScripts.find(script => script.entry === "workers/inner-runner.ts");
   const workerCode = readZip(debug, `debug/${worker.artifact.replace(/^\.qingzhou-debug\//, "")}`).toString();
-  const sandbox = readZip(zip, "qz-browser-agent-extension/runner-sandbox.js").toString();
+  const sandbox = readZip(zip, "zuri-agent-extension/runner-sandbox.js").toString();
   const strings = [...tokenizer(sandbox, { ecmaVersion: "latest", sourceType: "module" })]
     .filter(token => ["string", "template"].includes(token.type.label)).map(token => token.value);
   assert.ok(strings.includes(workerCode), "embedded debug source must remain byte-for-byte identical to the running Worker");
@@ -362,7 +362,7 @@ test("release debug maps trace readable bundles from Unicode and spaced checkout
     assert.equal(sha256(bytes), file.sha256, file.path);
     assert.equal(bytes.includes(Buffer.from(work)), false, "debug files must not leak staging paths");
     if (file.runtimePath) {
-      assert.equal(sha256(readZip(zip, `qz-browser-agent-extension/${file.runtimePath}`)), file.runtimeSha256);
+      assert.equal(sha256(readZip(zip, `zuri-agent-extension/${file.runtimePath}`)), file.runtimeSha256);
     }
   }
 });
@@ -399,16 +399,16 @@ with tempfile.TemporaryDirectory() as temporary:
     assert module.main()==0
     output=root/'output/0.0.0.1'
     assert sorted(item.name for item in output.iterdir())==[
-        'README.md','qz-browser-agent-extension-0.0.0.1.debug.zip','qz-browser-agent-extension-0.0.0.1.zip','version.json']
-    with zipfile.ZipFile(output/'qz-browser-agent-extension-0.0.0.1.zip') as archive:
+        'README.md','zuri-agent-extension-0.0.0.1.debug.zip','zuri-agent-extension-0.0.0.1.zip','version.json']
+    with zipfile.ZipFile(output/'zuri-agent-extension-0.0.0.1.zip') as archive:
         assert not any(name.endswith(('.map','.debug.zip')) for name in archive.namelist())
-    with zipfile.ZipFile(output/'qz-browser-agent-extension-0.0.0.1.debug.zip') as archive:
+    with zipfile.ZipFile(output/'zuri-agent-extension-0.0.0.1.debug.zip') as archive:
         assert 'maps/fixture.js.map' in archive.namelist()
     metadata=json.loads((output/'version.json').read_text())
     assert metadata['gitCommit']=='a'*40
     assert metadata['target']=='manual'
     assert metadata['minification']['enabled'] is False
-    assert metadata['sha256']==module.sha256_file(output/'qz-browser-agent-extension-0.0.0.1.zip')
+    assert metadata['sha256']==module.sha256_file(output/'zuri-agent-extension-0.0.0.1.zip')
     manual_sha=metadata['sha256']
     (extension/'fixture.js.map').write_text('{}')
     sys.argv.extend(['--target','webstore'])
@@ -418,8 +418,8 @@ with tempfile.TemporaryDirectory() as temporary:
     assert metadata['target']=='webstore' and metadata['packageRoot']=='.'
     archive_path=store/metadata['package']
     assert metadata['sha256']==module.sha256_file(archive_path)
-    with zipfile.ZipFile(output/'qz-browser-agent-extension-0.0.0.1.zip') as archive:
-        manual={name.removeprefix('qz-browser-agent-extension/'):archive.read(name)
+    with zipfile.ZipFile(output/'zuri-agent-extension-0.0.0.1.zip') as archive:
+        manual={name.removeprefix('zuri-agent-extension/'):archive.read(name)
                 for name in archive.namelist() if name!='version.json'}
     with zipfile.ZipFile(archive_path) as archive:
         store_files={name:archive.read(name) for name in archive.namelist()}
@@ -430,10 +430,10 @@ with tempfile.TemporaryDirectory() as temporary:
         assert store_files==manual
         assert sum(info.file_size for info in archive.infolist())==metadata['uncompressedSize']
         assert 'manifest.json' in archive.namelist() and 'version.json' not in archive.namelist()
-    with zipfile.ZipFile(store/'qz-browser-agent-extension-0.0.0.1.webstore.debug.zip') as archive:
+    with zipfile.ZipFile(store/'zuri-agent-extension-0.0.0.1.webstore.debug.zip') as archive:
         assert 'maps/fixture.js.map' in archive.namelist()
         assert json.loads(archive.read('manifest.json'))['package']['sha256']==metadata['sha256']
-    assert module.sha256_file(output/'qz-browser-agent-extension-0.0.0.1.zip')==manual_sha
+    assert module.sha256_file(output/'zuri-agent-extension-0.0.0.1.zip')==manual_sha
     assert module.main()==0
     assert module.sha256_file(archive_path)==metadata['sha256'], 'Web Store ZIP must be reproducible'
     manifest=json.loads((extension/'manifest.json').read_text())
@@ -473,7 +473,7 @@ with tempfile.TemporaryDirectory() as temporary:
             if valid: raise
         else: assert valid, 'Invalid archive was accepted'
     check(files.items(),True)
-    check([('qz-browser-agent-extension/'+name,data) for name,data in files.items()])
+    check([('zuri-agent-extension/'+name,data) for name,data in files.items()])
     for missing in files:
         check([(name,data) for name,data in files.items() if name!=missing])
     for name in ['products/manifest.json','nested/extension/manifest.json',
@@ -493,11 +493,11 @@ import importlib.util,json,pathlib,sys,tempfile,zipfile
 spec=importlib.util.spec_from_file_location('firefox_archive_fixture',sys.argv[1])
 module=importlib.util.module_from_spec(spec);sys.modules[spec.name]=module;spec.loader.exec_module(module)
 manual=module.release_paths(pathlib.Path('releases'),'1.2.3')
-assert manual.package.as_posix()=='releases/1.2.3/qz-browser-agent-extension-1.2.3.zip'
-assert manual.debug.as_posix()=='releases/1.2.3/qz-browser-agent-extension-1.2.3.debug.zip'
+assert manual.package.as_posix()=='releases/1.2.3/zuri-agent-extension-1.2.3.zip'
+assert manual.debug.as_posix()=='releases/1.2.3/zuri-agent-extension-1.2.3.debug.zip'
 store=module.release_paths(pathlib.Path('releases'),'1.2.3','webstore')
-assert store.package.as_posix()=='releases/1.2.3/webstore/qz-browser-agent-extension-1.2.3.webstore.zip'
-assert store.debug.name=='qz-browser-agent-extension-1.2.3.webstore.debug.zip'
+assert store.package.as_posix()=='releases/1.2.3/webstore/zuri-agent-extension-1.2.3.webstore.zip'
+assert store.debug.name=='zuri-agent-extension-1.2.3.webstore.debug.zip'
 firefox=module.release_paths(pathlib.Path('releases'),'1.2.3','firefox')
 assert firefox.package.as_posix()=='releases/1.2.3/firefox/qz-browser-agent-firefox-1.2.3.xpi'
 assert firefox.debug.as_posix()=='releases/1.2.3/firefox/qz-browser-agent-firefox-1.2.3.debug.zip'
@@ -732,16 +732,16 @@ test("Git releases execute the source, publisher, build scripts, lockfile and no
   const metadata = JSON.parse(await readFile(join(work, `output/${version}/version.json`), "utf8"));
   assert.equal(metadata.gitCommit, commit);
   assert.equal(metadata.source, "git");
-  const debugMetadata = zipJson(join(work, `output/${version}/qz-browser-agent-extension-${version}.debug.zip`), "manifest.json");
+  const debugMetadata = zipJson(join(work, `output/${version}/zuri-agent-extension-${version}.debug.zip`), "manifest.json");
   assert.equal(debugMetadata.gitCommit, commit);
   assert.equal(debugMetadata.package.sha256, metadata.sha256);
   assert.match(await readFile(join(work, `output/${version}/README.md`), "utf8"), /committed publisher/);
-  const zipPath = join(work, `output/${version}/qz-browser-agent-extension-${version}.zip`);
+  const zipPath = join(work, `output/${version}/zuri-agent-extension-${version}.zip`);
   for (const [name, contents] of committedNotices) {
-    assert.deepEqual(zipBytes(zipPath, `qz-browser-agent-extension/${name}`), contents, `notice must come from the release commit: ${name}`);
+    assert.deepEqual(zipBytes(zipPath, `zuri-agent-extension/${name}`), contents, `notice must come from the release commit: ${name}`);
   }
   const source = execFileSync("python3", ["-c", "import sys,zipfile; print(zipfile.ZipFile(sys.argv[1]).read(sys.argv[2]).decode())", zipPath,
-    "qz-browser-agent-extension/icons/release-provenance.txt"], { encoding: "utf8" });
+    "zuri-agent-extension/icons/release-provenance.txt"], { encoding: "utf8" });
   assert.equal(source.trim(), "committed source");
   assert.equal(git(["tag", "--list"]), "", "dry run must never tag the fixture repository");
   git(["rm", "-f", "LICENSE"]);

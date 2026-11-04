@@ -35,7 +35,7 @@ try {
     "--target", "webstore",
     "--output-dir", output,
   ], { cwd: ROOT, stdio: "pipe" });
-  const zipPath = join(output, version, "webstore", `qz-browser-agent-extension-${version}.webstore.zip`);
+  const zipPath = join(output, version, "webstore", `zuri-agent-extension-${version}.webstore.zip`);
   assertPublicReleasePackage(zipPath);
   execFileSync("python3", [
     "-c",
@@ -122,9 +122,9 @@ try {
   ], { cwd: ROOT, stdio: "pipe" });
   execFileSync("python3", [
     "-c", "import sys,zipfile; zipfile.ZipFile(sys.argv[1]).extractall(sys.argv[2])",
-    join(output, version, `qz-browser-agent-extension-${version}.zip`), join(work, "manual"),
+    join(output, version, `zuri-agent-extension-${version}.zip`), join(work, "manual"),
   ]);
-  extensionPath = join(work, "manual", "qz-browser-agent-extension");
+  extensionPath = join(work, "manual", "zuri-agent-extension");
   context = await launchExtension(extensionPath);
   const manualWorker = context.serviceWorkers().find(item => item.url().endsWith("/background/service-worker.js"))
     || await context.waitForEvent("serviceworker", { timeout: 10_000 });

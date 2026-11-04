@@ -114,7 +114,7 @@ try {
   }
   const sha256 = createHash("sha256").update(await readFile(tarball)).digest("hex");
   const installs = [join(work, "installation"), join(work, "another-cache-path")];
-  const packages = installs.map(directory => join(directory, "node_modules/qz-browser-agent"));
+  const packages = installs.map(directory => join(directory, "node_modules/zuri-agent-extension"));
   for (const directory of installs) {
     console.error(`Installing the tarball in ${directory}…`);
     await mkdir(directory);
@@ -123,7 +123,7 @@ try {
     await access(join(directory, "node_modules/.bin", process.platform === "win32" ? "qz.cmd" : "qz"));
   }
   const metadata = JSON.parse(await readFile(join(packages[0], "package.json"), "utf8"));
-  assert.equal(metadata.name, "qz-browser-agent");
+  assert.equal(metadata.name, "zuri-agent-extension");
   assert.match(await cli(installs[0], ["--help"]), /qz/);
   assert.ok((await cli(installs[0], ["--version"])).split(/\s+/).includes(metadata.version), "Installed qz must report its package version.");
   assert.deepEqual(await result(installs[0], ["status"]), { running: false, connected: false });

@@ -173,7 +173,7 @@ boot files remain the extension importers.
 | `npm run verify:firefox` | Firefox suite | Builds `dist/extension-firefox/` in development mode, then runs `tests/unit/test-firefox-*.mjs` and Firefox Playwright |
 | `npm run verify:coverage` | Shared suites plus Chrome package suites | The coverage gate. Same suites as `verify` and `verify:chrome`, with `--coverage` |
 | `npm test -- firefox` | Firefox suite | Same suite as `verify:firefox` without the leading typecheck |
-| `npm run release` | `chrome` | `dist/releases/<version>/qz-browser-agent-extension-<version>.zip` |
+| `npm run release` | `chrome` | `dist/releases/<version>/zuri-agent-extension-<version>.zip` |
 | `npm run release:firefox` | `firefox` | `dist/releases/<version>/firefox/qz-browser-agent-firefox-<version>.xpi` |
 
 `build:firefox` is the production package you load in Firefox. `verify:firefox` rebuilds a
@@ -206,8 +206,8 @@ on the build command, so a product build can still pass both.
 ## Release artifacts
 
 [publish-release.py](../scripts/publish-release.py) writes one archive per `--target`. With no
-`--target` it compiles Chrome and writes `qz-browser-agent-extension-<version>.zip`.
-`--target webstore` writes `qz-browser-agent-extension-<version>.webstore.zip`. The manual zip keeps
+`--target` it compiles Chrome and writes `zuri-agent-extension-<version>.zip`.
+`--target webstore` writes `zuri-agent-extension-<version>.webstore.zip`. The manual zip keeps
 the public `key`. The webstore zip removes `key` and places `manifest.json` at the ZIP root. That
 `key` fixes the unpacked Chrome id `ghbaodmonhcgkfeejcpffknlggbjhjgj`. `--target firefox` compiles
 with `--browser firefox` and writes the unsigned `.xpi` below.

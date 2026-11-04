@@ -76,7 +76,7 @@ jobs:
           const { version } = JSON.parse(readFileSync('services/mcp-bridge/package.json', 'utf8'));
           if (process.env.RELEASE_VERSION) assert.equal(version, process.env.RELEASE_VERSION);
           if (process.env.PUBLISH_REQUESTED === 'true') assert.equal(process.env.GITHUB_REF, 'refs/heads/main');
-          console.log(`Checking qz-browser-agent ${version}`);
+          console.log(`Checking zuri-agent-extension ${version}`);
           NODE
       - run: npm ci
       - name: Select package runtime

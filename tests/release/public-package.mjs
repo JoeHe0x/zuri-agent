@@ -5,7 +5,7 @@ export function assertPublicReleasePackage(packagePath) {
   execFileSync("python3", ["-c", String.raw`
 import pathlib,re,sys,zipfile
 with zipfile.ZipFile(sys.argv[1]) as archive:
-    files={entry.filename.removeprefix('qz-browser-agent-extension/'):archive.read(entry)
+    files={entry.filename.removeprefix('zuri-agent-extension/'):archive.read(entry)
               for entry in archive.infolist() if not entry.is_dir()}
 private_content=[
     re.compile(r'Dog' + r'fooding|idea' + r'Lab|云' + r'壳|集团' + r'(?:登录|工号)', re.I),

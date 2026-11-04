@@ -250,9 +250,9 @@ npm run release -- --version 0.0.0.1 --summary "Local package preview"
 
 Packaging installs the selected commit's locked dependencies and builds in a temporary directory. It
 preserves the source manifest and writes the ZIP, README, and metadata to
-`dist/releases/<version>/`. The install archive is `qz-browser-agent-extension-<version>.zip`,
-with the extension under `qz-browser-agent-extension/`. The debug archive is
-`qz-browser-agent-extension-<version>.debug.zip`. Distribution and Git tags are separate maintainer steps.
+`dist/releases/<version>/`. The install archive is `zuri-agent-extension-<version>.zip`,
+with the extension under `zuri-agent-extension/`. The debug archive is
+`zuri-agent-extension-<version>.debug.zip`. Distribution and Git tags are separate maintainer steps.
 Temporary Firefox loading uses `dist/extension-firefox/` from `npm run dev:firefox` and
 `npm run build:firefox`. The Firefox archive is below. The split is described in
 [Firefox packaging](firefox-packaging.md).
@@ -263,7 +263,7 @@ For a Chrome Web Store upload, select the `webstore` target:
 npm run release -- --version 0.0.0.1 --target webstore
 ```
 
-This writes `dist/releases/<version>/webstore/qz-browser-agent-extension-<version>.webstore.zip`
+This writes `dist/releases/<version>/webstore/zuri-agent-extension-<version>.webstore.zip`
 with `manifest.json` at the ZIP root. Upload this ZIP in the Chrome Developer Dashboard.
 The Web Store target removes `key` from the packaged manifest. Source and manual packages retain
 their public key to keep a stable extension ID during local development.

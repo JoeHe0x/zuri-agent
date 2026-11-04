@@ -134,7 +134,7 @@ justifications and store listing copy require maintainer review.
 
 ```bash
 node --import ./tests/support/typescript-loader.mjs tests/release/verify-store-zip.mjs \
-  dist/releases/0.1.5/webstore/qz-browser-agent-extension-0.1.5.webstore.zip \
+  dist/releases/0.1.5/webstore/zuri-agent-extension-0.1.5.webstore.zip \
   tests/results/final-store-zip
 ```
 
