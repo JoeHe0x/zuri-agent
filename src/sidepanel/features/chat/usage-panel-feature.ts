@@ -18,6 +18,8 @@ interface UsagePanelOptions {
 /** Hit rate at or above this reads as healthy; the cache tab draws it as a waterline. */
 const HIT_WATERLINE = 0.8;
 const RECENT_STEPS = 8;
+const WHO_USER = '<circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/>';
+const WHO_AGENT = '<rect x="4" y="8" width="16" height="12" rx="3"/><path d="M12 8V4.5M9 13.5v1M15 13.5v1"/>';
 const ratio = (part: number, whole: number) => whole > 0 ? part / whole : 0;
 const percent = (part: number, whole: number) => whole > 0 ? `${Math.round(part / whole * 100)}%` : "–";
 const full = (value: number) => Math.round(value).toLocaleString();
@@ -150,7 +152,12 @@ export function createUsagePanelFeature(options: UsagePanelOptions) {
       row.tabIndex = 0;
       row.setAttribute("role", "button");
       row.setAttribute("aria-expanded", String(replayOpen.has(index)));
-      row.append(el("span", "usage-who", entry.role === "user" ? t("replayYou") : t("replayAgent")));
+      const who = el("span", "usage-who");
+      who.title = entry.role === "user" ? t("replayYou") : t("replayAgent");
+      who.setAttribute("role", "img");
+      who.setAttribute("aria-label", who.title);
+      who.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${entry.role === "user" ? WHO_USER : WHO_AGENT}</svg>`;
+      row.append(who);
       row.append(el("span", "usage-text", entry.text || entry.tools.map(tool => tool.name).join(" · ")));
       const tail = entry.cache && entry.cache.input > 0 ? el("span", `usage-tail${ratio(entry.cache.read, entry.cache.input) < HIT_WATERLINE ? " usage-meta--low" : ""}`, percent(entry.cache.read, entry.cache.input)) : null;
       if (tail) row.append(tail);
