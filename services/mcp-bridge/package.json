@@ -1,5 +1,5 @@
 {
-  "name": "qz-browser-agent",
+  "name": "zuri-agent-extension",
   "version": "0.1.4",
   "description": "Local browser tools and MCP access for the qz extension",
   "type": "module",
