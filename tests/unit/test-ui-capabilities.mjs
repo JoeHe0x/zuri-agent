@@ -20,16 +20,16 @@ test("file-discovered UI factories register atomically and use one scoped event 
   const extensions = createWorkspaceExtensions();
   const runtime = createSidepanelUiRuntime({ host: { root: {}, settings: {}, extensions }, storage: createMemoryStorage(),
     onError: error => errors.push(String(error)) });
-  let qz;
+  let zuri;
   await runtime.mountAll([{ id: "example", setup(api) {
-    qz = api;
+    zuri = api;
     api.registerPage(page("example"));
     api.on("accepted", event => received.push(event.value));
     api.on("local", event => received.push(event.value));
     api.on("broken", () => { throw new Error("isolated"); });
   } }]);
-  assert.equal(qz.onEvent, undefined);
-  assert.equal(qz.extensions.onEvent, undefined);
+  assert.equal(zuri.onEvent, undefined);
+  assert.equal(zuri.extensions.onEvent, undefined);
   assert.equal(runtime.getPages()[0].id, "example");
   runtime.emit({ type: "accepted", value: "background" });
   extensions.notify({ type: "local", value: "UI" });
@@ -37,13 +37,13 @@ test("file-discovered UI factories register atomically and use one scoped event 
   extensions.notify({ type: "broken" });
   assert.deepEqual(received, ["background", "UI"]);
   assert.match(errors[0], /isolated/);
-  assert.throws(() => qz.registerPage(page("late")), /during extension setup/);
-  await qz.storage.set("choice", "retained");
+  assert.throws(() => zuri.registerPage(page("late")), /during extension setup/);
+  await zuri.storage.set("choice", "retained");
   await runtime.unmount("example");
   runtime.emit({ type: "accepted", value: "late" });
   extensions.notify({ type: "local", value: "late" });
   assert.deepEqual(received, ["background", "UI"]);
-  await assert.rejects(qz.storage.set("choice", "forbidden"), /abort/i);
+  await assert.rejects(zuri.storage.set("choice", "forbidden"), /abort/i);
   await runtime.mountAll([{ id: "example", async setup(api) { assert.equal(await api.storage.get("choice"), "retained"); } }]);
   await runtime.mountAll([{ id: "failed", setup(api) { api.registerPage(page("uninstalled")); throw new Error("setup failed"); } }]);
   assert.equal(runtime.getPage("uninstalled"), undefined);
@@ -303,14 +303,14 @@ test("session navigation inherits both capability and caller cancellation", asyn
 });
 
 test("product settings inherit the UI lifetime and reject writes after unload", async () => {
-  let qz, productSignal;
+  let zuri, productSignal;
   const host = { root: {}, settings: {}, extensions: {},
     providers: { createSettings(input) { productSignal = input.signal; return {}; } },
   };
   const runtime = createSidepanelUiRuntime({ host });
-  await runtime.mountAll([{ id: "product", setup(api) { qz = api; } }]);
-  qz.providers.createSettings({});
+  await runtime.mountAll([{ id: "product", setup(api) { zuri = api; } }]);
+  zuri.providers.createSettings({});
   await runtime.unmount("product");
   assert.equal(productSignal.aborted, true);
-  assert.throws(() => qz.providers.createSettings({}), { name: "AbortError" });
+  assert.throws(() => zuri.providers.createSettings({}), { name: "AbortError" });
 });

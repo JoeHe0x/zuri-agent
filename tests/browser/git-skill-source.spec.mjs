@@ -175,12 +175,12 @@ for (const skin of ["sidepanel.css"]) {
 
         await page.locator('[data-git-source-action="remove"]').click();
         const removal = await page.evaluate(() => {
-          const dialog = document.querySelector("#qz-decision-dialog");
-          const panel = dialog.querySelector(".qz-decision-panel");
+          const dialog = document.querySelector("#zuri-decision-dialog");
+          const panel = dialog.querySelector(".zuri-decision-panel");
           const bounds = panel.getBoundingClientRect();
           return {
             visible: dialog.open,
-            choices: [...dialog.querySelectorAll("[data-qz-decision-value] strong")].map(element => element.textContent.trim()),
+            choices: [...dialog.querySelectorAll("[data-zuri-decision-value] strong")].map(element => element.textContent.trim()),
             pageOverflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
             panelContained: bounds.left >= 0 && bounds.right <= document.documentElement.clientWidth,
             panelCenterY: bounds.top + bounds.height / 2,
@@ -193,7 +193,7 @@ for (const skin of ["sidepanel.css"]) {
         expect(removal.panelContained).toBe(true);
         expect(removal.panelCenterY).toBeLessThan(removal.viewportCenterY);
         await page.keyboard.press("Escape");
-        await expect(page.locator("#qz-decision-dialog")).not.toBeVisible();
+        await expect(page.locator("#zuri-decision-dialog")).not.toBeVisible();
 
         await page.evaluate(() => {
           window.__decisionResult = "pending";
@@ -204,25 +204,25 @@ for (const skin of ["sidepanel.css"]) {
             tone: "danger",
           }).then(result => { window.__decisionResult = result; });
         });
-        await expect(page.locator("#qz-decision-dialog")).toBeVisible();
+        await expect(page.locator("#zuri-decision-dialog")).toBeVisible();
         const confirmation = await page.evaluate(() => {
-          const panel = document.querySelector(".qz-decision-panel");
+          const panel = document.querySelector(".zuri-decision-panel");
           const style = getComputedStyle(panel);
           return {
-            title: document.querySelector("#qz-decision-title")?.textContent,
-            message: document.querySelector("#qz-decision-message")?.textContent,
-            cancelFocused: document.activeElement?.id === "qz-decision-cancel",
+            title: document.querySelector("#zuri-decision-title")?.textContent,
+            message: document.querySelector("#zuri-decision-message")?.textContent,
+            cancelFocused: document.activeElement?.id === "zuri-decision-cancel",
             borderLeft: style.borderLeftColor,
             borderTop: style.borderTopColor,
-            confirmClass: document.querySelector("#qz-decision-confirm")?.className,
+            confirmClass: document.querySelector("#zuri-decision-confirm")?.className,
           };
         });
         expect(confirmation.title).toBe("覆盖本地修改？");
         expect(confirmation.message).toBe("继续后会以仓库版本覆盖当前修改。");
         expect(confirmation.cancelFocused).toBe(true);
         expect(confirmation.borderLeft).toBe(confirmation.borderTop);
-        expect(confirmation.confirmClass).toContain("qz-btn--danger");
-        await page.locator("#qz-decision-confirm").click();
+        expect(confirmation.confirmClass).toContain("zuri-btn--danger");
+        await page.locator("#zuri-decision-confirm").click();
         await expect.poll(() => page.evaluate(() => window.__decisionResult)).toBe(true);
       });
     });

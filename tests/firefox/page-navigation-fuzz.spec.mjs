@@ -12,11 +12,11 @@ const plans = [
 ];
 for (const { seed, kind, watchNetwork, scenarios } of plans) test(`Firefox navigation ${kind} fuzz seed=${seed} watchNetwork=${watchNetwork}`, async ({}, info) => {
   test.setTimeout(180000);
-  const directory = await mkdtemp(join(tmpdir(), "qz-firefox-navigation-fuzz-")), extension = join(directory, "extension");
+  const directory = await mkdtemp(join(tmpdir(), "zuri-firefox-navigation-fuzz-")), extension = join(directory, "extension");
   let session;
   const report = { browser: "firefox", kind, watchNetwork, seed, reads: 0, cases: [] };
   try {
-    await installNavigationFuzzHarness(process.env.QINGZHOU_FIREFOX_EXTENSION_DIR, extension, "firefox");
+    await installNavigationFuzzHarness(process.env.ZURI_FIREFOX_EXTENSION_DIR, extension, "firefox");
     session = await openFirefoxSidebar({ extensionDir: extension });
     const api = request => session.extension("background", `
       const request = Cu.cloneInto(${JSON.stringify(request)}, content);

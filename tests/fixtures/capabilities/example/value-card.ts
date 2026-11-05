@@ -24,7 +24,7 @@ export const valueCardRenderer: RendererDefinition = {
   },
   mount(container, view, { document, signal }) {
     const button = document.createElement("button");
-    button.className = "qz-btn qz-btn--secondary qz-btn--sm";
+    button.className = "zuri-btn zuri-btn--secondary zuri-btn--sm";
     button.type = "button";
     const value = document.createElement("pre");
     container.append(button, value);

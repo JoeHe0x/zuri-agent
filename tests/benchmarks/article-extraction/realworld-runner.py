@@ -1,4 +1,4 @@
-"""Run upstream Trafilatura against a frozen Qingzhou real-world corpus."""
+"""Run upstream Trafilatura against a frozen Zuri real-world corpus."""
 
 from __future__ import annotations
 

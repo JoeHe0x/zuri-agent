@@ -13,10 +13,10 @@ import coreMessages from "../../src/sidepanel/i18n/messages.ts";
 import { backendMessages } from "../../src/shared/i18n/backend-messages.ts";
 
 async function fixture(t, packs = [{ language: "ja", chromeLocale: "ja", name: "日本語", catalog: "./ja" }]) {
-  const source = await realpath(await mkdtemp(join(tmpdir(), "qingzhou-locales-")));
+  const source = await realpath(await mkdtemp(join(tmpdir(), "zuri-locales-")));
   t.after(() => rm(source, { recursive: true, force: true }));
   await put(source, "manifest.json", JSON.stringify({ default_locale: "en" }));
-  await put(source, "_locales/en/messages.json", JSON.stringify({ extensionName: { message: "Qingzhou" }, extensionDescription: { message: "An agent workspace." } }));
+  await put(source, "_locales/en/messages.json", JSON.stringify({ extensionName: { message: "Zuri" }, extensionDescription: { message: "An agent workspace." } }));
   await put(source, "shared/messages.ts", 'import { defineMessages } from "./definition.js"; export default defineMessages("core", { save: { en: "Save {name}", "zh-CN": "保存 {name}" }, price: { en: "Costs $5", "zh-CN": "费用 $5" } });');
   await put(source, "capabilities/languages/index.ts", 'export { default as locales } from "./locales.js";');
   await metadata(source, packs);
@@ -65,12 +65,12 @@ test("language packages generate deterministic native resources without copying 
   const assets = capabilityLocaleAssets(source);
   assert.deepEqual(assets, capabilityLocaleAssets(source));
   const japanese = catalog(assets, source);
-  assert.equal(japanese.extensionName.message, "Qingzhou", "missing manifest translations retain the declared default locale");
+  assert.equal(japanese.extensionName.message, "Zuri", "missing manifest translations retain the declared default locale");
   assert.equal(japanese.extensionDescription.message, "ブラウザーで使える AI エージェント。");
-  assert.equal(japanese.qz_language.message, "ja");
+  assert.equal(japanese.zuri_language.message, "ja");
   assert.equal(japanese[chromeMessageId("core.save")].message, "{name} を保存");
   assert.equal(decodeChromeMessage(japanese[chromeMessageId("core.price")]), "$5 です", "Chrome runtime text preserves literal dollars");
-  assert.equal(catalog(assets, source, "en").qz_language.message, "en");
+  assert.equal(catalog(assets, source, "en").zuri_language.message, "en");
   assert.equal(catalog(assets, source, "en").extensionDescription.message, "An agent workspace.");
   assert.ok(assets.resources.has(join(source, "capabilities/languages/ja/core.json")));
   assert.ok(assets.resources.has(join(source, "_locales/en/messages.json")));
@@ -79,19 +79,19 @@ test("language packages generate deterministic native resources without copying 
 
 test("native assets preserve dollar runs, apparent Chrome placeholders and named interpolation as literal text", async t => {
   const source = await fixture(t);
-  const price = "$5 / $$6 / $$$7 / $HOME$ / $1 / $QZ_LITERAL$ / trailing $";
+  const price = "$5 / $$6 / $$$7 / $HOME$ / $1 / $ZURI_LITERAL$ / trailing $";
   await put(source, "capabilities/languages/ja/core.json", JSON.stringify({ "core.price": price, "manifest.extensionDescription": price }));
   const messages = catalog(capabilityLocaleAssets(source), source);
   assert.equal(decodeChromeMessage(messages[chromeMessageId("core.price")]), price);
-  assert.equal(messages[chromeMessageId("core.price")].placeholders.qz_literal.content, "$$5 / $$$6 / $$$$7 / $$HOME$$ / $$1 / $$QZ_LITERAL$$ / trailing $$");
-  assert.equal(messages.extensionDescription.placeholders.qz_literal.content, price, "manifest values do not pass through getMessage substitutions");
-  for (const value of ["", "plain {name}", price, "$", "$$", "$$$", "$QZ_LITERAL$"]) {
+  assert.equal(messages[chromeMessageId("core.price")].placeholders.zuri_literal.content, "$$5 / $$$6 / $$$$7 / $$HOME$$ / $$1 / $$ZURI_LITERAL$$ / trailing $$");
+  assert.equal(messages.extensionDescription.placeholders.zuri_literal.content, price, "manifest values do not pass through getMessage substitutions");
+  for (const value of ["", "plain {name}", price, "$", "$$", "$$$", "$ZURI_LITERAL$"]) {
     assert.equal(decodeChromeMessage(encodeChromeMessage(value)), value);
     const state = { window: {}, options: { localeMessages: { probe: encodeChromeMessage(value) } } };
     runInNewContext(`(${installBenchmarkChromeStub.toString()})(options)`, state);
     assert.equal(state.window.chrome.i18n.getMessage("probe"), value, "serialized browser stubs follow the same native literal contract");
   }
-  for (const value of [null, [], "text", { message: 1 }, { message: "$QZ_LITERAL$" }, { message: "$OTHER$", placeholders: {} }, { message: "$QZ_LITERAL$", placeholders: { qz_literal: { content: false } } }]) {
+  for (const value of [null, [], "text", { message: 1 }, { message: "$ZURI_LITERAL$" }, { message: "$OTHER$", placeholders: {} }, { message: "$ZURI_LITERAL$", placeholders: { zuri_literal: { content: false } } }]) {
     assert.equal(decodeChromeMessage(value), undefined);
   }
 });
@@ -178,7 +178,7 @@ test("package removal and product selection omit unavailable namespaces and leav
   assert.equal(catalog(capabilityLocaleAssets(source), source)[chromeMessageId("product-optional.hello")].message, "こんにちは");
   await rm(join(source, "capabilities/languages"), { recursive: true });
   assert.deepEqual(capabilityLocaleAssets(source), { resources: new Set(), assets: new Map() });
-  assert.equal(JSON.parse(await readFile(join(source, "_locales/en/messages.json"), "utf8")).extensionName.message, "Qingzhou");
+  assert.equal(JSON.parse(await readFile(join(source, "_locales/en/messages.json"), "utf8")).extensionName.message, "Zuri");
 });
 
 test("Traditional Chinese native labels stay localized without a contributed translation catalog", async t => {
@@ -194,7 +194,7 @@ test("Traditional Chinese native labels stay localized without a contributed tra
     switchModel: { message: "快速切換模型預設組合" },
   };
   const generated = catalog(capabilityLocaleAssets(source), source, "zh_TW");
-  assert.deepEqual(generated, { ...expected, qz_language: { message: "zh-TW" } });
+  assert.deepEqual(generated, { ...expected, zuri_language: { message: "zh-TW" } });
   await rm(join(source, "capabilities/languages"), { recursive: true });
   assert.deepEqual(capabilityLocaleAssets(source), { resources: new Set(), assets: new Map() });
   assert.deepEqual(JSON.parse(await readFile(join(source, file), "utf8")), expected);
@@ -235,7 +235,7 @@ test("catalog paths stay in their own package and reject symlinks", async t => {
 test("language aliases are unambiguous and canonical; Chrome numeric regions remain supported", async t => {
   const source = await fixture(t);
   await metadata(source, [{ language: "es-419", chromeLocale: "es_419", name: "Español latinoamericano", aliases: ["es-MX"] }]);
-  assert.equal(catalog(capabilityLocaleAssets(source), source, "es_419").qz_language.message, "es-419");
+  assert.equal(catalog(capabilityLocaleAssets(source), source, "es_419").zuri_language.message, "es-419");
   await metadata(source, [
     { language: "zh-CN", chromeLocale: "zh_CN", name: "简体中文", aliases: ["zh-HK"] },
     { language: "zh-TW", chromeLocale: "zh_TW", name: "繁體中文", aliases: ["zh-HK"] },

@@ -9,7 +9,7 @@ export async function firefoxPageCommand(request: PageCommand, world: "MAIN" | "
   const doc = page.document;
   if (!doc) throw new Error("Firefox page command has no document");
 
-  const state = page.__qzFirefoxPage || (page.__qzFirefoxPage = {
+  const state = page.__zuriFirefoxPage || (page.__zuriFirefoxPage = {
     next: 1,
     nodes: new Map(),
     objects: new Map(),
@@ -64,7 +64,7 @@ export async function firefoxPageCommand(request: PageCommand, world: "MAIN" | "
     if (!event || typeof event !== "object") return;
     const Marked = page.WeakSet;
     if (typeof Marked !== "function") return;
-    const set = page.__qzExtensionInputEvents || (page.__qzExtensionInputEvents = new Marked());
+    const set = page.__zuriExtensionInputEvents || (page.__zuriExtensionInputEvents = new Marked());
     try { set.add(event); } catch { /* A stand-in event may not be a WeakSet key. */ }
   };
   const checkable = (node: DomNode | null | undefined): "checkbox" | "radio" | "" => {
@@ -538,12 +538,12 @@ export async function firefoxPageCommand(request: PageCommand, world: "MAIN" | "
       case "probe": {
         let extensionId = "";
         try { extensionId = String(page.chrome?.runtime?.id || ""); } catch { extensionId = ""; }
-        return { result: remote({ extensionId, bridge: typeof page.__qzInvoke === "function" }) };
+        return { result: remote({ extensionId, bridge: typeof page.__zuriInvoke === "function" }) };
       }
       case "invoke": {
         const bound = state.objects.get(String(command.objectId || ""));
         if (command.objectId && !bound) return failed(new Error("Cannot find object"));
-        const fn = page.__qzInvoke;
+        const fn = page.__zuriInvoke;
         if (typeof fn !== "function") throw new Error("Content script bridge is missing");
         let value: unknown = fn.call(bound?.node, bound?.node || null, command.payload);
         if (command.awaitPromise !== false && value && typeof (value as Promise<unknown>).then === "function") value = await value;
@@ -629,10 +629,10 @@ export function firefoxApplyUserAgent(userAgent: string): void {
   const page = globalThis as unknown as PageScope;
   const proto = page.Navigator?.prototype;
   if (!proto) return;
-  const holder = page as PageScope & { __qzNativeUserAgent?: PropertyDescriptor };
-  if (!holder.__qzNativeUserAgent) holder.__qzNativeUserAgent = Object.getOwnPropertyDescriptor(proto, "userAgent");
-  if (!userAgent && holder.__qzNativeUserAgent) {
-    Object.defineProperty(proto, "userAgent", holder.__qzNativeUserAgent);
+  const holder = page as PageScope & { __zuriNativeUserAgent?: PropertyDescriptor };
+  if (!holder.__zuriNativeUserAgent) holder.__zuriNativeUserAgent = Object.getOwnPropertyDescriptor(proto, "userAgent");
+  if (!userAgent && holder.__zuriNativeUserAgent) {
+    Object.defineProperty(proto, "userAgent", holder.__zuriNativeUserAgent);
     return;
   }
   Object.defineProperty(proto, "userAgent", { configurable: true, get: () => userAgent });
@@ -641,15 +641,15 @@ export function firefoxApplyUserAgent(userAgent: string): void {
 export function firefoxConsoleMain(): void {
   const page = globalThis as unknown as PageScope;
   const root = page.document?.documentElement;
-  if (!root?.setAttribute || root.getAttribute?.("data-qz-console-hook") === "1") return;
-  root.setAttribute("data-qz-console-hook", "1");
+  if (!root?.setAttribute || root.getAttribute?.("data-zuri-console-hook") === "1") return;
+  root.setAttribute("data-zuri-console-hook", "1");
   const queue: { seq: number; record: ConsoleRecord }[] = [];
   let seq = 0;
   const push = (record: ConsoleRecord) => {
     seq += 1;
     queue.push({ seq, record });
     if (queue.length > 200) queue.shift();
-    root.setAttribute?.("data-qz-console-queue", JSON.stringify(queue));
+    root.setAttribute?.("data-zuri-console-queue", JSON.stringify(queue));
   };
   const frame = () => String(new page.Error().stack || "");
   const consoleApi = page.console;
@@ -676,23 +676,23 @@ export function firefoxConsoleMain(): void {
 export function firefoxConsoleBridge(): void {
   const page = globalThis as unknown as PageScope;
   const root = page.document?.documentElement;
-  if (!root?.getAttribute || root.__qzConsoleBridge) return;
-  root.__qzConsoleBridge = true;
-  root.__qzConsoleSeen = 0;
+  if (!root?.getAttribute || root.__zuriConsoleBridge) return;
+  root.__zuriConsoleBridge = true;
+  root.__zuriConsoleSeen = 0;
   const flush = () => {
     let queue: { seq?: number; record?: ConsoleRecord }[] = [];
-    try { queue = JSON.parse(root.getAttribute?.("data-qz-console-queue") || "[]"); } catch { return; }
-    let last = Number(root.__qzConsoleSeen || 0);
+    try { queue = JSON.parse(root.getAttribute?.("data-zuri-console-queue") || "[]"); } catch { return; }
+    let last = Number(root.__zuriConsoleSeen || 0);
     for (const item of queue) {
       const seq = Number(item?.seq || 0);
       if (!item?.record || seq <= last) continue;
       last = seq;
-      page.chrome?.runtime?.sendMessage?.({ type: "qz-firefox-console", record: item.record });
+      page.chrome?.runtime?.sendMessage?.({ type: "zuri-firefox-console", record: item.record });
     }
-    root.__qzConsoleSeen = last;
+    root.__zuriConsoleSeen = last;
   };
   const Observer = page.MutationObserver;
-  if (typeof Observer === "function") new Observer(flush).observe(root, { attributes: true, attributeFilter: ["data-qz-console-queue"] });
+  if (typeof Observer === "function") new Observer(flush).observe(root, { attributes: true, attributeFilter: ["data-zuri-console-queue"] });
   flush();
 }
 
@@ -739,7 +739,7 @@ interface DomNode {
   href?: string; target?: string; form?: { requestSubmit?(submitter?: DomNode): void } | null;
   value?: string; selectionStart?: number | null; selectionEnd?: number | null;
   disabled?: boolean; checked?: boolean; readOnly?: boolean; required?: boolean; isContentEditable?: boolean;
-  appendChild?(node: DomNode): void; __qzConsoleSeen?: number; __qzConsoleBridge?: boolean;
+  appendChild?(node: DomNode): void; __zuriConsoleSeen?: number; __zuriConsoleBridge?: boolean;
 }
 interface PageScope {
   document?: DomNode & {
@@ -770,9 +770,9 @@ interface PageScope {
   addEventListener?(type: string, listener: (event: unknown) => void): void;
   MutationObserver?: new (callback: () => void) => { observe(target: DomNode, options: { attributes: boolean; attributeFilter: string[] }): void };
   chrome?: { runtime?: { id?: string; sendMessage?(message: unknown): void } };
-  __qzInvoke?: (this: unknown, node: DomNode, payload: unknown) => unknown;
-  __qzExtensionInputEvents?: { add(value: object): void };
-  __qzFirefoxPage?: {
+  __zuriInvoke?: (this: unknown, node: DomNode, payload: unknown) => unknown;
+  __zuriExtensionInputEvents?: { add(value: object): void };
+  __zuriFirefoxPage?: {
     next: number; nodes: Map<number, DomNode>; objects: Map<string, { node: DomNode; group: string }>;
     mouseTarget: DomNode | null; touchTarget: DomNode | null;
   };

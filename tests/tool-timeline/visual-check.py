@@ -17,8 +17,8 @@ from extension_assets import serve_repository
 
 ROOT = Path(__file__).resolve().parent
 REPO_ROOT = ROOT.parents[1]
-DEFAULT_SCREENSHOT = Path("/tmp/qingzhou-tool-timeline-visual-test.png")
-DEFAULT_GIF = Path("/tmp/qingzhou-tool-timeline-visual-test.gif")
+DEFAULT_SCREENSHOT = Path("/tmp/zuri-tool-timeline-visual-test.png")
+DEFAULT_GIF = Path("/tmp/zuri-tool-timeline-visual-test.gif")
 
 
 def expect(condition, message):
@@ -1101,7 +1101,7 @@ def check_tool_component(page, name):
         expect("request req_42" in text and "1280ms" in text, "network_body: missing request metadata")
         directions = page.evaluate("() => window.visualTimelineTest.debugNetworkBodyTypeState()")
         expect("读取请求体" in directions["requestText"], f"network_body: request summary label missing {directions}")
-        expect("请求体" in directions["requestText"] and "轻舟工具" in directions["requestText"], f"network_body: request body evidence missing {directions}")
+        expect("请求体" in directions["requestText"] and "Zuri工具" in directions["requestText"], f"network_body: request body evidence missing {directions}")
         expect("读取响应体" in directions["responseText"], f"network_body: response summary label regressed {directions}")
         expect("响应体" in directions["responseText"] and '"ok"' in directions["responseText"], f"network_body: response body evidence regressed {directions}")
     if name == "wait_for_user":
@@ -1662,7 +1662,7 @@ def expect_sidepanel_settings_smoke(browser, visual_url):
         },
         storage: {
           local: {
-            async get(key) { return key === 'qz_data_consent' ? { qz_data_consent: { version: 1, acceptedAt: 1 } } : {}; },
+            async get(key) { return key === 'zuri_data_consent' ? { zuri_data_consent: { version: 1, acceptedAt: 1 } } : {}; },
             async set() {},
             async remove() {},
           },
@@ -1708,7 +1708,7 @@ def expect_sidepanel_session_delete_stability(browser, visual_url):
       };
       const clone = value => value === undefined ? undefined : JSON.parse(JSON.stringify(value));
       const emit = event => listeners.message.slice().forEach(fn => fn(event));
-      const storage = { qz_data_consent: { version: 1, acceptedAt: 1 }, _sessions: sessions };
+      const storage = { zuri_data_consent: { version: 1, acceptedAt: 1 }, _sessions: sessions };
       const storageGet = async keys => {
         if (typeof keys === 'string') return { [keys]: clone(storage[keys]) };
         if (Array.isArray(keys)) return Object.fromEntries(keys.map(key => [key, clone(storage[key])]));
@@ -2099,7 +2099,7 @@ def expect_sidepanel_assistant_actions_smoke(browser, visual_url):
         storage: {
           local: {
             async get(key) {
-              if (key === 'qz_data_consent') return { qz_data_consent: { version: 1, acceptedAt: 1 } };
+              if (key === 'zuri_data_consent') return { zuri_data_consent: { version: 1, acceptedAt: 1 } };
               if (key === '_sessions') return { _sessions: { [session.id]: session } };
               return {};
             },
@@ -2181,10 +2181,10 @@ def expect_sidepanel_assistant_actions_smoke(browser, visual_url):
           window.__emitPortMessage({
             requestId: request.requestId,
             payload: {
-              format: 'qingzhou.session',
+              format: 'zuri.session',
               version: 1,
               exportedAt: '2026-07-10 10:00:03',
-              app: { name: '轻舟', version: 'test' },
+              app: { name: 'Zuri', version: 'test' },
               source: { sessionId: 'sess-actions', parentSessionId: 'root' },
               session: {
                 title: '按钮可见性测试',
@@ -2324,7 +2324,7 @@ def expect_sidepanel_artifacts_smoke(browser, visual_url):
     (() => {
       const listeners = { message: [], disconnect: [], changed: [] };
       const session = { id: 'sess-artifacts', title: '产物测试任务', parentSessionId: 'root' };
-      const storage = { qz_data_consent: { version: 1, acceptedAt: 1 }, _sessions: {} };
+      const storage = { zuri_data_consent: { version: 1, acceptedAt: 1 }, _sessions: {} };
       const clone = (value) => JSON.parse(JSON.stringify(value));
       const emit = (event) => listeners.message.slice().forEach(fn => fn(event));
       const storageGet = async (keys) => {
@@ -2674,7 +2674,7 @@ def expect_sidepanel_automation_artifacts_smoke(browser, visual_url):
         updatedAt: '2026-06-15 09:04:31',
       };
       const storage = {
-        qz_data_consent: { version: 1, acceptedAt: 1 },
+        zuri_data_consent: { version: 1, acceptedAt: 1 },
         _sessions: {
           [session.id]: session,
           'auto-session-0': {
@@ -2689,7 +2689,7 @@ def expect_sidepanel_automation_artifacts_smoke(browser, visual_url):
           },
         },
         '_session_auto-session-1': {
-          type: 'qz-browser-agent-session',
+          type: 'zuri-agent-session',
           version: 4,
           conversation: null,
           transcript: [
@@ -2711,7 +2711,7 @@ def expect_sidepanel_automation_artifacts_smoke(browser, visual_url):
           savedAt: '2026-06-15 09:04:31',
         },
         '_session_auto-session-0': {
-          type: 'qz-browser-agent-session',
+          type: 'zuri-agent-session',
           version: 4,
           conversation: null,
           transcript: [
@@ -2847,7 +2847,7 @@ def main():
     operation_flow = read_json(args.operations)
 
     with serve_sidepanel() as url, sync_playwright() as p:
-        browser = p.chromium.launch(channel=os.environ.get("QINGZHOU_PLAYWRIGHT_CHANNEL", "chromium"))
+        browser = p.chromium.launch(channel=os.environ.get("ZURI_PLAYWRIGHT_CHANNEL", "chromium"))
         page = browser.new_page(locale="zh-CN", viewport={"width": 1180, "height": 980}, device_scale_factor=1)
         page_errors = []
         console_errors = []
@@ -2891,7 +2891,7 @@ def main():
 
         if gif_path:
             operations = operation_flow or default_operations_from_page(page)
-            with tempfile.TemporaryDirectory(prefix="qingzhou-timeline-frames-") as tmp:
+            with tempfile.TemporaryDirectory(prefix="zuri-timeline-frames-") as tmp:
                 frame_dir = Path(tmp)
                 run_operations_with_frames(page, operations, frame_dir, args.frame_target)
                 make_gif(frame_dir, gif_path, args.fps)

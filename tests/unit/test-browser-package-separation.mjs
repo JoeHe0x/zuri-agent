@@ -36,7 +36,7 @@ test("the Chromium channel rejects Firefox and the Firefox package rejects a Chr
 });
 
 test("Chromium extension loading refuses the Firefox package", async () => {
-  const directory = mkdtempSync(join(tmpdir(), "qz-firefox-package-"));
+  const directory = mkdtempSync(join(tmpdir(), "zuri-firefox-package-"));
   try {
     writeFileSync(join(directory, "manifest.json"), JSON.stringify({
       manifest_version: 3,

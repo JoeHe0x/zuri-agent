@@ -36,7 +36,7 @@ export function installOffscreenHost(chromeApi: OffscreenChrome, doc: HostDocume
       return;
     }
     if (!chromeApi.windows?.create) throw new Error("Firefox offscreen host has no document");
-    console.info("[轻舟] firefox offscreen uses a minimized window");
+    console.info("[Zuri] firefox offscreen uses a minimized window");
     const created = await chromeApi.windows.create({ url: url(), type: "popup", state: "minimized", focused: false, width: 200, height: 200 });
     const id = Number(created?.id);
     if (!Number.isInteger(id) || id < 0) throw new Error("Firefox offscreen window was not created");

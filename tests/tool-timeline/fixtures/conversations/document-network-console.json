@@ -9,7 +9,7 @@
         "type": "tool",
         "_uiKey": "dnc-t1",
         "toolCallId": "dnc-t1",
-        "name": "qingzhou_documents__document_fetch",
+        "name": "zuri_documents__document_fetch",
         "args": { "url": "https://example.com/report.docx" },
         "result": { "filename": "竞品报告.docx", "sourceUrl": "https://example.com/report.docx", "fileId": "file_8421", "size": 245760, "blockCount": 18, "outline": [{ "level": 1, "text": "摘要" }, { "level": 2, "text": "候选品牌" }] }
       },
@@ -17,7 +17,7 @@
         "type": "tool",
         "_uiKey": "dnc-t2",
         "toolCallId": "dnc-t2",
-        "name": "qingzhou_documents__document_parse",
+        "name": "zuri_documents__document_parse",
         "args": { "fileId": "file_8421" },
         "result": { "title": "竞品报告", "docModelId": "doc_8421", "sheetCount": 1, "sheets": [{ "name": "候选品牌", "rowCount": 6, "columns": ["name", "status", "owner", "url"] }], "outline": [{ "level": 1, "text": "结论" }] }
       },
@@ -25,7 +25,7 @@
         "type": "tool",
         "_uiKey": "dnc-t3",
         "toolCallId": "dnc-t3",
-        "name": "qingzhou_documents__document_read_chunk",
+        "name": "zuri_documents__document_read_chunk",
         "args": { "docModelId": "doc_8421", "chunkIndex": 2, "limit": 1200 },
         "result": { "title": "竞品报告", "docModelId": "doc_8421", "type": "text", "chunkIndex": 2, "chunkCount": 8, "text": "本块覆盖候选品牌的定位、价格带和渠道状态。A 品牌在线下渠道更强，B 品牌内容种草效率更高。" }
       },

@@ -1,8 +1,8 @@
 /* Utility-first layout vocabulary; candidates come from the enabled UI dependency graph. */
-@import "tailwindcss/utilities.css" layer(utilities) prefix(qz) source(none);
+@import "tailwindcss/utilities.css" layer(utilities) prefix(zuri) source(none);
 
 /* Inline aliases keep the existing skin variables authoritative at the element. */
-@theme inline prefix(qz) {
+@theme inline prefix(zuri) {
   --color-surface: var(--bg-primary);
   --color-surface-secondary: var(--bg-secondary);
   --color-surface-muted: var(--bg-tertiary);

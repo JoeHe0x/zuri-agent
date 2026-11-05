@@ -6,7 +6,7 @@ test.describe("message-owned document attachments", () => {
   test.beforeEach(async ({ page }) => {
     await page.addInitScript(installAttachmentChromeStub);
     await page.goto("/extension/sidepanel/sidepanel.html", { waitUntil: "domcontentloaded" });
-    await page.waitForFunction(() => Boolean(window.qingzhouConversationBenchmark));
+    await page.waitForFunction(() => Boolean(window.zuriConversationBenchmark));
   });
 
   test("gates send while parsing and restores the message-owned draft after a Session switch", async ({ page }) => {
@@ -56,7 +56,7 @@ test.describe("message-owned document attachments", () => {
         width: node.getBoundingClientRect().width,
         nameOverflow: name.scrollWidth > name.clientWidth,
         textOverflow: getComputedStyle(name).textOverflow,
-        dangerClass: remove.classList.contains("qz-icon-btn--danger"),
+        dangerClass: remove.classList.contains("zuri-icon-btn--danger"),
       };
     });
     expect(layout.width).toBeCloseTo(168, 0);
@@ -93,7 +93,7 @@ test.describe("message-owned document attachments", () => {
     await page.locator("#input").fill("写到一半、尚未发送的内容");
     await page.waitForTimeout(300);
     await page.reload({ waitUntil: "domcontentloaded" });
-    await page.waitForFunction(() => Boolean(window.qingzhouConversationBenchmark));
+    await page.waitForFunction(() => Boolean(window.zuriConversationBenchmark));
     await expect(page.locator("#input")).toHaveValue("写到一半、尚未发送的内容");
     await expect(page.locator("#btn-send")).toBeEnabled();
   });
@@ -102,7 +102,7 @@ test.describe("message-owned document attachments", () => {
     await page.waitForFunction(() => window.__attachmentWindowAttached === true);
     await page.locator("#input").fill("最后一次输入也不能丢");
     await page.reload({ waitUntil: "domcontentloaded" });
-    await page.waitForFunction(() => Boolean(window.qingzhouConversationBenchmark));
+    await page.waitForFunction(() => Boolean(window.zuriConversationBenchmark));
     await expect(page.locator("#input")).toHaveValue("最后一次输入也不能丢");
   });
 
@@ -116,7 +116,7 @@ test.describe("message-owned document attachments", () => {
       "/extension/sidepanel/sidepanel.html?draftWindowDelay=350",
       { waitUntil: "domcontentloaded" },
     );
-    await page.waitForFunction(() => Boolean(window.qingzhouConversationBenchmark));
+    await page.waitForFunction(() => Boolean(window.zuriConversationBenchmark));
     await expect(page.locator("#input")).toHaveValue("当前窗口自己的草稿");
   });
 
@@ -125,7 +125,7 @@ test.describe("message-owned document attachments", () => {
       "/extension/sidepanel/sidepanel.html?draftWindowDelay=600",
       { waitUntil: "domcontentloaded" },
     );
-    await page.waitForFunction(() => Boolean(window.qingzhouConversationBenchmark));
+    await page.waitForFunction(() => Boolean(window.zuriConversationBenchmark));
     await switchToSession(page, "late-window-first", "第一个任务");
     await page.locator("#input").fill("第一个窗口内草稿");
     await switchToSession(page, "late-window-second", "第二个任务");
@@ -146,7 +146,7 @@ test.describe("message-owned document attachments", () => {
       await window.__lastDraftPersistence;
     });
     await page.reload({ waitUntil: "domcontentloaded" });
-    await page.waitForFunction(() => Boolean(window.qingzhouConversationBenchmark));
+    await page.waitForFunction(() => Boolean(window.zuriConversationBenchmark));
     await expect(page.locator("#input")).toHaveValue("关闭面板前最后输入的内容");
   });
 
@@ -159,7 +159,7 @@ test.describe("message-owned document attachments", () => {
     ));
     await page.evaluate(() => window.__lastDraftPersistence);
     await page.reload({ waitUntil: "domcontentloaded" });
-    await page.waitForFunction(() => Boolean(window.qingzhouConversationBenchmark));
+    await page.waitForFunction(() => Boolean(window.zuriConversationBenchmark));
     await expect(page.locator("#input")).toHaveValue("");
     await expect(page.locator("#btn-send")).toBeDisabled();
   });
@@ -216,7 +216,7 @@ test.describe("message-owned document attachments", () => {
       }
     });
     await page.reload({ waitUntil: "domcontentloaded" });
-    await page.waitForFunction(() => Boolean(window.qingzhouConversationBenchmark));
+    await page.waitForFunction(() => Boolean(window.zuriConversationBenchmark));
     await switchToSession(page, "upload-session", "待接纳消息");
     await expect(page.locator("#input")).toHaveValue("后台尚未接纳，必须可重试");
     await expect(page.locator("#btn-send")).toBeEnabled();
@@ -227,7 +227,7 @@ test.describe("message-owned document attachments", () => {
     await pasteFile(page, "resume-after-reopen.py", "print('resume')\n", "text/x-python");
     await page.waitForFunction(() => window.__pendingAttachmentStages.length === 1);
     await page.reload({ waitUntil: "domcontentloaded" });
-    await page.waitForFunction(() => Boolean(window.qingzhouConversationBenchmark));
+    await page.waitForFunction(() => Boolean(window.zuriConversationBenchmark));
     await switchToSession(page, "upload-session", "恢复解析");
 
     await expect(page.locator("#input")).toHaveValue("解析完成后继续发送");
@@ -551,7 +551,7 @@ test.describe("message-owned document attachments", () => {
     ));
     expect(persistedText).toBe("用户后来输入的新文本");
     await page.reload({ waitUntil: "domcontentloaded" });
-    await page.waitForFunction(() => Boolean(window.qingzhouConversationBenchmark));
+    await page.waitForFunction(() => Boolean(window.zuriConversationBenchmark));
     await switchToSession(page, "upload-session", "附件任务");
 
     await expect(page.locator("#input")).toHaveValue("用户后来输入的新文本");
@@ -740,7 +740,7 @@ test.describe("message-owned document attachments", () => {
 
   test("opens a newer document database without attempting to downgrade it", async ({ page }) => {
     const result = await page.evaluate(async () => {
-      const dbName = "qz-browser-agent-documents";
+      const dbName = "zuri-agent-documents";
       await new Promise((resolve, reject) => {
         const request = indexedDB.open(dbName, 3);
         request.onupgradeneeded = () => {
@@ -820,7 +820,7 @@ test.describe("message-owned document attachments", () => {
 
   test("renders the sent file as a compact token-based message card", async ({ page }) => {
     await page.emulateMedia({ colorScheme: "dark" });
-    await page.evaluate(() => window.qingzhouConversationBenchmark.runSnapshotRender({
+    await page.evaluate(() => window.zuriConversationBenchmark.runSnapshotRender({
       sessionId: "rendered-document-session",
       title: "文档消息",
       transcript: [{
@@ -885,12 +885,12 @@ async function readDropCue(page) {
 
 async function switchToSession(page, sessionId, title) {
   await page.evaluate(async ({ sessionId: id, title: sessionTitle }) => {
-    await window.qingzhouConversationBenchmark.seedSession({
+    await window.zuriConversationBenchmark.seedSession({
       sessionId: id,
       title: sessionTitle,
       transcript: [],
     });
-    await window.qingzhouConversationBenchmark.switchToSession(id, { source: "benchmark" });
+    await window.zuriConversationBenchmark.switchToSession(id, { source: "benchmark" });
   }, { sessionId, title });
 }
 
@@ -913,13 +913,13 @@ async function pasteFiles(page, files) {
 }
 
 function installAttachmentChromeStub() {
-  const storageKey = "__qingzhou_test_chrome_storage__";
-  let storage = { qz_data_consent: { version: 1, acceptedAt: 1 } };
+  const storageKey = "__zuri_test_chrome_storage__";
+  let storage = { zuri_data_consent: { version: 1, acceptedAt: 1 } };
   try { storage = { ...storage, ...JSON.parse(localStorage.getItem(storageKey) || "{}") }; } catch (_error) {}
   const clone = value => value == null ? value : JSON.parse(JSON.stringify(value));
   const ports = [];
-  const draftStorageKey = "__qingzhou_test_composer_drafts__";
-  window.__QZ_CONVERSATION_BENCHMARK__ = true;
+  const draftStorageKey = "__zuri_test_composer_drafts__";
+  window.__ZURI_CONVERSATION_BENCHMARK__ = true;
   window.__attachmentPortMessages = [];
   window.__pendingAttachmentStages = [];
   window.__pendingSessionCreations = [];
@@ -969,7 +969,7 @@ function installAttachmentChromeStub() {
   window.__getComposerDraft = getDraft;
   window.__seedComposerDraft = (sessionId, draft) => {
     ensureStoredSession(sessionId);
-    storage["qingzhou:workspace-view:73"] = { v: 1, page: "chat", sessionId };
+    storage["zuri:workspace-view:73"] = { v: 1, page: "chat", sessionId };
     writeStorage();
     return saveDraft(sessionId, draft);
   };

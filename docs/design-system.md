@@ -1,6 +1,6 @@
 # Design system
 
-Build capability layouts with the shared tokens, `qz-*` controls, and `qz:` utilities. The Side
+Build capability layouts with the shared tokens, `zuri-*` controls, and `zuri:` utilities. The Side
 Panel and exported Session HTML use the same compiled skin. Begin with the [capability
 guide](../src/capabilities/README.md) to register a page or renderer; this guide covers its public
 styling contract.
@@ -30,17 +30,17 @@ Use native button/input semantics and the shared control states.
 
 | Purpose | Public classes |
 | --- | --- |
-| Buttons | `qz-btn` with `qz-btn--primary`, `qz-btn--secondary`, `qz-btn--ghost`, or `qz-btn--danger`; sizes `qz-btn--xs/sm/lg` |
-| Icon buttons | `qz-icon-btn` with `qz-icon-btn--secondary` or `qz-icon-btn--danger`; sizes `qz-icon-btn--xs/sm/md` |
-| Fields | `qz-field`, `qz-field-label`, `qz-field-hint`; combine `qz-field qz-select` for selects |
-| Choice inputs | `qz-checkbox`, `qz-radio`, `qz-switch`, driven by native input state |
-| Result choices | `qz-choice-card` family, built with `renderResultChoice` from SDK DOM; single-column cards with a native radio or checkbox |
-| Popovers and menus | `qz-popover`, `qz-menu`, `qz-menu-item` |
-| Lists and decisions | `qz-list-toolbar` and `qz-decision-dialog` families; use the SDK dialog interaction |
-| Scrolling | `qz-scroll`; add `qz-scroll--native` for native scrollbars |
+| Buttons | `zuri-btn` with `zuri-btn--primary`, `zuri-btn--secondary`, `zuri-btn--ghost`, or `zuri-btn--danger`; sizes `zuri-btn--xs/sm/lg` |
+| Icon buttons | `zuri-icon-btn` with `zuri-icon-btn--secondary` or `zuri-icon-btn--danger`; sizes `zuri-icon-btn--xs/sm/md` |
+| Fields | `zuri-field`, `zuri-field-label`, `zuri-field-hint`; combine `zuri-field zuri-select` for selects |
+| Choice inputs | `zuri-checkbox`, `zuri-radio`, `zuri-switch`, driven by native input state |
+| Result choices | `zuri-choice-card` family, built with `renderResultChoice` from SDK DOM; single-column cards with a native radio or checkbox |
+| Popovers and menus | `zuri-popover`, `zuri-menu`, `zuri-menu-item` |
+| Lists and decisions | `zuri-list-toolbar` and `zuri-decision-dialog` families; use the SDK dialog interaction |
+| Scrolling | `zuri-scroll`; add `zuri-scroll--native` for native scrollbars |
 
-Control overrides use the declared `--qz-control-*`, `--qz-field-*`, and `--qz-popover-*` variables.
-`--qz-choice-card-text-scale` scales result-card text and line height together; it defaults to `1`.
+Control overrides use the declared `--zuri-control-*`, `--zuri-field-*`, and `--zuri-popover-*` variables.
+`--zuri-choice-card-text-scale` scales result-card text and line height together; it defaults to `1`.
 Preserve accessible names, keyboard focus, and disabled semantics. DOM helpers and renderer
 contracts are available through [SDK DOM](../src/sdk/sidepanel/dom.ts) and
 [renderers](../src/sdk/sidepanel/renderers.ts).
@@ -60,23 +60,23 @@ text blocks by 2px, cards by 8px, and use the small field padding token (8px) fo
 
 | Utility examples | Semantic source |
 | --- | --- |
-| `qz:bg-surface`, `qz:bg-surface-muted`, `qz:bg-surface-elevated` | `--bg-primary`, `--bg-tertiary`, `--bg-elevated` |
-| `qz:text-foreground`, `qz:text-secondary`, `qz:text-muted` | `--text-primary`, `--text-secondary`, `--text-muted` |
-| `qz:text-danger`, `qz:text-success`, `qz:text-warning` | `--red`, `--green`, `--orange` |
-| `qz:border-border`, `qz:border-focus` | `--border`, `--border-focus` |
-| `qz:font-ui`, `qz:font-code`, `qz:text-body` | `--font-sans`, `--font-mono`, `--field-font-md` |
-| `qz:rounded-control`, `qz:rounded-panel`, `qz:shadow-popover` | `--control-radius`, `--radius-lg`, `--shadow-lg` |
+| `zuri:bg-surface`, `zuri:bg-surface-muted`, `zuri:bg-surface-elevated` | `--bg-primary`, `--bg-tertiary`, `--bg-elevated` |
+| `zuri:text-foreground`, `zuri:text-secondary`, `zuri:text-muted` | `--text-primary`, `--text-secondary`, `--text-muted` |
+| `zuri:text-danger`, `zuri:text-success`, `zuri:text-warning` | `--red`, `--green`, `--orange` |
+| `zuri:border-border`, `zuri:border-focus` | `--border`, `--border-focus` |
+| `zuri:font-ui`, `zuri:font-code`, `zuri:text-body` | `--font-sans`, `--font-mono`, `--field-font-md` |
+| `zuri:rounded-control`, `zuri:rounded-panel`, `zuri:shadow-popover` | `--control-radius`, `--radius-lg`, `--shadow-lg` |
 
 ## Template example
 
-The `qz:` utility prefix precedes variants, as in `qz:hover:bg-surface-muted`. It is distinct from
-the `qz-*` component classes. Keep semantic classes and IDs used by interaction, tests, and skins.
+The `zuri:` utility prefix precedes variants, as in `zuri:hover:bg-surface-muted`. It is distinct from
+the `zuri-*` component classes. Keep semantic classes and IDs used by interaction, tests, and skins.
 
 ```html
-<section class="example-panel qz:flex qz:flex-col qz:gap-2 qz:p-4 qz:bg-surface qz:rounded-panel">
-  <label class="qz-field-label" for="example-name">Name</label>
-  <input id="example-name" class="qz-field" dir="auto">
-  <button type="button" class="qz-btn qz-btn--primary">Save</button>
+<section class="example-panel zuri:flex zuri:flex-col zuri:gap-2 zuri:p-4 zuri:bg-surface zuri:rounded-panel">
+  <label class="zuri-field-label" for="example-name">Name</label>
+  <input id="example-name" class="zuri-field" dir="auto">
+  <button type="button" class="zuri-btn zuri-btn--primary">Save</button>
 </section>
 ```
 
@@ -84,7 +84,7 @@ Use localized labels in production templates. The build discovers complete class
 TypeScript. Enumerate dynamic states explicitly:
 
 ```ts
-const tones = { ready: "qz:text-success", failed: "qz:text-danger" };
+const tones = { ready: "zuri:text-success", failed: "zuri:text-danger" };
 element.classList.remove(...Object.values(tones));
 element.classList.add(tones[state]);
 ```
@@ -105,11 +105,11 @@ create a sibling directory with an `index.css` and change the first import in
 
 For a variation of the default theme, the new entry can import `../default/index.css` and override
 semantic tokens in `@layer theme`. An independent theme implements the same public contract. Set
-`data-qingzhou-skin` on the stylesheet link in [sidepanel.html](../src/sidepanel/sidepanel.html) to
+`data-zuri-skin` on the stylesheet link in [sidepanel.html](../src/sidepanel/sidepanel.html) to
 the theme's name when recording that name in HTML exports.
 
-Keep the remaining feature imports. Each theme preserves the public semantic tokens, `qz-*`
-controls, `qz:` utilities, layer order, and DOM contract described here. Rebuild using the
+Keep the remaining feature imports. Each theme preserves the public semantic tokens, `zuri-*`
+controls, `zuri:` utilities, layer order, and DOM contract described here. Rebuild using the
 [development commands](commands.md); the output remains `sidepanel/sidepanel.css` and includes the
 selected theme, feature styles, and enabled capability styles.
 

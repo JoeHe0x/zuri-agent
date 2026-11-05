@@ -18,7 +18,7 @@ for (const mode of ['development', 'production']) {
           { action: 'allow', type: 'pattern', value: 'https://blocked.test/allowed/*' },
         ] } }) } }, scripting: { executeScript: async () => [] } };
         const definitions = new Map();
-        const { createScriptTools, ToolExecutionError } = window.QZ_SCRIPT_TEST;
+        const { createScriptTools, ToolExecutionError } = window.ZURI_SCRIPT_TEST;
         createScriptTools({ registerTool: definition => definitions.set(definition.name, definition), ToolExecutionError,
           skills: { loadScript: async () => { throw new Error("Inline script must not load a Skill resource"); } },
           scriptTimeoutProperty: { type: 'number' },
@@ -37,17 +37,17 @@ for (const mode of ['development', 'production']) {
         return { button: document.querySelector('button'), svg: document.querySelector('svg'), long, window, document };
       }`));
       expect(result.ok).toBe(true);
-      expect(result.result.button).toEqual({ __qz_uncloneable: 'dom', tagName: 'BUTTON', id: 'sample', className: 'selected', text: 'Real DOM' });
-      expect(result.result.svg).toEqual({ __qz_uncloneable: 'dom', tagName: 'svg', id: '', className: '[object SVGAnimatedString]', text: 'SVG text' });
+      expect(result.result.button).toEqual({ __zuri_uncloneable: 'dom', tagName: 'BUTTON', id: 'sample', className: 'selected', text: 'Real DOM' });
+      expect(result.result.svg).toEqual({ __zuri_uncloneable: 'dom', tagName: 'svg', id: '', className: '[object SVGAnimatedString]', text: 'SVG text' });
       expect(result.result.long.text).toBe('x'.repeat(200));
-      expect(result.result.window).toEqual({ __qz_uncloneable: 'global' });
-      expect(result.result.document).toEqual({ __qz_uncloneable: 'global' });
+      expect(result.result.window).toEqual({ __zuri_uncloneable: 'global' });
+      expect(result.result.document).toEqual({ __zuri_uncloneable: 'global' });
       const bridged = await page.evaluate(async () => {
         let call;
         const respond = event => {
-          if (event.source !== window || event.data?.source !== 'qz-run-script-tool-call') return;
+          if (event.source !== window || event.data?.source !== 'zuri-run-script-tool-call') return;
           call = event.data;
-          window.postMessage({ source: 'qz-run-script-tool-response', id: call.id,
+          window.postMessage({ source: 'zuri-run-script-tool-response', id: call.id,
             response: { ok: true, result: { accepted: true } } }, '*');
         };
         window.addEventListener('message', respond);

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Site-disjoint evaluation for Qingzhou's internal article candidates.
+"""Site-disjoint evaluation for Zuri's internal article candidates.
 
 This is benchmark code only. It never imports into the extension and never uses
 site, URL, selector, or benchmark page-type fields as model features.
@@ -604,7 +604,7 @@ def main() -> None:
     pages = load_pages(dataset)
     factories = model_factories(arguments.seed)
     report = {
-        "schema": "qingzhou.article-extraction-reranker-eval.v2",
+        "schema": "zuri.article-extraction-reranker-eval.v2",
         "dataset": str(dataset),
         "pages": len(pages),
         "extractPages": len(extract_pages(pages)),

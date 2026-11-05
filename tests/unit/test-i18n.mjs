@@ -33,9 +33,9 @@ test("native language packs preserve parameters and unavailable or mismatched pa
   const t = createTranslator(defineMessages("sample", { saved: { "zh-CN": "已保存 {name}", en: "Saved {name}" } }));
   withLanguage("ja-JP", () => {
     const input = '<b>ユーザー {name} $&</b>';
-    chrome.i18n.getMessage = key => key === "qz_language" ? "ja" : key === chromeMessageId("sample.saved") ? "{name}を保存しました" : "";
+    chrome.i18n.getMessage = key => key === "zuri_language" ? "ja" : key === chromeMessageId("sample.saved") ? "{name}を保存しました" : "";
     assert.equal(t("saved", { name: input }), `${input}を保存しました`);
-    chrome.i18n.getMessage = key => key === "qz_language" ? "ko" : "잘못된 언어";
+    chrome.i18n.getMessage = key => key === "zuri_language" ? "ko" : "잘못된 언어";
     assert.equal(t("saved", { name: input }), `Saved ${input}`);
     chrome.i18n.getMessage = () => { throw new Error("Extension context was invalidated"); };
     assert.equal(t("saved", { name: input }), `Saved ${input}`);

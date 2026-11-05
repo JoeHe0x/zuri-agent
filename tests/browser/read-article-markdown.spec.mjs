@@ -13,7 +13,7 @@ async function installContentScript(page, html) {
       Object.defineProperty(window, "chrome", { configurable: true, value: {} });
     }
     const runtime = {
-      getManifest: () => ({ name: "Qingzhou Test", version: "0.0.0" }),
+      getManifest: () => ({ name: "Zuri Test", version: "0.0.0" }),
       onMessage: {
         addListener(nextListener) {
           listener = nextListener;
@@ -25,7 +25,7 @@ async function installContentScript(page, html) {
       configurable: true,
       value: runtime,
     });
-    window.__callQingzhouContent = (action, params = {}) => new Promise((resolve, reject) => {
+    window.__callZuriContent = (action, params = {}) => new Promise((resolve, reject) => {
       if (typeof listener !== "function") {
         reject(new Error("content-script listener is not installed"));
         return;
@@ -40,16 +40,16 @@ async function installContentScript(page, html) {
   for (const script of contentScripts) {
     await page.addScriptTag({ url: testAssetUrl(script) });
   }
-  await expect.poll(() => page.evaluate(() => window.__QZ_CONTENT_READY)).toBe(true);
+  await expect.poll(() => page.evaluate(() => window.__ZURI_CONTENT_READY)).toBe(true);
 }
 
 async function readArticle(page, params) {
-  return page.evaluate(nextParams => window.__callQingzhouContent("readArticle", nextParams), params);
+  return page.evaluate(nextParams => window.__callZuriContent("readArticle", nextParams), params);
 }
 
 async function extractCandidate(page, readability = null) {
   return page.evaluate((nextReadability) => {
-    const candidate = window.QingzhouArticleExtractor.extract(document, { readability: nextReadability });
+    const candidate = window.ZuriArticleExtractor.extract(document, { readability: nextReadability });
     if (!candidate) return null;
     return {
       name: candidate.name,
@@ -425,7 +425,7 @@ test("auto requests complete page content while article mode may return a target
     </main>
   `);
   await page.evaluate(() => {
-    window.QingzhouArticleExtractor = Object.freeze({
+    window.ZuriArticleExtractor = Object.freeze({
       extract(_document, { complete = false } = {}) {
         if (complete) {
           const main = document.querySelector("main");
@@ -466,8 +466,8 @@ test("complete extraction never shrinks an already complete heterogeneous feed t
   `);
 
   const result = await page.evaluate(() => {
-    const targeted = window.QingzhouArticleExtractor.extract(document, { complete: false });
-    const complete = window.QingzhouArticleExtractor.extract(document, { complete: true });
+    const targeted = window.ZuriArticleExtractor.extract(document, { complete: false });
+    const complete = window.ZuriArticleExtractor.extract(document, { complete: true });
     return {
       targetedLength: targeted?.length || 0,
       completeLength: complete?.length || 0,
@@ -499,8 +499,8 @@ test("complete extraction stays monotonic when the central-root guess excludes s
       content: `<p>${lead.textContent}</p>${second.outerHTML}${third.outerHTML}`,
       textContent: [lead.textContent, second.innerText, third.innerText].join("\n"),
     };
-    const targeted = window.QingzhouArticleExtractor.extract(document, { readability, complete: false });
-    const complete = window.QingzhouArticleExtractor.extract(document, { readability, complete: true });
+    const targeted = window.ZuriArticleExtractor.extract(document, { readability, complete: false });
+    const complete = window.ZuriArticleExtractor.extract(document, { readability, complete: true });
     return {
       targetedLength: targeted?.length || 0,
       completeLength: complete?.length || 0,
@@ -829,8 +829,8 @@ test("complete extraction on Han-dominant collections preserves sibling cards ou
       content: first.outerHTML,
       textContent: first.innerText,
     };
-    const targeted = window.QingzhouArticleExtractor.extract(document, { readability, complete: false });
-    const complete = window.QingzhouArticleExtractor.extract(document, { readability, complete: true });
+    const targeted = window.ZuriArticleExtractor.extract(document, { readability, complete: false });
+    const complete = window.ZuriArticleExtractor.extract(document, { readability, complete: true });
     return {
       targetedLength: targeted?.length || 0,
       completeLength: complete?.length || 0,
@@ -1010,7 +1010,7 @@ test("a tiny footer article never hijacks the central content root", async ({ pa
   `);
 
   const result = await page.evaluate(() => {
-    const candidate = window.QingzhouArticleExtractor.extract(document, { complete: true });
+    const candidate = window.ZuriArticleExtractor.extract(document, { complete: true });
     return candidate ? { name: candidate.name, text: candidate.text, length: candidate.length } : null;
   });
   expect(result).toBeTruthy();

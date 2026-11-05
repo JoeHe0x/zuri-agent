@@ -21,10 +21,10 @@ export function createSuiteCatalog({ root: ROOT, match, unitConcurrency }) {
   const pathFromRoot = (...parts) => relative(ROOT, join(ROOT, ...parts));
   const browserUnitConcurrency = Math.min(2, unitConcurrency);
   const serviceNodeTests = [
-    "test-node-mcp-bridge.mjs", "test-node-mcp-cli.mjs", "test-node-mcp-pairing.mjs", "test-qz-cli-args.mjs",
-    "test-qz-terminal.mjs", "test-qz-task-stream.mjs", "test-qz-cli-output.mjs", "test-qz-cli-resources.mjs",
-    "test-qz-cli-version-compat.mjs", "test-qz-task-stream-recovery.mjs", "test-mcp-tool-arguments.mjs",
-    "test-qz-client-scope.mjs", "test-mcp-task-observation.mjs", "test-qz-cli-launcher.mjs", "test-qz-cli-signals.mjs", "test-qz-daemon-liveness.mjs",
+    "test-node-mcp-bridge.mjs", "test-node-mcp-cli.mjs", "test-node-mcp-pairing.mjs", "test-zuri-cli-args.mjs",
+    "test-zuri-terminal.mjs", "test-zuri-task-stream.mjs", "test-zuri-cli-output.mjs", "test-zuri-cli-resources.mjs",
+    "test-zuri-cli-version-compat.mjs", "test-zuri-task-stream-recovery.mjs", "test-mcp-tool-arguments.mjs",
+    "test-zuri-client-scope.mjs", "test-mcp-task-observation.mjs", "test-zuri-cli-launcher.mjs", "test-zuri-cli-signals.mjs", "test-zuri-daemon-liveness.mjs",
   ];
   const unitTestFiles = readdirSync(join(ROOT, "tests/unit"))
     .filter(name => /^test-.*\.mjs$/.test(name))
@@ -123,7 +123,7 @@ export function createSuiteCatalog({ root: ROOT, match, unitConcurrency }) {
         "tests/session-exchange/consent-import-check.mjs",
       ),
       testPythonSecondary("tests/session-exchange/e2e-check.py"),
-      testPythonSecondary("tests/qingzhou-documents/e2e-check.py"),
+      testPythonSecondary("tests/zuri-documents/e2e-check.py"),
       testPythonSecondary("tests/tool-timeline/e2e-check.py"),
     ],
     release: [
@@ -153,7 +153,7 @@ export function createSuiteCatalog({ root: ROOT, match, unitConcurrency }) {
       testPythonSecondary(
         "tests/tool-timeline/visual-check.py",
         "--screenshot",
-        "/tmp/qingzhou-tool-timeline-visual-test.png",
+        "/tmp/zuri-tool-timeline-visual-test.png",
       ),
       commandWith(
         { id: "conversation-visual-audit", exclusive: true, after: ["release-chrome-smoke", "mcp-tab-ownership-e2e"] },

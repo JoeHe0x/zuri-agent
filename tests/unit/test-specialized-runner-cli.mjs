@@ -66,7 +66,7 @@ test("behavior preserves filters and report paths, and help does not discover te
 });
 
 async function runnerFixture(t, entry) {
-  const root = await mkdtemp(join(tmpdir(), "qingzhou-runner-cli-"));
+  const root = await mkdtemp(join(tmpdir(), "zuri-runner-cli-"));
   t.after(() => rm(root, { recursive: true, force: true }));
   const marker = join(root, "observed.json");
   const observation = `import { writeFileSync } from "node:fs";

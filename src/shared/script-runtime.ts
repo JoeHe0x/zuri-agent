@@ -14,16 +14,16 @@ export function safeValueForMessage(value: unknown, world: ScriptWorld = "inner"
   if (typeof value === "number") return Number.isFinite(value) ? value : String(value);
   if (typeof value === "bigint") return String(value);
   if (typeof value === "function") {
-    return { __qz_uncloneable: "function", name: value.name || "" };
+    return { __zuri_uncloneable: "function", name: value.name || "" };
   }
   if (typeof value === "symbol") {
-    return { __qz_uncloneable: "symbol", description: String(value) };
+    return { __zuri_uncloneable: "symbol", description: String(value) };
   }
   if (typeof value !== "object") return String(value);
-  if (seen.has(value)) return { __qz_circular: true };
+  if (seen.has(value)) return { __zuri_circular: true };
   if (depth >= 8) {
     return {
-      __qz_truncated: true,
+      __zuri_truncated: true,
       type: Array.isArray(value) ? "array" : objectTag(value, world),
     };
   }
@@ -48,13 +48,13 @@ export function safeValueForMessage(value: unknown, world: ScriptWorld = "inner"
   };
   if (world === "page" && page.Element && value instanceof page.Element) {
     return {
-      __qz_uncloneable: "dom", tagName: value.tagName || "", id: value.id || "",
+      __zuri_uncloneable: "dom", tagName: value.tagName || "", id: value.id || "",
       className: typeof value.className === "string" ? value.className : String(value.className || ""),
       text: String(value.textContent || "").trim().slice(0, 200),
     };
   }
   if (value === globalThis || (world === "page" ? value === page.window || value === page.document : value === self)) {
-    return { __qz_uncloneable: "global" };
+    return { __zuri_uncloneable: "global" };
   }
   seen.add(value);
   try {
@@ -63,7 +63,7 @@ export function safeValueForMessage(value: unknown, world: ScriptWorld = "inner"
     }
     if (value instanceof Map) {
       return {
-        __qz_type: "Map",
+        __zuri_type: "Map",
         entries: Array.from(value.entries()).map(([key, item]) => [
           safeValueForMessage(key, world, seen, depth + 1),
           safeValueForMessage(item, world, seen, depth + 1),
@@ -72,13 +72,13 @@ export function safeValueForMessage(value: unknown, world: ScriptWorld = "inner"
     }
     if (value instanceof Set) {
       return {
-        __qz_type: "Set",
+        __zuri_type: "Set",
         values: Array.from(value.values()).map(item => safeValueForMessage(item, world, seen, depth + 1)),
       };
     }
     if (ArrayBuffer.isView(value)) {
       return {
-        __qz_type: value.constructor?.name || "TypedArray",
+        __zuri_type: value.constructor?.name || "TypedArray",
         length: world === "page" ? Reflect.get(value, "length") ?? value.byteLength ?? 0
           : "length" in value && typeof value.length === "number" ? value.length : value.byteLength,
         sample: world === "page" ? Array.from(Reflect.get(value, "slice") ? Reflect.apply(Reflect.get(value, "slice"), value, [0, 32]) as ArrayLike<unknown> : []).map(Number)
@@ -86,7 +86,7 @@ export function safeValueForMessage(value: unknown, world: ScriptWorld = "inner"
       };
     }
     if (value instanceof ArrayBuffer) {
-      return { __qz_type: "ArrayBuffer", byteLength: value.byteLength };
+      return { __zuri_type: "ArrayBuffer", byteLength: value.byteLength };
     }
     const out: Record<string, MessageValue> = {};
     for (const key of Object.keys(value)) {
@@ -94,7 +94,7 @@ export function safeValueForMessage(value: unknown, world: ScriptWorld = "inner"
         out[key] = safeValueForMessage((value as Record<string, unknown>)[key], world, seen, depth + 1);
       } catch (err) {
         out[key] = {
-          __qz_uncloneable: "property",
+          __zuri_uncloneable: "property",
           error: scriptErrorText(err, world),
         };
       }
@@ -102,7 +102,7 @@ export function safeValueForMessage(value: unknown, world: ScriptWorld = "inner"
     return out;
   } catch (err) {
     return {
-      __qz_uncloneable: "object",
+      __zuri_uncloneable: "object",
       type: objectTag(value, world),
       error: scriptErrorText(err, world),
     };

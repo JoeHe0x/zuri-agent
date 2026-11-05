@@ -73,7 +73,7 @@ for (const [locale, language, chromeLocale] of languages) for (const colorScheme
       const localeMessages = JSON.parse(await readFile(resolve(await ensureTestExtension(), `_locales/${chromeLocale}/messages.json`), "utf8"));
       await page.addInitScript(installBenchmarkChromeStub, { uiLanguage: locale, localeMessages, config });
       await page.goto("/extension/sidepanel/sidepanel.html", { waitUntil: "domcontentloaded" });
-      await page.waitForFunction(() => Boolean(window.qingzhouConversationBenchmark));
+      await page.waitForFunction(() => Boolean(window.zuriConversationBenchmark));
       await expect(page.locator("html")).toHaveAttribute("lang", language);
       await expect(page.locator("html")).toHaveAttribute("dir", language === "ar" ? "rtl" : "ltr");
       for (const width of [320, 360, 430]) {
@@ -92,7 +92,7 @@ for (const [locale, language, chromeLocale] of languages) for (const colorScheme
         await page.locator(".data-image-gallery-close").click();
         await expect(page.locator(".data-image-gallery-overlay")).toHaveCount(0);
       }
-      expect(await page.evaluate(() => window.__qzPostedMessages.some(message => message.type === "prompt"))).toBe(false);
+      expect(await page.evaluate(() => window.__zuriPostedMessages.some(message => message.type === "prompt"))).toBe(false);
     });
   });
 }

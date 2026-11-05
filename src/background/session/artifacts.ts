@@ -153,7 +153,7 @@ export function createSessionArtifacts({
     sessionListSummaryPatchTimers.set(id, setTimeout(() => {
       sessionListSummaryPatchTimers.delete(id);
       flushStoredSessionListSummaryPatch(id).catch((err) => {
-        logger.debug?.("[轻舟] flush session list summary failed:", errorMessage(err));
+        logger.debug?.("[Zuri] flush session list summary failed:", errorMessage(err));
       });
     }, Math.max(0, Number(delay) || 0)));
   }
@@ -187,7 +187,7 @@ export function createSessionArtifacts({
     sessionArtifactSummaryRefreshTimers.set(id, setTimeout(() => {
       sessionArtifactSummaryRefreshTimers.delete(id);
       refreshStoredSessionArtifactSummary(id, { touchSession, action }).catch((err) => {
-        logger.debug?.("[轻舟] refresh session artifact summary failed:", errorMessage(err));
+        logger.debug?.("[Zuri] refresh session artifact summary failed:", errorMessage(err));
       });
     }, Math.max(0, Number(delay) || 0)));
   }
@@ -196,7 +196,7 @@ export function createSessionArtifacts({
     const id = normalizeSessionId(sessionId);
     if (!id) return null;
     const artifacts = await collectSessionArtifactsRuntime(id).catch((err) => {
-      logger.debug?.("[轻舟] collect canonical session artifacts failed:", errorMessage(err));
+      logger.debug?.("[Zuri] collect canonical session artifacts failed:", errorMessage(err));
       return emptySessionArtifacts();
     });
     return patchStoredSessionListSummary(
@@ -223,7 +223,7 @@ export function createSessionArtifacts({
     const safeTranscript = transcript.map(objectOrEmpty);
     const artifacts = id
       ? await collectSessionArtifactsRuntime(id, safeTranscript).catch((err) => {
-        logger.debug?.("[轻舟] collect session list summary artifacts failed:", errorMessage(err));
+        logger.debug?.("[Zuri] collect session list summary artifacts failed:", errorMessage(err));
         return emptySessionArtifacts();
       })
       : emptySessionArtifacts();
@@ -282,7 +282,7 @@ export function createSessionArtifacts({
         });
       })
       .catch((err) => {
-        logger.debug?.("[轻舟] record session resource artifacts failed:", errorMessage(err));
+        logger.debug?.("[Zuri] record session resource artifacts failed:", errorMessage(err));
       });
   }
   async function collectTranscriptArtifactContext(transcript: readonly unknown[] = []) {
@@ -385,7 +385,7 @@ export function createSessionArtifacts({
         out.set(table.name, table);
       }
     } catch (err) {
-      logger.debug?.("[轻舟] collect artifact table meta failed:", errorMessage(err));
+      logger.debug?.("[Zuri] collect artifact table meta failed:", errorMessage(err));
     }
     return out;
   }
@@ -482,7 +482,7 @@ export function createSessionArtifacts({
     if (type === "report" || type === "brief") return true;
     const filename = String(item.filename || item.title || item.name || "").trim().toLowerCase();
     if (!filename) return false;
-    return /^轻舟简报(?:\.html?)?$/.test(filename) || /^任务简报(?:\.html?)?$/.test(filename);
+    return /^Zuri简报(?:\.html?)?$/.test(filename) || /^任务简报(?:\.html?)?$/.test(filename);
   }
 
   function compareArtifactContextItems(a: Artifact = {}, b: Artifact = {}) {
@@ -553,11 +553,11 @@ export function createSessionArtifacts({
     const source = Array.isArray(transcript) ? transcript : await resolveSessionArtifactTranscript(id);
     const [flowArtifacts, ledgerArtifacts] = await Promise.all([
       collectTranscriptArtifactContext(source).catch((err) => {
-        logger.debug?.("[轻舟] collect session flow artifacts failed:", errorMessage(err));
+        logger.debug?.("[Zuri] collect session flow artifacts failed:", errorMessage(err));
         return { dataTables: [], imageCollections: [], files: [] };
       }),
       listResources(id).catch((err) => {
-        logger.debug?.("[轻舟] collect session ledger artifacts failed:", errorMessage(err));
+        logger.debug?.("[Zuri] collect session ledger artifacts failed:", errorMessage(err));
         return [];
       }),
     ]);

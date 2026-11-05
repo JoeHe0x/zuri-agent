@@ -30,7 +30,7 @@ from sklearn.model_selection import GroupKFold
 HERE = Path(__file__).resolve().parent
 BASE_PATH = HERE / "study-tree-dp-readability.py"
 SPEC = importlib.util.spec_from_file_location(
-    "qingzhou_readability_full_base", BASE_PATH
+    "zuri_readability_full_base", BASE_PATH
 )
 if SPEC is None or SPEC.loader is None:
     raise RuntimeError(f"cannot load {BASE_PATH}")
@@ -297,7 +297,7 @@ def main() -> int:
         args.root_weight,
     ) if wcxb_holdout else ([], {})
     report = {
-        "schema": "qingzhou.tree-dp-readability-full-study.v1",
+        "schema": "zuri.tree-dp-readability-full-study.v1",
         "protocol": {
             "featureNames": feature_names,
             "baseScorer": "shipped-v6b-fixed-offset",

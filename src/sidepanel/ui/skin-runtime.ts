@@ -3,8 +3,8 @@ interface LoadSkinOptions extends SkinOptions { fetchStylesheet?: typeof fetch }
 
 const DEFAULT_SKIN_PATH = "sidepanel/sidepanel.css";
 const SKIN_LINK_SELECTORS = [
-  "#qingzhou-sidepanel-skin",
-  'link[rel~="stylesheet"][data-qingzhou-skin]',
+  "#zuri-sidepanel-skin",
+  'link[rel~="stylesheet"][data-zuri-skin]',
   'link[rel~="stylesheet"][href*="sidepanel"][href$=".css"]',
 ];
 
@@ -20,7 +20,7 @@ export function resolveActiveSidepanelSkin({
   const fallbackHref = runtime?.getURL?.(DEFAULT_SKIN_PATH) || DEFAULT_SKIN_PATH;
   const href = resolveHref(link?.href || link?.getAttribute?.("href") || fallbackHref, root, fallbackHref);
   const path = extensionResourcePath(href, runtime);
-  const name = String(link?.dataset?.qingzhouSkin || skinNameFromPath(path) || "default").trim() || "default";
+  const name = String(link?.dataset?.zuriSkin || skinNameFromPath(path) || "default").trim() || "default";
   return Object.freeze({ name, href, path });
 }
 

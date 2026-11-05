@@ -24,7 +24,7 @@ test("diversity audit uses stable URL, domain, text, and fingerprint normalizati
 });
 
 test("diversity audit detects duplicate evidence, site-family leakage, and weak concentration", () => {
-  const root = mkdtempSync(join(tmpdir(), "qingzhou-diversity-"));
+  const root = mkdtempSync(join(tmpdir(), "zuri-diversity-"));
   const snapshots = join(root, "snapshots");
   mkdirSync(snapshots);
   const common = Array.from({ length: 120 }, (_, index) => `第${index}段包含不同编号和上下文，用于验证抽取语料的近重复检测能力。`).join("");
@@ -91,7 +91,7 @@ test("diversity audit detects duplicate evidence, site-family leakage, and weak 
 });
 
 test("diversity audit validates the declared plan independently of captured pages", () => {
-  const root = mkdtempSync(join(tmpdir(), "qingzhou-diversity-plan-"));
+  const root = mkdtempSync(join(tmpdir(), "zuri-diversity-plan-"));
   const configPath = join(root, "plan.json");
   writeFileSync(configPath, JSON.stringify({
     sampleTarget: 4,

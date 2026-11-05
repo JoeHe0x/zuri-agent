@@ -257,14 +257,14 @@ test("throwing and rejected capability listeners stay isolated from siblings and
 test("event observers share one immutable snapshot without changing router terminal behavior", async () => {
   const f = fixture();
   const first = [], second = [];
-  await f.ui.mountAll([{ id: "mutates", setup(qz) {
-    qz.on("agent_end", message => {
+  await f.ui.mountAll([{ id: "mutates", setup(zuri) {
+    zuri.on("agent_end", message => {
       first.push(message);
       assert.throws(() => { message.runtime.detail.labels[0] = "corrupted"; }, TypeError);
       message.type = "corrupted";
     });
-  } }, { id: "sibling", setup(qz) {
-    qz.on("agent_end", message => second.push(message));
+  } }, { id: "sibling", setup(zuri) {
+    zuri.on("agent_end", message => second.push(message));
   } }]);
   for (const runId of ["new", "recovery"]) {
     f.router.handle(event("agent_start", "visible", { runId, eventSeq: 1 }));

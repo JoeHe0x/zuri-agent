@@ -31,8 +31,8 @@ import {
 } from "./driver.mjs";
 import { auditSkin, contrast, measureSamples, parseColor, readOverflow } from "./skin-audit.mjs";
 
-const HINT_MESSAGES = ["Click the qz icon in the toolbar to view.", "点击工具栏中的轻舟图标查看。"];
-const HINT_TOOLTIPS = ["qz: click to open the sidebar", "轻舟：点击打开侧边栏"];
+const HINT_MESSAGES = ["Click the zuri icon in the toolbar to view.", "点击工具栏中的Zuri图标查看。"];
+const HINT_TOOLTIPS = ["zuri: click to open the sidebar", "Zuri：点击打开侧边栏"];
 const GESTURE_ERROR = /may only be called from a user input handler/;
 
 test.describe.configure({ mode: "serial" });
@@ -125,7 +125,7 @@ test("the default theme keeps Firefox's own surfaces and violet accent over a ma
       const audit = await auditSkin(firefoxSidebar);
       expect(audit.accent, "the system accent is set").toBe("rgb(0, 122, 255)");
       expect(audit.sidebar).toBe(defaults[scheme].sidebar);
-      expect(audit.palette["--qz-ff-primary"]).toBe(defaults[scheme].primary);
+      expect(audit.palette["--zuri-ff-primary"]).toBe(defaults[scheme].primary);
       expectSkin(audit, `default ${scheme}`);
     }
   } finally {
@@ -136,12 +136,12 @@ test("the default theme keeps Firefox's own surfaces and violet accent over a ma
 });
 
 test("a window theme recolors the sidebar, its popups, and the primary fill", async ({ firefoxSidebar }) => {
-  const directory = mkdtempSync(join(tmpdir(), "qz-firefox-theme-"));
+  const directory = mkdtempSync(join(tmpdir(), "zuri-firefox-theme-"));
   writeFileSync(join(directory, "manifest.json"), JSON.stringify({
     manifest_version: 2,
-    name: "qz test theme",
+    name: "zuri test theme",
     version: "1.0",
-    browser_specific_settings: { gecko: { id: "qz-test-theme@example.test" } },
+    browser_specific_settings: { gecko: { id: "zuri-test-theme@example.test" } },
     theme: { colors: TEST_THEME },
   }));
   await openFromToolbar(firefoxSidebar);
@@ -149,16 +149,16 @@ test("a window theme recolors the sidebar, its popups, and the primary fill", as
   try {
     let root = await readSidebarRoot(firefoxSidebar);
     const started = Date.now();
-    while (!root.inline["--qz-ff-sidebar"] && Date.now() - started < 4000) {
+    while (!root.inline["--zuri-ff-sidebar"] && Date.now() - started < 4000) {
       await new Promise(resolve => setTimeout(resolve, 100));
       root = await readSidebarRoot(firefoxSidebar);
     }
-    expect(root.inline["--qz-ff-sidebar"]).toBe("rgb(42, 33, 72)");
-    expect(root.inline["--qz-ff-sidebar-text"]).toBe("rgb(236, 232, 255)");
-    expect(root.inline["--qz-ff-accent"]).toBe("rgb(185, 165, 255)");
-    expect(root.inline["--qz-ff-focus"]).toBe("rgb(124, 240, 208)");
-    expect(root.inline["--qz-ff-popup"]).toBe("rgb(246, 243, 255)");
-    expect(root.inline["--qz-ff-primary-text"]).toBe("rgb(21, 20, 26)");
+    expect(root.inline["--zuri-ff-sidebar"]).toBe("rgb(42, 33, 72)");
+    expect(root.inline["--zuri-ff-sidebar-text"]).toBe("rgb(236, 232, 255)");
+    expect(root.inline["--zuri-ff-accent"]).toBe("rgb(185, 165, 255)");
+    expect(root.inline["--zuri-ff-focus"]).toBe("rgb(124, 240, 208)");
+    expect(root.inline["--zuri-ff-popup"]).toBe("rgb(246, 243, 255)");
+    expect(root.inline["--zuri-ff-primary-text"]).toBe("rgb(21, 20, 26)");
     expect(root.colorScheme).toBe("dark");
 
     const audit = await auditSkin(firefoxSidebar);
@@ -176,16 +176,16 @@ test("a window theme recolors the sidebar, its popups, and the primary fill", as
     await uninstallTheme(firefoxSidebar, id);
   }
   const cleared = await readSidebarRoot(firefoxSidebar);
-  expect(cleared.inline["--qz-ff-sidebar"]).toBeUndefined();
+  expect(cleared.inline["--zuri-ff-sidebar"]).toBeUndefined();
 });
 
 test("a light-only theme in a dark sidebar follows the dark block Firefox paints, live", async ({ firefoxSidebar }) => {
-  const directory = mkdtempSync(join(tmpdir(), "qz-firefox-light-theme-"));
+  const directory = mkdtempSync(join(tmpdir(), "zuri-firefox-light-theme-"));
   writeFileSync(join(directory, "manifest.json"), JSON.stringify({
     manifest_version: 2,
-    name: "qz light test theme",
+    name: "zuri light test theme",
     version: "1.0",
-    browser_specific_settings: { gecko: { id: "qz-light-test-theme@example.test" } },
+    browser_specific_settings: { gecko: { id: "zuri-light-test-theme@example.test" } },
     theme: { colors: {
       frame: "#f8f0ec", toolbar: "rgba(255, 255, 255, 0.4)", toolbar_text: "#250e0b", tab_background_text: "#250e0b",
       toolbar_field: "#ffffff", toolbar_field_text: "#250e0b", sidebar: "#ffffff", sidebar_text: "#250e0b", sidebar_border: "#febd99",
@@ -196,7 +196,7 @@ test("a light-only theme in a dark sidebar follows the dark block Firefox paints
   const settle = async (expected) => {
     let root = await readSidebarRoot(firefoxSidebar);
     const started = Date.now();
-    while (root.inline["--qz-ff-sidebar"] !== expected && Date.now() - started < 4000) {
+    while (root.inline["--zuri-ff-sidebar"] !== expected && Date.now() - started < 4000) {
       await new Promise(resolve => setTimeout(resolve, 100));
       root = await readSidebarRoot(firefoxSidebar);
     }
@@ -205,16 +205,16 @@ test("a light-only theme in a dark sidebar follows the dark block Firefox paints
   try {
     await setColorScheme(firefoxSidebar, "light");
     let root = await settle("rgb(255, 255, 255)");
-    expect(root.inline["--qz-ff-sidebar"]).toBe("rgb(255, 255, 255)");
-    expect(root.inline["--qz-ff-sidebar-text"]).toBe("rgb(37, 14, 11)");
+    expect(root.inline["--zuri-ff-sidebar"]).toBe("rgb(255, 255, 255)");
+    expect(root.inline["--zuri-ff-sidebar-text"]).toBe("rgb(37, 14, 11)");
     expect(root.colorScheme).toBe("light");
     expectSkin(await auditSkin(firefoxSidebar), "light-only theme light");
 
     await setColorScheme(firefoxSidebar, "dark");
     root = await settle("rgb(37, 14, 11)");
-    expect(root.inline["--qz-ff-sidebar"], "the dark sidebar is the theme's ink").toBe("rgb(37, 14, 11)");
-    expect(root.inline["--qz-ff-sidebar-text"], "the dark text is the theme's frame").toBe("rgb(248, 240, 236)");
-    expect(root.inline["--qz-ff-field"]).toBeUndefined();
+    expect(root.inline["--zuri-ff-sidebar"], "the dark sidebar is the theme's ink").toBe("rgb(37, 14, 11)");
+    expect(root.inline["--zuri-ff-sidebar-text"], "the dark text is the theme's frame").toBe("rgb(248, 240, 236)");
+    expect(root.inline["--zuri-ff-field"]).toBeUndefined();
     expect(root.colorScheme).toBe("dark");
     const audit = await auditSkin(firefoxSidebar);
     expect(audit.sidebar).toBe("rgb(37, 14, 11)");
@@ -227,7 +227,7 @@ test("a light-only theme in a dark sidebar follows the dark block Firefox paints
       doc.body.append(anchor);
       const color = content.getComputedStyle(anchor).color;
       anchor.remove();
-      return { color, ink: doc.documentElement.style.getPropertyValue("--qz-ff-accent-ink").trim() };
+      return { color, ink: doc.documentElement.style.getPropertyValue("--zuri-ff-accent-ink").trim() };
     `);
     expect(link.color, "an unstyled link takes the accent ink").toBe(link.ink);
     expect(contrast(parseColor(link.color), [37, 14, 11])).toBeGreaterThanOrEqual(4.5);
@@ -317,18 +317,18 @@ test("the sidebar has no horizontal overflow at 320 and 400 pixels", async ({ fi
 });
 
 test("creating a notification without requireInteraction does not throw", async ({ firefoxSidebar }) => {
-  const plain = await createNotification(firefoxSidebar, "qz-firefox-plain", {
+  const plain = await createNotification(firefoxSidebar, "zuri-firefox-plain", {
     type: "basic",
-    title: "qz",
+    title: "zuri",
     message: "plain",
   });
   expect(plain.error || "", JSON.stringify(plain)).toBe("");
   expect(plain.marked).toBe(true);
-  expect(plain.created).toBe("qz-firefox-plain");
+  expect(plain.created).toBe("zuri-firefox-plain");
 
-  const sticky = await createNotification(firefoxSidebar, "qz-firefox-sticky", {
+  const sticky = await createNotification(firefoxSidebar, "zuri-firefox-sticky", {
     type: "basic",
-    title: "qz",
+    title: "zuri",
     message: "sticky",
     requireInteraction: true,
     priority: 1,
@@ -336,7 +336,7 @@ test("creating a notification without requireInteraction does not throw", async 
   // Firefox rejects requireInteraction before showAlert. A returned id means the wrapper removed it.
   expect(sticky.error || "", JSON.stringify(sticky)).toBe("");
   expect(sticky.marked).toBe(true);
-  expect(sticky.created).toBe("qz-firefox-sticky");
+  expect(sticky.created).toBe("zuri-firefox-sticky");
 });
 
 test("a refused sidebar open sets the badge, the toolbar hint, and the real error", async ({ firefoxSidebar }) => {
@@ -349,11 +349,11 @@ test("a refused sidebar open sets the badge, the toolbar hint, and the real erro
   expect(prompt.openError).toMatch(GESTURE_ERROR);
   expect(prompt.requireInteraction).toBe(false);
   expect(HINT_MESSAGES).toContain(prompt.message);
-  expect(["qz", "轻舟"]).toContain(prompt.title);
+  expect(["zuri", "Zuri"]).toContain(prompt.title);
   const state = await waitForSidebarState(firefoxSidebar, next => next.badge === "!");
   expect(state.badge).toBe("!");
   expect(HINT_TOOLTIPS).toContain(state.title);
-  expect(state.notifications).toContain("qz-open-sidebar");
+  expect(state.notifications).toContain("zuri-open-sidebar");
   expect(state.diagnostics.refused).toBe(before.diagnostics.refused + 1);
   expect(state.diagnostics.notified).toBe(before.diagnostics.notified + 1);
   expect(state.diagnostics.lastSource).toBe("api");
@@ -363,8 +363,8 @@ test("a refused sidebar open sets the badge, the toolbar hint, and the real erro
 
 test("clicking the hint notification logs Firefox's error and raises no second notification", async ({ firefoxSidebar }) => {
   const before = await sidebarState(firefoxSidebar);
-  expect(before.notifications).toContain("qz-open-sidebar");
-  const clicked = await clickNotification(firefoxSidebar, "qz-open-sidebar");
+  expect(before.notifications).toContain("zuri-open-sidebar");
+  const clicked = await clickNotification(firefoxSidebar, "zuri-open-sidebar");
   expect(clicked.clicked, JSON.stringify(clicked)).toBe(true);
   const state = await waitForSidebarState(firefoxSidebar, next => next.diagnostics.notificationClicks > before.diagnostics.notificationClicks
     && next.diagnostics.refused > before.diagnostics.refused);
@@ -373,7 +373,7 @@ test("clicking the hint notification logs Firefox's error and raises no second n
   expect(state.diagnostics.lastError).toMatch(GESTURE_ERROR);
   expect(state.diagnostics.opened).toBe(before.diagnostics.opened);
   expect(state.diagnostics.notified).toBe(before.diagnostics.notified);
-  expect(state.notifications).not.toContain("qz-open-sidebar");
+  expect(state.notifications).not.toContain("zuri-open-sidebar");
   expect(state.badge, "the badge keeps pointing at the toolbar button").toBe("!");
   expect(state.errors.at(-1)).toMatch(/firefox sidebarAction failed \(notification\):.*may only be called from a user input handler/);
   const sidebar = await readSidebar(firefoxSidebar);
@@ -382,16 +382,16 @@ test("clicking the hint notification logs Firefox's error and raises no second n
 
 test("a completion notification click that tries to open the sidebar raises no notification", async ({ firefoxSidebar }) => {
   await keepNotifications(firefoxSidebar);
-  await addNotificationOpener(firefoxSidebar, "qz-test-done");
+  await addNotificationOpener(firefoxSidebar, "zuri-test-done");
   const before = await sidebarState(firefoxSidebar);
-  const clicked = await clickNotification(firefoxSidebar, "qz-test-done");
+  const clicked = await clickNotification(firefoxSidebar, "zuri-test-done");
   expect(clicked.clicked, JSON.stringify(clicked)).toBe(true);
   const state = await waitForSidebarState(firefoxSidebar, next => next.diagnostics.refused > before.diagnostics.refused);
   await new Promise(resolve => setTimeout(resolve, 500));
   const settled = await sidebarState(firefoxSidebar);
   expect(state.diagnostics.lastSource).toBe("notification");
   expect(settled.diagnostics.notified).toBe(before.diagnostics.notified);
-  expect(settled.notifications).not.toContain("qz-open-sidebar");
+  expect(settled.notifications).not.toContain("zuri-open-sidebar");
   expect((await notificationOpens(firefoxSidebar)).at(-1)).toMatch(/only from the toolbar button/);
 });
 
@@ -412,7 +412,7 @@ test("opening the sidebar by shortcut, switcher, or toolbar clears the badge and
     const cleared = await waitForSidebarState(firefoxSidebar, next => next.badge === "");
     expect(cleared.badge, `${route} clears the badge`).toBe("");
     expect(HINT_TOOLTIPS, `${route} restores the tooltip`).not.toContain(cleared.title);
-    expect(cleared.notifications).not.toContain("qz-open-sidebar");
+    expect(cleared.notifications).not.toContain("zuri-open-sidebar");
   }
 });
 

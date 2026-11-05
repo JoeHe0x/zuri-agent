@@ -61,8 +61,8 @@ test("identical snapshots preserve draft, focus and selection, including legacy 
 test("result cards validate, preserve selection, lock during submit and recover after transport failure", async ({ page }) => {
   await showResultChoices(page);
   await expect(page.locator('.waiting-hint')).toBeHidden();
-  const first = page.locator('.qz-choice-card input[value="job-1"]');
-  const second = page.locator('.qz-choice-card input[value="job-2"]');
+  const first = page.locator('.zuri-choice-card input[value="job-1"]');
+  const second = page.locator('.zuri-choice-card input[value="job-2"]');
   await expect(page.locator('[data-choice-count]')).toHaveText("已选 0 项");
   await page.locator('[data-wait-action="continue"]').click();
   await expect(first).toBeFocused();
@@ -92,15 +92,15 @@ test("result cards validate, preserve selection, lock during submit and recover 
     f.cards.patch(f.el, { ...f.entry, status: "submitted" }, "session-a");
     f.state.sends[1].resolve();
   });
-  await expect(page.locator('.qz-choice-card')).toHaveCount(0);
+  await expect(page.locator('.zuri-choice-card')).toHaveCount(0);
   await expect(page.locator('[data-wait-action]')).toHaveCount(0);
 });
 
 test("single result choice submits one stable ID and cancellation submits no answer", async ({ page }) => {
   await showResultChoices(page, false);
-  await page.locator('.qz-choice-card input[value="job-1"]').check();
-  await page.locator('.qz-choice-card input[value="job-2"]').check();
-  await expect(page.locator('.qz-choice-card input[value="job-1"]')).not.toBeChecked();
+  await page.locator('.zuri-choice-card input[value="job-1"]').check();
+  await page.locator('.zuri-choice-card input[value="job-2"]').check();
+  await expect(page.locator('.zuri-choice-card input[value="job-1"]')).not.toBeChecked();
   await page.locator('[data-wait-action="continue"]').click();
   expect(await page.evaluate(() => window.waitFixture.state.commands[0].payload.answers)).toEqual({ selectedIds: "job-2" });
   await page.evaluate(() => {
@@ -135,7 +135,7 @@ test("long result lists scroll within the card and keep counts and actions below
   expect(geometry.scrolls).toBe(true);
   expect(geometry.countTop).toBeGreaterThanOrEqual(geometry.listBottom);
   expect(geometry.actionTop).toBeGreaterThan(geometry.countTop);
-  await page.locator('.qz-choice-card input[value="job-12"]').check();
+  await page.locator('.zuri-choice-card input[value="job-12"]').check();
   await page.locator('[data-wait-action="continue"]').click();
   expect(await page.evaluate(() => window.waitFixture.state.commands[0].payload.answers)).toEqual({ selectedIds: ["job-12"] });
 });
@@ -154,11 +154,11 @@ for (const scheme of ["light", "dark"]) {
       f.entry.form.fields[0].options[0].imageUrl = "https://example.com/role.svg";
       f.cards.patch(f.el, f.entry, "session-a");
     });
-    const first = page.locator('.qz-choice-card input[value="job-1"]');
+    const first = page.locator('.zuri-choice-card input[value="job-1"]');
     await first.check();
     for (const [level, scale] of [["small", 0.875], ["compact", 0.9], ["standard", 1], ["comfortable", 1.1], ["large", 1.25], ["xlarge", 15.5 / 12]]) {
       await page.locator('#messages').evaluate((el, size) => { el.dataset.chatTextSize = size; }, level);
-      await expectResultCardTypography(page.locator('.qz-choice-card').first(), scale);
+      await expectResultCardTypography(page.locator('.zuri-choice-card').first(), scale);
       await expect(first).toBeChecked();
       // Reading size changes content; action controls keep the shared small-button size.
       await expect(page.locator('[data-wait-action="continue"]')).toHaveCSS('font-size', '11px');
@@ -168,7 +168,7 @@ for (const scheme of ["light", "dark"]) {
     await page.locator('#messages').screenshot({ path: testInfo.outputPath(`choice-reading-size-${scheme}.png`) });
     await page.locator('[data-wait-action="continue"]').click();
     await expect(first).toBeDisabled();
-    await expectResultCardTypography(page.locator('.qz-choice-card').first(), 15.5 / 12);
+    await expectResultCardTypography(page.locator('.zuri-choice-card').first(), 15.5 / 12);
     await page.evaluate(() => {
       const f = window.waitFixture;
       f.cards.patch(f.el, { ...f.entry, status: "submitted" }, "session-a");
@@ -181,7 +181,7 @@ for (const scheme of ["light", "dark"]) {
       f.el = f.cards.create(JSON.parse(JSON.stringify(f.entry)), "session-a");
       document.querySelector('#messages').replaceChildren(f.el);
     });
-    await expectResultCardTypography(page.locator('.qz-choice-card').first(), 15.5 / 12);
+    await expectResultCardTypography(page.locator('.zuri-choice-card').first(), 15.5 / 12);
 
     // The reusable control keeps its theme defaults outside the conversation.
     await page.evaluate(async () => {
@@ -214,7 +214,7 @@ for (const scheme of ["light", "dark"]) {
 async function expectResultCardTypography(card, scale) {
   const styles = await card.evaluate(el => {
     const sizes = Object.fromEntries(['title', 'description', 'tag', 'source'].map(part => {
-      const style = getComputedStyle(el.querySelector(`.qz-choice-card-${part}`));
+      const style = getComputedStyle(el.querySelector(`.zuri-choice-card-${part}`));
       return [part, { size: parseFloat(style.fontSize), lineHeight: parseFloat(style.lineHeight) }];
     }));
     return { sizes, overflow: el.scrollWidth - el.clientWidth, imageWidth: el.querySelector('img')?.getBoundingClientRect().width };

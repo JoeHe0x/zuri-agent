@@ -246,7 +246,7 @@ function stopCurrentRun() {
   markCurrentSessionAbortRequested(sessionId);
   if (sessionId) {
     requestStopSessionRuntimeState(sessionId).catch((err) => {
-      console.warn("[轻舟] stop session request failed:", err?.message || err);
+      console.warn("[Zuri] stop session request failed:", err?.message || err);
       scheduleTranscriptReconcile(sessionId, { delay: 250, force: true });
     });
   }

@@ -8,23 +8,23 @@ async function installContentScript(page, html) {
     Object.defineProperty(window.chrome, "runtime", {
       configurable: true,
       value: {
-        getManifest: () => ({ name: "Qingzhou Test", version: "0.0.0" }),
+        getManifest: () => ({ name: "Zuri Test", version: "0.0.0" }),
         onMessage: { addListener(nextListener) { listener = nextListener; } },
         sendMessage: async () => ({ ok: true }),
       },
     });
-    window.__callQingzhouContent = (action, params = {}) => new Promise((resolve, reject) => {
+    window.__callZuriContent = (action, params = {}) => new Promise((resolve, reject) => {
       if (typeof listener !== "function") return reject(new Error("content-script listener is not installed"));
       listener({ action, ...params }, {}, resolve);
     });
   });
   await page.addScriptTag({ url: testAssetUrl("extension/content/content-script.js") });
-  await expect.poll(() => page.evaluate(() => window.__QZ_CONTENT_READY)).toBe(true);
+  await expect.poll(() => page.evaluate(() => window.__ZURI_CONTENT_READY)).toBe(true);
 }
 
 async function pageOverview(page, selector = "body") {
   return page.evaluate(
-    nextSelector => window.__callQingzhouContent("pageOverview", { selector: nextSelector, limit: 20 }),
+    nextSelector => window.__callZuriContent("pageOverview", { selector: nextSelector, limit: 20 }),
     selector,
   );
 }
@@ -80,7 +80,7 @@ test('page overview ranks every candidate but resolves selectors only for retain
     let selectorReads = 0;
     document.querySelectorAll = selector => { if (selector.startsWith('#link-')) selectorReads++; return original(selector); };
     try {
-      const overview = await __callQingzhouContent('pageOverview', { limit: 5 });
+      const overview = await __callZuriContent('pageOverview', { limit: 5 });
       return { actions: overview.actions, selectorReads };
     } finally { document.querySelectorAll = original; }
   });

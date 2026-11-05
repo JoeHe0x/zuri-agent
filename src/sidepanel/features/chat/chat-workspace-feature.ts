@@ -84,13 +84,13 @@ export function createChatWorkspaceFeature(options: ChatWorkspaceOptions) {
   attachmentsEl.className = "input-attachments hidden";
   select(".input-composer-frame").before(attachmentsEl);
   const slashMenuEl = root.createElement("div");
-  slashMenuEl.className = "qz-popover qz-menu input-slash-menu composer-plus-menu hidden";
+  slashMenuEl.className = "zuri-popover zuri-menu input-slash-menu composer-plus-menu hidden";
   inputArea.insertBefore(slashMenuEl, attachmentsEl);
   const plusMenuEl = root.createElement("div");
-  plusMenuEl.className = "qz-popover qz-menu input-slash-menu composer-plus-menu hidden";
+  plusMenuEl.className = "zuri-popover zuri-menu input-slash-menu composer-plus-menu hidden";
   inputArea.insertBefore(plusMenuEl, attachmentsEl);
   const usagePanelEl = root.createElement("div");
-  usagePanelEl.className = "qz-popover input-slash-menu composer-plus-menu usage-panel hidden";
+  usagePanelEl.className = "zuri-popover input-slash-menu composer-plus-menu usage-panel hidden";
   inputArea.insertBefore(usagePanelEl, attachmentsEl);
   createUsagePanelFeature({ button: select("#context-usage"), panel: usagePanelEl, getSessionId: options.getCurrentSessionId, request: options.request,
     compact: () => executeSlashCommand(parseSlashCommandText("/compact")!) });

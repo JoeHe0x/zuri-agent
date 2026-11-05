@@ -20,7 +20,7 @@ if (!executablePath) {
   throw new Error("Release Chrome smoke requires Chromium; run npx playwright install chromium or set CHROME_EXECUTABLE.");
 }
 
-const work = mkdtempSync(join(tmpdir(), "qingzhou-release-chrome-"));
+const work = mkdtempSync(join(tmpdir(), "zuri-release-chrome-"));
 const output = join(work, "release");
 const extracted = join(work, "extracted");
 const profile = join(work, "profile");
@@ -111,7 +111,7 @@ try {
   ], {
     cwd: ROOT,
     encoding: "utf8",
-    env: { ...process.env, QINGZHOU_EXTENSION_PATH: extensionPath },
+    env: { ...process.env, ZURI_EXTENSION_PATH: extensionPath },
   });
   const backgroundE2e = JSON.parse(backgroundE2eOutput.trim().split(/\r?\n/).filter(Boolean).at(-1));
   assert.equal(backgroundE2e.ok, true);
@@ -131,7 +131,7 @@ try {
   const manualExtensionId = new URL(manualWorker.url()).host;
   assert.equal(await manualWorker.evaluate(() => chrome.runtime.getManifest().key),
     JSON.parse(readFileSync(join(ROOT, "src/manifest.json"), "utf8")).key);
-  await manualWorker.evaluate(() => chrome.storage.local.set({ __qzIdentityProbe: "relocated" }));
+  await manualWorker.evaluate(() => chrome.storage.local.set({ __zuriIdentityProbe: "relocated" }));
   await context.close();
   context = null;
   const relocatedPath = join(work, "relocated extension 开源");
@@ -144,8 +144,8 @@ try {
       timeout: 10_000,
     });
   assert.equal(new URL(relocatedWorker.url()).host, manualExtensionId, "moving the installation preserves its identity");
-  assert.deepEqual(await relocatedWorker.evaluate(() => chrome.storage.local.get("__qzIdentityProbe")),
-    { __qzIdentityProbe: "relocated" }, "moving the installation preserves its stored data");
+  assert.deepEqual(await relocatedWorker.evaluate(() => chrome.storage.local.get("__zuriIdentityProbe")),
+    { __zuriIdentityProbe: "relocated" }, "moving the installation preserves its stored data");
   await context.close();
   context = null;
   console.log(JSON.stringify({

@@ -4,7 +4,7 @@ import { createSessionTabs } from '../../src/background/session/tabs.js';
 import { normalizeSessionRuntime } from '../../src/background/session/runtime-reducer.js';
 import { createToolRegistry } from '../../src/background/tools/registry.js';
 import { getActiveSkillToolSchemasSync, getSkillToolParameters, prepareSkillToolRegistryFromSkills } from '../../src/background/skills/skill-tool-runtime.js';
-import { QINGZHOU_SKILL_FORMAT, QINGZHOU_SKILL_SCHEMA_VERSION } from '../../src/shared/skills/skill-utils.js';
+import { ZURI_SKILL_FORMAT, ZURI_SKILL_SCHEMA_VERSION } from '../../src/shared/skills/skill-utils.js';
 import { SKILL_MANIFEST_FORMAT, SKILL_MANIFEST_SCHEMA_VERSION } from '../../src/shared/skills/skill-manifest.js';
 import { planTabBatch } from '../../src/background/tools/tab-batch.js';
 import { resolveTabReference } from '../../src/background/tools/tab-reference.js';
@@ -72,7 +72,7 @@ function fixture({ metadataReady = async () => {}, skillToolRegistrySnapshot } =
 
 const skillToolRegistrySnapshot = prepareSkillToolRegistryFromSkills([{
   name: 'tab-reference-skill', scope: 'resident',
-  format: QINGZHOU_SKILL_FORMAT, schemaVersion: QINGZHOU_SKILL_SCHEMA_VERSION,
+  format: ZURI_SKILL_FORMAT, schemaVersion: ZURI_SKILL_SCHEMA_VERSION,
   resources: [
     { path: 'plugin.json', type: 'json', content: JSON.stringify({
       format: SKILL_MANIFEST_FORMAT, schemaVersion: SKILL_MANIFEST_SCHEMA_VERSION, id: 'tab-skill',

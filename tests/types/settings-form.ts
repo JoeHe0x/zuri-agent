@@ -1,17 +1,17 @@
 import { createSettingsForm, type SettingsFormState } from "../../src/sdk/sidepanel/settings-form.js";
 import type { UiExtensionAPI } from "../../src/sdk/sidepanel.js";
 
-declare const qz: UiExtensionAPI;
+declare const zuri: UiExtensionAPI;
 let draft = "initial";
-const form = createSettingsForm(qz, {
+const form = createSettingsForm(zuri, {
   initialValue: draft,
   getDraft: () => draft,
   setDraft: value => { draft = value; },
   load: async signal => { signal.throwIfAborted(); return "loaded"; },
   save: async (value, signal) => { value.toUpperCase(); signal.throwIfAborted(); },
-  renderState: state => { qz.settings.setState("example", { disabled: !state.dirty }); },
+  renderState: state => { zuri.settings.setState("example", { disabled: !state.dirty }); },
 });
-qz.registerSettings({ id: "example", title: "Example", element: document.createElement("section"),
+zuri.registerSettings({ id: "example", title: "Example", element: document.createElement("section"),
   activate: form.activate, deactivate: form.deactivate, save: form.save });
 form.changed();
 
@@ -23,7 +23,7 @@ const phase: SettingsFormState["phase"] = "failed";
 
 interface Preferences { enabled: boolean }
 let preferences: Preferences = { enabled: false };
-createSettingsForm(qz, {
+createSettingsForm(zuri, {
   initialValue: preferences,
   getDraft: () => preferences,
   setDraft: value => { preferences = value; },
@@ -32,7 +32,7 @@ createSettingsForm(qz, {
   save: async (value, signal) => { value.enabled; signal.throwIfAborted(); return false; },
   renderState: () => {},
 });
-createSettingsForm<string>(qz, {
+createSettingsForm<string>(zuri, {
   initialValue: "initial", getDraft: () => draft, setDraft: () => {},
   // @ts-expect-error Loaded values must have the same shape as the draft.
   load: async () => 42,

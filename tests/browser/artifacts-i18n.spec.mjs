@@ -28,7 +28,7 @@ function installArtifactReplies(artifacts) {
         // The second scenario must use its tool transcript projection, not a richer
         // runtime response that could conceal a stale generated count description.
         const response = message.sessionId === "legacy-media" ? {} : artifacts;
-        queueMicrotask(() => window.__qzEmitPortMessage({ type: "session_artifacts", sessionId: message.sessionId, requestId: message.requestId, artifacts: response }));
+        queueMicrotask(() => window.__zuriEmitPortMessage({ type: "session_artifacts", sessionId: message.sessionId, requestId: message.requestId, artifacts: response }));
       } else post(message);
     };
     return port;
@@ -43,10 +43,10 @@ for (const width of [320, 390]) for (const [language, chromeLocale] of languages
       const localeMessages = JSON.parse(await readFile(resolve(await ensureTestExtension(), `_locales/${chromeLocale}/messages.json`), "utf8"));
       await page.addInitScript({ content: `(${installBenchmarkChromeStub.toString()})(${JSON.stringify({ uiLanguage: language, localeMessages })}); (${installArtifactReplies.toString()})(${JSON.stringify(runtimeArtifacts)});` });
       await page.goto("/extension/sidepanel/sidepanel.html", { waitUntil: "domcontentloaded" });
-      await page.waitForFunction(() => Boolean(window.qingzhouConversationBenchmark));
+      await page.waitForFunction(() => Boolean(window.zuriConversationBenchmark));
       const labels = await page.evaluate(async ({ sessionId }) => {
         const { t } = await import("/extension/capabilities/sessions/i18n.js");
-        await window.qingzhouConversationBenchmark.runSnapshotRender({
+        await window.zuriConversationBenchmark.runSnapshotRender({
           sessionId,
           title: "原始任务",
           transcript: [{ type: "artifacts", summary: {
@@ -84,7 +84,7 @@ for (const width of [320, 390]) for (const [language, chromeLocale] of languages
 
       await page.evaluate(async () => {
         const legacyArtifact = { type: "data", kindLabel: "图集", table: "旧照片", title: "旧照片", rowCount: 2, meta: "2 张图片", score: 3 };
-        await window.qingzhouConversationBenchmark.runSnapshotRender({
+        await window.zuriConversationBenchmark.runSnapshotRender({
           sessionId: "legacy-media",
           title: "原始任务",
           transcript: [

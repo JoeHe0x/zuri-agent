@@ -77,16 +77,16 @@ function resetVisualToolPresentationState() {
 
 const BUILTIN_WRAPPED_TOOL_GROUPS = [
   {
-    id: "qingzhou-management",
+    id: "zuri-management",
     displayName: "Agent管理",
     category: { id: "meta", label: "系统" },
     tools: [
-      wrappedTool("qingzhou_management__manage_settings", "manage_settings", getToolDisplayName("manage_settings")),
-      wrappedTool("qingzhou_management__manage_guardrails", "manage_guardrails", getToolDisplayName("manage_guardrails")),
+      wrappedTool("zuri_management__manage_settings", "manage_settings", getToolDisplayName("manage_settings")),
+      wrappedTool("zuri_management__manage_guardrails", "manage_guardrails", getToolDisplayName("manage_guardrails")),
     ],
   },
   {
-    id: "qingzhou-documents",
+    id: "zuri-documents",
     displayName: "文档处理",
     category: { id: "documents", label: "文档" },
     tools: [
@@ -96,10 +96,10 @@ const BUILTIN_WRAPPED_TOOL_GROUPS = [
       "document_create",
       "document_download",
       "document_list_artifacts",
-    ].map(capabilityId => wrappedTool(`qingzhou_documents__${capabilityId}`, capabilityId, getToolDisplayName(capabilityId))),
+    ].map(capabilityId => wrappedTool(`zuri_documents__${capabilityId}`, capabilityId, getToolDisplayName(capabilityId))),
   },
   {
-    id: "qingzhou-mcp",
+    id: "zuri-mcp",
     displayName: "MCP 接入",
     category: { id: "mcp", label: "MCP" },
     tools: [
@@ -107,7 +107,7 @@ const BUILTIN_WRAPPED_TOOL_GROUPS = [
       "mcp_list_tools",
       "mcp_search_tools",
       "mcp_call_tool",
-    ].map(capabilityId => wrappedTool(`qingzhou_mcp__${capabilityId}`, capabilityId, getToolDisplayName(capabilityId))),
+    ].map(capabilityId => wrappedTool(`zuri_mcp__${capabilityId}`, capabilityId, getToolDisplayName(capabilityId))),
   },
 ];
 const ALL_TOOL_NAMES = [
@@ -599,8 +599,8 @@ function sampleForTool(name) {
       result: { status: "created", sessionId: "session_003", title: "竞品抓取子任务", message: "已创建后台任务" },
     };
   }
-  if (name === "manage_settings" || name === "qingzhou_management__manage_settings") {
-    const readsCurrentConfig = name === "qingzhou_management__manage_settings";
+  if (name === "manage_settings" || name === "zuri_management__manage_settings") {
+    const readsCurrentConfig = name === "zuri_management__manage_settings";
     return {
       args: {
         action: readsCurrentConfig ? "get" : "update_config",
@@ -635,7 +635,7 @@ function sampleForTool(name) {
       },
     };
   }
-  if (name === "manage_guardrails" || name === "qingzhou_management__manage_guardrails") {
+  if (name === "manage_guardrails" || name === "zuri_management__manage_guardrails") {
     return {
       args: { action: "get" },
       result: {
@@ -868,7 +868,7 @@ function sampleForTool(name) {
   if (name === "wait_for_response") return { args: { urlPattern: "/api/search", timeout: 5 }, result: { message: "已等到响应", url: "https://example.com/api/search", elapsedMs: 860, ...SAMPLE_PAGE_CONTEXT } };
   if (name === "wait_for_network_idle") return { args: { timeout: 3, idleSeconds: 0.8 }, result: { message: "网络已空闲", elapsedMs: 1240, ...SAMPLE_PAGE_CONTEXT } };
   if (name === "wait_for_user") return { args: { message: "完成手机号验证", tabId: 1887, timeout: 60 }, result: { continued: true, reason: "user", tabId: 1887, elapsedMs: 18000, _pageTitle: "登录验证页", _pageUrl: "https://example.com/login" } };
-  if (name === "send_alert") return { args: { title: "杭州天气提醒", message: "杭州当前天气：25°C，阴，体感25°C，东北风4级；今日22~33°C，中雨转小雨，出门记得带伞。", level: "info" }, result: { ok: true, sent: true, suppressed: false, title: "杭州天气提醒", message: "杭州当前天气：25°C，阴，体感25°C，东北风4级；今日22~33°C，中雨转小雨，出门记得带伞。", level: "info", notificationId: "qz_alert_sample", policy: { maxPerWindow: 3 } } };
+  if (name === "send_alert") return { args: { title: "杭州天气提醒", message: "杭州当前天气：25°C，阴，体感25°C，东北风4级；今日22~33°C，中雨转小雨，出门记得带伞。", level: "info" }, result: { ok: true, sent: true, suppressed: false, title: "杭州天气提醒", message: "杭州当前天气：25°C，阴，体感25°C，东北风4级；今日22~33°C，中雨转小雨，出门记得带伞。", level: "info", notificationId: "zuri_alert_sample", policy: { maxPerWindow: 3 } } };
   if (name === "ask_user") {
     return {
       args: {
@@ -1079,7 +1079,7 @@ function sampleDomResult(title, selector = "body") {
   ];
   return {
     title,
-    url: "https://example.com/publish/editor?from=qingzhou",
+    url: "https://example.com/publish/editor?from=zuri",
     totalLines: 42,
     showing: "12-19",
     hasMore: true,
@@ -1090,7 +1090,7 @@ function sampleDomResult(title, selector = "body") {
 function sampleTreeResult(title) {
   return {
     title,
-    url: "https://clogin.ke.com/login?service=https%3A%2F%2Fwww.ke.com%2Fuser%2FcheckLogin%3Fredirect%3Dhttps%25253A%25252F%25252Fexample.com%25252Fpublish%25252Feditor%25253Ffrom%25253Dqingzhou%252526trace%25253Dvery-long-value",
+    url: "https://clogin.ke.com/login?service=https%3A%2F%2Fwww.ke.com%2Fuser%2FcheckLogin%3Fredirect%3Dhttps%25253A%25252F%25252Fexample.com%25252Fpublish%25252Feditor%25253Ffrom%25253Dzuri%252526trace%25253Dvery-long-value",
     depth: 16,
     totalLines: 18,
     nodeCount: 42,
@@ -1218,7 +1218,7 @@ function debugPluginToolFamilyGrouping() {
     title: "插件工具聚合",
     entries: [
       user("用 B站搜索助手检索视频并导出结果。", "plugin-u1"),
-      tool("bilibili_search__set_query", { keyword: "轻舟 agent" }, { ok: true, keyword: "轻舟 agent" }, "plugin-t1"),
+      tool("bilibili_search__set_query", { keyword: "Zuri agent" }, { ok: true, keyword: "Zuri agent" }, "plugin-t1"),
       ...Array.from({ length: 11 }, (_, index) => tool(
         "bilibili_search__extract_results",
         { limit: 20, page: index + 1 },
@@ -1806,7 +1806,7 @@ function debugNetworkBodyTypeState() {
   };
 
   return {
-    requestText: render(makeEvent("request", JSON.stringify({ query: "轻舟工具" }, null, 2))),
+    requestText: render(makeEvent("request", JSON.stringify({ query: "Zuri工具" }, null, 2))),
     responseText: render(makeEvent("response", JSON.stringify({ ok: true }, null, 2))),
   };
 }

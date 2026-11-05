@@ -8,7 +8,7 @@ import { ensureTestExtension } from "../support/extension-build.mjs";
 
 test("task-owned local HTML supports page tools, scripts and tab cleanup", async () => {
   test.setTimeout(60_000);
-  const directory = await mkdtemp(join(tmpdir(), "qingzhou-local-file-"));
+  const directory = await mkdtemp(join(tmpdir(), "zuri-local-file-"));
   let browser;
   try {
     const file = join(directory, "local report #1 中文.html");

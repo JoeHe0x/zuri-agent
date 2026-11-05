@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { SKILL_MANIFEST_FORMAT, SKILL_MANIFEST_SCHEMA_VERSION } from "../../src/shared/skills/skill-manifest.js";
-import { QINGZHOU_SKILL_FORMAT, QINGZHOU_SKILL_SCHEMA_VERSION } from "../../src/shared/skills/skill-utils.js";
+import { ZURI_SKILL_FORMAT, ZURI_SKILL_SCHEMA_VERSION } from "../../src/shared/skills/skill-utils.js";
 import { enrichSkillToolIdentity, setSkillToolUiCatalog } from "../../src/sidepanel/tools/skill-tool-ui-registry.js";
 import { normalizeToolIdentitySnapshot, toolIdentityEventFields } from "../../src/shared/tools/tool-identity.js";
 
@@ -18,7 +18,7 @@ const manifest = {
 };
 const candidate = runtime.prepareSkillToolRegistryFromSkills([{
   name: "renderer-contract", description: "Renderer contract", content: "", scope: "resident", status: "active",
-  format: QINGZHOU_SKILL_FORMAT, schemaVersion: QINGZHOU_SKILL_SCHEMA_VERSION,
+  format: ZURI_SKILL_FORMAT, schemaVersion: ZURI_SKILL_SCHEMA_VERSION,
   resources: [
     { path: "plugin.json", type: "json", content: JSON.stringify(manifest) },
     ...declarations.map(tool => ({ path: `scripts/${tool.name}.js`, type: "script", content: "return { rows: [] };" })),

@@ -51,7 +51,7 @@ test("one-level iframe elements have uids and accept click and fill", async () =
   });
   await new Promise(resolve => cross.listen(0, "127.0.0.1", resolve));
   await new Promise(resolve => parent.listen(0, "127.0.0.1", resolve));
-  const directory = await mkdtemp(join(tmpdir(), "qingzhou-iframe-uid-"));
+  const directory = await mkdtemp(join(tmpdir(), "zuri-iframe-uid-"));
   let browser;
   const close = async () => {
     await browser?.close();

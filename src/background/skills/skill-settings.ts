@@ -21,7 +21,7 @@ import {
   normalizeSkillSettingValue,
 } from "../../shared/skills/skill-settings.js";
 
-export const SKILL_SETTINGS_STORAGE_KEY = "_qz_skill_settings_v1";
+export const SKILL_SETTINGS_STORAGE_KEY = "_zuri_skill_settings_v1";
 
 const STORAGE_VERSION = 1;
 

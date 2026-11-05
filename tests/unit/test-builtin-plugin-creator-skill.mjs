@@ -10,8 +10,8 @@ import {
 import { SYSTEM_PROMPT } from "../../src/background/agent/prompts.js";
 import {
   getSkillDisplayName,
-  QINGZHOU_SKILL_FORMAT,
-  QINGZHOU_SKILL_SCHEMA_VERSION,
+  ZURI_SKILL_FORMAT,
+  ZURI_SKILL_SCHEMA_VERSION,
   skillMatchesName,
   toAgentSkillName,
 } from "../../src/shared/skills/skill-utils.js";
@@ -37,8 +37,8 @@ const storage = {
       description: "普通用户技能",
       content: "用户技能正文",
       scope: "global",
-      format: QINGZHOU_SKILL_FORMAT,
-      schemaVersion: QINGZHOU_SKILL_SCHEMA_VERSION,
+      format: ZURI_SKILL_FORMAT,
+      schemaVersion: ZURI_SKILL_SCHEMA_VERSION,
       updatedAt: "2026-06-01 10:00:00",
     },
     "用户系统提示": {
@@ -46,8 +46,8 @@ const storage = {
       description: "用户自定义常驻系统说明",
       content: "每次回答都要先确认关键假设。",
       scope: "resident",
-      format: QINGZHOU_SKILL_FORMAT,
-      schemaVersion: QINGZHOU_SKILL_SCHEMA_VERSION,
+      format: ZURI_SKILL_FORMAT,
+      schemaVersion: ZURI_SKILL_SCHEMA_VERSION,
       updatedAt: "2026-06-01 10:30:00",
     },
     [BUILTIN_SKILL_WORKBENCH_NAME]: {
@@ -148,7 +148,7 @@ for (const language of ['en', 'zh-CN']) {
 }
 
 const builtin = findBuiltinSkill(BUILTIN_SKILL_WORKBENCH_NAME);
-const removedLegacyBuiltinName = `轻舟${getBuiltinSkillWorkbenchDisplayName()}`;
+const removedLegacyBuiltinName = `Zuri${getBuiltinSkillWorkbenchDisplayName()}`;
 assert.equal(Boolean(builtin), true);
 assert.equal(findBuiltinSkill(removedLegacyBuiltinName), null);
 assert.equal(builtin.name, BUILTIN_SKILL_WORKBENCH_NAME);
@@ -156,7 +156,7 @@ assert.equal(getSkillDisplayName(builtin), getBuiltinSkillWorkbenchDisplayName()
 assert.equal(builtin.readOnly, true);
 assert.equal(builtin.builtin, true);
 assert.equal(isBuiltinSkill(builtin), true);
-assert.match(builtin.description, /通用轻舟 skill 管理工作台/);
+assert.match(builtin.description, /通用Zuri skill 管理工作台/);
 assert.match(builtin.description, /创建、更新、删除某个 skill/);
 assert.match(builtin.description, /编辑某个 skill 的 content、plugin\.json、scripts、resources/);
 assert.match(builtin.description, /探测并导入 Git Skill 仓库/);
@@ -170,7 +170,7 @@ assert.match(builtin.content, /Skill 工具曝光由 skill 的 `scope` 决定/);
 assert.match(builtin.content, /`scope:"global"` 只在当前会话 `load_skill` 后曝光/);
 assert.match(builtin.content, /`builtin`、`readOnly` 和 `source` 只描述来源与权限，不改变加载策略/);
 assert.match(builtin.content, /MCP 接入 SOP/);
-assert.match(builtin.content, /load_skill\("qingzhou-mcp"\)/);
+assert.match(builtin.content, /load_skill\("zuri-mcp"\)/);
 assert.doesNotMatch(builtin.content, /mcp_inspect_server|mcp_call_tool/);
 assert.doesNotMatch(builtin.content, /mcp_call_tool_directly/);
 assert.match(builtin.content, /runtime:"mcp"/);
@@ -198,7 +198,7 @@ assert.match(settingsDslSection, /`text` 可声明正则字符串 `pattern`/);
 assert.match(settingsDslSection, /`secret` 可声明 `reenterWhen`/);
 assert.match(settingsDslSection, /`number` 可声明 `min`、`max`、`step`/);
 assert.match(settingsDslSection, /`select` 必须声明非空 `options`/);
-assert.match(builtin.content, /实际读写配置值时加载 `qingzhou-management`/, "workbench should separate manifest schema authoring from user setting values");
+assert.match(builtin.content, /实际读写配置值时加载 `zuri-management`/, "workbench should separate manifest schema authoring from user setting values");
 assert.match(builtin.content, /secret 不在 manifest 声明 default/, "workbench should route secrets through the settings service");
 const settingsExampleSource = settingsDslSection.match(/```json\n([\s\S]*?)\n```/)?.[1] || "";
 const settingsExample = JSON.parse(settingsExampleSource);
@@ -208,7 +208,7 @@ assert.match(builtin.content, /source:"args"[\s\S]*不要求脚本把输入复�
 assert.match(builtin.content, /totalPath[\s\S]*truncatedPath/, "workbench should document complete and truncated table metadata");
 assert.equal(builtin.resources.some(resource => resource.path === "plugin.json"), true);
 const workbenchPluginManifest = JSON.parse(builtin.resources.find(resource => resource.path === "plugin.json").content);
-assert.match(workbenchPluginManifest.description, /通用轻舟 skill 的创建、更新、删除、列出、包导入和 Git 分发工具/);
+assert.match(workbenchPluginManifest.description, /通用Zuri skill 的创建、更新、删除、列出、包导入和 Git 分发工具/);
 assert.match(workbenchPluginManifest.description, /创建、修改、删除某个已指定的 skill/);
 assert.match(workbenchPluginManifest.description, /给具体网站生成站点 skill、Skill 工具、采集工具或网页操作能力时使用 site-skill-author/);
 const editSkillResourceTool = workbenchPluginManifest.tools.find(tool => tool.name === "edit_skill_resource");
@@ -237,7 +237,7 @@ assert.equal(siteSkillAuthorBuiltin.readOnly, true);
 assert.equal(siteSkillAuthorBuiltin.builtin, true);
 assert.equal(isBuiltinSkill(siteSkillAuthorBuiltin), true);
 assert.match(siteSkillAuthorBuiltin.description, /面向具体网站、网页或域名的站点能力生成器/);
-assert.match(siteSkillAuthorBuiltin.description, /让轻舟学会某个站点/);
+assert.match(siteSkillAuthorBuiltin.description, /让Zuri学会某个站点/);
 assert.match(siteSkillAuthorBuiltin.description, /为该站点创建 site skill、Skill 工具、采集工具、网页操作能力/);
 assert.match(siteSkillAuthorBuiltin.description, /从网站需求出发设计站点专用能力/);
 assert.match(siteSkillAuthorBuiltin.description, /创建、更新、删除某个已指定的 skill/);
@@ -250,8 +250,8 @@ assert.match(siteSkillAuthorBuiltin.content, /#### 3\.4\.2 功能地图与候选
 assert.match(siteSkillAuthorBuiltin.content, /#### 3\.4\.3 用户共同设计 gate/);
 assert.match(siteSkillAuthorBuiltin.content, /#### 3\.7\.3 最终报告门/);
 assert.match(siteSkillAuthorBuiltin.content, /表单是给用户看的[\s\S]*不要外露内部流程词/);
-assert.match(siteSkillAuthorBuiltin.content, /首次创建带工具的站点 Skill[\s\S]*qingzhou_skill_author__create_skill/);
-assert.match(siteSkillAuthorBuiltin.content, /qingzhou_skill_author__edit_skill_resource/);
+assert.match(siteSkillAuthorBuiltin.content, /首次创建带工具的站点 Skill[\s\S]*zuri_skill_author__create_skill/);
+assert.match(siteSkillAuthorBuiltin.content, /zuri_skill_author__edit_skill_resource/);
 assert.match(siteSkillAuthorBuiltin.content, /一次调用只改一个资源/);
 assert.doesNotMatch(siteSkillAuthorBuiltin.content, /resourceEdits:\[\{ action:"set"/);
 assert.match(siteSkillAuthorBuiltin.content, /runtime tool 的正式 smoke 必须在 skill 的 `domains` 和 `urlPatterns` 匹配到的真实执行域完成/);
@@ -283,13 +283,13 @@ assert.equal(listed.filter(skill => skill.name === BUILTIN_SITE_SKILL_AUTHOR_SKI
 assert.equal(hasSkill(listed, "用户技能"), true);
 assert.equal(hasSkill(listed, "用户系统提示"), true);
 assert.equal(hasSkill(listed, "旧技能"), true);
-assert.equal(storedSkill("旧技能").format, QINGZHOU_SKILL_FORMAT);
-assert.equal(storedSkill("旧技能").schemaVersion, QINGZHOU_SKILL_SCHEMA_VERSION);
+assert.equal(storedSkill("旧技能").format, ZURI_SKILL_FORMAT);
+assert.equal(storedSkill("旧技能").schemaVersion, ZURI_SKILL_SCHEMA_VERSION);
 assert.deepEqual(storedSkill("旧技能").resources, []);
 
 const promptSection = await skills.buildSkillPromptSection();
 assert.match(promptSection, new RegExp(BUILTIN_SKILL_WORKBENCH_NAME));
-assert.match(promptSection, /通用轻舟 skill 管理工作台/);
+assert.match(promptSection, /通用Zuri skill 管理工作台/);
 assert.match(promptSection, /给具体网站生成站点能力时使用 site-skill-author/);
 assert.match(promptSection, /Resident Skills/);
 assert.match(promptSection, /每次回答都要先确认关键假设。/);
@@ -359,21 +359,21 @@ const saved = await skills.saveSkill("插件样例", "插件样例", "content", 
 assert.equal(saved.name, toAgentSkillName("插件样例"));
 assert.equal(getSkillDisplayName(saved), "插件样例");
 assert.equal(storedSkill("插件样例").resources[0].path, "plugin.json");
-assert.equal(storedSkill("插件样例").format, QINGZHOU_SKILL_FORMAT);
-assert.equal(storedSkill("插件样例").schemaVersion, QINGZHOU_SKILL_SCHEMA_VERSION);
+assert.equal(storedSkill("插件样例").format, ZURI_SKILL_FORMAT);
+assert.equal(storedSkill("插件样例").schemaVersion, ZURI_SKILL_SCHEMA_VERSION);
 
 const overwrittenLegacy = await skills.saveSkill("旧技能", "新格式覆盖旧格式", "modern content");
 assert.equal(overwrittenLegacy.content, "modern content");
-assert.equal(storedSkill("旧技能").format, QINGZHOU_SKILL_FORMAT);
+assert.equal(storedSkill("旧技能").format, ZURI_SKILL_FORMAT);
 assert.equal((await skills.loadSkill("旧技能")).content, "modern content");
 
 await reloadPluginRegistry();
 const unloadedSchemas = tools.getToolSchemas({});
 const unloadedSchemaNames = unloadedSchemas.map(schema => schema.function?.name).filter(Boolean);
-assert.equal(unloadedSchemaNames.includes("qingzhou_skill_author__create_skill"), false);
-assert.equal(unloadedSchemaNames.includes("qingzhou_skill_author__edit_skill_resource"), false);
+assert.equal(unloadedSchemaNames.includes("zuri_skill_author__create_skill"), false);
+assert.equal(unloadedSchemaNames.includes("zuri_skill_author__edit_skill_resource"), false);
 await assert.rejects(
-  () => tools.executeTool("qingzhou_skill_author__list_skills", { timeout: 30, scope: "all" }, null, {}),
+  () => tools.executeTool("zuri_skill_author__list_skills", { timeout: 30, scope: "all" }, null, {}),
   err => err?.code === "UNKNOWN_TOOL",
 );
 
@@ -382,22 +382,22 @@ const schemaNames = schemas.map(schema => schema.function?.name).filter(Boolean)
 assert.equal(schemaNames.includes("update_skill"), false);
 assert.equal(schemaNames.includes("delete_skill"), false);
 assert.equal(schemaNames.includes("manage_skill"), false);
-assert.equal(schemaNames.includes("qingzhou_skill_author__create_skill"), true);
-assert.equal(schemaNames.includes("qingzhou_skill_author__edit_skill_resource"), true);
-assert.equal(schemaNames.includes("qingzhou_skill_author__update_skill"), true);
-assert.equal(schemaNames.includes("qingzhou_skill_author__delete_skill"), true);
-assert.equal(schemaNames.includes("qingzhou_skill_author__list_skills"), true);
-assert.equal(schemaNames.includes("qingzhou_skill_author__load_available_renderers"), true);
-assert.equal(schemaNames.includes("qingzhou_skill_author__import_page_zip"), true);
-assert.equal(schemaNames.includes("qingzhou_skill_author__import_git_repository"), true);
-assert.equal(schemaNames.includes("qingzhou_skill_author__install_skill_to_git"), true);
+assert.equal(schemaNames.includes("zuri_skill_author__create_skill"), true);
+assert.equal(schemaNames.includes("zuri_skill_author__edit_skill_resource"), true);
+assert.equal(schemaNames.includes("zuri_skill_author__update_skill"), true);
+assert.equal(schemaNames.includes("zuri_skill_author__delete_skill"), true);
+assert.equal(schemaNames.includes("zuri_skill_author__list_skills"), true);
+assert.equal(schemaNames.includes("zuri_skill_author__load_available_renderers"), true);
+assert.equal(schemaNames.includes("zuri_skill_author__import_page_zip"), true);
+assert.equal(schemaNames.includes("zuri_skill_author__import_git_repository"), true);
+assert.equal(schemaNames.includes("zuri_skill_author__install_skill_to_git"), true);
 
 const contributions = await runtime.listSkillContributions({});
-const authorPlugin = contributions.plugins.find(plugin => plugin.id === "qingzhou-skill-author");
+const authorPlugin = contributions.plugins.find(plugin => plugin.id === "zuri-skill-author");
 assert.equal(Boolean(authorPlugin), true);
 assert.equal(authorPlugin.active, false);
 const loadedContributions = await runtime.listSkillContributions(loadedSkillWorkbenchContext);
-assert.equal(loadedContributions.plugins.find(plugin => plugin.id === "qingzhou-skill-author")?.active, true);
+assert.equal(loadedContributions.plugins.find(plugin => plugin.id === "zuri-skill-author")?.active, true);
 assert.equal(authorPlugin.tools.find(tool => tool.localName === "create_skill").renderer.type, "skill");
 assert.equal(authorPlugin.tools.find(tool => tool.localName === "create_skill").renderer.action, "create");
 assert.equal(authorPlugin.tools.find(tool => tool.localName === "edit_skill_resource").renderer.type, "skill");
@@ -417,7 +417,7 @@ for (const localName of ["create_skill", "update_skill", "delete_skill", "edit_s
     appendText: "c", prependText: "d", extra: "retained only by whole-skill updates", timeout: 30, timeoutMs: 30000,
   };
   const calls = [];
-  const toolName = `qingzhou_skill_author__${localName}`;
+  const toolName = `zuri_skill_author__${localName}`;
   await runtime.executeSkillTool(toolName, input, null, loadedSkillWorkbenchContext, async (name, args) => {
     calls.push({ name, args });
     return { ok: true };
@@ -425,7 +425,7 @@ for (const localName of ["create_skill", "update_skill", "delete_skill", "edit_s
   const script = builtin.resources.find(resource => resource.path === `scripts/${localName.replaceAll("_", "-")}.js`);
   const AsyncFunction = (async () => {}).constructor;
   await new AsyncFunction("args", "tools", script.content)(
-    { ...input, $plugin: { id: "qingzhou-skill-author" } },
+    { ...input, $plugin: { id: "zuri-skill-author" } },
     { async manage_skill(args) { calls.push({ name: "manage_skill", args }); return { ok: true }; } },
   );
   assert.deepEqual(calls[1], calls[0], `${localName} portable and host arguments must agree`);
@@ -436,13 +436,13 @@ for (const localName of ["create_skill", "update_skill", "delete_skill", "edit_s
     assert.equal(Object.hasOwn(calls[0].args.resourceEdits[0], "name"), false);
   }
 }
-const updateSkillSchema = schemas.find(schema => schema.function?.name === "qingzhou_skill_author__update_skill");
-const createSkillSchema = schemas.find(schema => schema.function?.name === "qingzhou_skill_author__create_skill");
-const editResourceSchema = schemas.find(schema => schema.function?.name === "qingzhou_skill_author__edit_skill_resource");
-const listSkillsSchema = schemas.find(schema => schema.function?.name === "qingzhou_skill_author__list_skills");
-const importPageZipSchema = schemas.find(schema => schema.function?.name === "qingzhou_skill_author__import_page_zip");
-const importGitRepositorySchema = schemas.find(schema => schema.function?.name === "qingzhou_skill_author__import_git_repository");
-const installSkillToGitSchema = schemas.find(schema => schema.function?.name === "qingzhou_skill_author__install_skill_to_git");
+const updateSkillSchema = schemas.find(schema => schema.function?.name === "zuri_skill_author__update_skill");
+const createSkillSchema = schemas.find(schema => schema.function?.name === "zuri_skill_author__create_skill");
+const editResourceSchema = schemas.find(schema => schema.function?.name === "zuri_skill_author__edit_skill_resource");
+const listSkillsSchema = schemas.find(schema => schema.function?.name === "zuri_skill_author__list_skills");
+const importPageZipSchema = schemas.find(schema => schema.function?.name === "zuri_skill_author__import_page_zip");
+const importGitRepositorySchema = schemas.find(schema => schema.function?.name === "zuri_skill_author__import_git_repository");
+const installSkillToGitSchema = schemas.find(schema => schema.function?.name === "zuri_skill_author__install_skill_to_git");
 assert.match(createSkillSchema.function.parameters.properties.name.description, /英文小写 id/);
 assert.match(createSkillSchema.function.parameters.properties.displayName.description, /中文显示名/);
 assert.equal(Object.prototype.hasOwnProperty.call(createSkillSchema.function.parameters.properties, "resources"), false);
@@ -477,7 +477,7 @@ assert.match(updateSkillSchema.function.parameters.properties.oldText.descriptio
 assert.equal(Object.prototype.hasOwnProperty.call(updateSkillSchema.function.parameters.properties, "resourceEdits"), false);
 assert.equal(Object.prototype.hasOwnProperty.call(updateSkillSchema.function.parameters.properties, "contentEdits"), false);
 
-const availableRenderers = await executeSkillWorkbenchTool("qingzhou_skill_author__load_available_renderers", { timeout: 30 });
+const availableRenderers = await executeSkillWorkbenchTool("zuri_skill_author__load_available_renderers", { timeout: 30 });
 assert.equal(availableRenderers.ok, true);
 assert.equal(availableRenderers._plugin.runtime, "host");
 assert.equal(availableRenderers.renderers.some(renderer => renderer.type === "table"), true);
@@ -512,7 +512,7 @@ const distributionToolRuntime = tools.createToolRuntime({
   },
 });
 const importedPageZip = await distributionToolRuntime.execute(
-  "qingzhou_skill_author__import_page_zip",
+  "zuri_skill_author__import_page_zip",
   { timeout: 30, url: "https://skills.example/private.zip" },
   null,
   {
@@ -529,7 +529,7 @@ assert.deepEqual(pageZipImports, [{
 }]);
 const internalHostContext = {
   source: "plugin_host",
-  pluginId: "qingzhou-skill-author",
+  pluginId: "zuri-skill-author",
   sessionId: "session-skill-import",
 };
 const boundGitSource = await distributionToolRuntime.execute(
@@ -552,7 +552,7 @@ assert.equal(publishedGitSkills[0].commitMessage, "feat: publish user skill");
 
 const gitImportCalls = [];
 const importedGitRepository = await runtime.executeSkillTool(
-  "qingzhou_skill_author__import_git_repository",
+  "zuri_skill_author__import_git_repository",
   { timeout: 120, repositoryUrl: "https://github.com/example/skills/tree/main/packages", overwrite: false },
   null,
   loadedSkillWorkbenchContext,
@@ -578,7 +578,7 @@ assert.deepEqual(gitImportCalls, [
 
 const gitInstallCalls = [];
 const installedToGit = await runtime.executeSkillTool(
-  "qingzhou_skill_author__install_skill_to_git",
+  "zuri_skill_author__install_skill_to_git",
   {
     timeout: 120,
     name: "用户技能",
@@ -605,7 +605,7 @@ assert.deepEqual(gitInstallCalls, [
   },
 ]);
 
-const allSkillNames = await executeSkillWorkbenchTool("qingzhou_skill_author__list_skills", { timeout: 30, scope: "all" });
+const allSkillNames = await executeSkillWorkbenchTool("zuri_skill_author__list_skills", { timeout: 30, scope: "all" });
 assert.equal(allSkillNames.action, "list_skills");
 assert.equal(allSkillNames.scope, "all");
 assert.equal(Array.isArray(allSkillNames.names), true);
@@ -615,14 +615,14 @@ assert.equal(allSkillNames.names.includes(toAgentSkillName("用户技能")), tru
 assert.equal(allSkillNames.items.every(item => typeof item.name === "string"), true);
 assert.equal(allSkillNames._plugin.runtime, "host");
 
-const residentSkillNames = await executeSkillWorkbenchTool("qingzhou_skill_author__list_skills", { timeout: 30, scope: "resident" });
+const residentSkillNames = await executeSkillWorkbenchTool("zuri_skill_author__list_skills", { timeout: 30, scope: "resident" });
 assert.deepEqual(residentSkillNames.names, [toAgentSkillName("用户系统提示")]);
-const globalSkillNames = await executeSkillWorkbenchTool("qingzhou_skill_author__list_skills", { timeout: 30, scope: "global" });
+const globalSkillNames = await executeSkillWorkbenchTool("zuri_skill_author__list_skills", { timeout: 30, scope: "global" });
 assert.equal(globalSkillNames.names.includes(BUILTIN_SKILL_WORKBENCH_NAME), true);
 assert.equal(globalSkillNames.names.includes(BUILTIN_SITE_SKILL_AUTHOR_SKILL_NAME), true);
 assert.equal(globalSkillNames.names.includes(toAgentSkillName("用户系统提示")), false);
 await assert.rejects(
-  () => executeSkillWorkbenchTool("qingzhou_skill_author__list_skills", { timeout: 30, scope: "redident" }),
+  () => executeSkillWorkbenchTool("zuri_skill_author__list_skills", { timeout: 30, scope: "redident" }),
   err => err?.code === "INVALID_ARGUMENTS" && /all, global, site, or resident/.test(err.details?.originalMessage || err.message),
 );
 
@@ -632,7 +632,7 @@ assert.deepEqual(loadedUserViaTool.resources, []);
 
 await assert.rejects(
   () => runtime.executeSkillTool(
-    "qingzhou_skill_author__create_skill",
+    "zuri_skill_author__create_skill",
     {
       timeout: 30,
       name: "缺少注册表事务",
@@ -649,7 +649,7 @@ assert.equal(findStoredSkill("缺少注册表事务"), null, "a missing registry
 
 let hostToolCall = null;
 const createdByHost = await runtime.executeSkillTool(
-  "qingzhou_skill_author__create_skill",
+  "zuri_skill_author__create_skill",
   {
     timeout: 30,
     name: "Host 插件技能",
@@ -670,7 +670,7 @@ assert.equal(createdByHost.name, toAgentSkillName("Host 插件技能"));
 assert.equal(createdByHost.displayName, "Host 插件技能");
 assert.equal(createdByHost._plugin.runtime, "host");
 const duplicateCreateByHost = await runtime.executeSkillTool(
-  "qingzhou_skill_author__create_skill",
+  "zuri_skill_author__create_skill",
   {
     timeout: 30,
     name: "Host 插件技能",
@@ -684,7 +684,7 @@ const duplicateCreateByHost = await runtime.executeSkillTool(
 assert.equal(duplicateCreateByHost.code, "SKILL_ALREADY_EXISTS");
 assert.equal(storedSkill("Host 插件技能").content, "## 步骤\n- 通过技能工作台创建。");
 const createdByHostResource = await runtime.executeSkillTool(
-  "qingzhou_skill_author__edit_skill_resource",
+  "zuri_skill_author__edit_skill_resource",
   { timeout: 30, name: "Host 插件技能", path: "references/readme.md", action: "set", type: "markdown", content: "hello" },
   null,
   loadedSkillWorkbenchContext,
@@ -692,11 +692,11 @@ const createdByHostResource = await runtime.executeSkillTool(
 );
 assert.equal(createdByHostResource.updated, true);
 assert.equal(storedSkill("Host 插件技能").resources[0].path, "references/readme.md");
-assert.equal(storedSkill("Host 插件技能").format, QINGZHOU_SKILL_FORMAT);
+assert.equal(storedSkill("Host 插件技能").format, ZURI_SKILL_FORMAT);
 
 const commitCountBeforeCreate = skillRegistryCommitCount;
 const createdViaToolDispatcher = await executeSkillWorkbenchTool(
-  "qingzhou_skill_author__create_skill",
+  "zuri_skill_author__create_skill",
   {
     timeout: 30,
     name: "Dispatcher 插件技能",
@@ -719,7 +719,7 @@ assert.deepEqual(tools.consumeToolEffects(JSON.parse(JSON.stringify(createdViaTo
 assert.deepEqual(tools.consumeToolEffects(createdViaToolDispatcher, {}), [{ type: "skills.changed" }], "trusted host adapters must retain the committed core mutation effect");
 assert.deepEqual(tools.consumeToolEffects(createdViaToolDispatcher, {}), [], "wrapped core effects are one-shot");
 const dispatcherResource = await executeSkillWorkbenchTool(
-  "qingzhou_skill_author__edit_skill_resource",
+  "zuri_skill_author__edit_skill_resource",
   {
     timeout: 30,
     name: "Dispatcher 插件技能",
@@ -742,10 +742,10 @@ assert.equal(storedSkill("Dispatcher 插件技能").resources[0].content, JSON.s
   schemaVersion: SKILL_MANIFEST_SCHEMA_VERSION,
   id: "dispatcher-sample",
 }, null, 2));
-assert.equal(storedSkill("Dispatcher 插件技能").format, QINGZHOU_SKILL_FORMAT);
+assert.equal(storedSkill("Dispatcher 插件技能").format, ZURI_SKILL_FORMAT);
 
 const createdWithExplicitDisplayName = await executeSkillWorkbenchTool(
-  "qingzhou_skill_author__create_skill",
+  "zuri_skill_author__create_skill",
   {
     timeout: 30,
     name: "browser-video-search",
@@ -760,10 +760,10 @@ assert.equal(createdWithExplicitDisplayName.saved, true);
 assert.equal(createdWithExplicitDisplayName.name, "browser-video-search");
 assert.equal(createdWithExplicitDisplayName.displayName, "浏览器视频搜索");
 assert.equal(storedSkill("browser-video-search").metadata.displayName, "浏览器视频搜索");
-assert.equal(storedSkill("browser-video-search").metadata.qingzhou?.displayName, undefined);
+assert.equal(storedSkill("browser-video-search").metadata.zuri?.displayName, undefined);
 
 const createdFromNonCanonicalName = await executeSkillWorkbenchTool(
-  "qingzhou_skill_author__create_skill",
+  "zuri_skill_author__create_skill",
   {
     timeout: 30,
     name: "当前会话原始名称",
@@ -784,7 +784,7 @@ const loadedFromCreateRequestName = await tools.executeTool(
 assert.equal(loadedFromCreateRequestName.name, createdFromNonCanonicalName.name);
 
 const displayNameOnlyUpdate = await executeSkillWorkbenchTool(
-  "qingzhou_skill_author__update_skill",
+  "zuri_skill_author__update_skill",
   {
     timeout: 30,
     name: "browser-video-search",
@@ -798,12 +798,12 @@ assert.equal(displayNameOnlyUpdate.name, "browser-video-search");
 assert.equal(displayNameOnlyUpdate.displayName, "视频搜索助手");
 assert.equal(displayNameOnlyUpdate.changes.some(change => change.field === "displayName"), true);
 assert.equal(storedSkill("browser-video-search").metadata.displayName, "视频搜索助手");
-assert.equal(storedSkill("browser-video-search").metadata.qingzhou?.displayName, undefined);
+assert.equal(storedSkill("browser-video-search").metadata.zuri?.displayName, undefined);
 
 replacePluginRegistryFromSkills([], { reason: "test_cold_registry" });
 await assert.rejects(
   () => executeSkillWorkbenchTool(
-    "qingzhou_skill_author__create_skill",
+    "zuri_skill_author__create_skill",
     {
       timeout: 30,
       name: "冷启动插件技能",
@@ -818,7 +818,7 @@ await assert.rejects(
 );
 await reloadPluginRegistry({ reason: "test_cold_registry_recovery" });
 const createdAfterRegistryReady = await executeSkillWorkbenchTool(
-  "qingzhou_skill_author__create_skill",
+  "zuri_skill_author__create_skill",
   {
     timeout: 30,
     name: "冷启动插件技能",
@@ -832,7 +832,7 @@ assert.equal(createdAfterRegistryReady.saved, true);
 assert.equal(createdAfterRegistryReady.name, toAgentSkillName("冷启动插件技能"));
 assert.equal(createdAfterRegistryReady.displayName, "冷启动插件技能");
 const lazyRegistryResource = await executeSkillWorkbenchTool(
-  "qingzhou_skill_author__edit_skill_resource",
+  "zuri_skill_author__edit_skill_resource",
   {
     timeout: 30,
     name: "冷启动插件技能",
@@ -916,12 +916,12 @@ const bilibiliScriptContent = [
   "  return { totalOnPage: cards.length, returned: Math.min(cards.length, limit), videos: [] };",
   "}",
 ].join("\n");
-const bilibiliCreated = await executeSkillWorkbenchTool("qingzhou_skill_author__create_skill", { timeout: 30, ...bilibiliPayload });
+const bilibiliCreated = await executeSkillWorkbenchTool("zuri_skill_author__create_skill", { timeout: 30, ...bilibiliPayload });
 assert.equal(bilibiliCreated.saved, true);
 assert.equal(bilibiliCreated.name, toAgentSkillName("B站视频搜索"));
 assert.equal(bilibiliCreated.displayName, "B站视频搜索");
 assert.equal(storedSkill("B站视频搜索").scope, "site");
-await executeSkillWorkbenchTool("qingzhou_skill_author__edit_skill_resource", {
+await executeSkillWorkbenchTool("zuri_skill_author__edit_skill_resource", {
   timeout: 30,
   name: "B站视频搜索",
   path: "plugin.json",
@@ -930,7 +930,7 @@ await executeSkillWorkbenchTool("qingzhou_skill_author__edit_skill_resource", {
   title: "B站视频搜索插件声明",
   content: bilibiliManifestContent,
 }, null, {});
-await executeSkillWorkbenchTool("qingzhou_skill_author__edit_skill_resource", {
+await executeSkillWorkbenchTool("zuri_skill_author__edit_skill_resource", {
   timeout: 30,
   name: "B站视频搜索",
   path: "scripts/search-bilibili-videos.js",
@@ -941,11 +941,11 @@ await executeSkillWorkbenchTool("qingzhou_skill_author__edit_skill_resource", {
 }, null, {});
 assert.equal(storedSkill("B站视频搜索").resources.length, 2);
 assert.equal(storedSkill("B站视频搜索").resources[0].content.includes('"slashCommands"'), false);
-const siteSkillNames = await executeSkillWorkbenchTool("qingzhou_skill_author__list_skills", { timeout: 30, scope: "site" });
+const siteSkillNames = await executeSkillWorkbenchTool("zuri_skill_author__list_skills", { timeout: 30, scope: "site" });
 assert.equal(siteSkillNames.scope, "site");
 assert.equal(siteSkillNames.names.includes(toAgentSkillName("B站视频搜索")), true);
 const bilibiliSetUpdate = await executeSkillWorkbenchTool(
-  "qingzhou_skill_author__edit_skill_resource",
+  "zuri_skill_author__edit_skill_resource",
   {
     timeout: 30,
     name: "B站视频搜索",
@@ -968,7 +968,7 @@ assert.match(
   /totalOnPage: 0/,
 );
 const bilibiliReplaceUpdate = await executeSkillWorkbenchTool(
-  "qingzhou_skill_author__edit_skill_resource",
+  "zuri_skill_author__edit_skill_resource",
   {
     timeout: 30,
     name: "B站视频搜索",

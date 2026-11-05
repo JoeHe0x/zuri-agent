@@ -15,7 +15,7 @@ const ROOT = fileURLToPath(new URL("../../", import.meta.url));
 const EXAMPLE = join(ROOT, "tests/fixtures/capabilities/example");
 
 /** Reuse the runner's build, or own one isolated build for this process. */
-export async function ensureTestExtension({ extensionDir = process.env.QINGZHOU_TEST_EXTENSION_DIR } = {}) {
+export async function ensureTestExtension({ extensionDir = process.env.ZURI_TEST_EXTENSION_DIR } = {}) {
   if (extensionDir) {
     const directory = resolve(extensionDir);
     const manifest = JSON.parse(await readFile(join(directory, "manifest.json"), "utf8"));
@@ -26,14 +26,14 @@ export async function ensureTestExtension({ extensionDir = process.env.QINGZHOU_
     return directory;
   }
   if (!pending) {
-    const directory = mkdtempSync(join(tmpdir(), "qingzhou-test-build-"));
+    const directory = mkdtempSync(join(tmpdir(), "zuri-test-build-"));
     process.once("exit", () => rmSync(directory, { recursive: true, force: true }));
     // Serving a supplied build should not load the compiler and its boundary parser.
     pending = import("../../scripts/build-extension.mjs")
       .then(({ buildExtension }) => buildExtension({ outputDir: join(directory, "extension"), mode: "development" }))
       .then(async result => {
         await prepareExampleAssets();
-        process.env.QINGZHOU_TEST_EXTENSION_DIR = result.outputDir;
+        process.env.ZURI_TEST_EXTENSION_DIR = result.outputDir;
         return result.outputDir;
       })
       .catch(error => { pending = null; throw error; });
@@ -52,7 +52,7 @@ export function ensureCapabilityExtension({ omit = [], example = false } = {}) {
   if (omitted.some(name => !/^[a-z][a-z0-9-]*$/.test(name))) throw new Error("Invalid capability package name");
   const key = JSON.stringify({ omitted, example });
   if (!capabilityBuilds.has(key)) {
-    const directory = mkdtempSync(join(tmpdir(), "qingzhou-capability-variant-"));
+    const directory = mkdtempSync(join(tmpdir(), "zuri-capability-variant-"));
     process.once("exit", () => rmSync(directory, { recursive: true, force: true }));
     const pendingBuild = (async () => {
       const sourceDir = join(directory, "src");
@@ -70,7 +70,7 @@ export function ensureCapabilityExtension({ omit = [], example = false } = {}) {
 /** Legacy fixture URLs are a test-server overlay; even a release ZIP stays byte-for-byte untouched. */
 function prepareExampleAssets() {
   if (!pendingExampleAssets) {
-    const directory = mkdtempSync(join(tmpdir(), "qingzhou-example-assets-"));
+    const directory = mkdtempSync(join(tmpdir(), "zuri-example-assets-"));
     process.once("exit", () => rmSync(directory, { recursive: true, force: true }));
     pendingExampleAssets = build({
       absWorkingDir: EXAMPLE, entryPoints: globSync("**/*.ts", { cwd: EXAMPLE }).filter(path => path !== "index.ts" && !path.endsWith(".d.ts")),

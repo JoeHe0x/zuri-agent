@@ -1,6 +1,6 @@
 /** Rewrite initiatorDomains that use Firefox's email-shaped runtime.id. */
 
-const MARK = "qzFirefoxInitiator";
+const MARK = "zuriFirefoxInitiator";
 
 export function installInitiatorRewrite(chromeApi: InitiatorChrome): void {
   const dnr = chromeApi.declarativeNetRequest;

@@ -23,7 +23,7 @@ function installSettingsReplies(setting) {
   chrome.runtime.connect = (...args) => {
     const port = connect(...args), post = port.postMessage;
     port.postMessage = message => {
-      if (message.type === "list_skill_settings") queueMicrotask(() => window.__qzEmitPortMessage({ type: "skill_settings", requestId: message.requestId, settings: [setting] }));
+      if (message.type === "list_skill_settings") queueMicrotask(() => window.__zuriEmitPortMessage({ type: "skill_settings", requestId: message.requestId, settings: [setting] }));
       else post(message);
     };
     return port;
@@ -51,7 +51,7 @@ async function captureLayout(page, selector, name, testInfo) {
             break;
           }
           // A positioned menu is constrained by its own box, not its icon-sized anchor.
-          if (parent.matches(".qz-popover")) break;
+          if (parent.matches(".zuri-popover")) break;
         }
       }
     }
@@ -101,7 +101,7 @@ for (const [language, chromeLocale] of languages) for (const colorScheme of ["li
       const options = { uiLanguage: language, localeMessages, config, localStorage: { _skills: { [skill.name]: skill } } };
       await page.addInitScript({ content: `(${installBenchmarkChromeStub.toString()})(${JSON.stringify(options)}); (${installSettingsReplies.toString()})(${JSON.stringify(setting)});` });
       await page.goto("/extension/sidepanel/sidepanel.html", { waitUntil: "domcontentloaded" });
-      await page.waitForFunction(() => Boolean(window.qingzhouConversationBenchmark));
+      await page.waitForFunction(() => Boolean(window.zuriConversationBenchmark));
       const audit = (selector, scene) => captureLayout(page, selector, `${language}-${colorScheme}-${scene}`, testInfo);
       await page.locator("#btn-settings").click();
       await page.locator("#cfg-context-preset").selectOption("__custom");

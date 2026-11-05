@@ -81,7 +81,7 @@ function assertToolExposure() {
 }
 
 async function assertDuplicateGroupsMerge() {
-  const { ensureQingzhouTabGroupForWindow, QINGZHOU_TAB_GROUP_TITLE } = await import("../../src/shared/tab-groups.js");
+  const { ensureZuriTabGroupForWindow, ZURI_TAB_GROUP_TITLE } = await import("../../src/shared/tab-groups.js");
   const state = installChromeMock({
     tabs: [
       { id: 101, windowId: 1, groupId: 5 },
@@ -89,21 +89,21 @@ async function assertDuplicateGroupsMerge() {
       { id: 103, windowId: 1, groupId: -1 },
     ],
     groups: [
-      { id: 5, windowId: 1, title: QINGZHOU_TAB_GROUP_TITLE, color: "cyan", collapsed: false },
-      { id: 9, windowId: 1, title: QINGZHOU_TAB_GROUP_TITLE, color: "green", collapsed: false },
+      { id: 5, windowId: 1, title: ZURI_TAB_GROUP_TITLE, color: "cyan", collapsed: false },
+      { id: 9, windowId: 1, title: ZURI_TAB_GROUP_TITLE, color: "green", collapsed: false },
     ],
   });
 
-  const result = await ensureQingzhouTabGroupForWindow([103], { color: "cyan" });
+  const result = await ensureZuriTabGroupForWindow([103], { color: "cyan" });
   assert.equal(result.groupId, 5);
   assert.equal(state.tabs.get(102).groupId, 5, "duplicate group tabs should move into the canonical group");
   assert.equal(state.tabs.get(103).groupId, 5, "new task tabs should join the canonical group");
-  assert.equal(state.groups.get(5).title, QINGZHOU_TAB_GROUP_TITLE);
+  assert.equal(state.groups.get(5).title, ZURI_TAB_GROUP_TITLE);
   assert.equal(state.groups.get(5).color, "cyan");
 }
 
 async function assertCreatesGroupWhenMissing() {
-  const { ensureQingzhouTabGroupForWindow, QINGZHOU_TAB_GROUP_TITLE } = await import("../../src/shared/tab-groups.js");
+  const { ensureZuriTabGroupForWindow, ZURI_TAB_GROUP_TITLE } = await import("../../src/shared/tab-groups.js");
   const state = installChromeMock({
     tabs: [
       { id: 201, windowId: 2, groupId: -1 },
@@ -112,25 +112,25 @@ async function assertCreatesGroupWhenMissing() {
     groups: [],
   });
 
-  const result = await ensureQingzhouTabGroupForWindow([201, 202], { color: "cyan" });
+  const result = await ensureZuriTabGroupForWindow([201, 202], { color: "cyan" });
   assert.ok(result.groupId > 0);
   assert.equal(state.tabs.get(201).groupId, result.groupId);
   assert.equal(state.tabs.get(202).groupId, result.groupId);
-  assert.equal(state.groups.get(result.groupId).title, QINGZHOU_TAB_GROUP_TITLE);
+  assert.equal(state.groups.get(result.groupId).title, ZURI_TAB_GROUP_TITLE);
 }
 
 async function assertManagedGroupSurvivesLanguageSwitch() {
-  const { ensureQingzhouTabGroupForWindow } = await import("../../src/shared/tab-groups.js");
+  const { ensureZuriTabGroupForWindow } = await import("../../src/shared/tab-groups.js");
   const state = installChromeMock({ tabs: [{ id: 301, windowId: 3, groupId: -1 }, { id: 302, windowId: 3, groupId: -1 }] });
   globalThis.chrome.i18n = {
     getUILanguage: () => "ja",
-    getMessage: key => key === "qz_language" ? "ja" : key === chromeMessageId("backend.notification.task") ? "軽舟のタスク" : "",
+    getMessage: key => key === "zuri_language" ? "ja" : key === chromeMessageId("backend.notification.task") ? "軽舟のタスク" : "",
   };
-  const created = await ensureQingzhouTabGroupForWindow([301]);
+  const created = await ensureZuriTabGroupForWindow([301]);
   assert.equal(created.group.title, "軽舟のタスク");
 
   globalThis.chrome.i18n = { getUILanguage: () => "en" };
-  const updated = await ensureQingzhouTabGroupForWindow([301, 302], { preferredGroupId: created.groupId });
+  const updated = await ensureZuriTabGroupForWindow([301, 302], { preferredGroupId: created.groupId });
   assert.equal(updated.groupId, created.groupId, "the persisted identity survives a language switch");
   assert.equal(state.groups.size, 1, "changing language must not create another task group");
   assert.equal(updated.group.title, "Zuri task");
@@ -138,14 +138,14 @@ async function assertManagedGroupSurvivesLanguageSwitch() {
 }
 
 async function assertManagedGroupSurvivesLegacyBranding() {
-  const { ensureQingzhouTabGroupForWindow } = await import("../../src/shared/tab-groups.js");
-  for (const title of ["Tâche Qingzhou", "Qingzhou のタスク", "輕舟任務"]) {
+  const { ensureZuriTabGroupForWindow } = await import("../../src/shared/tab-groups.js");
+  for (const title of ["Tâche Zuri", "Zuri のタスク", "輕舟任務"]) {
     const state = installChromeMock({
       tabs: [{ id: 401, windowId: 4, groupId: 9 }, { id: 402, windowId: 4, groupId: 5 }],
       groups: [{ id: 9, windowId: 4, title }, { id: 5, windowId: 4, title: "Zuri task" }],
     });
     globalThis.chrome.i18n = { getUILanguage: () => "en" };
-    const result = await ensureQingzhouTabGroupForWindow([401, 402], { preferredGroupId: 9 });
+    const result = await ensureZuriTabGroupForWindow([401, 402], { preferredGroupId: 9 });
     assert.equal(result.groupId, 9, `owned group ${title} takes priority over title matching`);
     assert.equal(state.tabs.get(402).groupId, 9, "existing duplicate groups still merge");
     assert.equal(result.group.title, "Zuri task");
@@ -153,14 +153,14 @@ async function assertManagedGroupSurvivesLegacyBranding() {
 }
 
 async function assertInvalidPreferredGroupIsNotAdopted() {
-  const { ensureQingzhouTabGroupForWindow } = await import("../../src/shared/tab-groups.js");
+  const { ensureZuriTabGroupForWindow } = await import("../../src/shared/tab-groups.js");
   for (const preferredGroupId of [99, 8, 0, null]) {
     const state = installChromeMock({
       tabs: [{ id: 501, windowId: 5, groupId: -1 }, { id: 502, windowId: 5, groupId: 0 }, { id: 601, windowId: 6, groupId: 8 }],
       groups: [{ id: 0, windowId: 5, title: "Personal" }, { id: 8, windowId: 6, title: "Zuri task" }],
     });
     globalThis.chrome.i18n = { getUILanguage: () => "en" };
-    const result = await ensureQingzhouTabGroupForWindow([501], { preferredGroupId });
+    const result = await ensureZuriTabGroupForWindow([501], { preferredGroupId });
     assert.notEqual(result.groupId, 8, "a missing or foreign-window preferred group must not be adopted");
     assert.notEqual(result.groupId, 0, "a stale same-window ID or null preference must not adopt an unrelated user group");
     assert.equal(state.groups.get(0).title, "Personal");

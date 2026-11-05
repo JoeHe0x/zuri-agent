@@ -38,12 +38,12 @@ const loadedContext = Object.freeze({
   source: "test",
   sessionId: "session_documents_test",
   runId: "run_documents_test",
-  loadedPluginSkillNames: [documentsSkill.BUILTIN_QINGZHOU_DOCUMENTS_SKILL_NAME],
+  loadedPluginSkillNames: [documentsSkill.BUILTIN_ZURI_DOCUMENTS_SKILL_NAME],
 });
 
 await runtime.commitSkillToolRegistryCandidate(
   await runtime.prepareSkillToolRegistryFromStorage(),
-  { reason: "test_qingzhou_documents_skill" },
+  { reason: "test_zuri_documents_skill" },
 );
 pluginUi.setSkillToolUiCatalog(await runtime.listSkillContributions(loadedContext));
 
@@ -60,23 +60,23 @@ await assert.rejects(
   "document plugin tools should not execute before the skill is loaded",
 );
 
-const loadedSkill = await skills.loadSkill(documentsSkill.BUILTIN_QINGZHOU_DOCUMENTS_SKILL_NAME);
-assert.equal(loadedSkill.name, "qingzhou-documents");
+const loadedSkill = await skills.loadSkill(documentsSkill.BUILTIN_ZURI_DOCUMENTS_SKILL_NAME);
+assert.equal(loadedSkill.name, "zuri-documents");
 assert.equal(loadedSkill.metadata.displayName, "文档处理");
 assert.equal(loadedSkill.scope, "global");
 assert.equal(loadedSkill.builtin, true);
 assert.equal(loadedSkill.readOnly, true);
 assert.match(loadedSkill.content, /只把远程文件原样下载[\s\S]*`download_url`/);
 assert.match(loadedSkill.content, /大文档必须通过 `docModelId` 传入/);
-assert.match(loadedSkill.content, /qingzhou_documents__document_fetch/);
-assert.match(loadedSkill.content, /qingzhou_documents__document_list_artifacts/);
+assert.match(loadedSkill.content, /zuri_documents__document_fetch/);
+assert.match(loadedSkill.content, /zuri_documents__document_list_artifacts/);
 assert.match(loadedSkill.content, /DOCX、XLSX、PDF 来自其他 Skill 的资源[\s\S]*load_skill_resource/);
 assert.match(loadedSkill.content, /rows 的每个元素就是一行/);
 assert.match(loadedSkill.content, /rows:\[\[\{"公司":"A"\},\{"公司":"B"\}\]\]/);
 assert.match(loadedSkill.content, /title[^\n]*元数据[^\n]*不会自动写入正文/);
 
 const manifest = JSON.parse(loadedSkill.resources.find(resource => resource.path === "plugin.json")?.content || "{}");
-assert.equal(manifest.id, contract.QINGZHOU_DOCUMENTS_SKILL_ID);
+assert.equal(manifest.id, contract.ZURI_DOCUMENTS_SKILL_ID);
 assert.equal(manifest.version, "0.2.3");
 assert.deepEqual(manifest.tools.map(tool => tool.name), contract.DOCUMENT_TOOL_CORE_NAMES);
 assert.ok(manifest.tools.every(tool => tool.runtime === "host" && tool.needsPage === false));
@@ -84,10 +84,10 @@ assert.ok(manifest.tools.every(tool => tool.includeTrace === false));
 assert.equal(loadedSkill.resources.filter(resource => resource.type === "script").length, contract.DOCUMENT_TOOL_CORE_NAMES.length);
 
 const catalog = await skills.buildSkillPromptSection();
-assert.match(catalog, /qingzhou-documents（文档处理）/);
+assert.match(catalog, /zuri-documents（文档处理）/);
 assert.match(catalog, /阅读长文档、转换文件格式或生成正式文档产物/);
 await assert.rejects(
-  () => skills.updateSkill("qingzhou-documents", { description: "x" }),
+  () => skills.updateSkill("zuri-documents", { description: "x" }),
   err => err?.code === "SKILL_READ_ONLY",
 );
 
@@ -99,7 +99,7 @@ for (const coreName of contract.DOCUMENT_TOOL_CORE_NAMES) {
   const schema = loadedSchemas.find(item => item.function?.name === pluginName)?.function;
   assert.ok(schema, `${pluginName} should be exposed after load_skill`);
   assert.equal(schema.name, pluginName);
-  assert.ok(schema.description.startsWith(contract.QINGZHOU_DOCUMENT_TOOL_SPECS[coreName].description));
+  assert.ok(schema.description.startsWith(contract.ZURI_DOCUMENT_TOOL_SPECS[coreName].description));
   assert.ok(Object.prototype.hasOwnProperty.call(schema.parameters.properties, "timeout"), `${pluginName} should receive the common timeout control`);
 }
 
@@ -166,7 +166,7 @@ for (const [coreName, input] of Object.entries(forwardingCases)) {
   assert.equal(calls[0].context.sessionId, loadedContext.sessionId);
   assert.equal(calls[0].context.runId, loadedContext.runId);
   assert.equal(result.coreName, coreName);
-  assert.equal(result._plugin.id, contract.QINGZHOU_DOCUMENTS_SKILL_ID);
+  assert.equal(result._plugin.id, contract.ZURI_DOCUMENTS_SKILL_ID);
   assert.equal(result._plugin.runtime, "host");
   assert.equal(Object.prototype.hasOwnProperty.call(result, "trace"), false, `${coreName} should not duplicate its result into host trace`);
 }
@@ -328,4 +328,4 @@ assert.match(artifactModelSource, /function toolCapabilityName[\s\S]*enrichSkill
 assert.doesNotMatch(rendererSource, /getDocumentToolCoreName/, "renderer should not know about document runtime aliases");
 assert.doesNotMatch(timelineSource, /getDocumentToolCoreName/, "timeline should not know about document runtime aliases");
 
-console.log("qingzhou documents skill tests passed");
+console.log("zuri documents skill tests passed");

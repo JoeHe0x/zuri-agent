@@ -39,24 +39,24 @@ test('compiled script bridge stays idempotent and preserves request identity and
   const result = await page.evaluate(async () => {
     const reply = await new Promise(resolve => {
       const listener = event => {
-        if (event.data?.source !== 'qz-run-script-tool-response') return;
+        if (event.data?.source !== 'zuri-run-script-tool-response') return;
         window.removeEventListener('message', listener); resolve(event.data);
       };
       window.addEventListener('message', listener);
-      window.postMessage({ source: 'qz-run-script-tool-call', id: 'call-1', toolName: 'read_dom', args: { limit: 5 }, sessionId: 'owned', runId: 'active', depth: 2 }, '*');
+      window.postMessage({ source: 'zuri-run-script-tool-call', id: 'call-1', toolName: 'read_dom', args: { limit: 5 }, sessionId: 'owned', runId: 'active', depth: 2 }, '*');
     });
     return { calls: globalThis.bridgeCalls, reply };
   });
   expect(result.calls).toEqual([{ type: 'run_script_tool_call', toolName: 'read_dom', args: { limit: 5 }, sessionId: 'owned', runId: 'active', depth: 2 }]);
-  expect(result.reply).toEqual({ source: 'qz-run-script-tool-response', id: 'call-1', response: { ok: true } });
+  expect(result.reply).toEqual({ source: 'zuri-run-script-tool-response', id: 'call-1', response: { ok: true } });
   await page.evaluate(() => { chrome.runtime.lastError = { message: 'extension reloaded' }; });
   const failed = await page.evaluate(() => new Promise(resolve => {
     const listener = event => {
-      if (event.data?.source !== 'qz-run-script-tool-response' || event.data.id !== 'call-2') return;
+      if (event.data?.source !== 'zuri-run-script-tool-response' || event.data.id !== 'call-2') return;
       window.removeEventListener('message', listener); resolve(event.data.response);
     };
     window.addEventListener('message', listener);
-    window.postMessage({ source: 'qz-run-script-tool-call', id: 'call-2', toolName: 'read_dom' }, '*');
+    window.postMessage({ source: 'zuri-run-script-tool-call', id: 'call-2', toolName: 'read_dom' }, '*');
   }));
   expect(failed).toEqual({ ok: false, error: 'extension reloaded' });
 });

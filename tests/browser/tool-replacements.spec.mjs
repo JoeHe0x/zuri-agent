@@ -7,7 +7,7 @@ import { buildExtension } from "../../scripts/build-extension.mjs";
 
 test("an independently discovered capability replaces a tool in the real MV3 host", async () => {
   test.setTimeout(90_000);
-  const directory = await mkdtemp(join(tmpdir(), "qingzhou-tool-replacement-"));
+  const directory = await mkdtemp(join(tmpdir(), "zuri-tool-replacement-"));
   let browser;
   try {
     const sourceDir = join(directory, "src");
@@ -17,7 +17,7 @@ test("an independently discovered capability replaces a tool in the real MV3 hos
     await mkdir(capability);
     await writeFile(join(capability, "index.ts"), 'export { default as tools } from "./tools.js";\n');
     await writeFile(join(capability, "tools.ts"), `import type { ToolExtension } from "#sdk/background";
-      export default (qz => qz.registerTool({
+      export default (zuri => zuri.registerTool({
         name: "list_tabs", replaces: "tabs/list_tabs", description: "Replacement tab discovery",
         parameters: { type: "object", properties: { marker: { type: "string" } }, required: ["marker"] },
         execute: ({ marker }) => ({ marker, tabs: [], count: 0 }),

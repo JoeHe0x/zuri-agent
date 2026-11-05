@@ -41,7 +41,7 @@ export async function runPageBatchCase({ page, createSession, deleteSession, run
             resolve(req.headers.referer);
           };
         });
-        const after = await page.evaluate(() => window.__qzLiveHarness.count());
+        const after = await page.evaluate(() => window.__zuriLiveHarness.count());
         const pending = runPrompt(page, sessionId,
           `用 open_tab 和 read_article 打开并读取这两个页面：${origin}/left-${trial} 和 ${origin}/right-${trial}。分别列出商品名称和校验码，每个商品一行。`, { timeoutMs: 120_000 });
         void pending.catch(() => {});
@@ -50,10 +50,10 @@ export async function runPageBatchCase({ page, createSession, deleteSession, run
           const url = await Promise.race([documentRequested, pending.then(() => {
             throw new Error('the real task must request a fixture document');
           })]);
-          await page.waitForFunction(({ sessionId, after, url }) => window.__qzLiveHarness.eventsSince(after).some(event =>
+          await page.waitForFunction(({ sessionId, after, url }) => window.__zuriLiveHarness.eventsSince(after).some(event =>
             event.sessionId === sessionId && event.type === 'tool_execution_start' && event.toolName === 'open_tab' && event.args?.url === url),
           { sessionId, after, url }, { timeout: 5000 });
-          const events = await page.evaluate(after => window.__qzLiveHarness.eventsSince(after), after);
+          const events = await page.evaluate(after => window.__zuriLiveHarness.eventsSince(after), after);
           liveStart = events.find(event => event.sessionId === sessionId && event.type === 'tool_execution_start' && event.args?.url === url);
           assert.ok(liveStart, 'tool start must reach the Side Panel while document parsing is blocked');
           assert.equal(events.some(event => event.type === 'tool_execution_end' && event.toolCallId === liveStart.toolCallId), false);
@@ -82,7 +82,7 @@ export async function runPageBatchCase({ page, createSession, deleteSession, run
         trials.push(record);
         recordEvidence({ trials });
         console.log(JSON.stringify({ trial, elapsedMs, hasBoundBatch, toolBatches: batches.length }));
-        if (process.env.QZ_PAGE_BATCH_EXPECT_BINDINGS !== '0') assert.equal(hasBoundBatch, true,
+        if (process.env.ZURI_PAGE_BATCH_EXPECT_BINDINGS !== '0') assert.equal(hasBoundBatch, true,
           'the system prompt and tool schemas should elicit open + referenced reads in one response');
       } finally { await deleteSession(page, sessionId); }
     }

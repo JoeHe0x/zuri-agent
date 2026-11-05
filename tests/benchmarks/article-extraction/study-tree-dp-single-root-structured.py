@@ -28,7 +28,7 @@ from sklearn.model_selection import GroupKFold
 
 HERE = Path(__file__).resolve().parent
 ROOT_QUALITY_PATH = HERE / "study-tree-dp-root-quality.py"
-SPEC = importlib.util.spec_from_file_location("qingzhou_single_root_quality", ROOT_QUALITY_PATH)
+SPEC = importlib.util.spec_from_file_location("zuri_single_root_quality", ROOT_QUALITY_PATH)
 if SPEC is None or SPEC.loader is None:
     raise RuntimeError(f"cannot load {ROOT_QUALITY_PATH}")
 ROOT_QUALITY = importlib.util.module_from_spec(SPEC)
@@ -872,7 +872,7 @@ def main() -> int:
         wcxb_report = {"summary": ROOT_QUALITY.summarize(rows), "rows": rows}
 
     report = {
-        "schema": "qingzhou.tree-dp-single-root-structured-study.v1",
+        "schema": "zuri.tree-dp-single-root-structured-study.v1",
         "protocol": {
             "model": "single-root-or-empty-latent-structured-tree-dp",
             "runtimeReadabilityCandidate": False,

@@ -120,7 +120,7 @@
     ]
   },
   "steps": [
-    { "action": "eval", "expression": "() => { window.__QINGZHOU_TOOL_TIMELINE_TRACE = true; window.__QINGZHOU_TOOL_TIMELINE_TRACE_BUFFER = []; }", "label": "开启 timeline trace" },
+    { "action": "eval", "expression": "() => { window.__ZURI_TOOL_TIMELINE_TRACE = true; window.__ZURI_TOOL_TIMELINE_TRACE_BUFFER = []; }", "label": "开启 timeline trace" },
     { "action": "expandGroup", "group": 0, "label": "展开二级工具聚合" },
     { "action": "assert", "expect": "selectorCount", "selector": ".tool-family-trace", "equals": 1 },
     { "action": "click", "selector": ".tool-family-row[data-tool-family-id=\"collect\"]", "label": "切到采集信息 family" },
@@ -136,7 +136,7 @@
     { "action": "assert", "expect": "navText", "equals": "9/11" },
     { "action": "assert", "expect": "activeText", "selector": ".tool-family-batch.active", "includes": "×11" },
     { "action": "assert", "expect": "selectorText", "selector": ".tool-timeline-slot", "includes": "第 9 条正文证据" },
-    { "action": "assert", "expect": "js", "expression": "() => (window.__QINGZHOU_TOOL_TIMELINE_TRACE_BUFFER || []).some(item => item.stage === 'nav' && item.mode === 'family' && item.current === 11 && item.next === 10)", "message": "family pager navigation should be traced with raw indexes" },
+    { "action": "assert", "expect": "js", "expression": "() => (window.__ZURI_TOOL_TIMELINE_TRACE_BUFFER || []).some(item => item.stage === 'nav' && item.mode === 'family' && item.current === 11 && item.next === 10)", "message": "family pager navigation should be traced with raw indexes" },
     { "action": "assert", "expect": "noHorizontalOverflow" }
   ]
 }

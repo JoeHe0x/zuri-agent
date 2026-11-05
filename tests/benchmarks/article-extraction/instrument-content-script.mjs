@@ -1,7 +1,7 @@
-const CONTENT_READY_ANCHOR = "host.__QZ_CONTENT_READY = true;";
+const CONTENT_READY_ANCHOR = "host.__ZURI_CONTENT_READY = true;";
 
-const BENCHMARK_SERIALIZER_BRIDGE = `host.__QZ_CONTENT_READY = true;
-  globalThis.__qingzhouContentBenchmark = Object.freeze({
+const BENCHMARK_SERIALIZER_BRIDGE = `host.__ZURI_CONTENT_READY = true;
+  globalThis.__zuriContentBenchmark = Object.freeze({
     serializeArticleContent(article) {
       return serializeArticleContent(article);
     },

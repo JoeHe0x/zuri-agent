@@ -12,17 +12,17 @@ const SIDEBAR_URL = `moz-extension://${FIREFOX_EXTENSION_UUID}/sidepanel/sidepan
 
 /** Launch stock Firefox, temporarily install the Firefox package, and leave the sidebar closed. */
 export async function openFirefoxSidebar({
-  extensionDir = process.env.QINGZHOU_FIREFOX_EXTENSION_DIR,
-  profile = mkdtempSync(join(tmpdir(), "qz-firefox-playwright-")),
+  extensionDir = process.env.ZURI_FIREFOX_EXTENSION_DIR,
+  profile = mkdtempSync(join(tmpdir(), "zuri-firefox-playwright-")),
   firefoxUserPrefs = {},
 } = {}) {
-  if (!extensionDir) throw new Error("Set QINGZHOU_FIREFOX_EXTENSION_DIR to dist/extension-firefox. npm run verify:firefox builds it.");
+  if (!extensionDir) throw new Error("Set ZURI_FIREFOX_EXTENSION_DIR to dist/extension-firefox. npm run verify:firefox builds it.");
   const manifest = assertFirefoxPackage(JSON.parse(await readFile(join(extensionDir, "manifest.json"), "utf8")), extensionDir);
   const browser = resolveFirefoxExecutable();
   const context = await firefox.launchPersistentContext(profile, {
     channel: "moz-firefox",
     executablePath: browser.executablePath,
-    headless: process.env.QINGZHOU_FIREFOX_HEADED !== "1",
+    headless: process.env.ZURI_FIREFOX_HEADED !== "1",
     args: ["-remote-allow-system-access"],
     viewport: null,
     firefoxUserPrefs: {
@@ -116,7 +116,7 @@ async function evaluateChrome(session, expression) {
 let frameSerial = 0;
 
 async function evaluateExtension(session, target, expression) {
-  const message = `qz-firefox-test-${++frameSerial}`;
+  const message = `zuri-firefox-test-${++frameSerial}`;
   const frameSource = `(async () => {
     try {
       const view = Cu.waiveXrays(content);

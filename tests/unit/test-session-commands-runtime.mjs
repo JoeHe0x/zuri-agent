@@ -1669,19 +1669,19 @@ async function stopBeforeStartDropsUnstartedPrompt() {
   });
   const sessionId = "pending-stop";
   await fixture.repository.createMetadata({ id: sessionId, title: "Pending stop" });
-  fixture.agent(sessionId).acceptUnstartedPrompt("QZ_PENDING_SHOULD_NOT_RUN", "pending-user");
+  fixture.agent(sessionId).acceptUnstartedPrompt("ZURI_PENDING_SHOULD_NOT_RUN", "pending-user");
   fixture.setRuntime(sessionId, { status: "pending", running: true, pendingStart: true, runId: null });
   transcript.recordEvent(sessionId, {
     type: "message_start",
     clientMessageId: "pending-user",
-    message: { role: "user", content: "QZ_PENDING_SHOULD_NOT_RUN", clientMessageId: "pending-user", _origin: "user" },
+    message: { role: "user", content: "ZURI_PENDING_SHOULD_NOT_RUN", clientMessageId: "pending-user", _origin: "user" },
   });
   const stopped = await fixture.commands.stopSessionRuntime(sessionId, { source: "live_pending", cascade: false });
   assert.equal(stopped.status, "aborted");
-  assert.equal(JSON.stringify(await fixture.repository.readActiveConversation(sessionId)).includes("QZ_PENDING_SHOULD_NOT_RUN"), false);
-  assert.equal(JSON.stringify(transcript.snapshot(sessionId)).includes("QZ_PENDING_SHOULD_NOT_RUN"), false);
+  assert.equal(JSON.stringify(await fixture.repository.readActiveConversation(sessionId)).includes("ZURI_PENDING_SHOULD_NOT_RUN"), false);
+  assert.equal(JSON.stringify(transcript.snapshot(sessionId)).includes("ZURI_PENDING_SHOULD_NOT_RUN"), false);
   const record = await fixture.repository.readRecord(sessionId);
-  assert.equal(JSON.stringify(record?.transcript || []).includes("QZ_PENDING_SHOULD_NOT_RUN"), false);
+  assert.equal(JSON.stringify(record?.transcript || []).includes("ZURI_PENDING_SHOULD_NOT_RUN"), false);
 }
 
 async function stopCascadeAndDeleteFlow() {

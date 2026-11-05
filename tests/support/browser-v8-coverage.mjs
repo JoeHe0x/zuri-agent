@@ -11,7 +11,7 @@ const localScriptCache = new Map();
 export function createBrowserV8CoverageCollector({
   coverageDir = process.env.NODE_V8_COVERAGE || "",
   workerIndex = 0,
-  extensionDir = process.env.QINGZHOU_TEST_EXTENSION_DIR || resolve(PROJECT_ROOT, "dist/extension"),
+  extensionDir = process.env.ZURI_TEST_EXTENSION_DIR || resolve(PROJECT_ROOT, "dist/extension"),
 } = {}) {
   const scripts = new Map();
   const enabled = Boolean(coverageDir);

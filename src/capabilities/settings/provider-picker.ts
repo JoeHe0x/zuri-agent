@@ -83,7 +83,7 @@ export function createProviderPicker({ root, signal }: { root: Document; signal?
         item.dataset.providerId = provider.id;
         item.setAttribute("role", "option");
         item.setAttribute("aria-selected", String(provider.id === select.value));
-        item.className = "qz-menu-item provider-picker-item";
+        item.className = "zuri-menu-item provider-picker-item";
         const label = root.createElement("span");
         label.dir = "auto";
         label.textContent = provider.label;

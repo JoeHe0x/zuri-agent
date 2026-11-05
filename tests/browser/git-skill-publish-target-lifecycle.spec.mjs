@@ -33,7 +33,7 @@ test.describe("Git skill publish target lifecycle", () => {
         content: "# Publish lifecycle smoke",
         scope: "global",
         status: "active",
-        format: "qingzhou.skill",
+        format: "zuri.skill",
         schemaVersion: 2,
         resources: [],
         updatedAt: "2026-07-14 10:00:00",

@@ -13,12 +13,12 @@ export interface LanguagePack {
 
 /** Chrome message names are case-insensitive; escaping uppercase and separators keeps IDs injective. */
 export function chromeMessageId(qualifiedKey: string): string {
-  return `qz_${qualifiedKey.replace(/[^a-z0-9]/g, character => `_${character.charCodeAt(0).toString(16).padStart(4, "0")}`)}`;
+  return `zuri_${qualifiedKey.replace(/[^a-z0-9]/g, character => `_${character.charCodeAt(0).toString(16).padStart(4, "0")}`)}`;
 }
 
 export interface ChromeMessage {
   readonly message: string;
-  readonly placeholders?: { readonly qz_literal: { readonly content: string } };
+  readonly placeholders?: { readonly zuri_literal: { readonly content: string } };
 }
 
 /** Chrome resolves named placeholders at install, then dollar runs when getMessage is called. */
@@ -27,7 +27,7 @@ export function encodeChromeMessage(text: string, { substitutions = true }: { su
   // A single literal placeholder prevents source text such as $HOME$ from becoming a variable.
   // getMessage removes one dollar per run; manifest substitution does not perform that second pass.
   const content = substitutions ? text.replace(/\$+/g, dollars => `$${dollars}`) : text;
-  return { message: "$QZ_LITERAL$", placeholders: { qz_literal: { content } } };
+  return { message: "$ZURI_LITERAL$", placeholders: { zuri_literal: { content } } };
 }
 
 /** Read our generated runtime messages as plain text, without a general Chrome-template interpreter. */
@@ -35,8 +35,8 @@ export function decodeChromeMessage(value: unknown): string | undefined {
   if (!value || typeof value !== "object" || Array.isArray(value)) return undefined;
   const entry = value as Partial<ChromeMessage>;
   if (typeof entry.message !== "string") return undefined;
-  if (entry.message !== "$QZ_LITERAL$") return entry.placeholders === undefined ? entry.message : undefined;
-  const content = entry.placeholders?.qz_literal?.content;
+  if (entry.message !== "$ZURI_LITERAL$") return entry.placeholders === undefined ? entry.message : undefined;
+  const content = entry.placeholders?.zuri_literal?.content;
   return typeof content === "string" ? content.replace(/\${2,}/g, dollars => dollars.slice(1)) : undefined;
 }
 
@@ -46,7 +46,7 @@ export interface TranslationCatalog {
   readonly historicalLabels?: readonly string[];
 }
 
-export const HISTORICAL_LABELS_MESSAGE_ID = "qz_historical_labels";
+export const HISTORICAL_LABELS_MESSAGE_ID = "zuri_historical_labels";
 
 function placeholders(text: string): string {
   return [...new Set([...text.matchAll(/\{([a-zA-Z][\w]*)\}/g)].map(match => match[1]))].sort().join(",");

@@ -33,9 +33,9 @@ interface PickerState {
 }
 type ContentMessageListener = Parameters<typeof chrome.runtime.onMessage.addListener>[0];
 interface ContentGlobals {
-  __QZ_CONTENT_VERSION?: string; __QZ_CONTENT_READY?: boolean; QingzhouArticleExtractor?: ArticleExtractor;
-  __QZ_CONTENT_MESSAGE_LISTENER?: ContentMessageListener;
-  __qzInvoke?: (node: Node | null, payload: ContentRequest) => Promise<unknown>;
+  __ZURI_CONTENT_VERSION?: string; __ZURI_CONTENT_READY?: boolean; ZuriArticleExtractor?: ArticleExtractor;
+  __ZURI_CONTENT_MESSAGE_LISTENER?: ContentMessageListener;
+  __zuriInvoke?: (node: Node | null, payload: ContentRequest) => Promise<unknown>;
 }
 const host = globalThis as typeof globalThis & ContentGlobals;
 const errorMessage = (error: unknown) => error instanceof Error ? error.message : String(error);
@@ -43,7 +43,7 @@ const errorMessage = (error: unknown) => error instanceof Error ? error.message 
 // Background validates Session/tab ownership before dispatch. Replies contain data, never DOM nodes.
 
 (() => {
-  const QZ_CONTENT_VERSION = "2026-10-28-shadow-find-target";
+  const ZURI_CONTENT_VERSION = "2026-10-28-shadow-find-target";
   const findElementRefs = new Map<string, WeakRef<Element>>();
   const findElementRefScope = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
   let findElementRefSequence = 0;
@@ -59,9 +59,9 @@ const errorMessage = (error: unknown) => error instanceof Error ? error.message 
   let elementPickerGeneration = 0;
   let elementPickerStarting = false;
   // Skip duplicate injection of this version; a new version refreshes styles and handlers.
-  if (host.__QZ_CONTENT_VERSION === QZ_CONTENT_VERSION && typeof host.__qzInvoke === "function") return;
-  host.__QZ_CONTENT_READY = true;
-  host.__QZ_CONTENT_VERSION = QZ_CONTENT_VERSION;
+  if (host.__ZURI_CONTENT_VERSION === ZURI_CONTENT_VERSION && typeof host.__zuriInvoke === "function") return;
+  host.__ZURI_CONTENT_READY = true;
+  host.__ZURI_CONTENT_VERSION = ZURI_CONTENT_VERSION;
 
   // Content actions share one reply channel; asynchronous handlers must keep it open.
 
@@ -70,7 +70,7 @@ const errorMessage = (error: unknown) => error instanceof Error ? error.message 
     const handler = handlers[msg.action];
     if (!handler) {
       if (msg.action === "ping") {
-        sendResponse({ ok: true, contentVersion: QZ_CONTENT_VERSION, documentReady: documentReadiness() });
+        sendResponse({ ok: true, contentVersion: ZURI_CONTENT_VERSION, documentReady: documentReadiness() });
         return;
       }
       sendResponse(toolError("UNKNOWN_ACTION", `Unknown content action: ${msg.action}`, { action: msg.action }));
@@ -88,9 +88,9 @@ const errorMessage = (error: unknown) => error instanceof Error ? error.message 
     return true; // Keep sendResponse available for the asynchronous handler.
   };
   // Reinitialization replaces the old message owner before accepting new actions.
-  if (host.__QZ_CONTENT_MESSAGE_LISTENER) chrome.runtime.onMessage.removeListener(host.__QZ_CONTENT_MESSAGE_LISTENER);
+  if (host.__ZURI_CONTENT_MESSAGE_LISTENER) chrome.runtime.onMessage.removeListener(host.__ZURI_CONTENT_MESSAGE_LISTENER);
   chrome.runtime.onMessage.addListener(onMessage);
-  host.__QZ_CONTENT_MESSAGE_LISTENER = onMessage;
+  host.__ZURI_CONTENT_MESSAGE_LISTENER = onMessage;
 
   // One event-only wait per document, even when a caller stops waiting.
   let documentReady: Promise<{ ok: true }> | undefined;
@@ -129,7 +129,7 @@ const errorMessage = (error: unknown) => error instanceof Error ? error.message 
   }
 
   function extractReadableArticle({ complete = false } = {}): Article | null {
-    const extractor = host.QingzhouArticleExtractor;
+    const extractor = host.ZuriArticleExtractor;
     let extracted: ExtractedArticle | null = null;
     try {
       extracted = extractor?.extract?.(document, { complete }) || null;
@@ -586,13 +586,13 @@ const errorMessage = (error: unknown) => error instanceof Error ? error.message 
         linkStyle: "inlined",
       });
       service.use(gfm);
-      service.addRule("qingzhouDecorativeMediaEmphasis", {
+      service.addRule("zuriDecorativeMediaEmphasis", {
         filter: node => ["EM", "I"].includes(node.nodeName)
           && !cleanArticleText(node.textContent || "")
           && Boolean(node.querySelector("img,picture")),
         replacement: content => content,
       });
-      service.addRule("qingzhouComplexTable", {
+      service.addRule("zuriComplexTable", {
         filter: node => node.nodeName === "TABLE" && !isSimpleGfmTable(node),
         replacement: (_content, node) => `\n\n${safeArticleTableHtml(node)}\n\n`,
       });
@@ -1255,7 +1255,7 @@ const errorMessage = (error: unknown) => error instanceof Error ? error.message 
 
     return new Promise((resolve) => {
       const host = document.createElement("div");
-      host.dataset.qingzhouElementPicker = "";
+      host.dataset.zuriElementPicker = "";
       host.style.setProperty("all", "initial", "important");
       host.style.setProperty("position", "fixed", "important");
       host.style.setProperty("inset", "0", "important");
@@ -1298,7 +1298,7 @@ const errorMessage = (error: unknown) => error instanceof Error ? error.message 
       });
 
       const cursorStyle = document.createElement("style");
-      cursorStyle.dataset.qingzhouElementPicker = "";
+      cursorStyle.dataset.zuriElementPicker = "";
       cursorStyle.textContent = "html, html * { cursor: crosshair !important; }";
       document.documentElement.append(cursorStyle, host);
       const enterAnimation = stage.animate(
@@ -1446,7 +1446,7 @@ const errorMessage = (error: unknown) => error instanceof Error ? error.message 
       node instanceof Element
       && node.ownerDocument === document
       && node.getRootNode() === document
-      && !node.hasAttribute("data-qingzhou-element-picker")
+      && !node.hasAttribute("data-zuri-element-picker")
     ));
     if (fromPath) return fromPath;
     const direct = event?.target instanceof Element ? event.target : null;
@@ -3052,7 +3052,7 @@ const errorMessage = (error: unknown) => error instanceof Error ? error.message 
       fillRoots.delete(oldest);
     }
   }
-  host.__qzInvoke = async (node, payload) => {
+  host.__zuriInvoke = async (node, payload) => {
     // Background consumes this isolated-world reference once to bind a backend
     // node UID. It never rematches a selector or exposes a DOM node in a reply.
     if (payload?.action === "resolveFindElement") {

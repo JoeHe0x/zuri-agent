@@ -259,7 +259,7 @@ test.describe("chat composer IME stability", () => {
   test("keeps native IME commits stable at 125% scale with a busy composer dock", async ({ page }) => {
     await page.setViewportSize({ width: 430, height: 640 });
     await renderSettledTranscript(page, "ime_native_commit_stability");
-    await page.evaluate(() => window.qingzhouConversationBenchmark.configureVisualState({
+    await page.evaluate(() => window.zuriConversationBenchmark.configureVisualState({
       running: true,
       pendingFollowUps: [
         { clientMessageId: "ime-queued-1", text: "第一条排队消息" },
@@ -594,7 +594,7 @@ test.describe("chat composer IME stability", () => {
 
 async function renderSettledTranscript(page, sessionId) {
   await page.evaluate(async id => {
-    await window.qingzhouConversationBenchmark.runSnapshotRender({
+    await window.zuriConversationBenchmark.runSnapshotRender({
       sessionId: id,
       transcript: Array.from({ length: 12 }, (_, index) => ({
         type: "assistant",

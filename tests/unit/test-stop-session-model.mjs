@@ -372,13 +372,13 @@ assert.match(
 
 assert.match(
   scriptTools,
-  /const __qzRunId = \$\{JSON\.stringify\(runId \|\| ""\)\};/,
+  /const __zuriRunId = \$\{JSON\.stringify\(runId \|\| ""\)\};/,
   "CDP run_script bridge should capture the originating runId",
 );
 
 assert.match(
   scriptTools,
-  /runId:\s*__qzRunId/,
+  /runId:\s*__zuriRunId/,
   "CDP run_script bridge should forward runId to background tool calls",
 );
 

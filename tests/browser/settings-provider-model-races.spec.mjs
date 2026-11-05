@@ -22,7 +22,7 @@ function deferModelRequests() {
     const post = port.postMessage;
     port.postMessage = message => {
       if (["list_models", "match_model_capabilities"].includes(message.type)) {
-        window.__qzPostedMessages.push(structuredClone(message));
+        window.__zuriPostedMessages.push(structuredClone(message));
         return;
       }
       post(message);
@@ -35,7 +35,7 @@ test.use({ viewport: { width: 430, height: 900 } });
 test.beforeEach(async ({ page }) => {
   await page.addInitScript({ content: `(${installBenchmarkChromeStub.toString()})(${JSON.stringify({ config })}); (${deferModelRequests.toString()})();` });
   await page.goto("/extension/sidepanel/sidepanel.html", { waitUntil: "domcontentloaded" });
-  await page.waitForFunction(() => Boolean(window.qingzhouConversationBenchmark));
+  await page.waitForFunction(() => Boolean(window.zuriConversationBenchmark));
   await page.locator("#btn-settings").click();
   await expect(page.locator("#cfg-provider")).toHaveValue("fixture-a");
 });
@@ -43,24 +43,24 @@ test.beforeEach(async ({ page }) => {
 async function request(page, type, { provider, model, after = "" } = {}) {
   const criteria = { type, provider, model, after };
   await page.waitForFunction(({ type, provider, model, after }) => {
-    const messages = window.__qzPostedMessages;
+    const messages = window.__zuriPostedMessages;
     const offset = after ? messages.findIndex(message => message.requestId === after) + 1 : 0;
     return messages.slice(offset).some(message => message.type === type && (!provider || message.provider === provider) && (model === undefined || message.model === model));
   }, criteria);
   return page.evaluate(({ type, provider, model, after }) => {
-    const messages = window.__qzPostedMessages;
+    const messages = window.__zuriPostedMessages;
     const offset = after ? messages.findIndex(message => message.requestId === after) + 1 : 0;
     return messages.slice(offset).filter(message => message.type === type && (!provider || message.provider === provider) && (model === undefined || message.model === model)).at(-1);
   }, criteria);
 }
 
 async function models(page, pending, values, error = false) {
-  await page.evaluate(({ pending, values, error }) => window.__qzEmitPortMessage(error
+  await page.evaluate(({ pending, values, error }) => window.__zuriEmitPortMessage(error
     ? { type: "error", requestId: pending.requestId, code: "MODEL_LIST_UNAVAILABLE", message: "stale directory failure" }
     : { type: "models", requestId: pending.requestId, provider: pending.provider, models: values }), { pending, values, error });
 }
 async function capabilities(page, pending, match) {
-  await page.evaluate(({ pending, match }) => window.__qzEmitPortMessage({ type: "model_capabilities", requestId: pending.requestId, match }), { pending, match });
+  await page.evaluate(({ pending, match }) => window.__zuriEmitPortMessage({ type: "model_capabilities", requestId: pending.requestId, match }), { pending, match });
 }
 async function expectModels(page, values) {
   const menu = page.locator("#cfg-model-options");
@@ -199,7 +199,7 @@ test("provider cache is reused for unchanged credentials and isolated after a ke
   await models(page, second, betaModels);
   await chooseProvider(page, "fixture-a");
   await expectModels(page, alphaModels);
-  expect(await page.evaluate(() => window.__qzPostedMessages.filter(message => message.type === "list_models" && message.provider === "fixture-a").length)).toBe(1);
+  expect(await page.evaluate(() => window.__zuriPostedMessages.filter(message => message.type === "list_models" && message.provider === "fixture-a").length)).toBe(1);
   await page.locator("#cfg-apikey").fill("fixture-key-new");
   await page.locator("#cfg-apikey").press("Tab");
   const changed = await request(page, "list_models", { provider: "fixture-a", after: second.requestId });
@@ -252,7 +252,7 @@ test("committing an edited key makes one replacement request without a second de
   await page.locator("#cfg-apikey").press("Tab");
   const pending = await request(page, "list_models", { provider: "fixture-a", after: initial.requestId });
   await page.clock.runFor(700);
-  const replacements = await page.evaluate(() => window.__qzPostedMessages.filter(message => message.type === "list_models" && message.apiKey === "fixture-key-new"));
+  const replacements = await page.evaluate(() => window.__zuriPostedMessages.filter(message => message.type === "list_models" && message.apiKey === "fixture-key-new"));
   expect(replacements.map(message => message.requestId)).toEqual([pending.requestId]);
   await models(page, pending, betaModels);
   await expectModels(page, betaModels);
@@ -286,9 +286,9 @@ for (const close of ["escape", "button"]) test(`closing settings by ${close} can
   if (close === "escape") await page.locator("#cfg-apikey").press("Escape");
   else await page.locator("#btn-close-settings").click();
   await expect(page.locator("#settings-panel")).toBeHidden();
-  const closedRequests = await page.evaluate(() => window.__qzPostedMessages.filter(message => message.type === "list_models"));
+  const closedRequests = await page.evaluate(() => window.__zuriPostedMessages.filter(message => message.type === "list_models"));
   await page.clock.runFor(700);
-  expect(await page.evaluate(() => window.__qzPostedMessages.filter(message => message.type === "list_models"))).toEqual(closedRequests);
+  expect(await page.evaluate(() => window.__zuriPostedMessages.filter(message => message.type === "list_models"))).toEqual(closedRequests);
   for (const pending of closedRequests.filter(message => message.requestId !== first.requestId)) {
     await models(page, pending, [{ id: "late-model", label: "manual-alias" }]);
   }

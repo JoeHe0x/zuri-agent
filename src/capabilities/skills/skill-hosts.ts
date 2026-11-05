@@ -3,7 +3,7 @@ import { ToolExecutionError } from "#sdk/background/tools";
 import { listSkillRendererDefinitions } from "#sdk/shared/skills";
 import { SKILL_AUTHOR_ACTIONS, skillResourceEditArgs, BUILTIN_SKILL_WORKBENCH_NAME } from "./workbench.js";
 
-const register: SkillHostExtension = qz => {
+const register: SkillHostExtension = zuri => {
   const handlers = {
     ...Object.fromEntries(Object.keys(SKILL_AUTHOR_ACTIONS).map(name => [name, executeSkillAuthorHostTool])),
     load_available_renderers: executeSkillAuthorLoadAvailableRenderers,
@@ -12,7 +12,7 @@ const register: SkillHostExtension = qz => {
     install_skill_to_git: executeSkillAuthorDistributionHostTool,
   };
   for (const [toolName, execute] of Object.entries(handlers)) {
-    qz.registerSkillHost({ skillName: BUILTIN_SKILL_WORKBENCH_NAME, manifestId: "qingzhou-skill-author", toolName, execute });
+    zuri.registerSkillHost({ skillName: BUILTIN_SKILL_WORKBENCH_NAME, manifestId: "zuri-skill-author", toolName, execute });
   }
 };
 export default register;

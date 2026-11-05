@@ -49,7 +49,7 @@ import { createSerialQueue } from "../internal/serial-queue.js";
 export { AUTOMATION_SCHEDULER_ALARM };
 const AUTOMATION_SCHEDULER_PERIOD_MINUTES = 1;
 const AUTOMATION_SCHEDULER_GRACE_MS = AUTOMATION_SCHEDULER_PERIOD_MINUTES * 60_000;
-const AUTOMATION_NOTIFICATION_PREFIX = "qz_auto";
+const AUTOMATION_NOTIFICATION_PREFIX = "zuri_auto";
 
 export function createAutomationRuntime({
   repository,
@@ -72,13 +72,13 @@ export function createAutomationRuntime({
     await ready();
     const existing = await alarms.get?.(AUTOMATION_SCHEDULER_ALARM).catch(() => null);
     if (!existing) await createSchedulerAlarm();
-    queueScheduler("boot").catch((error) => logger?.warn?.("[轻舟] automation scheduler boot failed:", error));
+    queueScheduler("boot").catch((error) => logger?.warn?.("[Zuri] automation scheduler boot failed:", error));
     return true;
   }
 
   function handleAlarm(alarm: { name?: string }) {
     if (alarm?.name !== AUTOMATION_SCHEDULER_ALARM) return false;
-    queueScheduler("alarm").catch((error) => logger?.warn?.("[轻舟] automation scheduler tick failed:", error));
+    queueScheduler("alarm").catch((error) => logger?.warn?.("[Zuri] automation scheduler tick failed:", error));
     return true;
   }
 
@@ -206,7 +206,7 @@ export function createAutomationRuntime({
 
     for (const sessionId of deletion.sessionIds) {
       await sessions.remove(sessionId, { source: "automation_delete" }).catch((error) => {
-        logger?.warn?.("[轻舟] automation session cleanup failed:", error);
+        logger?.warn?.("[Zuri] automation session cleanup failed:", error);
       });
     }
     return deletion.result;
@@ -249,7 +249,7 @@ export function createAutomationRuntime({
       const records = await sessions.listRecords();
       return records && typeof records === "object" && !Array.isArray(records) ? records : {};
     } catch (error) {
-      logger?.debug?.("[轻舟] automation run message summaries unavailable:", errorMessage(error));
+      logger?.debug?.("[Zuri] automation run message summaries unavailable:", errorMessage(error));
       return {};
     }
   }
@@ -300,7 +300,7 @@ export function createAutomationRuntime({
       const persistent = { ...base, persistAcrossSessions: true };
       await alarms.create(AUTOMATION_SCHEDULER_ALARM, persistent);
     } catch (error) {
-      logger?.debug?.("[轻舟] automation alarm persistence flag unavailable:", errorMessage(error));
+      logger?.debug?.("[Zuri] automation alarm persistence flag unavailable:", errorMessage(error));
       await alarms.create(AUTOMATION_SCHEDULER_ALARM, base);
     }
   }
@@ -415,7 +415,7 @@ export function createAutomationRuntime({
       if (signal?.aborted && createdSessionId) {
         // Session deletion can reconcile Automation state through this same operation queue.
         void sessions.remove(createdSessionId, { source: "automation_start_cancelled" }).catch(cleanupError => {
-          logger?.warn?.("[轻舟] cancelled automation session cleanup failed:", cleanupError);
+          logger?.warn?.("[Zuri] cancelled automation session cleanup failed:", cleanupError);
         });
       }
       if (triggerType === "manual") throw error;
@@ -489,7 +489,7 @@ export function createAutomationRuntime({
     queueScheduler("run_end");
     if (automation) {
       void notifyRun(automation, updatedRun).catch(error => {
-        logger?.debug?.("[轻舟] automation notification failed:", errorMessage(error));
+        logger?.debug?.("[Zuri] automation notification failed:", errorMessage(error));
       });
     }
     return updatedRun;
@@ -638,7 +638,7 @@ function runStatusText(status: unknown) {
 }
 
 function parseNotificationSessionId(notificationId: unknown) {
-  const match = String(notificationId || "").match(/^qz_auto_([^_]+)_/);
+  const match = String(notificationId || "").match(/^zuri_auto_([^_]+)_/);
   return match ? match[1] : "";
 }
 

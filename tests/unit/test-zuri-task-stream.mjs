@@ -411,12 +411,12 @@ test("text revisions produce replace events, including clearing text", async () 
 
 test("failure, cancellation and interruption return the real snapshot promptly", async () => {
   for (const status of ["error", "failed", "aborted", "cancelled", "interrupted"]) {
-    const end = snapshot(status, [], { runtime: { status, waitTitle: "Choose a destination", waitMessage: "Open the qz panel", waitId: "wait-1" } });
+    const end = snapshot(status, [], { runtime: { status, waitTitle: "Choose a destination", waitMessage: "Open the zuri panel", waitId: "wait-1" } });
     const { result, calls, updates } = await sequence([snapshot("pending"), end]);
     assert.equal(calls, 2);
     assert.equal(result, end);
     assert.equal(updates.at(-1).status, status);
-    assert.equal(updates.at(-1).waitMessage, "Open the qz panel");
+    assert.equal(updates.at(-1).waitMessage, "Open the zuri panel");
   }
 });
 
@@ -611,7 +611,7 @@ test("form and native permission waits stay active, emit each input once and res
 });
 
 test("watching an existing pause also stays alive until the user resumes", async () => {
-  const paused = snapshot("paused", [], { runtime: { waitId: "manual", waitMessage: "Resume in qz" } });
+  const paused = snapshot("paused", [], { runtime: { waitId: "manual", waitMessage: "Resume in zuri" } });
   const done = snapshot("completed");
   const { result, updates } = await sequence([paused, paused, snapshot("running"), done], { allowIdle: true });
   assert.equal(result, done);

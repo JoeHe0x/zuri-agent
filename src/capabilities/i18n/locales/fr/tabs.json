@@ -3,7 +3,7 @@
   "tabs.tab": "Onglet {tabId}",
   "tabs.current": "Actuel",
   "tabs.window": "Fenêtre {windowId}",
-  "tabs.qingzhouTask": "Tâche qz",
+  "tabs.zuriTask": "Tâche zuri",
   "tabs.organizedInto": "Regroupés dans « {name} »",
   "tabs.namedTabCount": "Onglets : {count} · {name}",
   "tabs.groupedTabs": "Onglets regroupés : {count}",

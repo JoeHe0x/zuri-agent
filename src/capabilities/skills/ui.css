@@ -6,8 +6,8 @@
 }
 
 .skills-import-menu {
-  --qz-menu-padding: 4px;
-  --qz-popover-shadow: var(--shadow-md);
+  --zuri-menu-padding: 4px;
+  --zuri-popover-shadow: var(--shadow-md);
   top: calc(100% + 5px);
   inset-inline-end: 0;
   z-index: 20;
@@ -64,13 +64,13 @@
   gap: 7px;
 }
 
-.git-skill-source-bind-row .qz-field {
+.git-skill-source-bind-row .zuri-field {
   min-width: 0;
   font-family: var(--font-mono);
   font-size: 11px;
 }
 
-.git-skill-source-bind-row .qz-btn {
+.git-skill-source-bind-row .zuri-btn {
   min-width: 50px;
 }
 
@@ -202,8 +202,8 @@
 }
 
 .git-skill-source-action {
-  --qz-control-size: 26px;
-  --qz-control-icon-size: 15px;
+  --zuri-control-size: 26px;
+  --zuri-control-icon-size: 15px;
 }
 
 .git-skill-source-apply {
@@ -684,10 +684,10 @@
 }
 
 .skill-editor-save-btn {
-  --qz-control-height: 30px;
-  --qz-control-gap: 5px;
-  --qz-control-font-size: 12px;
-  --qz-control-font-weight: 600;
+  --zuri-control-height: 30px;
+  --zuri-control-gap: 5px;
+  --zuri-control-font-size: 12px;
+  --zuri-control-font-weight: 600;
   flex: none;
 }
 
@@ -817,7 +817,7 @@
 }
 
 .skill-mcp-delete-btn {
-  --qz-control-size: 28px;
+  --zuri-control-size: 28px;
 }
 
 .skill-resource-edit-item {
@@ -847,7 +847,7 @@
 }
 
 .skill-resource-delete-btn {
-  --qz-control-size: 28px;
+  --zuri-control-size: 28px;
 }
 
 .skill-resource-edit-content,
@@ -980,7 +980,7 @@
 }
 
 .skill-actions-menu {
-  --qz-menu-padding: 4px;
+  --zuri-menu-padding: 4px;
   z-index: 24;
   top: calc(100% + 6px);
   inset-inline-end: 0;
@@ -1056,9 +1056,9 @@
 }
 
 .skill-git-publish-backdrop {
-  --qz-control-bg: var(--modal-backdrop);
-  --qz-control-bg-hover: var(--modal-backdrop);
-  --qz-control-bg-pressed: var(--modal-backdrop);
+  --zuri-control-bg: var(--modal-backdrop);
+  --zuri-control-bg-hover: var(--modal-backdrop);
+  --zuri-control-bg-pressed: var(--modal-backdrop);
   inset: 0;
   appearance: none;
   padding: 0;
@@ -1160,7 +1160,7 @@
   font-weight: 550;
 }
 
-.skill-git-publish-message .qz-field {
+.skill-git-publish-message .zuri-field {
   width: 100%;
 }
 
@@ -1834,12 +1834,12 @@
 .skill-mcp-edit-headers {
   min-height: 34px;
   padding: 8px 10px;
-  --qz-field-font-size: 12px;
+  --zuri-field-font-size: 12px;
 }
 
 .skill-mcp-edit-headers {
   min-height: 92px;
-  --qz-field-font-size: 11px;
+  --zuri-field-font-size: 11px;
   resize: vertical;
   line-height: 1.45;
 }
@@ -1852,7 +1852,7 @@
   padding: 14px 16px;
 }
 
-.skill-mcp-test-row .qz-btn {
+.skill-mcp-test-row .zuri-btn {
   min-width: 84px;
   height: 34px;
   padding: 0 12px;
@@ -1983,7 +1983,7 @@
     padding-right: 12px;
   }
 
-  .skill-mcp-test-row .qz-btn {
+  .skill-mcp-test-row .zuri-btn {
     justify-self: start;
   }
 }

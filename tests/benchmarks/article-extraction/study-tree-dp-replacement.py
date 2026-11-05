@@ -3,7 +3,7 @@
 
 This is deliberately different from a candidate selector.  ``empty`` and every
 materializable content forest live in the same dynamic program.  The model
-keeps Qingzhou's shipped 16-D score as an offset, absorbs two Readability-derived
+keeps Zuri's shipped 16-D score as an offset, absorbs two Readability-derived
 path signals, gives at most one root the Readability primary-candidate prior,
 and learns a once-per-page non-empty energy with a page-balanced structured
 hinge loss.  Inference remains O(number of DOM elements).
@@ -29,7 +29,7 @@ from sklearn.model_selection import GroupKFold
 HERE = Path(__file__).resolve().parent
 READABILITY_STUDY_PATH = HERE / "study-tree-dp-readability.py"
 SPEC = importlib.util.spec_from_file_location(
-    "qingzhou_tree_dp_readability_study",
+    "zuri_tree_dp_readability_study",
     READABILITY_STUDY_PATH,
 )
 if SPEC is None or SPEC.loader is None:
@@ -677,7 +677,7 @@ def main() -> int:
         for item in validation_pages
     ]
     report = {
-        "schema": "qingzhou.tree-dp-full-replacement-study.v1",
+        "schema": "zuri.tree-dp-full-replacement-study.v1",
         "protocol": {
             "model": "single-tree-dp-with-internal-empty-state",
             "runtimeReadabilityCandidate": False,
@@ -739,7 +739,7 @@ def main() -> int:
 
     if args.masks_output:
         masks = {
-            "schema": "qingzhou.tree-dp-full-replacement-oof-masks.v1",
+            "schema": "zuri.tree-dp-full-replacement-oof-masks.v1",
             "protocol": report["protocol"],
             "pages": masks_for_pages(
                 zh_pages,
@@ -757,7 +757,7 @@ def main() -> int:
         beta_map = {item.page.id: final_beta for item in validation_pages}
         model_map = {item.page.id: final_model for item in validation_pages}
         masks = {
-            "schema": "qingzhou.tree-dp-full-replacement-validation-masks.v1",
+            "schema": "zuri.tree-dp-full-replacement-validation-masks.v1",
             "protocol": report["protocol"],
             "pages": masks_for_pages(
                 validation_pages,

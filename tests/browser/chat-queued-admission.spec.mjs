@@ -7,13 +7,13 @@ for (const colorScheme of ['light', 'dark']) {
     test.beforeEach(async ({ page }) => {
       await page.addInitScript({ content: `(${installBenchmarkChromeStub})({}); (${installAdmissionGate})();` });
       await page.goto('/extension/sidepanel/sidepanel.html', { waitUntil: 'domcontentloaded' });
-      await page.waitForFunction(() => Boolean(window.qingzhouConversationBenchmark));
+      await page.waitForFunction(() => Boolean(window.zuriConversationBenchmark));
     });
 
     for (const kind of ['image', 'document', 'mixed', 'text']) {
       test(`${kind} waits in the queue without ever creating a temporary transcript bubble`, async ({ page }) => {
         await seedDraft(page, kind);
-        await page.evaluate(() => window.qingzhouConversationBenchmark.dispatchBackgroundEvent({
+        await page.evaluate(() => window.zuriConversationBenchmark.dispatchBackgroundEvent({
           type: 'agent_start', sessionId: 'admission', runId: 'benchmark-visual-run', eventSeq: 1,
         }));
         await page.locator('#btn-send').click();
@@ -73,7 +73,7 @@ for (const colorScheme of ['light', 'dark']) {
       await seedDraft(page, 'mixed');
       await page.locator('#btn-send').click();
       await page.waitForFunction(() => window.__admission.requests.length === 1);
-      await page.evaluate(() => window.qingzhouConversationBenchmark.configureVisualState({ running: false }));
+      await page.evaluate(() => window.zuriConversationBenchmark.configureVisualState({ running: false }));
       await page.waitForTimeout(200);
       expect(await page.evaluate(() => window.__admission.probe.bubbleObservations)).toBe(0);
       await page.evaluate(() => window.__admission.accept('started'));
@@ -89,15 +89,15 @@ for (const colorScheme of ['light', 'dark']) {
       await page.locator('#btn-send').click();
       await page.waitForFunction(() => window.__admission.requests.length === 1);
       await page.evaluate(async () => {
-        await window.qingzhouConversationBenchmark.seedSession({ sessionId: 'other', title: 'other', transcript: [] });
-        await window.qingzhouConversationBenchmark.switchToSession('other', { source: 'benchmark' });
+        await window.zuriConversationBenchmark.seedSession({ sessionId: 'other', title: 'other', transcript: [] });
+        await window.zuriConversationBenchmark.switchToSession('other', { source: 'benchmark' });
       });
       await page.locator('#input').fill('保留另一个会话的草稿');
       await expect(page.locator('#queued-followups .queued-followup')).toHaveCount(0);
       await page.evaluate(() => window.__admission.accept('queued'));
       await expect(page.locator('#input')).toHaveValue('保留另一个会话的草稿');
       await expect(page.locator('#messages .msg-user')).toHaveCount(0);
-      await page.evaluate(() => window.qingzhouConversationBenchmark.switchToSession('admission', { source: 'benchmark' }));
+      await page.evaluate(() => window.zuriConversationBenchmark.switchToSession('admission', { source: 'benchmark' }));
       await expect(page.locator('#queued-followups [data-client-message-id="draft-queued"]')).toHaveCount(1);
       await expect(page.locator('#messages .msg-user')).toHaveCount(0);
     });
@@ -113,7 +113,7 @@ for (const colorScheme of ['light', 'dark']) {
       await expect(page.locator('#queued-followups .queued-followup')).toHaveCount(0);
       await page.evaluate(() => {
         const message = window.__admission.requests[0];
-        window.__qzEmitPortMessage({ type: 'prompt_accepted', requestId: message.requestId, sessionId: message.sessionId,
+        window.__zuriEmitPortMessage({ type: 'prompt_accepted', requestId: message.requestId, sessionId: message.sessionId,
           clientMessageId: message.clientMessageId, accepted: true, disposition: 'queued' });
       });
       await page.waitForTimeout(200);
@@ -143,10 +143,10 @@ async function seedDraft(page, kind, { running = true } = {}) {
       documents.push({ ...ref, document: ref, status: 'ready' });
     }
     state.drafts.admission = { sessionId: 'admission', messageId: 'draft-queued', text: '稍后检查这条消息', images, documents, updatedAt: Date.now() };
-    await window.qingzhouConversationBenchmark.seedSession({ sessionId: 'admission', title: 'queue admission',
+    await window.zuriConversationBenchmark.seedSession({ sessionId: 'admission', title: 'queue admission',
       transcript: [{ type: 'assistant', content: '正在执行当前任务。' }] });
-    await window.qingzhouConversationBenchmark.switchToSession('admission', { source: 'benchmark' });
-    window.qingzhouConversationBenchmark.configureVisualState({ running });
+    await window.zuriConversationBenchmark.switchToSession('admission', { source: 'benchmark' });
+    window.zuriConversationBenchmark.configureVisualState({ running });
     state.probe = { bubbleObservations: 0 };
     const observe = () => {
       if (document.querySelector('#messages .msg-user[data-client-message-id="draft-queued"]')) state.probe.bubbleObservations++;
@@ -159,7 +159,7 @@ async function seedDraft(page, kind, { running = true } = {}) {
 
 async function acceptUserMessage(page, sent) {
   await page.evaluate(sent => {
-    window.qingzhouConversationBenchmark.dispatchBackgroundEvent({ type: 'message_start', sessionId: sent.sessionId,
+    window.zuriConversationBenchmark.dispatchBackgroundEvent({ type: 'message_start', sessionId: sent.sessionId,
       runId: 'benchmark-visual-run', eventSeq: 2, clientMessageId: sent.clientMessageId, deliveryStatus: 'accepted',
       message: { role: 'user', clientMessageId: sent.clientMessageId, _origin: 'user', documents: sent.documents,
         content: sent.images.length ? [{ type: 'text', text: sent.text }, ...sent.images.map(img => ({ type: 'image_url', image_url: { url: img.dataUrl } }))] : sent.text } });
@@ -173,7 +173,7 @@ function installAdmissionGate() {
     const port = connect(...args), post = port.postMessage.bind(port);
     port.postMessage = message => {
       if (message.type === 'get_composer_draft' && state.drafts[message.sessionId]) {
-        queueMicrotask(() => window.__qzEmitPortMessage({ type: 'get_composer_draft_result', requestId: message.requestId,
+        queueMicrotask(() => window.__zuriEmitPortMessage({ type: 'get_composer_draft_result', requestId: message.requestId,
           sessionId: message.sessionId, draft: structuredClone(state.drafts[message.sessionId]) }));
         return;
       }
@@ -184,12 +184,12 @@ function installAdmissionGate() {
     return port;
   };
   state.accept = disposition => {
-    window.__qzPromptAcceptance = { disposition };
+    window.__zuriPromptAcceptance = { disposition };
     state.releases.shift()();
   };
   state.fail = () => {
     const message = state.requests.at(-1);
     state.releases.shift();
-    window.__qzEmitPortMessage({ type: 'error', requestId: message.requestId, code: 'PERSIST_FAILED', message: 'admission persistence failed' });
+    window.__zuriEmitPortMessage({ type: 'error', requestId: message.requestId, code: 'PERSIST_FAILED', message: 'admission persistence failed' });
   };
 }

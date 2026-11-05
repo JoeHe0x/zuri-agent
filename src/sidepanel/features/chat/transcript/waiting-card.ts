@@ -139,14 +139,14 @@ export function createWaitingCards(options: CardOptions) {
 
 function setWaitActions(el: HTMLElement, disabled: boolean, label: string) {
   el.querySelectorAll<HTMLButtonElement>(".waiting-actions button").forEach(button => { button.disabled = disabled; });
-  el.querySelectorAll<HTMLInputElement>(".qz-choice-card input").forEach(input => { input.disabled = disabled; });
+  el.querySelectorAll<HTMLInputElement>(".zuri-choice-card input").forEach(input => { input.disabled = disabled; });
   const hint = el.querySelector<HTMLElement>(".waiting-hint");
   if (hint) { hint.textContent = label; hint.hidden = false; }
 }
 
 function updateChoiceCounts(el: HTMLElement) {
   el.querySelectorAll<HTMLElement>("[data-choice-count]").forEach(counter => {
-    const count = counter.closest(".waiting-field")?.querySelectorAll(".qz-choice-card input:checked").length || 0;
+    const count = counter.closest(".waiting-field")?.querySelectorAll(".zuri-choice-card input:checked").length || 0;
     counter.textContent = t("choiceSelectedCount", { count });
   });
 }
@@ -196,18 +196,18 @@ function renderWaitTranscriptHtml(entry: WaitCard) {
     ? (form.browserPermission ? permissionT("hint") : form.debuggerDetached || hasResultChoices ? "" : hasForm ? t("agentAfterSubmit") : t("agentAfterAction"))
     : waitResolvedHint(entry);
   return `
-    <div class="waiting-card${statusClass} qz:relative qz:overflow-hidden qz:px-3 qz:pt-2.5 qz:pb-3">
+    <div class="waiting-card${statusClass} zuri:relative zuri:overflow-hidden zuri:px-3 zuri:pt-2.5 zuri:pb-3">
       <div class="waiting-pulse"></div>
-      <div class="waiting-body qz:mb-2.5">
-        <div class="waiting-title qz:mb-1">${escapeHtml(title)}</div>
-        ${message ? `<div class="waiting-message qz:mb-1">${escapeHtml(message)}</div>` : ""}
-        ${hasForm ? `<form class="waiting-form qz:mt-2 qz:grid qz:gap-2">${renderWaitingFormFields(form.fields, form.title)}</form>` : ""}
-        ${hint || hasResultChoices ? `<div class="waiting-hint qz:mt-1.5"${hint ? "" : " hidden"}>${escapeHtml(hint)}</div>` : ""}
+      <div class="waiting-body zuri:mb-2.5">
+        <div class="waiting-title zuri:mb-1">${escapeHtml(title)}</div>
+        ${message ? `<div class="waiting-message zuri:mb-1">${escapeHtml(message)}</div>` : ""}
+        ${hasForm ? `<form class="waiting-form zuri:mt-2 zuri:grid zuri:gap-2">${renderWaitingFormFields(form.fields, form.title)}</form>` : ""}
+        ${hint || hasResultChoices ? `<div class="waiting-hint zuri:mt-1.5"${hint ? "" : " hidden"}>${escapeHtml(hint)}</div>` : ""}
       </div>
       ${waiting ? `
-        <div class="waiting-actions qz:flex qz:gap-1.5">
-          <button class="qz-btn qz-btn--primary qz-btn--sm waiting-continue-btn qz:flex-1" type="button" data-wait-action="continue">${escapeHtml(form.locationConsent ? t("dataConsentAccept") : form.browserPermission ? permissionT("allow") : form.debuggerDetached ? debuggerDetachT("continue") : hasForm ? form.submitLabel : t("doneContinue"))}</button>
-          <button class="qz-btn qz-btn--ghost qz-btn--sm waiting-cancel-btn" type="button" data-wait-action="cancel">${form.debuggerDetached ? escapeHtml(debuggerDetachT("stop")) : tHtml("cancel")}</button>
+        <div class="waiting-actions zuri:flex zuri:gap-1.5">
+          <button class="zuri-btn zuri-btn--primary zuri-btn--sm waiting-continue-btn zuri:flex-1" type="button" data-wait-action="continue">${escapeHtml(form.locationConsent ? t("dataConsentAccept") : form.browserPermission ? permissionT("allow") : form.debuggerDetached ? debuggerDetachT("continue") : hasForm ? form.submitLabel : t("doneContinue"))}</button>
+          <button class="zuri-btn zuri-btn--ghost zuri-btn--sm waiting-cancel-btn" type="button" data-wait-action="cancel">${form.debuggerDetached ? escapeHtml(debuggerDetachT("stop")) : tHtml("cancel")}</button>
         </div>
       ` : ""}
     </div>
@@ -279,12 +279,12 @@ function renderWaitingFormFields(fields: WaitingField[], title: string) {
     const error = `<div class="waiting-field-error" data-field-error></div>`;
     let control = "";
     if (field.type === "textarea") {
-      control = `<textarea id="${escapeHtmlAttribute(controlId)}" class="qz-field qz-field--sm waiting-field-control" data-field-id="${escapeHtmlAttribute(field.id)}" placeholder="${escapeHtmlAttribute(field.placeholder)}" aria-required="${String(field.required)}">${escapeHtml(field.defaultValue)}</textarea>`;
+      control = `<textarea id="${escapeHtmlAttribute(controlId)}" class="zuri-field zuri-field--sm waiting-field-control" data-field-id="${escapeHtmlAttribute(field.id)}" placeholder="${escapeHtmlAttribute(field.placeholder)}" aria-required="${String(field.required)}">${escapeHtml(field.defaultValue)}</textarea>`;
     } else if (field.type === "single_choice" || field.type === "multi_choice") {
       const inputType = field.type === "single_choice" ? "radio" : "checkbox";
       const defaultValues = new Set(Array.isArray(field.defaultValue) ? field.defaultValue : [field.defaultValue].filter(Boolean));
       control = `
-        <div class="waiting-options qz:grid ${field.presentation === "cards" ? "qz:gap-2 qz:-mx-1 qz:p-1 qz-scroll qz:max-h-80 qz:overflow-y-auto qz:overscroll-contain" : "qz:gap-1"}" data-field-id="${escapeHtmlAttribute(field.id)}" role="group" aria-label="${escapeHtmlAttribute(field.label)}" aria-required="${String(field.required)}">
+        <div class="waiting-options zuri:grid ${field.presentation === "cards" ? "zuri:gap-2 zuri:-mx-1 zuri:p-1 zuri-scroll zuri:max-h-80 zuri:overflow-y-auto zuri:overscroll-contain" : "zuri:gap-1"}" data-field-id="${escapeHtmlAttribute(field.id)}" role="group" aria-label="${escapeHtmlAttribute(field.label)}" aria-required="${String(field.required)}">
           ${field.options.map((option, optionIndex) => {
             const optionId = `${controlId}_${optionIndex}`;
             if (field.presentation === "cards") return renderResultChoice(document, {
@@ -292,8 +292,8 @@ function renderWaitingFormFields(fields: WaitingField[], title: string) {
             }).outerHTML;
             const checked = defaultValues.has(option.value) ? " checked" : "";
             return `
-            <label class="waiting-option qz:grid qz:cursor-pointer qz:grid-cols-[auto_minmax(0,1fr)] qz:items-start qz:gap-1.75 qz:px-1.75 qz:py-1.5">
-              <input id="${escapeHtmlAttribute(optionId)}" class="${inputType === "radio" ? "qz-radio" : "qz-checkbox"}" type="${inputType}" name="${escapeHtmlAttribute(name)}" value="${escapeHtmlAttribute(option.value)}"${checked}>
+            <label class="waiting-option zuri:grid zuri:cursor-pointer zuri:grid-cols-[auto_minmax(0,1fr)] zuri:items-start zuri:gap-1.75 zuri:px-1.75 zuri:py-1.5">
+              <input id="${escapeHtmlAttribute(optionId)}" class="${inputType === "radio" ? "zuri-radio" : "zuri-checkbox"}" type="${inputType}" name="${escapeHtmlAttribute(name)}" value="${escapeHtmlAttribute(option.value)}"${checked}>
               <span>
                 <strong>${escapeHtml(option.label)}</strong>
                 ${option.description ? `<small>${escapeHtml(option.description)}</small>` : ""}
@@ -302,16 +302,16 @@ function renderWaitingFormFields(fields: WaitingField[], title: string) {
           `;
           }).join("")}
         </div>
-        ${field.presentation === "cards" ? '<div class="qz-field-hint qz:mt-1" data-choice-count role="status" aria-live="polite"></div>' : ""}
+        ${field.presentation === "cards" ? '<div class="zuri-field-hint zuri:mt-1" data-choice-count role="status" aria-live="polite"></div>' : ""}
       `;
     } else {
-      control = `<input id="${escapeHtmlAttribute(controlId)}" class="qz-field qz-field--sm waiting-field-control" data-field-id="${escapeHtmlAttribute(field.id)}" type="text" placeholder="${escapeHtmlAttribute(field.placeholder)}" value="${escapeHtmlAttribute(field.defaultValue)}" aria-required="${String(field.required)}">`;
+      control = `<input id="${escapeHtmlAttribute(controlId)}" class="zuri-field zuri-field--sm waiting-field-control" data-field-id="${escapeHtmlAttribute(field.id)}" type="text" placeholder="${escapeHtmlAttribute(field.placeholder)}" value="${escapeHtmlAttribute(field.defaultValue)}" aria-required="${String(field.required)}">`;
     }
     const labelFor = field.type === "single_choice" || field.type === "multi_choice" ? "" : ` for="${escapeHtmlAttribute(controlId)}"`;
     const redundantCardLabel = fields.length === 1 && (field.type === "single_choice" || field.type === "multi_choice")
       && field.presentation === "cards" && field.label === title;
     return `
-      <div class="waiting-field qz:grid qz:gap-1" data-field-id="${escapeHtmlAttribute(field.id)}" data-required="${String(field.required)}" data-type="${escapeHtmlAttribute(field.type)}">
+      <div class="waiting-field zuri:grid zuri:gap-1" data-field-id="${escapeHtmlAttribute(field.id)}" data-required="${String(field.required)}" data-type="${escapeHtmlAttribute(field.type)}">
         ${redundantCardLabel ? "" : `<label class="waiting-field-label"${labelFor}>${escapeHtml(field.label)}${required}</label>`}
         ${control}
         ${help}

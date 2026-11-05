@@ -5,7 +5,7 @@ import { createBackgroundApi } from "../../src/background/background-api.js";
 import { createRuntimeMessageTransport } from "../../src/background/transports/runtime-message.js";
 import { createSidepanelTransport } from "../../src/background/transports/sidepanel.js";
 
-const sender = { id: "extension", frameId: 0, tab: { id: 12 }, url: "http://127.0.0.1:23001/qz-connect" };
+const sender = { id: "extension", frameId: 0, tab: { id: 12 }, url: "http://127.0.0.1:23001/zuri-connect" };
 const status = { state: "connected", clientId: "profile-uuid", name: "default", endpoint: "http://127.0.0.1:23001", retryCount: 0, retryLimit: 3 };
 function setup() {
   const state = { consent: true, url: sender.url, connections: [] };
@@ -29,10 +29,10 @@ test("connection derives its port from the Chrome sender and explicitly enables 
 test("connection rejects untrusted pages, subframes and extension senders without a tab", async () => {
   for (const invalid of [
     { ...sender, id: "other" }, { ...sender, frameId: 1 }, { ...sender, tab: undefined },
-    { ...sender, url: "https://evil.example/qz-connect" },
+    { ...sender, url: "https://evil.example/zuri-connect" },
     { ...sender, url: "http://127.0.0.1:23001/other" },
-    { ...sender, url: "http://localhost.evil.example/qz-connect" },
-    { ...sender, url: "http://user@localhost/qz-connect" },
+    { ...sender, url: "http://localhost.evil.example/zuri-connect" },
+    { ...sender, url: "http://user@localhost/zuri-connect" },
   ]) {
     const { state, deps } = setup();
     await assert.rejects(createMcpConnectPage(deps)(invalid), { code: "MCP_CONNECTION_PAGE_REQUIRED" });

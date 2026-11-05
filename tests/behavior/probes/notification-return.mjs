@@ -44,13 +44,13 @@ const notifier = createSessionCompletionNotifier({
 
 await notifier.notifyCompleted("session42");
 const completionHandled = await notifier.handleClick(created[0]?.id || "");
-const alertHandled = await notifier.handleClick("qz_alert_session_session42_1234_journey");
-const automationClick = notifier.handleClick("qz_auto_session42_run42");
+const alertHandled = await notifier.handleClick("zuri_alert_session_session42_1234_journey");
+const automationClick = notifier.handleClick("zuri_auto_session42_run42");
 const automationRevealStartedSynchronously = openedSessions.length === 3;
 const automationHandled = await automationClick;
 const clearedAfterAddressableClicks = cleared.length;
 canOpenSession = false;
-const unaddressedHandled = await notifier.handleClick("qz_alert_session_session42_1235_unaddressed");
+const unaddressedHandled = await notifier.handleClick("zuri_alert_session_session42_1235_unaddressed");
 
 const checks = {
   completionNotificationCreated: created.length === 1,
@@ -66,7 +66,7 @@ const checks = {
 const failures = Object.entries(checks).filter(([, passed]) => !passed).map(([name]) => name);
 
 console.log(JSON.stringify({
-  schema: "qingzhou.behavior_probe.notification_return.v1",
+  schema: "zuri.behavior_probe.notification_return.v1",
   journey: "H16",
   passed: failures.length === 0,
   checks,

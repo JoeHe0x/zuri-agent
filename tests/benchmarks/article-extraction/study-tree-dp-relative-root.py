@@ -43,7 +43,7 @@ def load_module(name: str, path: Path):
 
 
 CALIBRATED_PATH = HERE / "study-tree-dp-calibrated-root.py"
-CALIBRATED = load_module("qingzhou_relative_root_base", CALIBRATED_PATH)
+CALIBRATED = load_module("zuri_relative_root_base", CALIBRATED_PATH)
 GLOBAL_DISTILL = CALIBRATED.GLOBAL_DISTILL
 DISTILL = CALIBRATED.DISTILL
 MLP = CALIBRATED.MLP
@@ -140,7 +140,7 @@ def load_wmb_pages(directory: Path) -> list[object]:
     if not report_path.exists():
         raise ValueError(f"WebMainBench export is incomplete: {report_path} is missing")
     report = json.loads(report_path.read_text(encoding="utf8"))
-    if report.get("schema") != "qingzhou.webmainbench-tree-dp-training-export.v1":
+    if report.get("schema") != "zuri.webmainbench-tree-dp-training-export.v1":
         raise ValueError(f"unexpected WebMainBench export schema: {report.get('schema')}")
     paths = sorted(directory.glob("*.json.gz"))
     if report.get("exported") != len(paths):
@@ -331,7 +331,7 @@ def main() -> int:
 
     summary = GLOBAL_DISTILL.summary(rows)
     report = {
-        "schema": "qingzhou.tree-dp-relative-root-study.v1",
+        "schema": "zuri.tree-dp-relative-root-study.v1",
         "protocol": {
             "trainingSplits": ["base", "train"],
             "grouping": "siteFamily",

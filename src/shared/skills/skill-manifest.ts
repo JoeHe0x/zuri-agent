@@ -94,7 +94,7 @@ export function parseSkillManifest(content: unknown = "", skill: Data = {}): { p
         level: "error",
         skillName: String(skill.name || ""),
         path: SKILL_MANIFEST_PATH,
-        message: `Invalid qingzhou Skill manifest JSON: ${err instanceof Error ? err.message : String(err)}`,
+        message: `Invalid zuri Skill manifest JSON: ${err instanceof Error ? err.message : String(err)}`,
       }],
     };
   }

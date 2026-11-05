@@ -184,7 +184,7 @@ function appendMarkdownSection(parent: HTMLElement, title: unknown, text: unknow
     : linkifyText(clipped);
   appendHtmlSection(parent, "tool-friendly-section", `
     <div class="tool-section-title">${escapeHtml(title)}</div>
-    <div class="tool-article-body qz-markdown" data-tool-scroll-surface="markdown-${escapeHtmlAttribute(title)}">${rendered}</div>
+    <div class="tool-article-body zuri-markdown" data-tool-scroll-surface="markdown-${escapeHtmlAttribute(title)}">${rendered}</div>
     ${source.length > clipped.length ? `<div class="tool-more-hint">${tHtml("shownCharacters", { count: clipped.length })}</div>` : ""}
   `);
 }

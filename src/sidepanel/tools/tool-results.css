@@ -358,14 +358,14 @@
 }
 
 .tool-data-table-copy {
-  --qz-control-height: 23px;
-  --qz-control-gap: 4px;
-  --qz-control-padding: 8px;
-  --qz-control-border: color-mix(in srgb, var(--border) 62%, transparent);
-  --qz-control-bg: color-mix(in srgb, var(--bg-primary) 78%, transparent);
-  --qz-control-bg-hover: color-mix(in srgb, var(--bg-primary) 92%, var(--accent-subtle));
-  --qz-control-font-size: 10px;
-  --qz-control-font-weight: 540;
+  --zuri-control-height: 23px;
+  --zuri-control-gap: 4px;
+  --zuri-control-padding: 8px;
+  --zuri-control-border: color-mix(in srgb, var(--border) 62%, transparent);
+  --zuri-control-bg: color-mix(in srgb, var(--bg-primary) 78%, transparent);
+  --zuri-control-bg-hover: color-mix(in srgb, var(--bg-primary) 92%, var(--accent-subtle));
+  --zuri-control-font-size: 10px;
+  --zuri-control-font-weight: 540;
   flex: 0 0 auto;
 }
 

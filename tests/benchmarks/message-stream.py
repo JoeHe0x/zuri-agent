@@ -78,7 +78,7 @@ def run(args):
     with serve_repo() as base_url, sync_playwright() as playwright:
         browser = playwright.chromium.launch(
             headless=True,
-            channel=os.environ.get("QINGZHOU_PLAYWRIGHT_CHANNEL", "chromium"),
+            channel=os.environ.get("ZURI_PLAYWRIGHT_CHANNEL", "chromium"),
         )
         for viewport_name, viewport in VIEWPORTS.items():
             page = browser.new_page(viewport=viewport)

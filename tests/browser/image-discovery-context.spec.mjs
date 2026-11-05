@@ -9,22 +9,22 @@ async function installContentScript(page, html) {
     Object.defineProperty(window.chrome, "runtime", {
       configurable: true,
       value: {
-        getManifest: () => ({ name: "Qingzhou Test", version: "0.0.0" }),
+        getManifest: () => ({ name: "Zuri Test", version: "0.0.0" }),
         onMessage: { addListener(nextListener) { listener = nextListener; } },
         sendMessage: async () => ({ ok: true }),
       },
     });
-    window.__callQingzhouContent = (action, params = {}) => new Promise((resolve, reject) => {
+    window.__callZuriContent = (action, params = {}) => new Promise((resolve, reject) => {
       if (typeof listener !== "function") return reject(new Error("content-script listener is not installed"));
       listener({ action, ...params }, {}, resolve);
     });
   });
   await page.addScriptTag({ url: testAssetUrl("extension/content/content-script.js") });
-  await expect.poll(() => page.evaluate(() => window.__QZ_CONTENT_READY)).toBe(true);
+  await expect.poll(() => page.evaluate(() => window.__ZURI_CONTENT_READY)).toBe(true);
 }
 
 async function listImages(page) {
-  return page.evaluate(() => window.__callQingzhouContent("listImageElements", {
+  return page.evaluate(() => window.__callZuriContent("listImageElements", {
     visibleOnly: true,
     limit: 20,
   }));
@@ -152,7 +152,7 @@ test("concurrent Content image reads allocate one bitmap at a time and recover f
       return convertToBlob.apply(this, args);
     };
     try {
-      const pending = Array.from({ length: 6 }, () => window.__callQingzhouContent('readImageElement', { selector: '#image' }));
+      const pending = Array.from({ length: 6 }, () => window.__callZuriContent('readImageElement', { selector: '#image' }));
       await firstEncoding;
       const blocked = { decoded, open, encoded };
       release();
@@ -184,7 +184,7 @@ test("queued image reads keep source identity and metadata paired with the captu
     const red = imageUrl('red', 8, 8), blue = imageUrl('blue', 12, 6), green = imageUrl('lime', 16, 16);
     blocker.src = candidate.src = red;
     await Promise.all([blocker.decode(), candidate.decode()]);
-    const source = async () => (await window.__callQingzhouContent('listImageElements', { selector: '#candidate', visibleOnly: false })).images[0].src;
+    const source = async () => (await window.__callZuriContent('listImageElements', { selector: '#candidate', visibleOnly: false })).images[0].src;
     const selectedSource = await source();
     const convert = OffscreenCanvas.prototype.convertToBlob;
     const releases = [], announcements = [];
@@ -197,9 +197,9 @@ test("queued image reads keep source identity and metadata paired with the captu
       return convert.apply(this, args);
     };
     try {
-      const first = window.__callQingzhouContent('readImageElement', { selector: '#blocker' });
+      const first = window.__callZuriContent('readImageElement', { selector: '#blocker' });
       await started[0];
-      const queued = window.__callQingzhouContent('readImageElement', { selector: '#candidate' });
+      const queued = window.__callZuriContent('readImageElement', { selector: '#candidate' });
       candidate.src = blue; candidate.alt = 'captured blue'; await candidate.decode();
       const capturedSource = await source();
       releases[0](); await first;

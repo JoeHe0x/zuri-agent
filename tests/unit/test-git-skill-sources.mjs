@@ -86,7 +86,7 @@ test("archive URLs retain only non-secret update parameters on the repository or
   assert.equal(sanitizeGitArchiveUrl("https://evil.example/archive.zip?sha=main", EXAMPLE_REPOSITORY), "");
 });
 
-test("Git origins round-trip without disturbing unrelated Qingzhou metadata", () => {
+test("Git origins round-trip without disturbing unrelated Zuri metadata", () => {
   const source = {
     id: gitSkillSourceId(EXAMPLE_REPOSITORY),
     repositoryUrl: EXAMPLE_REPOSITORY,
@@ -101,7 +101,7 @@ test("Git origins round-trip without disturbing unrelated Qingzhou metadata", ()
     name: "content-supply",
     description: "test",
     content: "# Test",
-    metadata: { qingzhou: { display: { renderer: "markdown" } } },
+    metadata: { zuri: { display: { renderer: "markdown" } } },
   }, source);
   assert.equal(gitSkillBelongsToSource(skill, source.id), true);
   assert.deepEqual(getGitSkillOrigin(skill), {
@@ -118,7 +118,7 @@ test("Git origins round-trip without disturbing unrelated Qingzhou metadata", ()
   });
   const detached = withoutGitSkillOrigin(skill, source.id);
   assert.equal(getGitSkillOrigin(detached), null);
-  assert.deepEqual(detached.metadata.qingzhou.display, { renderer: "markdown" });
+  assert.deepEqual(detached.metadata.zuri.display, { renderer: "markdown" });
 });
 
 test("source state normalization drops malformed records and secret archive parameters", () => {

@@ -175,7 +175,7 @@ export function createSettingsShell(root: Document, onError: (error: unknown) =>
         button = root.createElement("button");
         button.id = `settings-tab-${group.id}`;
         button.type = "button";
-        button.className = "qz-segment-item settings-tab";
+        button.className = "zuri-segment-item settings-tab";
         button.setAttribute("role", "tab");
         button.dataset.settingsTab = group.id;
         button.addEventListener("click", () => select(group.id), { signal: events.signal });

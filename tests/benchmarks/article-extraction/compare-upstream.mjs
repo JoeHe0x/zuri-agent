@@ -26,21 +26,21 @@ if (defuddleBundle && !existsSync(defuddleBundle)) {
 const includeTreedp = process.argv.includes("--treedp");
 const browserAlgorithmNames = [
   "legacy-readability",
-  "qingzhou-current",
-  ...(includeTreedp ? ["qingzhou-treedp"] : []),
+  "zuri-current",
+  ...(includeTreedp ? ["zuri-treedp"] : []),
   ...(defuddleBundle ? ["defuddle"] : []),
 ];
 const algorithmNames = [...browserAlgorithmNames, "trafilatura-python"];
 const algorithmPairs = [
-  ["legacy-readability", "qingzhou-current"],
+  ["legacy-readability", "zuri-current"],
   ["legacy-readability", "trafilatura-python"],
-  ["qingzhou-current", "trafilatura-python"],
+  ["zuri-current", "trafilatura-python"],
 ];
 if (includeTreedp) {
   algorithmPairs.push(
-    ["qingzhou-current", "qingzhou-treedp"],
-    ["legacy-readability", "qingzhou-treedp"],
-    ["qingzhou-treedp", "trafilatura-python"],
+    ["zuri-current", "zuri-treedp"],
+    ["legacy-readability", "zuri-treedp"],
+    ["zuri-treedp", "trafilatura-python"],
   );
 }
 if (defuddleBundle) {
@@ -49,7 +49,7 @@ if (defuddleBundle) {
   }
 }
 
-const upstream = resolve(option("--upstream", "/tmp/qingzhou-trafilatura-source"));
+const upstream = resolve(option("--upstream", "/tmp/zuri-trafilatura-source"));
 const python = option("--python", "python3");
 const output = resolve(option(
   "--output",
@@ -282,7 +282,7 @@ async function runBrowserAlgorithms(page, source, url = "") {
     let current = { text: "", strategy: "", error: "" };
     try {
       const readability = parseReadability();
-      const candidate = globalThis.QingzhouArticleExtractor.extract(documentInput, { readability });
+      const candidate = globalThis.ZuriArticleExtractor.extract(documentInput, { readability });
       current = {
         text: candidate?.text || "",
         strategy: candidate?.name || "",
@@ -300,9 +300,9 @@ async function runBrowserAlgorithms(page, source, url = "") {
       const treedpStarted = performance.now();
       let summary = null;
       try {
-        summary = globalThis.__qingzhouArticleBenchmark.collect(documentInput);
-        globalThis.__qingzhouArticleBenchmark.force("treedp");
-        const candidate = globalThis.QingzhouArticleExtractor.extract(documentInput);
+        summary = globalThis.__zuriArticleBenchmark.collect(documentInput);
+        globalThis.__zuriArticleBenchmark.force("treedp");
+        const candidate = globalThis.ZuriArticleExtractor.extract(documentInput);
         treedp = {
           text: candidate?.text || "",
           strategy: candidate?.name || "",
@@ -311,7 +311,7 @@ async function runBrowserAlgorithms(page, source, url = "") {
       } catch (error) {
         treedp = { text: "", strategy: "", error: errorText(error) };
       } finally {
-        try { globalThis.__qingzhouArticleBenchmark.clear(); } catch (_error) { /* ignore */ }
+        try { globalThis.__zuriArticleBenchmark.clear(); } catch (_error) { /* ignore */ }
       }
       const descriptor = summary?.candidates?.find?.(entry => entry.key === "treedp");
       treedp.timingMs = Number.isFinite(descriptor?.elapsedMs)
@@ -343,8 +343,8 @@ async function runBrowserAlgorithms(page, source, url = "") {
       declaredLanguage,
       algorithms: {
         "legacy-readability": legacy,
-        "qingzhou-current": current,
-        ...(treedp ? { "qingzhou-treedp": treedp } : {}),
+        "zuri-current": current,
+        ...(treedp ? { "zuri-treedp": treedp } : {}),
         ...(defuddle ? { defuddle } : {}),
       },
     };
@@ -424,7 +424,7 @@ if (includeTreedp) {
   await page.addScriptTag({
     content: instrumentArticleExtractorSource(readFileSync(articleExtractorPath, "utf8")),
   });
-  if (await page.evaluate(() => typeof globalThis.__qingzhouArticleBenchmark?.collect) !== "function") {
+  if (await page.evaluate(() => typeof globalThis.__zuriArticleBenchmark?.collect) !== "function") {
     throw new Error("instrumented extractor did not expose the benchmark probe");
   }
 } else {
@@ -512,7 +512,7 @@ await browser.close();
 const gitStatus = commandOutput("git", ["status", "--porcelain=v1", "--untracked-files=all"], { cwd: root });
 const playwrightPackage = JSON.parse(readFileSync(join(root, "node_modules/playwright/package.json"), "utf8"));
 const report = {
-  schema: "qingzhou.article-extraction-upstream.v3",
+  schema: "zuri.article-extraction-upstream.v3",
   corpus: {
     upstream,
     upstreamCommit: expectedUpstream.upstreamCommit,
@@ -557,9 +557,9 @@ const report = {
   headToHead,
   disagreements,
   provenance: {
-    qingzhouGitCommit: commandOutput("git", ["rev-parse", "HEAD"], { cwd: root }),
-    qingzhouGitDirty: Boolean(gitStatus),
-    qingzhouGitStatusSha256: sha256(gitStatus),
+    zuriGitCommit: commandOutput("git", ["rev-parse", "HEAD"], { cwd: root }),
+    zuriGitDirty: Boolean(gitStatus),
+    zuriGitStatusSha256: sha256(gitStatus),
     treedpCandidate: includeTreedp,
     sourceSha256: {
       readability: fileSha256(readabilityPath),

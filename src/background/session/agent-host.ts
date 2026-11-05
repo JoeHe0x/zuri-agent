@@ -165,7 +165,7 @@ export function createSessionAgentHost({
           retired = true;
           continue;
         }
-        logger.warn?.(`[轻舟] persist terminal ${writes[index][0]} boundary failed:`, result.reason);
+        logger.warn?.(`[Zuri] persist terminal ${writes[index][0]} boundary failed:`, result.reason);
       }
     }
     if (retired) return false;
@@ -173,7 +173,7 @@ export function createSessionAgentHost({
     broadcast({ ...event, sessionId });
     syncAutomationOutcome(sessionId);
     closeOwnedTabs(sessionId, `agent_${event.type}`).catch(error => {
-      logger.debug?.("[轻舟] close terminal owned tabs failed:", errorMessage(error));
+      logger.debug?.("[Zuri] close terminal owned tabs failed:", errorMessage(error));
     });
   }
 
@@ -181,7 +181,7 @@ export function createSessionAgentHost({
     void Promise.resolve()
       .then(() => getAutomationRuntime()?.syncSessionOutcome?.(sessionId))
       .catch(error => {
-        logger.warn?.("[轻舟] automation run outcome sync failed:", error);
+        logger.warn?.("[Zuri] automation run outcome sync failed:", error);
       });
   }
 
@@ -193,7 +193,7 @@ export function createSessionAgentHost({
     } catch (error) {
       // Terminal persistence and tab cleanup must still proceed. The CDP
       // runtime retires its cache even when Chrome reports detach failure.
-      logger.warn?.("[轻舟] release terminal run resources failed:", error);
+      logger.warn?.("[Zuri] release terminal run resources failed:", error);
     }
   }
 

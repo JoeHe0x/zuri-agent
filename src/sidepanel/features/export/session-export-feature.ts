@@ -58,9 +58,9 @@ interface ExportHtmlOptions {
 declare const SESSION_EXPORT_RUNTIME_SOURCE: string;
 
 function renderSessionExportRuntime() {
-  const keys = ["imagePreview", "images", "close", "importQingzhou", "importing", "imported", "retryImport", "importFailedRetry"] as const;
+  const keys = ["imagePreview", "images", "close", "importZuri", "importing", "imported", "retryImport", "importFailedRetry"] as const;
   const messages = JSON.stringify(Object.fromEntries(keys.map(key => [key, t(key)]))).replace(/</g, "\\u003c");
-  return `<script type="application/json" id="qingzhou-export-messages">${messages}</script><script>${SESSION_EXPORT_RUNTIME_SOURCE.replace(/<\/script/giu, "<\\/script")}</script>`;
+  return `<script type="application/json" id="zuri-export-messages">${messages}</script><script>${SESSION_EXPORT_RUNTIME_SOURCE.replace(/<\/script/giu, "<\\/script")}</script>`;
 }
 
 export function createSessionExportFeature(options: ExportOptions = {}) {
@@ -410,7 +410,7 @@ export function buildSessionExportHtml(session: ExportSession, exchangePayload: 
   skin = {},
   brandAssets = {},
 }: ExportHtmlOptions = {}) {
-  const title = session.title || t("qingzhouConversation");
+  const title = session.title || t("zuriConversation");
   const dayLogo = String(brandAssets.day || "");
   const nightLogo = String(brandAssets.night || dayLogo);
   const favicon = String(brandAssets.favicon || "");
@@ -429,7 +429,7 @@ export function buildSessionExportHtml(session: ExportSession, exchangePayload: 
   const skinName = String(skin.name || "default");
   const skinPath = String(skin.path || "");
   const documentHtml = `<!doctype html>
-<html lang="${getLanguage()}" dir="${getTextDirection()}" data-qingzhou-skin="${escapeHtml(skinName)}"${skinPath ? ` data-qingzhou-skin-path="${escapeHtml(skinPath)}"` : ""}>
+<html lang="${getLanguage()}" dir="${getTextDirection()}" data-zuri-skin="${escapeHtml(skinName)}"${skinPath ? ` data-zuri-skin-path="${escapeHtml(skinPath)}"` : ""}>
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -545,17 +545,17 @@ export function buildSessionExportHtml(session: ExportSession, exchangePayload: 
       .session-export-logo-day { display: none !important; }
       .session-export-logo-night { display: block !important; }
     }
-    /* qingzhou-math-styles */
+    /* zuri-math-styles */
   </style>
 </head>
 <body>
   <div class="session-export-shell">
     ${logoHtml}
-    <div id="app" class="qz:flex qz:flex-col qz:relative qz:rounded-none">
-      <div id="session-title-bar" class="session-title-bar qz:flex-none qz:gap-2">
-        <span id="current-session-title" class="qz:block qz:min-w-0 qz:max-w-full qz:truncate">${escapeHtml(title)}</span>
+    <div id="app" class="zuri:flex zuri:flex-col zuri:relative zuri:rounded-none">
+      <div id="session-title-bar" class="session-title-bar zuri:flex-none zuri:gap-2">
+        <span id="current-session-title" class="zuri:block zuri:min-w-0 zuri:max-w-full zuri:truncate">${escapeHtml(title)}</span>
         <span class="session-export-continuation">
-          <button id="qingzhou-session-cta" class="qz-btn qz-btn--primary qz-btn--xs session-export-cta" hidden type="button"></button>
+          <button id="zuri-session-cta" class="zuri-btn zuri-btn--primary zuri-btn--xs session-export-cta" hidden type="button"></button>
         </span>
       </div>
       ${renderSessionExchangeScript(exchangePayload)}
@@ -565,7 +565,7 @@ export function buildSessionExportHtml(session: ExportSession, exchangePayload: 
   </div>
 </body>
 </html>`;
-  return documentHtml.replace("/* qingzhou-math-styles */", safeMathStylesheet);
+  return documentHtml.replace("/* zuri-math-styles */", safeMathStylesheet);
 }
 
 const EXPORT_EMPTY_IMAGE = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";

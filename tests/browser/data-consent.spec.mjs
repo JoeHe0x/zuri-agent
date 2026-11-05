@@ -19,12 +19,12 @@ test("consent blocks workspace initialization, survives reopening, and starts no
     return [getComputedStyle(document.querySelector("#app")).display, document.querySelector(".data-consent").getBoundingClientRect().top];
   })).toEqual(["none", 0]);
   expect(requests.some(value => /\/sidepanel\/app\.js/.test(value))).toBe(false);
-  expect(await page.evaluate(() => window.__qzPostedMessages)).toEqual([]);
+  expect(await page.evaluate(() => window.__zuriPostedMessages)).toEqual([]);
   await page.locator("[data-consent-accept]").click();
   await expect(page.locator(".data-consent")).toHaveCount(0);
   await expect(page.locator("#app")).not.toHaveAttribute("data-workspace-booting");
   await expect(page.locator(".welcome-onboarding")).toBeVisible();
-  expect(await page.evaluate(() => window.__qzPostedMessages.some(message => message.type === "prompt"))).toBe(false);
+  expect(await page.evaluate(() => window.__zuriPostedMessages.some(message => message.type === "prompt"))).toBe(false);
   await page.reload();
   await expect(page.locator("#app")).not.toHaveAttribute("data-workspace-booting");
   await expect(page.locator(".data-consent")).toHaveCount(0);
@@ -37,7 +37,7 @@ test("a stalled consent read reveals the startup notice", async ({ page }) => {
     const local = chrome.storage.local;
     const get = local.get.bind(local);
     local.get = keys => {
-      if (keys !== "qz_data_consent") return get(keys);
+      if (keys !== "zuri_data_consent") return get(keys);
       window.__consentReadStalled = true;
       return new Promise(() => {});
     };
@@ -46,7 +46,7 @@ test("a stalled consent read reveals the startup notice", async ({ page }) => {
   await page.waitForFunction(() => window.__consentReadStalled === true);
   await expect(page.locator("#app")).toHaveAttribute("data-workspace-booting", "");
   await page.clock.runFor(6000);
-  await expect(page.locator("#workspace-boot-fallback")).toHaveText("qz is still starting. Wait a moment or reopen the side panel.");
+  await expect(page.locator("#workspace-boot-fallback")).toHaveText("zuri is still starting. Wait a moment or reopen the side panel.");
   await expect(page.locator("#app")).not.toHaveAttribute("data-workspace-booting");
   await expect(page.locator("#app")).toHaveCSS("visibility", "visible");
 });
@@ -65,7 +65,7 @@ test("save failure keeps the card open and supports retry", async ({ page }) => 
   await page.locator("[data-consent-accept]").click();
   await expect(page.locator("[data-consent-error]")).toHaveText("Could not save your choice. Try again.");
   await expect(page.locator("[data-consent-accept]")).toBeEnabled();
-  expect(await page.evaluate(() => window.__qzPostedMessages)).toEqual([]);
+  expect(await page.evaluate(() => window.__zuriPostedMessages)).toEqual([]);
   await page.locator("[data-consent-accept]").click();
   await expect(page.locator(".data-consent")).toHaveCount(0);
 });
@@ -75,7 +75,7 @@ test("later closes the panel without accepting, and reopening still asks", async
   await setup(page);
   await page.locator("[data-consent-later]").click();
   expect(await page.evaluate(() => window.__closed)).toBe(true);
-  expect(await page.evaluate(() => localStorage.getItem("__qz_test_consent"))).toBeNull();
+  expect(await page.evaluate(() => localStorage.getItem("__zuri_test_consent"))).toBeNull();
   await page.reload();
   await expect(page.locator(".data-consent")).toBeVisible();
 });

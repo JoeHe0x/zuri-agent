@@ -6,7 +6,7 @@ async function installContentScript(page) {
   await page.evaluate(() => {
     const maps = [];
     const Original = Map;
-    window.__qzMaps = maps;
+    window.__zuriMaps = maps;
     window.Map = class extends Original {
       constructor(...args) {
         super(...args);
@@ -17,21 +17,21 @@ async function installContentScript(page) {
     Object.defineProperty(window.chrome, "runtime", {
       configurable: true,
       value: {
-        getManifest: () => ({ name: "Qingzhou Test", version: "0.0.0" }),
+        getManifest: () => ({ name: "Zuri Test", version: "0.0.0" }),
         onMessage: { addListener() {}, removeListener() {} },
         sendMessage: async () => ({ ok: true }),
       },
     });
   });
   await page.addScriptTag({ url: testAssetUrl("extension/content/content-script.js") });
-  await expect.poll(() => page.evaluate(() => window.__QZ_CONTENT_READY)).toBe(true);
+  await expect.poll(() => page.evaluate(() => window.__ZURI_CONTENT_READY)).toBe(true);
 }
 
 test("rich-text fill roots are released and do not keep disconnected elements", async ({ page }) => {
   await installContentScript(page);
   const report = await page.evaluate(async () => {
-    const invoke = (node, payload) => window.__qzInvoke(node, payload);
-    const book = () => (window.__qzMaps || []).find(item => [...item.keys()].some(key => String(key).startsWith("fill:")));
+    const invoke = (node, payload) => window.__zuriInvoke(node, payload);
+    const book = () => (window.__zuriMaps || []).find(item => [...item.keys()].some(key => String(key).startsWith("fill:")));
     const host = document.querySelector("#rich");
     const child = host.querySelector("#child");
     await invoke(child, { action: "inspectElement", editingHost: true, fillToken: "fill:keep" });

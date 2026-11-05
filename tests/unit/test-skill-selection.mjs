@@ -5,7 +5,7 @@ import { readFile } from 'node:fs/promises';
 import vm from 'node:vm';
 import { selectSkillResults } from '../../src/background/skills/skill-selection.js';
 import { parseSkillManifest } from '../../src/shared/skills/skill-manifest.js';
-import { QINGZHOU_SKILL_SCHEMA_VERSION } from '../../src/shared/skills/skill-utils.js';
+import { ZURI_SKILL_SCHEMA_VERSION } from '../../src/shared/skills/skill-utils.js';
 import { withLanguage } from '../../src/shared/i18n/index.js';
 import { issueToolEffects, consumeToolEffects } from '../../src/background/tools/effects.js';
 
@@ -101,7 +101,7 @@ test('default titles and errors retain the run language across human waiting', a
 });
 
 test('only top-level result selection is accepted and explicit contracts survive normalization', () => {
-  const parse = candidate => parseSkillManifest(JSON.stringify({ format: 'qingzhou.plugin', schemaVersion: 1, id: 'selection',
+  const parse = candidate => parseSkillManifest(JSON.stringify({ format: 'zuri.plugin', schemaVersion: 1, id: 'selection',
     tools: [{ name: 'choose', runtime: 'inner', script: 'scripts/choose.js', renderer: candidate }] }), { name: 'selection' });
   const valid = parse({ ...renderer, selectionMode: 'single', required: false });
   assert.equal(valid.diagnostics.length, 0);
@@ -132,9 +132,9 @@ test('real tool runtime stops collection timeout before human wait, isolates Ses
   const waitModule = new URL('../../src/capabilities/wait/tools.ts', import.meta.url).href;
   const catalog = `data:text/javascript;base64,${Buffer.from(`
     import waits from ${JSON.stringify(waitModule)};
-    export default [{id:'selection-fixture', setup:qz => {
-      waits(qz);
-      qz.registerTool({ name:'run_skill_script', parameters:{type:'object',properties:{}}, timeout:0,
+    export default [{id:'selection-fixture', setup:zuri => {
+      waits(zuri);
+      zuri.registerTool({ name:'run_skill_script', parameters:{type:'object',properties:{}}, timeout:0,
         execute: async args => { if(args.args.slow) await new Promise(resolve=>setTimeout(resolve,200));
           return {ok:true,hasResult:true,result:{jobs:args.args.bad?[{}]:${JSON.stringify(jobs)}}}; }
       });
@@ -146,8 +146,8 @@ test('real tool runtime stops collection timeout before human wait, isolates Ses
   const { createToolRuntime } = await import('../../src/background/tools/runtime.js');
   const { createSessionSupervisor } = await import('../../src/background/session/supervisor.js');
   const { prepareSkillToolRegistryFromSkills } = await import('../../src/background/skills/skill-tool-runtime.js');
-  const snapshot = prepareSkillToolRegistryFromSkills([{ name: 'selection', scope: 'resident', format: 'qingzhou.skill', schemaVersion: QINGZHOU_SKILL_SCHEMA_VERSION,
-    resources: [{ path: 'plugin.json', type: 'json', content: JSON.stringify({ format: 'qingzhou.plugin', schemaVersion: 1, id: 'selection',
+  const snapshot = prepareSkillToolRegistryFromSkills([{ name: 'selection', scope: 'resident', format: 'zuri.skill', schemaVersion: ZURI_SKILL_SCHEMA_VERSION,
+    resources: [{ path: 'plugin.json', type: 'json', content: JSON.stringify({ format: 'zuri.plugin', schemaVersion: 1, id: 'selection',
       tools: [{ name: 'choose', runtime: 'inner', script: 'scripts/choose.js', parameters: { type: 'object', properties: { slow: { type: 'boolean' }, bad: { type: 'boolean' } } }, renderer }] }) },
     { path: 'scripts/choose.js', type: 'script', content: 'async () => ({})' }] }]);
   const supervisor = createSessionSupervisor({ createAgent: () => ({ getRunState: () => ({ runId: 'run' }), abort() {} }) });

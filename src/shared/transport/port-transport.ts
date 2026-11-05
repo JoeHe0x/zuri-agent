@@ -4,7 +4,7 @@ import type { PreparedMessage, WireMessage } from "./message-codec.js";
 import { createReceiveBudget } from "./transfer-budget.js";
 import type { ReceiveBudget, TransferBudget } from "./transfer-budget.js";
 
-const MARKER = "__qz_transport__";
+const MARKER = "__zuri_transport__";
 const VERSION = 1;
 type Timer = ReturnType<typeof setTimeout>;
 export interface PortTransportLimits {

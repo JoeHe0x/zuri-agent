@@ -13,7 +13,7 @@ import {
 
 const diagnostics = [];
 const plugin = normalizeSkillManifest({
-  format: "qingzhou.plugin",
+  format: "zuri.plugin",
   schemaVersion: 1,
   id: "settings-example",
   displayName: "设置示例",

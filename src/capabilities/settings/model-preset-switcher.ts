@@ -150,7 +150,7 @@ export function createModelPresetSwitcher(options: PresetSwitcherOptions = {}) {
       const item = document.createElement("button");
       item.id = `model-preset-switcher-option-${index}`;
       item.type = "button";
-      item.className = "qz-menu-item model-preset-switcher-item";
+      item.className = "zuri-menu-item model-preset-switcher-item";
       item.dataset.modelPresetIndex = String(index);
       item.setAttribute("role", "option");
       item.setAttribute("aria-selected", String(index === activeIndex));

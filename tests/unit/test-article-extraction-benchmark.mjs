@@ -195,9 +195,9 @@ test("Markdown quality analyzer validates GFM AST, semantic round trips, and pag
 
 test("benchmark-only extractor instrumentation exposes all candidates and clears forced state", async t => {
   const source = readFileSync(articleExtractorScript, "utf8");
-  const anchor = "host.QingzhouArticleExtractor = Object.freeze({ extract });";
+  const anchor = "host.ZuriArticleExtractor = Object.freeze({ extract });";
   assert.equal(source.split(anchor).length - 1, 1, "the benchmark seam must have one unambiguous anchor");
-  assert.doesNotMatch(source, /__qingzhouArticleBenchmark/, "the production source must not expose benchmark diagnostics");
+  assert.doesNotMatch(source, /__zuriArticleBenchmark/, "the production source must not expose benchmark diagnostics");
   assert.throws(() => instrumentArticleExtractorSource(""), /found 0/);
   assert.throws(() => instrumentArticleExtractorSource(`${source}\n${anchor}`), /found 2/);
 
@@ -214,11 +214,11 @@ test("benchmark-only extractor instrumentation exposes all candidates and clears
   const instrumentedSource = countedDiagnostic(
     countedDiagnostic(
       instrumentArticleExtractorSource(source),
-      "qingzhouBenchmarkBuildTreeDpDiagnostics",
-      "__qingzhouTreeDiagnosticBuilds",
+      "zuriBenchmarkBuildTreeDpDiagnostics",
+      "__zuriTreeDiagnosticBuilds",
     ),
-    "qingzhouBenchmarkTreeSelectorDiagnostics",
-    "__qingzhouTreeSelectorDiagnostics",
+    "zuriBenchmarkTreeSelectorDiagnostics",
+    "__zuriTreeSelectorDiagnostics",
   );
 
   const browser = await chromium.launch({ headless: true });
@@ -238,12 +238,12 @@ test("benchmark-only extractor instrumentation exposes all candidates and clears
       charThreshold: 0,
       keepClasses: false,
     }).parse();
-    const collectedDefault = globalThis.__qingzhouArticleBenchmark.collect(document, { readability });
-    const collected = globalThis.__qingzhouArticleBenchmark.collect(document, {
+    const collectedDefault = globalThis.__zuriArticleBenchmark.collect(document, { readability });
+    const collected = globalThis.__zuriArticleBenchmark.collect(document, {
       readability,
       provenance: true,
     });
-    const collectedGold = globalThis.__qingzhouArticleBenchmark.collect(document, {
+    const collectedGold = globalThis.__zuriArticleBenchmark.collect(document, {
       readability,
       provenance: true,
       goldSelection: {
@@ -252,7 +252,7 @@ test("benchmark-only extractor instrumentation exposes all candidates and clears
         excludeRegionIds: [],
       },
     });
-    const collectedAnnotationGold = globalThis.__qingzhouArticleBenchmark.collect(document, {
+    const collectedAnnotationGold = globalThis.__zuriArticleBenchmark.collect(document, {
       readability,
       provenance: true,
       goldSelection: {
@@ -261,22 +261,22 @@ test("benchmark-only extractor instrumentation exposes all candidates and clears
         keptAnnotationValues: ["article-main"],
       },
     });
-    globalThis.__qingzhouArticleBenchmark.force("baseline");
-    const forcedStrategy = globalThis.QingzhouArticleExtractor.extract(document, { readability })?.name || "";
-    globalThis.__qingzhouArticleBenchmark.clear();
-    const normalStrategy = globalThis.QingzhouArticleExtractor.extract(document, { readability })?.name || "";
-    globalThis.__qingzhouArticleBenchmark.force("baseline");
+    globalThis.__zuriArticleBenchmark.force("baseline");
+    const forcedStrategy = globalThis.ZuriArticleExtractor.extract(document, { readability })?.name || "";
+    globalThis.__zuriArticleBenchmark.clear();
+    const normalStrategy = globalThis.ZuriArticleExtractor.extract(document, { readability })?.name || "";
+    globalThis.__zuriArticleBenchmark.force("baseline");
     let invalidError = "";
     try {
-      globalThis.__qingzhouArticleBenchmark.force("missing");
+      globalThis.__zuriArticleBenchmark.force("missing");
     } catch (error) {
       invalidError = error.message;
     }
-    const afterInvalidStrategy = globalThis.QingzhouArticleExtractor.extract(document, { readability })?.name || "";
-    const lastExtractText = globalThis.__qingzhouArticleBenchmark.lastExtractText();
-    globalThis.__qingzhouArticleBenchmark.clearLastExtractText();
+    const afterInvalidStrategy = globalThis.ZuriArticleExtractor.extract(document, { readability })?.name || "";
+    const lastExtractText = globalThis.__zuriArticleBenchmark.lastExtractText();
+    globalThis.__zuriArticleBenchmark.clearLastExtractText();
     return {
-      publicKeys: Object.keys(globalThis.QingzhouArticleExtractor),
+      publicKeys: Object.keys(globalThis.ZuriArticleExtractor),
       domUnchanged: document.documentElement.outerHTML === originalDom,
       collectedDefault,
       collected,
@@ -287,7 +287,7 @@ test("benchmark-only extractor instrumentation exposes all candidates and clears
       invalidError,
       afterInvalidStrategy,
       lastExtractText,
-      clearedExtractText: globalThis.__qingzhouArticleBenchmark.lastExtractText(),
+      clearedExtractText: globalThis.__zuriArticleBenchmark.lastExtractText(),
     };
   });
   assert.deepEqual(result.publicKeys, ["extract"]);
@@ -299,12 +299,12 @@ test("benchmark-only extractor instrumentation exposes all candidates and clears
   assert.ok(result.collected.candidates.every(candidate => candidate.features?.chars > 0));
   assert.ok(result.collected.candidates.every(candidate => Number.isFinite(candidate.elapsedMs) && candidate.elapsedMs >= 0));
   const benchmarkDiagnostics = result.collected.diagnostics;
-  assert.equal(benchmarkDiagnostics.schema, "qingzhou.article-extraction-benchmark-diagnostics.v1");
+  assert.equal(benchmarkDiagnostics.schema, "zuri.article-extraction-benchmark-diagnostics.v1");
   assert.equal(benchmarkDiagnostics.candidateProvenanceEnabled, true);
-  assert.equal(benchmarkDiagnostics.forcedTreeDp.schema, "qingzhou.article-extraction-tree-dp-diagnostics.v1");
+  assert.equal(benchmarkDiagnostics.forcedTreeDp.schema, "zuri.article-extraction-tree-dp-diagnostics.v1");
   assert.equal(
     benchmarkDiagnostics.forcedTreeDp.actionModel.schema,
-    "qingzhou.tree-dp-rich-bounded-action.v1",
+    "zuri.tree-dp-rich-bounded-action.v1",
   );
   assert.match(benchmarkDiagnostics.forcedTreeDp.actionModel.packedSha256, /^[a-f0-9]{64}$/);
   assert.ok(["ordinary", "root"].includes(benchmarkDiagnostics.forcedTreeDp.selectedAction));
@@ -320,13 +320,13 @@ test("benchmark-only extractor instrumentation exposes all candidates and clears
     Object.values(benchmarkDiagnostics.forcedTreeDp.includeRootTags).reduce((sum, count) => sum + count, 0),
     benchmarkDiagnostics.forcedTreeDp.includeRootCount,
   );
-  assert.equal(benchmarkDiagnostics.productDecision.schema, "qingzhou.article-extraction-product-decision.v1");
+  assert.equal(benchmarkDiagnostics.productDecision.schema, "zuri.article-extraction-product-decision.v1");
   assert.equal(benchmarkDiagnostics.productDecision.completeRequested, true);
   assert.equal(benchmarkDiagnostics.productDecision.finalStrategy, result.collected.currentStrategy);
   assert.match(benchmarkDiagnostics.productDecision.preTreeLegacy.sourceText, /这段中心正文/);
   assert.equal(typeof benchmarkDiagnostics.productDecision.hanDominant, "boolean");
   const provenance = benchmarkDiagnostics.provenance;
-  assert.equal(provenance.schema, "qingzhou.article-extraction-provenance.v1");
+  assert.equal(provenance.schema, "zuri.article-extraction-provenance.v1");
   assert.equal(provenance.coordinate, "prepared-dom-nonempty-text-node-preorder-v1");
   assert.equal(provenance.rangeEncoding, "zero-based-half-open");
   assert.ok(provenance.sourceUnitCount > 0);
@@ -404,7 +404,7 @@ test("benchmark-only extractor instrumentation exposes all candidates and clears
       && typeof text === "string"
   )));
   const goldProvenance = result.collectedGold.diagnostics.provenance;
-  assert.equal(goldProvenance.gold.schema, "qingzhou.article-extraction-tree-dp-gold-selection.v1");
+  assert.equal(goldProvenance.gold.schema, "zuri.article-extraction-tree-dp-gold-selection.v1");
   assert.equal(goldProvenance.gold.status, "extract");
   assert.equal(goldProvenance.gold.requestedInclude, 1);
   assert.equal(goldProvenance.gold.resolvedInclude, 1);
@@ -415,7 +415,7 @@ test("benchmark-only extractor instrumentation exposes all candidates and clears
   const annotationGold = result.collectedAnnotationGold.diagnostics.provenance;
   assert.equal(
     annotationGold.gold.schema,
-    "qingzhou.article-extraction-annotation-gold-selection.v1",
+    "zuri.article-extraction-annotation-gold-selection.v1",
   );
   assert.equal(annotationGold.gold.annotationAttribute, "data-anno-uid");
   assert.equal(annotationGold.gold.requestedValues, 1);
@@ -553,7 +553,7 @@ test("benchmark-only extractor instrumentation exposes all candidates and clears
   const repeatedUnit = "重复来源单元必须保持未知，不能因为文本相同就被当成确定的保留票。".repeat(10);
   const ambiguousReadability = await page.evaluate((text) => {
     document.body.innerHTML = `<main><p>${text}</p><p>${text}</p></main>`;
-    return globalThis.__qingzhouArticleBenchmark.collect(document, {
+    return globalThis.__zuriArticleBenchmark.collect(document, {
       readability: {
         content: `<article><p>${text}</p></article>`,
         textContent: text,
@@ -586,27 +586,27 @@ test("benchmark-only extractor instrumentation exposes all candidates and clears
   const rescueHtml = `<header><nav>${navigation}</nav></header><main class="main-content">${cards}</main>`;
   const rescueDiagnostics = await page.evaluate((html) => {
     document.body.innerHTML = html;
-    globalThis.__qingzhouTreeDiagnosticBuilds = 0;
-    globalThis.__qingzhouTreeSelectorDiagnostics = 0;
+    globalThis.__zuriTreeDiagnosticBuilds = 0;
+    globalThis.__zuriTreeSelectorDiagnostics = 0;
     const firstCard = document.querySelector(".result-card");
     const readability = {
       content: firstCard.outerHTML,
       textContent: firstCard.innerText,
     };
-    const normal = globalThis.QingzhouArticleExtractor.extract(document, { readability, complete: true });
+    const normal = globalThis.ZuriArticleExtractor.extract(document, { readability, complete: true });
     const normalDiagnosticCalls = {
-      build: globalThis.__qingzhouTreeDiagnosticBuilds,
-      selector: globalThis.__qingzhouTreeSelectorDiagnostics,
+      build: globalThis.__zuriTreeDiagnosticBuilds,
+      selector: globalThis.__zuriTreeSelectorDiagnostics,
     };
-    const summary = globalThis.__qingzhouArticleBenchmark.collect(document, { readability });
+    const summary = globalThis.__zuriArticleBenchmark.collect(document, { readability });
     return {
       ...summary.diagnostics.productDecision,
       normalStrategy: normal?.name || "",
       normalText: normal?.text || "",
       normalDiagnosticCalls,
       collectDiagnosticCalls: {
-        build: globalThis.__qingzhouTreeDiagnosticBuilds,
-        selector: globalThis.__qingzhouTreeSelectorDiagnostics,
+        build: globalThis.__zuriTreeDiagnosticBuilds,
+        selector: globalThis.__zuriTreeSelectorDiagnostics,
       },
     };
   }, rescueHtml);
@@ -635,7 +635,7 @@ test("benchmark-only extractor instrumentation exposes all candidates and clears
     await rawPage.addScriptTag({ path: articleExtractorScript });
     const raw = await rawPage.evaluate(() => {
       const firstCard = document.querySelector(".result-card");
-      const candidate = globalThis.QingzhouArticleExtractor.extract(document, {
+      const candidate = globalThis.ZuriArticleExtractor.extract(document, {
         readability: { content: firstCard.outerHTML, textContent: firstCard.innerText },
         complete: true,
       });
@@ -660,7 +660,7 @@ test("benchmark-only extractor instrumentation exposes all candidates and clears
     document.body.innerHTML = `<header class="site-header"><nav><a href="/">首页</a></nav></header>
       <main class="catalog-content">${entries}</main><footer class="site-footer">版权声明</footer>`;
     const firstEntry = document.querySelector(".catalog-entry");
-    return globalThis.__qingzhouArticleBenchmark.collect(document, {
+    return globalThis.__zuriArticleBenchmark.collect(document, {
       readability: {
         content: firstEntry.outerHTML,
         textContent: firstEntry.innerText,
@@ -681,7 +681,7 @@ test("benchmark-only extractor instrumentation exposes all candidates and clears
     const unrelated = unrelatedSeed
       .repeat(Math.ceil(firstEntry.innerText.length / unrelatedSeed.length))
       .slice(0, firstEntry.innerText.length);
-    return globalThis.__qingzhouArticleBenchmark.collect(document, {
+    return globalThis.__zuriArticleBenchmark.collect(document, {
       readability: {
         content: `<article><p>${unrelated}</p></article>`,
         textContent: unrelated,
@@ -699,9 +699,9 @@ test("benchmark-only extractor instrumentation exposes all candidates and clears
 
 test("benchmark-only content instrumentation exposes the product article serializer", async t => {
   const source = readFileSync(contentScript, "utf8");
-  const anchor = "host.__QZ_CONTENT_READY = true;";
+  const anchor = "host.__ZURI_CONTENT_READY = true;";
   assert.equal(source.split(anchor).length - 1, 1, "the benchmark seam must have one unambiguous anchor");
-  assert.doesNotMatch(source, /__qingzhouContentBenchmark/, "the production content script must not expose benchmark APIs");
+  assert.doesNotMatch(source, /__zuriContentBenchmark/, "the production content script must not expose benchmark APIs");
   assert.throws(() => instrumentContentScriptSource(""), /found 0/);
   assert.throws(() => instrumentContentScriptSource(`${source}\n${anchor}`), /found 2/);
 
@@ -717,14 +717,14 @@ test("benchmark-only content instrumentation exposes the product article seriali
     };
   });
   await page.addScriptTag({ content: instrumentContentScriptSource(source) });
-  const markdown = await page.evaluate(() => globalThis.__qingzhouContentBenchmark.serializeArticleContent({
+  const markdown = await page.evaluate(() => globalThis.__zuriContentBenchmark.serializeArticleContent({
     content: [
       '<article><h1>产品序列化</h1>',
       '<img src="/placeholder.jpg" data-src="https://cdn.example.com/real.jpg" alt="真实图片">',
-      '<table><caption>复杂表格</caption><tr><th rowspan="2">名称</th><th>值</th></tr><tr><td>轻舟</td></tr></table>',
+      '<table><caption>复杂表格</caption><tr><th rowspan="2">名称</th><th>值</th></tr><tr><td>Zuri</td></tr></table>',
       '</article>',
     ].join(""),
-    text: "产品序列化 真实图片 复杂表格 名称 值 轻舟",
+    text: "产品序列化 真实图片 复杂表格 名称 值 Zuri",
   }));
   assert.match(markdown, /!\[真实图片\]\(https:\/\/cdn\.example\.com\/real\.jpg\)/, "lazy image normalization must use data-src");
   assert.doesNotMatch(markdown, /placeholder\.jpg/);
@@ -733,7 +733,7 @@ test("benchmark-only content instrumentation exposes the product article seriali
 });
 
 test("Chinese real-world extraction plan is a deterministic 300-page suite", () => {
-  assert.equal(core.schema, "qingzhou.article-extraction-sites.v1");
+  assert.equal(core.schema, "zuri.article-extraction-sites.v1");
   assert.equal(core.sampleTarget, 300);
   assert.equal(core.sites.length, 25);
   assert.equal(new Set(core.sites.map(site => site.id)).size, core.sites.length);
@@ -753,7 +753,7 @@ test("Chinese real-world extraction plan is a deterministic 300-page suite", () 
 });
 
 test("Chinese real-world v2 increment adds 200 diverse pages without reusing the v1 site plan", () => {
-  assert.equal(increment.schema, "qingzhou.article-extraction-sites.v1");
+  assert.equal(increment.schema, "zuri.article-extraction-sites.v1");
   assert.equal(increment.sampleTarget, 200);
   assert.equal(increment.sites.length, 48);
   assert.equal(new Set(increment.sites.map(site => site.id)).size, increment.sites.length);
@@ -818,7 +818,7 @@ test("Chinese real-world v3 expansion freezes 1,000 site-disjoint pages into 300
     splitPages,
     label,
   }) => {
-    assert.equal(plan.schema, "qingzhou.article-extraction-sites.v1");
+    assert.equal(plan.schema, "zuri.article-extraction-sites.v1");
     assert.equal(plan.strictSiteQuotas, true, `${label} must not fill one failed site's quota from another site`);
     assert.equal(plan.sampleTarget, target);
     assert.ok(plan.sites.length >= minimumSites, `${label} has only ${plan.sites.length} sites`);
@@ -898,10 +898,10 @@ test("Chinese real-world v3 expansion freezes 1,000 site-disjoint pages into 300
 });
 
 test("upstream parity benchmark keeps three algorithms, independent provenance, and extract-only timings", () => {
-  for (const name of ["legacy-readability", "qingzhou-current", "trafilatura-python"]) {
+  for (const name of ["legacy-readability", "zuri-current", "trafilatura-python"]) {
     assert.match(upstreamComparison, new RegExp(`["]${name}["]`), `${name} is missing`);
   }
-  assert.match(upstreamComparison, /algorithmPairs\s*=\s*\[[\s\S]*legacy-readability[\s\S]*qingzhou-current[\s\S]*trafilatura-python/);
+  assert.match(upstreamComparison, /algorithmPairs\s*=\s*\[[\s\S]*legacy-readability[\s\S]*zuri-current[\s\S]*trafilatura-python/);
   assert.match(upstreamComparison, /createHash\("sha256"\)[\s\S]*digest\.update\(annotationsBytes\)[\s\S]*digest\.update\(relativePath\)[\s\S]*digest\.update\(bytes\)/);
   assert.doesNotMatch(upstreamComparison, /eval_baseline\.json/, "the runner must calculate the combined corpus digest itself");
   assert.match(upstreamComparison, /kind:\s*"extract-only"[\s\S]*meanMs[\s\S]*p50Ms[\s\S]*p95Ms[\s\S]*maxMs/);
@@ -928,7 +928,7 @@ test("reranker all-candidate contract includes the shipped Tree-DP candidate", t
 });
 
 test("real-world corpus compose creates a self-contained, deterministic, content-addressed corpus", t => {
-  const fixtureRoot = mkdtempSync(join(tmpdir(), "qingzhou-corpus-compose-"));
+  const fixtureRoot = mkdtempSync(join(tmpdir(), "zuri-corpus-compose-"));
   t.after(() => rmSync(fixtureRoot, { recursive: true, force: true }));
   const baseDirectory = join(fixtureRoot, "base");
   const incrementDirectory = join(fixtureRoot, "increment");
@@ -938,7 +938,7 @@ test("real-world corpus compose creates a self-contained, deterministic, content
   ];
   const incrementSamples = [fixtureSample(incrementDirectory, "gamma", "https://example.net/c")];
   writeFixtureCorpus(baseDirectory, {
-    schema: "qingzhou.article-extraction-corpus.v1",
+    schema: "zuri.article-extraction-corpus.v1",
     suite: "core",
     capturedAt: "2026-08-13T00:00:00.000Z",
     config: "base-plan.json",
@@ -950,7 +950,7 @@ test("real-world corpus compose creates a self-contained, deterministic, content
     provenance: { capture: "base" },
   });
   writeFixtureCorpus(incrementDirectory, {
-    schema: "qingzhou.article-extraction-corpus.v1",
+    schema: "zuri.article-extraction-corpus.v1",
     suite: "core",
     capturedAt: "2026-08-14T00:00:00.000Z",
     config: "increment-plan.json",
@@ -996,7 +996,7 @@ test("real-world corpus compose creates a self-contained, deterministic, content
 });
 
 test("real-world corpus compose identifies one final canonical URL as one page even when DOM hashes differ", t => {
-  const fixtureRoot = mkdtempSync(join(tmpdir(), "qingzhou-corpus-compose-short-"));
+  const fixtureRoot = mkdtempSync(join(tmpdir(), "zuri-corpus-compose-short-"));
   t.after(() => rmSync(fixtureRoot, { recursive: true, force: true }));
   const baseDirectory = join(fixtureRoot, "base");
   const incrementDirectory = join(fixtureRoot, "increment");
@@ -1004,7 +1004,7 @@ test("real-world corpus compose identifies one final canonical URL as one page e
   const incrementSample = fixtureSample(incrementDirectory, "same-increment-dom", "https://example.com/article?utm_source=increment#two");
   assert.notEqual(baseSample.inputSha256, incrementSample.inputSha256, "the fixture must represent different hydrated DOM bytes");
   const manifest = samples => ({
-    schema: "qingzhou.article-extraction-corpus.v1",
+    schema: "zuri.article-extraction-corpus.v1",
     suite: "core",
     capturedAt: "2026-08-14T00:00:00.000Z",
     target: 1,
@@ -1022,7 +1022,7 @@ test("real-world corpus compose identifies one final canonical URL as one page e
 });
 
 test("real-world corpus compose uses ordered supplements to fill URL-deduplication holes", t => {
-  const fixtureRoot = mkdtempSync(join(tmpdir(), "qingzhou-corpus-compose-supplement-"));
+  const fixtureRoot = mkdtempSync(join(tmpdir(), "zuri-corpus-compose-supplement-"));
   t.after(() => rmSync(fixtureRoot, { recursive: true, force: true }));
   const baseDirectory = join(fixtureRoot, "base");
   const incrementDirectory = join(fixtureRoot, "increment");
@@ -1032,7 +1032,7 @@ test("real-world corpus compose uses ordered supplements to fill URL-deduplicati
   const supplementSample = fixtureSample(supplementDirectory, "replacement", "https://example.net/replacement");
   assert.notEqual(baseSample.inputSha256, incrementDuplicate.inputSha256);
   const manifest = samples => ({
-    schema: "qingzhou.article-extraction-corpus.v1",
+    schema: "zuri.article-extraction-corpus.v1",
     suite: "core",
     capturedAt: "2026-08-14T00:00:00.000Z",
     target: 1,
@@ -1057,7 +1057,7 @@ test("real-world corpus compose uses ordered supplements to fill URL-deduplicati
 });
 
 test("real-world corpus compose fills v3 shortfalls only from the same split, vertical, and discovered type", t => {
-  const fixtureRoot = mkdtempSync(join(tmpdir(), "qingzhou-corpus-compose-cells-"));
+  const fixtureRoot = mkdtempSync(join(tmpdir(), "zuri-corpus-compose-cells-"));
   t.after(() => rmSync(fixtureRoot, { recursive: true, force: true }));
   const baseDirectory = join(fixtureRoot, "base");
   const incrementDirectory = join(fixtureRoot, "increment");
@@ -1120,7 +1120,7 @@ test("real-world corpus compose fills v3 shortfalls only from the same split, ve
     { metadata: testPlace },
   );
   writeFixtureCorpus(baseDirectory, {
-    schema: "qingzhou.article-extraction-corpus.v1",
+    schema: "zuri.article-extraction-corpus.v1",
     suite: "core",
     target: 1,
     captured: 1,
@@ -1128,7 +1128,7 @@ test("real-world corpus compose fills v3 shortfalls only from the same split, ve
     failures: [],
   });
   writeFixtureCorpus(incrementDirectory, {
-    schema: "qingzhou.article-extraction-corpus.v1",
+    schema: "zuri.article-extraction-corpus.v1",
     suite: "core",
     target: 4,
     captured: 4,
@@ -1143,7 +1143,7 @@ test("real-world corpus compose fills v3 shortfalls only from the same split, ve
     },
   });
   writeFixtureCorpus(supplementDirectory, {
-    schema: "qingzhou.article-extraction-corpus.v1",
+    schema: "zuri.article-extraction-corpus.v1",
     suite: "core",
     target: 5,
     captured: 5,
@@ -1187,7 +1187,7 @@ test("real-world corpus compose fills v3 shortfalls only from the same split, ve
     { metadata: train },
   );
   writeFixtureCorpus(wrongOnlyDirectory, {
-    schema: "qingzhou.article-extraction-corpus.v1",
+    schema: "zuri.article-extraction-corpus.v1",
     suite: "core",
     target: 1,
     captured: 1,
@@ -1202,14 +1202,14 @@ test("real-world corpus compose fills v3 shortfalls only from the same split, ve
 });
 
 test("real-world corpus compose leaves no partial output when supplements remain insufficient", t => {
-  const fixtureRoot = mkdtempSync(join(tmpdir(), "qingzhou-corpus-compose-supplement-short-"));
+  const fixtureRoot = mkdtempSync(join(tmpdir(), "zuri-corpus-compose-supplement-short-"));
   t.after(() => rmSync(fixtureRoot, { recursive: true, force: true }));
   const baseDirectory = join(fixtureRoot, "base");
   const incrementDirectory = join(fixtureRoot, "increment");
   const supplementDirectory = join(fixtureRoot, "supplement");
   const url = "https://example.com/same-page";
   const manifest = samples => ({
-    schema: "qingzhou.article-extraction-corpus.v1",
+    schema: "zuri.article-extraction-corpus.v1",
     suite: "core",
     target: 1,
     captured: samples.length,
@@ -1233,7 +1233,7 @@ test("real-world corpus compose leaves no partial output when supplements remain
 });
 
 test("snapshot sanitization neutralizes object payloads without deleting hydrated fallback content", t => {
-  const fixtureRoot = mkdtempSync(join(tmpdir(), "qingzhou-sanitize-object-"));
+  const fixtureRoot = mkdtempSync(join(tmpdir(), "zuri-sanitize-object-"));
   t.after(() => rmSync(fixtureRoot, { recursive: true, force: true }));
   const corpus = join(fixtureRoot, "corpus");
   mkdirSync(join(corpus, "snapshots"), { recursive: true });
@@ -1242,7 +1242,7 @@ test("snapshot sanitization neutralizes object payloads without deleting hydrate
   const snapshot = `snapshots/${inputSha256}.html`;
   writeFileSync(join(corpus, snapshot), html);
   writeFixtureCorpus(corpus, {
-    schema: "qingzhou.article-extraction-corpus.v1",
+    schema: "zuri.article-extraction-corpus.v1",
     target: 1,
     captured: 1,
     samples: [{ id: "core-0001", siteId: "fixture", inputSha256, snapshot }],

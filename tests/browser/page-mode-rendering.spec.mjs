@@ -10,7 +10,7 @@ for (const language of ["zh-CN", "en", "zh-TW", "ja", "ko", "es", "fr", "de", "p
     await page.addInitScript(installBenchmarkChromeStub, { uiLanguage: language, localeMessages });
     await page.setViewportSize({ width: 320, height: 700 });
     await page.goto("/extension/sidepanel/sidepanel.html", { waitUntil: "domcontentloaded" });
-    await page.waitForFunction(() => Boolean(window.qingzhouConversationBenchmark));
+    await page.waitForFunction(() => Boolean(window.zuriConversationBenchmark));
     for (const colorScheme of ["light", "dark"]) {
       await page.emulateMedia({ colorScheme });
       const results = await page.evaluate(async () => {

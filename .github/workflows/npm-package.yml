@@ -5,7 +5,7 @@ on:
     paths:
       - services/mcp-bridge/**
       - tests/unit/test-*mcp*.mjs
-      - tests/unit/test-qz-*.mjs
+      - tests/unit/test-zuri-*.mjs
       - tests/release/npm-package.mjs
       - tests/runner/**
       - tests/support/observation-timers.mjs
@@ -17,7 +17,7 @@ on:
     paths:
       - services/mcp-bridge/**
       - tests/unit/test-*mcp*.mjs
-      - tests/unit/test-qz-*.mjs
+      - tests/unit/test-zuri-*.mjs
       - tests/release/npm-package.mjs
       - tests/runner/**
       - tests/support/observation-timers.mjs
@@ -106,7 +106,7 @@ jobs:
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         if: runner.os == 'Linux' && matrix.node == '24'
         with:
-          name: qz-npm-${{ github.run_id }}-${{ github.run_attempt }}
+          name: zuri-npm-${{ github.run_id }}-${{ github.run_attempt }}
           path: tests/results/npm/package.tgz
           if-no-files-found: error
           retention-days: 7
@@ -127,6 +127,6 @@ jobs:
           registry-url: https://registry.npmjs.org
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
-          name: qz-npm-${{ github.run_id }}-${{ github.run_attempt }}
+          name: zuri-npm-${{ github.run_id }}-${{ github.run_attempt }}
           path: npm-artifact
       - run: npm publish npm-artifact/package.tgz --access public --registry=https://registry.npmjs.org

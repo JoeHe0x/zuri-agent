@@ -10,7 +10,7 @@ import { createTestAgentOptions } from '../support/agent-services.mjs';
 
 // v3 shape is preserved from the initial repository's session-codec (17c8d2cd).
 const legacyRecord = () => ({
-  type: 'qz-browser-agent-session', version: 3,
+  type: 'zuri-agent-session', version: 3,
   conversation: { type: 'conversation', version: 1, entries: [
     { type: 'message', id: 'entry-1', parentId: null, timestamp: '2026-01-01 12:00:00', message: { role: 'user', content: 'old question' } },
     { type: 'message', id: 'entry-2', parentId: 'entry-1', timestamp: '2026-01-01 12:00:01', message: { role: 'assistant', content: 'old answer' } },

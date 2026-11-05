@@ -9,7 +9,7 @@ import { ensureTestExtension, resolveTestAsset } from "../support/extension-buil
 import { prepareBenchmarkAssets } from "../support/benchmark-assets.mjs";
 
 const root = fileURLToPath(new URL("../../", import.meta.url));
-const temporary = await mkdtemp(join(tmpdir(), "qingzhou-test-assets-"));
+const temporary = await mkdtemp(join(tmpdir(), "zuri-test-assets-"));
 const extensionDir = join(temporary, "extension");
 let server;
 try {
@@ -32,7 +32,7 @@ try {
 
   server = spawn(process.execPath, [join(root, "tests/support/static-server.mjs"), "--port", "0"], {
     cwd: temporary,
-    env: { ...process.env, QINGZHOU_TEST_EXTENSION_DIR: extensionDir },
+    env: { ...process.env, ZURI_TEST_EXTENSION_DIR: extensionDir },
     stdio: ["ignore", "pipe", "pipe"],
   });
   const baseUrl = await new Promise((resolveUrl, reject) => {
@@ -119,7 +119,7 @@ with tempfile.TemporaryDirectory() as temporary:
         (output / "manifest.json").write_text(json.dumps({"manifest_version": 3}))
         (output / "probe.js").write_text("export const source = 'compiled';")
         (output.parent / "outside.js").write_text("private fixture")
-    with patch.dict(os.environ, {"QINGZHOU_TEST_EXTENSION_DIR": ""}), patch.object(assets, "TemporaryDirectory", temporary_build), patch.object(assets.subprocess, "run", build), patch("socket.getfqdn", side_effect=AssertionError("local fixture must not resolve DNS")):
+    with patch.dict(os.environ, {"ZURI_TEST_EXTENSION_DIR": ""}), patch.object(assets, "TemporaryDirectory", temporary_build), patch.object(assets.subprocess, "run", build), patch("socket.getfqdn", side_effect=AssertionError("local fixture must not resolve DNS")):
         with assets.serve_repository() as base:
             assert assets.extension_directory() == assets.extension_directory().resolve()
             assert urlopen(base + "/extension/probe.js").read() == b"export const source = 'compiled';"

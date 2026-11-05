@@ -23,7 +23,7 @@ const skills = listBuiltinSkills();
 // Foreign descriptions deliberately stay Chinese even in an English runtime.
 const foreign = normalizeModernSkill({ name: 'foreign-guide', description: '用户的说明', content: '# 用户的内容',
   scope: 'global', resources: [{ path: 'plugin.json', type: 'json', content: JSON.stringify({
-    format: 'qingzhou.plugin', schemaVersion: 1, id: 'foreign-guide', tools: [{ name: 'echo',
+    format: 'zuri.plugin', schemaVersion: 1, id: 'foreign-guide', tools: [{ name: 'echo',
       title: '用户工具', description: '用户定义的工具说明', script: 'scripts/echo.js',
       parameters: { type: 'object', properties: { text: { type: 'string', description: '用户的参数说明' } }, required: ['text'] },
     }],
@@ -41,7 +41,7 @@ const registered = names.map(name => {
   return { name, title: tool.title, description: tool.description, parameters: tool.parameters,
     noImages: tool.model?.noImages, imagePrompt: tool.model?.imagePrompt };
 });
-const aliases = ['技能工作台', 'Skill workbench', '文档处理', 'Document processing', 'Agent管理', '轻舟管理', 'Qingzhou settings', 'qz settings', 'MCP 接入', 'MCP integration', '站点技能生成器', 'Site Skill Builder'];
+const aliases = ['技能工作台', 'Skill workbench', '文档处理', 'Document processing', 'Agent管理', 'Zuri管理', 'Zuri settings', 'zuri settings', 'MCP 接入', 'MCP integration', '站点技能生成器', 'Site Skill Builder'];
 process.stdout.write(JSON.stringify({
   registered,
   schemas: tools.getToolSchemas(options),

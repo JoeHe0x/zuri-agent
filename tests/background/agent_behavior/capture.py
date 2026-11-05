@@ -27,13 +27,13 @@ class CaseCapture:
         if not directory:
             return None
         # The Node launcher passes only the selected credential, never the whole local env file.
-        key = os.environ.get("QINGZHOU_CAPTURE_API_KEY", "").strip()
-        key_file = os.environ.get("QINGZHOU_CAPTURE_API_KEY_FILE", "")
+        key = os.environ.get("ZURI_CAPTURE_API_KEY", "").strip()
+        key_file = os.environ.get("ZURI_CAPTURE_API_KEY_FILE", "")
         if not key and key_file:
             key = Path(key_file).read_text(encoding="utf-8").strip()
         if not key:
-            raise ValueError("--capture-dir requires QINGZHOU_CAPTURE_API_KEY or QINGZHOU_CAPTURE_API_KEY_FILE for redaction")
-        return cls(directory, (key, os.environ.get("QINGZHOU_MCP_BRIDGE_TOKEN", "")))
+            raise ValueError("--capture-dir requires ZURI_CAPTURE_API_KEY or ZURI_CAPTURE_API_KEY_FILE for redaction")
+        return cls(directory, (key, os.environ.get("ZURI_MCP_BRIDGE_TOKEN", "")))
 
     def redact(self, value: Any) -> Any:
         if isinstance(value, dict):

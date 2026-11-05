@@ -18,7 +18,7 @@ export const browserPermissionMessages = defineMessages("browser-permissions", {
   "name.history": { "zh-CN": "浏览历史", en: "browsing history" },
   "name.desktopCapture": { "zh-CN": "屏幕录制", en: "screen recording" },
   "name.downloads.open": { "zh-CN": "打开下载文件", en: "opening downloaded files" },
-  required: { "zh-CN": "请在轻舟侧边栏中授权 {permission} 后重试。", en: "Allow {permission} in the qz side panel, then retry." },
+  required: { "zh-CN": "请在Zuri侧边栏中授权 {permission} 后重试。", en: "Allow {permission} in the zuri side panel, then retry." },
   denied: { "zh-CN": "未获得 {permission} 权限，操作已取消。需要时可重试并授权。", en: "Permission for {permission} was not granted. The action was cancelled. Retry to allow access." },
 });
 

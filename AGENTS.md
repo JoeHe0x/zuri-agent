@@ -46,7 +46,7 @@ loads the compiled extension from `dist/extension/`.
 
 ## Tools and capabilities
 
-- Register build-time tools with `qz.registerTool(...)` through a capability's `tools` export.
+- Register build-time tools with `zuri.registerTool(...)` through a capability's `tools` export.
   Execution, safety, and permission hosts live in `src/background/tools/`. Skill tools use the same
   protocols through `background/skills/skill-tool-runtime.ts`.
 - Contribute embedded Skills through `skills` and trusted host execution through `skillHosts`.
@@ -70,11 +70,11 @@ loads the compiled extension from `dist/extension/`.
   by stable turn/tool identity. Preserve them through rebuilds and single-tool → timeline → family upgrades.
 - Connect features through bounded ports in `features/app/workspace-composition.ts`. Capabilities own
   their UI, templates, styles, and renderers. Cross-package cooperation uses explicit optional contracts.
-- Reuse `qz-*` controls, tokens, popovers, and tool profiles in both color schemes. `sidepanel.css`
+- Reuse `zuri-*` controls, tokens, popovers, and tool profiles in both color schemes. `sidepanel.css`
   assembles the selected theme and module styles; HTML exports embed the active skin.
 - Follow the [CSS contract](docs/design-system.md), implemented by `src/themes/default/`. Keep Tailwind's
   `theme → base → vendor → components → utilities` layers and import its utilities with the project theme.
-  Use complete static `qz:` class names. A deliberate visual migration, when the task asks for one,
+  Use complete static `zuri:` class names. A deliberate visual migration, when the task asks for one,
   compares actual old/new DOM with zero pixel difference; ordinary UI and copy changes skip this.
 
 ## Source layout
@@ -171,7 +171,7 @@ Choose the verification tier from the size of the change:
 - **Coverage**: run `npm run verify:coverage` (typecheck and `npm test -- --all --coverage`) only
   for releases or when the user explicitly asks. `--all` does not select Firefox.
 
-For a full Chrome browser run, set `QINGZHOU_PLAYWRIGHT_WORKERS` to the available core count
+For a full Chrome browser run, set `ZURI_PLAYWRIGHT_WORKERS` to the available core count
 (`$(nproc)` on Linux). The default worker count is `ceil(availableParallelism() / 3)`, capped at 4.
 An explicit value is clamped to 1-16.
 

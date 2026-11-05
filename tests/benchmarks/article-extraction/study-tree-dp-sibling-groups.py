@@ -138,7 +138,7 @@ def load_pages(directory: Path) -> tuple[list[TRAINER.Page], dict]:
     if not report_path.exists():
         raise ValueError(f"incomplete export: {report_path} is missing")
     report = json.loads(report_path.read_text(encoding="utf8"))
-    if report.get("schema") != "qingzhou.article-extraction-tree-dp-training-export.v2":
+    if report.get("schema") != "zuri.article-extraction-tree-dp-training-export.v2":
         raise ValueError(f"unexpected export schema: {report.get('schema')}")
     if report.get("testOpened") is not False:
         raise ValueError("refusing an export that opened the Chinese test split")
@@ -682,7 +682,7 @@ def main() -> int:
         })
         print(json.dumps({"fold": fold, "summary": fold_summary}, ensure_ascii=False), flush=True)
     report = {
-        "schema": "qingzhou.tree-dp-sibling-group-study.v1",
+        "schema": "zuri.tree-dp-sibling-group-study.v1",
         "protocol": {
             "trainingSplits": ["base", "train"],
             "grouping": "siteFamily",

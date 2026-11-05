@@ -2,7 +2,7 @@ import { expect, test } from "./fixtures.mjs";
 import { createScreenActionHarness } from "./screen-action-harness.mjs";
 
 // Preserve the established browser for native controls and clipboard input.
-test.use({ channel: process.env.QINGZHOU_PLAYWRIGHT_CHANNEL || "chromium-headless-shell" });
+test.use({ channel: process.env.ZURI_PLAYWRIGHT_CHANNEL || "chromium-headless-shell" });
 
 const FIXTURE_URL = "/tests/fixtures/screen-action-structures.html";
 const STATE_READER = "__readScreenStructureState";
@@ -289,11 +289,11 @@ test.describe("act_on_screen · structural edge cases in real Chrome", () => {
         action: "type",
         returnScreenshot: false,
         ...controlledPoint,
-        text: "mixed-轻舟",
+        text: "mixed-Zuri",
         replace: true,
       }));
       const controlledState = await harness.state(STATE_READER);
-      expect(controlledState.controlledValue).toBe("MIXED-轻舟");
+      expect(controlledState.controlledValue).toBe("MIXED-Zuri");
       expect(controlledState.controlledInputs).toBeGreaterThan(0);
 
       const readonlyPoint = await harness.point("#readonly-target");

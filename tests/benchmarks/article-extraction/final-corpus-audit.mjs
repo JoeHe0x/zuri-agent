@@ -329,7 +329,7 @@ export function auditFinalCorpus({ corpusDir, baseDir, sourceDirs = [], policy }
   }
 
   return {
-    schema: "qingzhou.article-extraction-final-corpus-audit.v1",
+    schema: "zuri.article-extraction-final-corpus-audit.v1",
     generatedAt: new Date().toISOString(),
     corpus: {
       directory: corpus.corpusDir,

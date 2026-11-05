@@ -1,11 +1,11 @@
 <!doctype html>
 <html><head><meta charset="utf-8"><title>Static component extraction</title>
 <base href="https://example.test/research/">
-<style>qz-article-note, #shadow-host { display:block; } .hidden { display:none; }</style>
+<style>zuri-article-note, #shadow-host { display:block; } .hidden { display:none; }</style>
 </head><body><article id="story">
 <h1>Component research report</h1>
 <p>This research report explains browser support and preserves the evidence in custom components. The main article contains ordinary text, a visible support matrix, relative links and slotted annotations. Reading it must preserve every visible observation without running page component lifecycle callbacks.</p>
-<qz-article-note id="light-note"><p>LIGHT-SLOT-EVIDENCE</p></qz-article-note>
+<zuri-article-note id="light-note"><p>LIGHT-SLOT-EVIDENCE</p></zuri-article-note>
 <div id="shadow-host"></div>
 <p class="hidden">HIDDEN-LIGHT-SECRET</p>
 <p>The final recommendations depend on the support matrix and the annotations. These are content, even though the page implements their presentation with nested custom elements and constructed stylesheets.</p>
@@ -13,7 +13,7 @@
 globalThis.componentCalls = { construct: 0, connect: 0, adopt: 0, disconnect: 0 };
 const sheet = new CSSStyleSheet();
 sheet.replaceSync(':host{display:block}.hidden{display:none}');
-customElements.define('qz-article-note', class extends HTMLElement {
+customElements.define('zuri-article-note', class extends HTMLElement {
   constructor() { super(); componentCalls.construct++; this.attachShadow({mode:'open'}); }
   connectedCallback() {
     componentCalls.connect++;
@@ -25,6 +25,6 @@ customElements.define('qz-article-note', class extends HTMLElement {
   disconnectedCallback() { componentCalls.disconnect++; }
 });
 const outer = document.querySelector('#shadow-host').attachShadow({mode:'open'});
-outer.innerHTML = '<qz-article-note><p>NESTED-SLOT-EVIDENCE</p><qz-article-note><p>DEEP-SLOT-EVIDENCE</p></qz-article-note></qz-article-note>';
+outer.innerHTML = '<zuri-article-note><p>NESTED-SLOT-EVIDENCE</p><zuri-article-note><p>DEEP-SLOT-EVIDENCE</p></zuri-article-note></zuri-article-note>';
 globalThis.componentBaseline = {...componentCalls};
 </script></body></html>

@@ -67,8 +67,8 @@ test("model parameter entries reject ambiguous or kernel-owned fields", () => {
     /temperature 重复/,
   );
   assert.throws(() => parseModelParameterEntries([{ key: "", value: "1" }]), /Key 不能为空/);
-  assert.throws(() => parseModelParameterEntries([{ key: "messages", value: "[]" }]), /由轻舟管理/);
-  assert.throws(() => parseModelParameterEntries([{ key: "__proto__", value: "{}" }]), /由轻舟管理/);
+  assert.throws(() => parseModelParameterEntries([{ key: "messages", value: "[]" }]), /由Zuri管理/);
+  assert.throws(() => parseModelParameterEntries([{ key: "__proto__", value: "{}" }]), /由Zuri管理/);
 });
 
 test("stored model parameters normalize safely and compare independent of key order", () => {
@@ -87,7 +87,7 @@ test("stored model parameters normalize safely and compare independent of key or
   assert.deepEqual(normalizeModelParameters({ model: "evil", temperature: 0.2 }), { temperature: 0.2 });
   assert.throws(
     () => normalizeModelParameters({ tools: [] }, { strict: true }),
-    /tools 由轻舟管理/,
+    /tools 由Zuri管理/,
   );
   assert.throws(
     () => normalizeModelParameters({ temperature: Number.POSITIVE_INFINITY }, { strict: true }),

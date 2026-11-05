@@ -3,7 +3,7 @@
   "tabs.tab": "Вкладка {tabId}",
   "tabs.current": "Текущая",
   "tabs.window": "Окно {windowId}",
-  "tabs.qingzhouTask": "Задача qz",
+  "tabs.zuriTask": "Задача zuri",
   "tabs.organizedInto": "Объединены в «{name}»",
   "tabs.namedTabCount": "Вкладок: {count} · {name}",
   "tabs.groupedTabs": "Вкладок в группах: {count}",

@@ -20,8 +20,8 @@
   background: var(--bg-secondary);
 }
 
-.waiting-card .qz-choice-card {
-  --qz-choice-card-text-scale: var(--chat-text-scale, 1);
+.waiting-card .zuri-choice-card {
+  --zuri-choice-card-text-scale: var(--chat-text-scale, 1);
 }
 
 .waiting-pulse {
@@ -67,7 +67,7 @@
 }
 
 .waiting-field-control {
-  --qz-field-font-size: calc(12px * var(--chat-text-scale, 1));
+  --zuri-field-font-size: calc(12px * var(--chat-text-scale, 1));
   background-color: color-mix(in srgb, var(--field-surface) 82%, transparent);
 }
 
@@ -139,9 +139,9 @@ textarea.waiting-field-control {
 }
 
 .waiting-continue-btn {
-  --qz-control-font-weight: 600;
+  --zuri-control-font-weight: 600;
 }
 
 .waiting-cancel-btn {
-  --qz-control-padding: var(--control-padding-sm);
+  --zuri-control-padding: var(--control-padding-sm);
 }

@@ -13,12 +13,12 @@ test("model list failures silently preserve manual model input", async ({ page }
     listModelsError: "models.dev unavailable",
   });
   await page.goto("/extension/sidepanel/sidepanel.html", { waitUntil: "domcontentloaded" });
-  await page.waitForFunction(() => Boolean(window.qingzhouConversationBenchmark));
+  await page.waitForFunction(() => Boolean(window.zuriConversationBenchmark));
 
   await page.locator("#btn-settings").click();
   const input = page.locator("#cfg-model");
   await expect(input).toHaveValue("deepseek-v4-flash");
-  await page.waitForFunction(() => window.__qzPostedMessages.some(message => message.type === "list_models"));
+  await page.waitForFunction(() => window.__zuriPostedMessages.some(message => message.type === "list_models"));
   await expect(input).not.toHaveAttribute("title");
   await expect(page.getByText("models.dev unavailable")).toHaveCount(0);
   await expect(page.getByText(/模型列表获取失败|未获取到模型列表/u)).toHaveCount(0);

@@ -49,7 +49,7 @@ for (const watchNetwork of [false, true]) test(`tab navigation commits before re
   });
   await new Promise(resolve => server.listen(0, "127.0.0.1", resolve));
   const origin = `http://127.0.0.1:${server.address().port}`;
-  const directory = await mkdtemp(join(tmpdir(), "qingzhou-navigation-"));
+  const directory = await mkdtemp(join(tmpdir(), "zuri-navigation-"));
   let browser;
   try {
     const extension = join(directory, "extension");

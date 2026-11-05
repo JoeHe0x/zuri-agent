@@ -10,7 +10,7 @@ let assets;
 /** Independent upstream comparators; these browser globals are never part of the extension build. */
 export function prepareUpstreamArticleAssets() {
   return assets ||= (async () => {
-    const directory = mkdtempSync(join(tmpdir(), "qingzhou-upstream-article-"));
+    const directory = mkdtempSync(join(tmpdir(), "zuri-upstream-article-"));
     process.once("exit", () => rmSync(directory, { recursive: true, force: true }));
     const sources = {
       readability: 'import { Readability } from "@mozilla/readability"; globalThis.Readability = Readability;',

@@ -48,7 +48,7 @@
   }
 
   function longLineSnippet() {
-    return "const cacheKey = \"" + "qingzhou-rendering-regression-".repeat(40) + "\";";
+    return "const cacheKey = \"" + "zuri-rendering-regression-".repeat(40) + "\";";
   }
 
   function markedCodeText(body) {
@@ -308,7 +308,7 @@
     ];
   }
 
-  window.QingzhouMessageRenderingCases = {
+  window.ZuriMessageRenderingCases = {
     buildCodeCases,
     buildMarkdownCases,
     buildScrollFrames,

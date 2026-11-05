@@ -28,7 +28,7 @@ async function installContentScript(page) {
     Object.defineProperty(window.chrome, "runtime", {
       configurable: true,
       value: {
-        getManifest: () => ({ name: "Qingzhou Test", version: "0.0.0" }),
+        getManifest: () => ({ name: "Zuri Test", version: "0.0.0" }),
         onMessage: {
           addListener(nextListener) { listener = nextListener; },
           removeListener() {},
@@ -36,7 +36,7 @@ async function installContentScript(page) {
         sendMessage: async () => ({ ok: true }),
       },
     });
-    window.__callQingzhouContent = (action, params = {}) => new Promise((resolve, reject) => {
+    window.__callZuriContent = (action, params = {}) => new Promise((resolve, reject) => {
       if (typeof listener !== "function") {
         reject(new Error("content-script listener is not installed"));
         return;
@@ -49,12 +49,12 @@ async function installContentScript(page) {
     });
   });
   await page.addScriptTag({ url: testAssetUrl("extension/content/content-script.js") });
-  await expect.poll(() => page.evaluate(() => window.__QZ_CONTENT_READY)).toBe(true);
+  await expect.poll(() => page.evaluate(() => window.__ZURI_CONTENT_READY)).toBe(true);
 }
 
 function findElements(page, params) {
   return page.evaluate(
-    nextParams => window.__callQingzhouContent("findElements", nextParams),
+    nextParams => window.__callZuriContent("findElements", nextParams),
     params,
   );
 }

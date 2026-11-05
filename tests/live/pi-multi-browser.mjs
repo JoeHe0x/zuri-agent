@@ -13,23 +13,23 @@ import { acceptDataDisclosure } from "../support/data-consent.mjs";
 
 // Explicit live entrypoint: pi and the extension both call the real DeepSeek API.
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
-const extension = process.env.QINGZHOU_TEST_EXTENSION_DIR;
-assert.ok(extension && existsSync(join(extension, "manifest.json")), "Set QINGZHOU_TEST_EXTENSION_DIR to a current production build");
-const apiKey = readTestApiKey("deepseek", { keyFile: process.env.QINGZHOU_DEEPSEEK_AK_FILE || "" });
-const model = process.env.QINGZHOU_DEEPSEEK_MODEL || "deepseek-flash";
+const extension = process.env.ZURI_TEST_EXTENSION_DIR;
+assert.ok(extension && existsSync(join(extension, "manifest.json")), "Set ZURI_TEST_EXTENSION_DIR to a current production build");
+const apiKey = readTestApiKey("deepseek", { keyFile: process.env.ZURI_DEEPSEEK_AK_FILE || "" });
+const model = process.env.ZURI_DEEPSEEK_MODEL || "deepseek-flash";
 const output = join(root, "tests/results/skill-pi", `multi-${new Date().toISOString().replace(/[:.]/g, "-")}`);
-const temporary = await mkdtemp(join(tmpdir(), "qz-pi-multi-"));
+const temporary = await mkdtemp(join(tmpdir(), "zuri-pi-multi-"));
 const work = join(temporary, "work"), config = join(temporary, "pi"), stateDir = join(temporary, "service"), bin = join(temporary, "bin");
-const sessions = join(output, "pi-sessions"), skill = join(root, "skills/qz-browser-agent/SKILL.md");
+const sessions = join(output, "pi-sessions"), skill = join(root, "skills/zuri-agent/SKILL.md");
 for (const directory of [output, work, config, stateDir, bin, sessions, join(output, "model")]) mkdirSync(directory, { recursive: true, mode: 0o700 });
 const clean = value => String(value).split(apiKey).join("[redacted]");
 const save = (filename, value) => writeFileSync(join(output, filename), clean(typeof value === "string" ? value : JSON.stringify(value, null, 2)));
 const cli = join(root, "services/mcp-bridge/src/bin.mjs");
 // Use the actual unpublished CLI source without replacing npx or the user's installed package.
 const wrapper = `#!${process.execPath}\nimport { spawn } from 'node:child_process';\nimport { appendFileSync } from 'node:fs';\nconst args=process.argv.slice(2); const p=spawn(${JSON.stringify(process.execPath)},[${JSON.stringify(cli)},...args],{stdio:['inherit','pipe','pipe']});\nlet out='',err='';p.stdout.on('data',b=>{out+=b;process.stdout.write(b)});p.stderr.on('data',b=>{err+=b;process.stderr.write(b)});p.on('error',e=>{console.error(e.message);process.exitCode=1});p.on('close',code=>{appendFileSync(${JSON.stringify(join(output, "cli.jsonl"))},JSON.stringify({at:Date.now(),args,code,stdout:out,stderr:err})+'\\n');process.exitCode=code??1});\n`;
-writeFileSync(join(bin, "qz"), wrapper, { mode: 0o700 });
+writeFileSync(join(bin, "zuri"), wrapper, { mode: 0o700 });
 writeFileSync(join(config, "settings.json"), JSON.stringify({ defaultProvider: "deepseek", defaultModel: model, defaultThinkingLevel: "off", enableInstallTelemetry: false, enableAnalytics: false }), { mode: 0o600 });
-const env = { ...process.env, PATH: `${bin}:${dirname(process.execPath)}:${process.env.PATH}`, QZ_STATE_DIR: stateDir,
+const env = { ...process.env, PATH: `${bin}:${dirname(process.execPath)}:${process.env.PATH}`, ZURI_STATE_DIR: stateDir,
   PI_CODING_AGENT_DIR: config, PI_OFFLINE: "1", PI_TELEMETRY: "0", NO_COLOR: "1" };
 for (const key of Object.keys(env)) if (/(?:API_KEY|TOKEN|SECRET|PASSWORD)$/i.test(key)) delete env[key];
 // The test runner's TypeScript loader belongs to this repository, not the installed pi CLI.
@@ -38,7 +38,7 @@ delete env.NODE_PATH;
 const piExecutable = process.env.PI_EXECUTABLE || "pi";
 const report = { ok: false, startedAt: new Date().toISOString(), output, model, extension, piSessionId: randomUUID(),
   agentTools: ["read", "bash"], phases: [], browsers: [], network: [], checks: [], limitations: [
-    "The current unpublished CLI is supplied as qz on the isolated PATH; this does not test a newly published npm version.",
+    "The current unpublished CLI is supplied as zuri on the isolated PATH; this does not test a newly published npm version.",
     "The harness initializes consent and model settings. pi receives shell tools only and performs pairing by launching Chrome with the returned URL.",
   ] };
 const persist = () => save("report.json", report);
@@ -69,8 +69,8 @@ async function command(executable, args, { input, timeout = 30000, childEnv = en
     });
   });
 }
-async function qz(args) {
-  const result = await command(join(bin, "qz"), [...args, "--json"]);
+async function zuri(args) {
+  const result = await command(join(bin, "zuri"), [...args, "--json"]);
   assert.equal(result.code, 0, result.stderr || result.stdout);
   assert.equal(result.value?.ok, true, result.stdout);
   return result.value.result;
@@ -86,7 +86,7 @@ async function pi(label, prompt) {
     result = await command(piExecutable, ["--offline", "--no-extensions", "--no-context-files", "--no-prompt-templates", "--no-themes", "--no-skills", "--skill", skill,
       "--tools", "read,bash", "--provider", "deepseek", "--model", model, "--thinking", "off", "--mode", "json", "--print",
       "--append-system-prompt", `Write scratch files in the current working directory (${work}).`,
-      "--session-dir", sessions, "--session-id", report.piSessionId, "--name", "qz multi-browser validation", prompt], {
+      "--session-dir", sessions, "--session-id", report.piSessionId, "--name", "zuri multi-browser validation", prompt], {
       timeout: 10 * 60000, childEnv: { ...env, DEEPSEEK_API_KEY: apiKey }, onLine(line) {
         appendFileSync(join(output, `${label}.jsonl`), clean(line) + "\n");
         try {
@@ -113,11 +113,11 @@ async function collect(label) {
     const state = await page.evaluate(() => chrome.runtime.sendMessage({ type: "mcp_connection_status" }));
     assert.equal(state.result.state, "connected", JSON.stringify(state));
     const client = state.result;
-    const tasks = await qz(["tasks", "--client", client.clientId, "--limit", "500"]);
+    const tasks = await zuri(["tasks", "--client", client.clientId, "--limit", "500"]);
     const items = (tasks.sessions || tasks.items || []).filter(item => item.id !== "0");
     const snapshots = [];
     for (const item of items) {
-      const snapshot = await qz(["show", item.id, "--client", client.clientId]);
+      const snapshot = await zuri(["show", item.id, "--client", client.clientId]);
       snapshots.push(snapshot);
     }
     save(`${label}-profile-${index + 1}.json`, { client, tasks, snapshots });
@@ -164,10 +164,10 @@ try {
     await browser.closeExtensionPages();
     report.browsers.push({ profile: index + 1, path: browser.profile, pid: browser.child.pid, version: browser.version });
   }
-  assert.equal((await qz(["status"])).connected, false, "the harness must leave all Profiles unpaired");
+  assert.equal((await zuri(["status"])).connected, false, "the harness must leave all Profiles unpaired");
   const executable = browsers[0].launches[0].executable;
-  const binding = await pi("bind", `Use the qz-browser-agent Skill to connect these three already-running Chrome Profiles without UI tools. qz and Node are on PATH; use qz instead of npx for this unpublished build. The extension, data notice and DeepSeek model are configured. Browser executable: ${JSON.stringify(executable)}. Profile directories in order: ${JSON.stringify(browsers.map(item => item.profile))}. Open the binding URL by launching that executable with --user-data-dir for each exact directory. Let qz assign identifiers. Report the online identifier and UUID for each Profile. Keep the local service running. Do not inspect credentials or use browser debugging APIs.`);
-  assert.ok(binding.tools.some(tool => tool.name === "read" && String(tool.args.path || tool.args.file_path || "").endsWith("qz-browser-agent/SKILL.md")), "pi must read the Skill");
+  const binding = await pi("bind", `Use the zuri-agent Skill to connect these three already-running Chrome Profiles without UI tools. zuri and Node are on PATH; use zuri instead of npx for this unpublished build. The extension, data notice and DeepSeek model are configured. Browser executable: ${JSON.stringify(executable)}. Profile directories in order: ${JSON.stringify(browsers.map(item => item.profile))}. Open the binding URL by launching that executable with --user-data-dir for each exact directory. Let zuri assign identifiers. Report the online identifier and UUID for each Profile. Keep the local service running. Do not inspect credentials or use browser debugging APIs.`);
+  assert.ok(binding.tools.some(tool => tool.name === "read" && String(tool.args.path || tool.args.file_path || "").endsWith("zuri-agent/SKILL.md")), "pi must read the Skill");
   assert.ok(binding.tools.some(tool => tool.name === "bash" && String(tool.args.command).includes("--user-data-dir")), "pi must launch the target browser itself");
   const before = await collect("bound");
   assert.equal(new Set(before.map(item => item.client.clientId)).size, 3);
@@ -178,7 +178,7 @@ try {
     { marker: "PI_HANGZHOU", prompt: "Read https://en.wikipedia.org/wiki/Hangzhou and name its three UNESCO World Heritage Sites, with source links." },
     { marker: "PI_PYTHON", prompt: "Read https://docs.python.org/3/library/asyncio-task.html and explain TaskGroup cancellation in three bullets, with the source link." },
   ];
-  const research = await pi("research", `Delegate these three independent research tasks to qz, each in its corresponding Profile, and start all three before waiting. ${JSON.stringify(tasks.map((task, index) => ({ client: before[index].client.name, marker: task.marker, task: task.prompt + " Include " + task.marker + " in the final response." })))} Review the completed responses and report findings, source links, task IDs and browser UUIDs. Use bounded watches; keep working until all three are complete.`);
+  const research = await pi("research", `Delegate these three independent research tasks to zuri, each in its corresponding Profile, and start all three before waiting. ${JSON.stringify(tasks.map((task, index) => ({ client: before[index].client.name, marker: task.marker, task: task.prompt + " Include " + task.marker + " in the final response." })))} Review the completed responses and report findings, source links, task IDs and browser UUIDs. Use bounded watches; keep working until all three are complete.`);
   assert.ok(research.tools.some(tool => /\bcreate\b/.test(tool.args.command || "")));
   const commands = readFileSync(join(output, "cli.jsonl"), "utf8").trim().split("\n").map(line => JSON.parse(line));
   const created = commands.filter(item => item.args[0] === "create" && item.code === 0);
@@ -197,7 +197,7 @@ try {
     assert.ok(own.urls.some(url => new URL(url).hostname === domain), `${domain} must actually be opened in its target browser`);
   }
   report.checks.push("three real DeepSeek browser tasks completed with separate histories and page ownership");
-  await pi("rename-followup", "Rename only the second Profile's qz connection to pi-research by opening a binding URL in that Profile. Keep the same browser UUID. Then continue its existing Hangzhou task: add each UNESCO inscription year and source URL. Do not create a replacement task. Verify the other two browser connections are still online and return the final findings.");
+  await pi("rename-followup", "Rename only the second Profile's zuri connection to pi-research by opening a binding URL in that Profile. Keep the same browser UUID. Then continue its existing Hangzhou task: add each UNESCO inscription year and source URL. Do not create a replacement task. Verify the other two browser connections are still online and return the final findings.");
   const after = await collect("final");
   assert.deepEqual(after.map(item => item.client.clientId), before.map(item => item.client.clientId), "rename retains all UUIDs");
   assert.deepEqual(after.map(item => item.client.name), ["default", "pi-research", "browser-3"]);

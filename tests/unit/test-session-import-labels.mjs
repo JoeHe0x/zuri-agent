@@ -8,14 +8,14 @@ import { chromeMessageId } from "../../src/shared/i18n/definition.ts";
 import { readSessionImportLabels, sessionImportButtonText } from "../../src/shared/session/session-import-copy.ts";
 
 const english = {
-  importQingzhou: "Continue in qz",
+  importZuri: "Continue in zuri",
   importing: "Importing",
   imported: "Imported",
   retryImport: "Try again",
   importFailedRetry: "Could not import. Try again.",
 };
 const chinese = {
-  importQingzhou: "导入轻舟继续对话",
+  importZuri: "导入Zuri继续对话",
   importing: "正在导入",
   imported: "已导入",
   retryImport: "重试导入",
@@ -35,14 +35,14 @@ test("import button copy follows page language, then the extension language", as
   try {
     Object.defineProperty(globalThis, "chrome", { configurable: true, value: { i18n: {
       getUILanguage: () => "zh-CN",
-      getMessage: key => key === "qz_language" ? "zh-CN" : "",
+      getMessage: key => key === "zuri_language" ? "zh-CN" : "",
     } } });
     assert.deepEqual(await createSessionImportLabels(""), chinese, "an empty page language follows the extension");
     assert.deepEqual(await createSessionImportLabels("   "), chinese);
 
     const catalog = {
-      qz_language: { message: "ja" },
-      [chromeMessageId("core.importQingzhou")]: { message: "軽舟にインポート" },
+      zuri_language: { message: "ja" },
+      [chromeMessageId("core.importZuri")]: { message: "軽舟にインポート" },
       [chromeMessageId("core.importing")]: { message: "インポート中" },
       [chromeMessageId("core.imported")]: { message: "インポートしました" },
       [chromeMessageId("core.retryImport")]: { message: "再試行" },
@@ -55,11 +55,11 @@ test("import button copy follows page language, then the extension language", as
     globalThis.fetch = async url => {
       const href = String(url);
       if (href.endsWith("_locales/ja/messages.json")) return new Response(JSON.stringify(catalog), { status: 200 });
-      if (href.endsWith("_locales/en/messages.json")) return new Response(JSON.stringify({ qz_language: { message: "en" } }), { status: 200 });
+      if (href.endsWith("_locales/en/messages.json")) return new Response(JSON.stringify({ zuri_language: { message: "en" } }), { status: 200 });
       return new Response("missing", { status: 404 });
     };
-    assert.equal((await createSessionImportLabels("ja")).importQingzhou, "軽舟にインポート");
-    assert.equal((await createSessionImportLabels("en")).importQingzhou, "Continue in qz", "page English wins over the extension language");
+    assert.equal((await createSessionImportLabels("ja")).importZuri, "軽舟にインポート");
+    assert.equal((await createSessionImportLabels("en")).importZuri, "Continue in zuri", "page English wins over the extension language");
   } finally {
     globalThis.fetch = previousFetch;
     if (previous) Object.defineProperty(globalThis, "chrome", previous);
@@ -69,10 +69,10 @@ test("import button copy follows page language, then the extension language", as
 
 test("import label payloads and button states stay bounded", () => {
   assert.deepEqual(readSessionImportLabels(english), english);
-  assert.equal(readSessionImportLabels({ ...english, importQingzhou: "" }), null);
+  assert.equal(readSessionImportLabels({ ...english, importZuri: "" }), null);
   assert.deepEqual(readSessionImportLabels({ ...english, extra: "ignored" }), english);
   assert.equal(readSessionImportLabels(null), null);
-  assert.equal(sessionImportButtonText({ busy: false, imported: false, titled: false }, english), "Continue in qz");
+  assert.equal(sessionImportButtonText({ busy: false, imported: false, titled: false }, english), "Continue in zuri");
   assert.equal(sessionImportButtonText({ busy: true, imported: false, titled: true }, english), "Importing");
   assert.equal(sessionImportButtonText({ busy: false, imported: true, titled: true }, english), "Imported");
   assert.equal(sessionImportButtonText({ busy: false, imported: false, titled: true }, chinese), "重试导入");
@@ -84,7 +84,7 @@ test("import labels are available before data-consent acceptance", async () => {
   assert.match(gate.slice(0, gate.indexOf("dataConsent.assertAccepted()")), /"system\.sessionImportLabels"/);
 
   const transport = createRuntimeMessageTransport(createBackgroundApi({
-    system: { sessionImportLabels: async language => ({ language, importQingzhou: "Continue in qz" }) },
+    system: { sessionImportLabels: async language => ({ language, importZuri: "Continue in zuri" }) },
   }));
   const response = await new Promise((resolve, reject) => {
     const timer = setTimeout(() => reject(new Error("label request timed out")), 1000);
@@ -94,5 +94,5 @@ test("import labels are available before data-consent acceptance", async () => {
     });
     assert.equal(keep, true);
   });
-  assert.deepEqual(response, { ok: true, labels: { language: "en", importQingzhou: "Continue in qz" } });
+  assert.deepEqual(response, { ok: true, labels: { language: "en", importZuri: "Continue in zuri" } });
 });

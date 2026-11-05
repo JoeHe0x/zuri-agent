@@ -1,5 +1,5 @@
 {
-  "schema": "qingzhou.article-extraction-sites.v1",
+  "schema": "zuri.article-extraction-sites.v1",
   "sampleTarget": 800,
   "design": {
     "purpose": "Same-vertical, same-page-type and same-evaluation-split reserve for the 1,000-page v3 expansion. It must never enlarge the target during composition.",

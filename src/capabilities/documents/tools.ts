@@ -34,11 +34,11 @@ import {
 } from "#sdk/shared/documents";
 import { DOCUMENT_BLOCK_EXAMPLES, DOCUMENT_BLOCK_INPUT_SCHEMA, DOCUMENT_CREATE_CONTENT_INPUT_SCHEMA, DOCUMENT_OUTPUT_FORMATS, DOCUMENT_SHEET_INPUT_SCHEMA, summarizeDocumentContent, validateDirectDocumentCreateInput } from "#sdk/background/documents";
 
-import { QINGZHOU_DOCUMENT_TOOL_SPECS } from "./skill-contract.js";
+import { ZURI_DOCUMENT_TOOL_SPECS } from "./skill-contract.js";
 import { getSecurityGuardrails, matchBlockedUrl } from "#sdk/shared/security";
 import { nowBeijingDateTime } from "#sdk/shared/format";
 
-const DOCUMENT_CREATE_PROPERTIES: Readonly<Record<string, ToolParameter>> = QINGZHOU_DOCUMENT_TOOL_SPECS.document_create.parameters.properties;
+const DOCUMENT_CREATE_PROPERTIES: Readonly<Record<string, ToolParameter>> = ZURI_DOCUMENT_TOOL_SPECS.document_create.parameters.properties;
 
 /** Registers user downloads and the session-owned document pipeline. */
 export function registerFilesDocumentsTools({
@@ -187,7 +187,7 @@ function resolveSaveFileFilename(filename = "", mimeType = "") {
   const clean = String(filename || "").replace(/^[\\/]+/, "").trim();
   if (clean) return clean;
   const stamp = nowBeijingDateTime().replace(/\D/g, "").slice(0, 14) || String(Date.now());
-  return `qingzhou-output-${stamp}.${extensionForSaveFileMimeType(mimeType)}`;
+  return `zuri-output-${stamp}.${extensionForSaveFileMimeType(mimeType)}`;
 }
 
 function extensionForSaveFileMimeType(mimeType = "") {
@@ -279,8 +279,8 @@ registerTool({
 
 registerTool({
   name: "document_fetch",
-  get description() { return QINGZHOU_DOCUMENT_TOOL_SPECS.document_fetch.description; },
-  get parameters() { return QINGZHOU_DOCUMENT_TOOL_SPECS.document_fetch.parameters; },
+  get description() { return ZURI_DOCUMENT_TOOL_SPECS.document_fetch.description; },
+  get parameters() { return ZURI_DOCUMENT_TOOL_SPECS.document_fetch.parameters; },
   hidden: true,
   timeout: { defaultMs: 120000, maxMs: 600000 },
   execute: async ({ url, filename = "", mimeType = "" }, _signal, context = {}) => {
@@ -299,8 +299,8 @@ registerTool({
 
 registerTool({
   name: "document_parse",
-  get description() { return QINGZHOU_DOCUMENT_TOOL_SPECS.document_parse.description; },
-  get parameters() { return QINGZHOU_DOCUMENT_TOOL_SPECS.document_parse.parameters; },
+  get description() { return ZURI_DOCUMENT_TOOL_SPECS.document_parse.description; },
+  get parameters() { return ZURI_DOCUMENT_TOOL_SPECS.document_parse.parameters; },
   hidden: true,
   timeout: { defaultMs: 120000, maxMs: 600000 },
   execute: async ({ fileId, chunkSize = 6000 }, _signal, context = {}) => {
@@ -327,8 +327,8 @@ registerTool({
 
 registerTool({
   name: "document_read_chunk",
-  get description() { return QINGZHOU_DOCUMENT_TOOL_SPECS.document_read_chunk.description; },
-  get parameters() { return QINGZHOU_DOCUMENT_TOOL_SPECS.document_read_chunk.parameters; },
+  get description() { return ZURI_DOCUMENT_TOOL_SPECS.document_read_chunk.description; },
+  get parameters() { return ZURI_DOCUMENT_TOOL_SPECS.document_read_chunk.parameters; },
   hidden: true,
   timeout: { defaultMs: 120000, maxMs: 600000 },
   execute: async ({ docModelId, chunkIndex = 0, tableId = "", sheetName = "", offset = 0, limit = 50 }, _signal, context = {}) => {
@@ -348,8 +348,8 @@ registerTool({
 
 registerTool({
   name: "document_create",
-  get description() { return QINGZHOU_DOCUMENT_TOOL_SPECS.document_create.description; },
-  get parameters() { return QINGZHOU_DOCUMENT_TOOL_SPECS.document_create.parameters; },
+  get description() { return ZURI_DOCUMENT_TOOL_SPECS.document_create.description; },
+  get parameters() { return ZURI_DOCUMENT_TOOL_SPECS.document_create.parameters; },
   hidden: true,
   timeout: { defaultMs: 120000, maxMs: 600000 },
   validateArgs: input => {
@@ -448,8 +448,8 @@ registerTool({
 
 registerTool({
   name: "document_download",
-  get description() { return QINGZHOU_DOCUMENT_TOOL_SPECS.document_download.description; },
-  get parameters() { return QINGZHOU_DOCUMENT_TOOL_SPECS.document_download.parameters; },
+  get description() { return ZURI_DOCUMENT_TOOL_SPECS.document_download.description; },
+  get parameters() { return ZURI_DOCUMENT_TOOL_SPECS.document_download.parameters; },
   hidden: true,
   timeout: { defaultMs: 120000, maxMs: 600000 },
   execute: async ({ artifactId, filename = "", saveAs = false }, _signal, context = {}) => {
@@ -462,8 +462,8 @@ registerTool({
 
 registerTool({
   name: "document_list_artifacts",
-  get description() { return QINGZHOU_DOCUMENT_TOOL_SPECS.document_list_artifacts.description; },
-  get parameters() { return QINGZHOU_DOCUMENT_TOOL_SPECS.document_list_artifacts.parameters; },
+  get description() { return ZURI_DOCUMENT_TOOL_SPECS.document_list_artifacts.description; },
+  get parameters() { return ZURI_DOCUMENT_TOOL_SPECS.document_list_artifacts.parameters; },
   hidden: true,
   timeout: { defaultMs: 120000, maxMs: 600000 },
   execute: async ({ limit = 20 }, _signal, context = {}) => listDocumentArtifacts({ limit, sessionId: context.sessionId || "" }),
@@ -613,7 +613,7 @@ function assertDocumentCreateControlArgs(input: Record<string, unknown> = {}) {
     ...(Object.keys(expected).length
       ? { expected }
       : {
-        expectedSchema: QINGZHOU_DOCUMENT_TOOL_SPECS.document_create.parameters,
+        expectedSchema: ZURI_DOCUMENT_TOOL_SPECS.document_create.parameters,
         allowedFields: [...allowedKeys],
       }),
     retry,
@@ -786,7 +786,7 @@ function assertDirectDocumentPayloadAllowed(blocks: readonly unknown[] = [], she
     t("directBlocksSheetsPayloadIsTooLargeSaveOr"),
     {
       payloadChars,
-      recommended: "load_skill(\"qingzhou-documents\") and follow its parse -> create flow with docModelId",
+      recommended: "load_skill(\"zuri-documents\") and follow its parse -> create flow with docModelId",
     },
   );
 }

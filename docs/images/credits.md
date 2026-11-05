@@ -1,6 +1,6 @@
 # Workspace screenshot credits
 
-The workspace screenshots show qz collecting Hangzhou photographs in real Chrome sessions:
+The workspace screenshots show zuri collecting Hangzhou photographs in real Chrome sessions:
 
 - [English](workspace.png): extracted at 87.8 seconds from `v3/recordings/hangzhou.mov`,
   the original recording used in the English promotional video.

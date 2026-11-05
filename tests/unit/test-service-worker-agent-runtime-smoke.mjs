@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import { storedSessionKey } from "../../src/shared/session/session-store.js";
 import {
-  QINGZHOU_SKILL_FORMAT,
-  QINGZHOU_SKILL_SCHEMA_VERSION,
+  ZURI_SKILL_FORMAT,
+  ZURI_SKILL_SCHEMA_VERSION,
 } from "../../src/shared/skills/skill-utils.js";
 import {
   SKILL_MANIFEST_FORMAT,
@@ -11,7 +11,7 @@ import {
 import { SKILL_SETTINGS_STORAGE_KEY } from "../../src/background/skills/skill-settings.js";
 
 const storageData = {};
-storageData._qingzhou_mcp_bridge = { enabled: false };
+storageData._zuri_mcp_bridge = { enabled: false };
 const postedMessages = [];
 const COVERAGE_PLUGIN_SKILL_NAME = "coverage-plugin-skill";
 const COVERAGE_PLUGIN_TOOL_NAME = "coverage_helper__ping";
@@ -78,8 +78,8 @@ storageData._skills = {
     domains: [],
     urlPatterns: [],
     excludePatterns: [],
-    format: QINGZHOU_SKILL_FORMAT,
-    schemaVersion: QINGZHOU_SKILL_SCHEMA_VERSION,
+    format: ZURI_SKILL_FORMAT,
+    schemaVersion: ZURI_SKILL_SCHEMA_VERSION,
     createdAt: "2026-07-14 10:00:00",
     updatedAt: "2026-07-14 10:00:00",
     resources: [
@@ -123,8 +123,8 @@ function shouldSuppressPdfWarning(args) {
 function shouldSuppressRoutineLog(args) {
   const text = args.map(item => String(item)).join(" ");
   return /^\[LLM\]/.test(text)
-    || /^\[轻舟\] Service Worker started/.test(text)
-    || /^\[轻舟\] setPanelBehavior OK/.test(text);
+    || /^\[Zuri\] Service Worker started/.test(text)
+    || /^\[Zuri\] setPanelBehavior OK/.test(text);
 }
 console.warn = (...args) => {
   if (shouldSuppressPdfWarning(args)) return;
@@ -199,15 +199,15 @@ try {
     { id: chrome.runtime.id, url: chrome.runtime.getURL("sidepanel/sidepanel.html") }, resolve,
   ));
   assert.equal(consentReply.ok, true);
-  assert.equal(storageData.qz_data_consent.version, 1);
+  assert.equal(storageData.zuri_data_consent.version, 1);
 
   assert.equal(state.alarmsOnAlarm.length, 2, "data consent should add the MCP reconnect listener alongside the automation router");
-  for (const name of ["unrelated-alarm", "qingzhou-mcp-bridge-reconnect"]) {
+  for (const name of ["unrelated-alarm", "zuri-mcp-bridge-reconnect"]) {
     for (const listener of state.alarmsOnAlarm) listener({ name });
   }
   await new Promise(resolve => setTimeout(resolve, 0));
   assert.equal(state.bridgePolls, 0, "alarm delivery must not enable a disabled MCP bridge");
-  assert.equal(state.alarms.has("qingzhou-mcp-bridge-reconnect"), false, "a disabled bridge must not schedule reconnect alarms");
+  assert.equal(state.alarms.has("zuri-mcp-bridge-reconnect"), false, "a disabled bridge must not schedule reconnect alarms");
   assert.equal(state.commandsOnCommand.length, 1, "service worker should register one custom command router");
   const sidePanelOpenCount = state.sidePanelOpens.length;
   state.commandsOnCommand[0]("unrelated-command", state.tabs[0]);
@@ -713,12 +713,12 @@ try {
       bridgeResult.result?.tools?.some(tool => tool.name === COVERAGE_PLUGIN_TOOL_NAME),
       "MCP list_tools should refresh the registry and preserve the loaded Skill tool",
     );
-    assert.equal(state.alarms.has("qingzhou-mcp-bridge-reconnect"), true, "a connected bridge should schedule its reconnect alarm");
+    assert.equal(state.alarms.has("zuri-mcp-bridge-reconnect"), true, "a connected bridge should schedule its reconnect alarm");
   } finally {
     state.bridgeListToolsSessionId = "";
     await setMcpBridgeEnabled(false);
   }
-  assert.equal(state.alarms.has("qingzhou-mcp-bridge-reconnect"), false, "disabling the bridge should clear its reconnect alarm");
+  assert.equal(state.alarms.has("zuri-mcp-bridge-reconnect"), false, "disabling the bridge should clear its reconnect alarm");
 
   await waitFor(() => storageData[`_session_runtime_${sessionId}`]?.workingTabId === 3);
   assert.equal(
@@ -801,7 +801,7 @@ try {
     "apart from the intentional import capsule, an imported session must produce the same provider request body as its source",
   );
 
-  const connectedNotificationId = `qz_alert_session_${sessionId}_connected`;
+  const connectedNotificationId = `zuri_alert_session_${sessionId}_connected`;
   state.notificationsOnClicked[0](connectedNotificationId);
   assert.deepEqual(
     state.sidePanelOpens.at(-1),
@@ -824,7 +824,7 @@ try {
   const movedWindowRevealStart = movedWindowPort.messages.length;
   const movedWindowFocusStart = state.windowUpdates.length;
   state.tabs.find(tab => tab.id === 3).windowId = 2;
-  const movedWindowNotificationId = `qz_alert_session_${sessionId}_moved`;
+  const movedWindowNotificationId = `zuri_alert_session_${sessionId}_moved`;
   state.notificationsOnClicked[0](movedWindowNotificationId);
   assert.deepEqual(
     state.sidePanelOpens.at(-1),
@@ -851,7 +851,7 @@ try {
 
   for (const listener of port.onDisconnect._listeners.slice()) listener();
   const revealStart = postedMessages.length;
-  const notificationId = `qz_alert_session_${sessionId}_smoke`;
+  const notificationId = `zuri_alert_session_${sessionId}_smoke`;
   assert.equal(state.notificationsOnClicked.length, 1, "service worker should register one notification click router");
   state.notificationsOnClicked[0](notificationId);
   assert.deepEqual(
@@ -879,7 +879,7 @@ try {
 
   const originalSidePanelOpen = globalThis.chrome.sidePanel.open;
   try {
-    const windowFallbackId = "qz_alert_session_missing_window";
+    const windowFallbackId = "zuri_alert_session_missing_window";
     state.notificationsOnClicked[0](windowFallbackId);
     assert.deepEqual(
       state.sidePanelOpens.at(-1),
@@ -889,7 +889,7 @@ try {
     await waitFor(() => state.clearedNotifications.includes(windowFallbackId));
 
     globalThis.chrome.sidePanel.open = undefined;
-    const connectedPanelFallbackId = "qz_alert_session_missing_connected";
+    const connectedPanelFallbackId = "zuri_alert_session_missing_connected";
     state.notificationsOnClicked[0](connectedPanelFallbackId);
     await waitFor(() => state.clearedNotifications.includes(connectedPanelFallbackId));
     assert.ok(
@@ -902,7 +902,7 @@ try {
     globalThis.chrome.sidePanel.open = () => {
       throw new Error("forced synchronous side panel failure");
     };
-    const syncFailureId = "qz_alert_session_syncfailure_notice";
+    const syncFailureId = "zuri_alert_session_syncfailure_notice";
     state.notificationsOnClicked[0](syncFailureId);
     await new Promise(resolve => setTimeout(resolve, 0));
     assert.equal(
@@ -914,7 +914,7 @@ try {
     globalThis.chrome.sidePanel.open = async () => {
       throw new Error("forced asynchronous side panel failure");
     };
-    const asyncFailureId = "qz_alert_session_asyncfailure_notice";
+    const asyncFailureId = "zuri_alert_session_asyncfailure_notice";
     state.notificationsOnClicked[0](asyncFailureId);
     await new Promise(resolve => setTimeout(resolve, 0));
     assert.equal(
@@ -924,7 +924,7 @@ try {
     );
 
     globalThis.chrome.sidePanel.open = originalSidePanelOpen;
-    const missingWorkingTabId = `qz_alert_session_${sessionId}_missingtab`;
+    const missingWorkingTabId = `zuri_alert_session_${sessionId}_missingtab`;
     const workingTabIndex = state.tabs.findIndex(tab => tab.id === 3);
     const [missingWorkingTab] = state.tabs.splice(workingTabIndex, 1);
     state.notificationsOnClicked[0](missingWorkingTabId);
@@ -935,7 +935,7 @@ try {
       "a notification must remain available when its Session working tab has disappeared",
     );
     globalThis.chrome.sidePanel.open = undefined;
-    const unavailableTargetId = `qz_alert_session_${sessionId}_unavailable`;
+    const unavailableTargetId = `zuri_alert_session_${sessionId}_unavailable`;
     const unavailableRevealStart = postedMessages.length;
     state.notificationsOnClicked[0](unavailableTargetId);
     await new Promise(resolve => setTimeout(resolve, 0));
@@ -953,17 +953,17 @@ try {
     globalThis.chrome.sidePanel.open = () => {
       throw "forced synchronous non-Error side panel failure";
     };
-    state.notificationsOnClicked[0]("qz_alert_session_syncstring_notice");
+    state.notificationsOnClicked[0]("zuri_alert_session_syncstring_notice");
     await new Promise(resolve => setTimeout(resolve, 0));
 
     globalThis.chrome.sidePanel.open = () => Promise.reject("forced asynchronous non-Error side panel failure");
-    state.notificationsOnClicked[0]("qz_alert_session_asyncstring_notice");
+    state.notificationsOnClicked[0]("zuri_alert_session_asyncstring_notice");
     await new Promise(resolve => setTimeout(resolve, 0));
   } finally {
     globalThis.chrome.sidePanel.open = originalSidePanelOpen;
   }
 
-  const updateNotificationId = "qz_update_coverage_notice";
+  const updateNotificationId = "zuri_update_coverage_notice";
   state.notificationsOnClicked[0](updateNotificationId);
   await new Promise(resolve => setTimeout(resolve, 0));
   assert.equal(state.clearedNotifications.includes(updateNotificationId), false, "obsolete update notifications have no handler");
@@ -1064,7 +1064,7 @@ function createChromeMock() {
         return { version: "0.4.1" };
       },
       getURL(path) {
-        return `chrome-extension://qingzhou/${path}`;
+        return `chrome-extension://zuri/${path}`;
       },
       onStartup: makeEvent(),
       onInstalled: makeEvent(),
@@ -1126,7 +1126,7 @@ function createChromeMock() {
     },
     tabGroups: {
       async get(groupId) {
-        return { id: groupId, title: "轻舟" };
+        return { id: groupId, title: "Zuri" };
       },
       async update(groupId, patch = {}) {
         return { id: groupId, ...patch };
@@ -1286,7 +1286,7 @@ function createFetchMock(responses = []) {
   return async function fetchMock(url, init = {}) {
     const href = String(url || "");
     state.networkRequests.push(href);
-    if (href === "chrome-extension://qingzhou/rules/provider-headers.json") return Response.json([]);
+    if (href === "chrome-extension://zuri/rules/provider-headers.json") return Response.json([]);
     if (href === "https://llm-smoke.test/chat/completions") {
       const request = JSON.parse(String(init.body || "{}"));
       const titleRequest = isTitleGenerationRequest(request);
@@ -1312,15 +1312,15 @@ function createFetchMock(responses = []) {
       });
     }
     if (href === "http://127.0.0.1:18765/health") {
-      return Response.json({ service: "qz-browser-agent", protocolVersion: 1, features: { browserPairing: 1 }, instanceId: "smoke-instance" });
+      return Response.json({ service: "zuri-agent", protocolVersion: 1, features: { browserPairing: 1 }, instanceId: "smoke-instance" });
     }
-    if (href === "http://127.0.0.1:18765/v1/qingzhou/pair") {
+    if (href === "http://127.0.0.1:18765/v1/zuri/pair") {
       const paired = JSON.parse(String(init.body || "{}"));
       bridgeIdentity = { clientId: paired.clientId, name: paired.name, connectionId: paired.connectionId, instanceId: paired.instanceId };
       return Response.json({ ok: true, ...paired });
     }
-    if (href === "http://127.0.0.1:18765/v1/qingzhou/disconnect") return Response.json({ ok: true });
-    if (href === "http://127.0.0.1:18765/v1/qingzhou/poll") {
+    if (href === "http://127.0.0.1:18765/v1/zuri/disconnect") return Response.json({ ok: true });
+    if (href === "http://127.0.0.1:18765/v1/zuri/poll") {
       state.bridgePolls += 1;
       const requests = state.bridgePolls === 1 && state.bridgeListToolsSessionId
         ? [{
@@ -1334,7 +1334,7 @@ function createFetchMock(responses = []) {
         : [];
       return Response.json({ requests, ...bridgeIdentity });
     }
-    if (href === "http://127.0.0.1:18765/v1/qingzhou/result") {
+    if (href === "http://127.0.0.1:18765/v1/zuri/result") {
       state.bridgeResults.push(JSON.parse(String(init.body || "{}")));
       return Response.json({ ok: true });
     }
@@ -1487,8 +1487,8 @@ function testPluginSkill(name, id) {
     domains: [],
     urlPatterns: [],
     excludePatterns: [],
-    format: QINGZHOU_SKILL_FORMAT,
-    schemaVersion: QINGZHOU_SKILL_SCHEMA_VERSION,
+    format: ZURI_SKILL_FORMAT,
+    schemaVersion: ZURI_SKILL_SCHEMA_VERSION,
     createdAt: "2026-07-17 00:00:00",
     updatedAt: "2026-07-17 00:00:00",
     resources: [

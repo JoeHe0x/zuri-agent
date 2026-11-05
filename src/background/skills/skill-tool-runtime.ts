@@ -166,7 +166,7 @@ function buildActiveSkillToolSchemas(options: SkillToolOptions) {
           description: buildSkillToolDescription(plugin, tool),
           parameters,
         },
-        _qingzhouPlugin: {
+        _zuriPlugin: {
           pluginId: plugin.id,
           skillName: plugin.skillName,
           localName: tool.localName,

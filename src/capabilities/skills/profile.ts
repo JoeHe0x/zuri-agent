@@ -106,7 +106,7 @@ function appendSkillResourceProfile(parent: HTMLElement, args: Data, result: unk
       parent,
       data.truncated ? t("continueReading") : t("documentParsed"),
       data.truncated
-        ? t("docmodelidLoadQingzhouDocumentsThenUseDocumentReadChunkTo", { id: String(documentInfo.docModelId) })
+        ? t("docmodelidLoadZuriDocumentsThenUseDocumentReadChunkTo", { id: String(documentInfo.docModelId) })
         : t("parsedAsByTheDocumentPipeline", { format: String(data.format || documentInfo.format || documentInfo.type || "document") }),
     );
   }

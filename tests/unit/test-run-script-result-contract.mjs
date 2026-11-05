@@ -63,10 +63,10 @@ assert.match(innerWorkerSource, /import \{ safeValueForMessage, installSecurityG
 assert.match(scriptRuntimeSource, /function safeValueForMessage\(/, "shared script runtime should own dynamic value serialization");
 assert.match(innerWorkerSource, /const safeToolArgs = safeValueForMessage\(toolArgs\)/, "inner worker should sanitize tool args before crossing postMessage");
 assert.match(innerWorkerSource, /const safeResult = ok && result !== undefined \? safeValueForMessage\(result\) : null/, "inner worker should sanitize returned script results before crossing postMessage");
-assert.match(source, /const __qzSafeValueForMessage = value => QZ_SCRIPT_RUNTIME\.safeValueForMessage\(value, "page"\)/, "page runtime should select page serialization semantics from the compiled shared runtime");
-assert.match(source, /QZ_SCRIPT_RUNTIME\.installSecurityGuards\(__qzSecurityGuardrails, "page"\)/, "page runtime should install the shared guard with page semantics");
-assert.match(source, /const safeInput = __qzSafeValueForMessage\(input \|\| \{\}\)/, "page runtime should sanitize tool args before window.postMessage");
-assert.match(source, /const __qzSafeResult = ok && result !== undefined \? __qzSafeValueForMessage\(result\) : null/, "page runtime should sanitize returned script results before CDP serialization");
+assert.match(source, /const __zuriSafeValueForMessage = value => ZURI_SCRIPT_RUNTIME\.safeValueForMessage\(value, "page"\)/, "page runtime should select page serialization semantics from the compiled shared runtime");
+assert.match(source, /ZURI_SCRIPT_RUNTIME\.installSecurityGuards\(__zuriSecurityGuardrails, "page"\)/, "page runtime should install the shared guard with page semantics");
+assert.match(source, /const safeInput = __zuriSafeValueForMessage\(input \|\| \{\}\)/, "page runtime should sanitize tool args before window.postMessage");
+assert.match(source, /const __zuriSafeResult = ok && result !== undefined \? __zuriSafeValueForMessage\(result\) : null/, "page runtime should sanitize returned script results before CDP serialization");
 assert.match(runScriptBridge, /function failureResponse\(/, "run_script tool bridge should have one failure response contract");
 assert.match(runScriptBridge, /const respondFailure[\s\S]*withLanguage\(language, \(\) => failureResponse\(payload, options\)\)/, "run language scopes must retain the shared failure response contract");
 assert.match(runScriptBridge, /const isError = output.ok === false \|\| output.isError === true \|\| output.error != null[\s\S]*await applyNestedToolResult\([\s\S]*if \(isError\)[\s\S]*respondFailure\(result/, "run_script tool bridge should record and reject tool failure payloads instead of resolving error objects");
@@ -83,7 +83,7 @@ assert.ok(innerWorkerWrapperLine.includes('{\\n" + source + "\\n})();'), "inner 
 assert.doesNotMatch(innerWorkerWrapperLine, /\{\\\\n" \+ source \+ "\\\\n/, "inner worker wrapper must not double-escape newline separators");
 assert.doesNotThrow(() => {
   const innerSmokeSource = wrapRunScriptSource(`async () => {
- return { ok: true, message: "Hello World!轻舟 inner环境正常运行 ✅", timestamp: new Date().toISOString() };
+ return { ok: true, message: "Hello World!Zuri inner环境正常运行 ✅", timestamp: new Date().toISOString() };
 }`);
   const body = `"use strict"; return (async () => {\n${innerSmokeSource}\n})();`;
   new Function("input", "args", "$plugin", "tools", "tool", "trace", "log", "tabId", body);
@@ -92,17 +92,17 @@ assert.doesNotThrow(() => {
   const { result: envelope } = await runInnerWorker(compiledWorker, `
     const cycle = { name: 'cycle' }; cycle.self = cycle;
     return { fn: function namedUnsafe() {}, symbol: Symbol('unsafe'), bigint: 9007199254740993n,
-      date: new Date('2026-07-09T00:00:00.000Z'), regexp: /qingzhou/gi,
+      date: new Date('2026-07-09T00:00:00.000Z'), regexp: /zuri/gi,
       map: new Map([['fn', () => 'map']]), set: new Set([Symbol('set')]),
       proxy: new Proxy({}, { ownKeys() { throw new Error('bad ownKeys'); } }), cycle };
   `);
   assert.equal(envelope.ok, true);
   const safe = envelope.result;
-  assert.equal(safe.fn.__qz_uncloneable, 'function');
-  assert.equal(safe.symbol.__qz_uncloneable, 'symbol');
+  assert.equal(safe.fn.__zuri_uncloneable, 'function');
+  assert.equal(safe.symbol.__zuri_uncloneable, 'symbol');
   assert.equal(safe.bigint, '9007199254740993');
-  assert.equal(safe.proxy.__qz_uncloneable, 'object');
-  assert.equal(safe.cycle.self.__qz_circular, true);
+  assert.equal(safe.proxy.__zuri_uncloneable, 'object');
+  assert.equal(safe.cycle.self.__zuri_circular, true);
   assertCloneSafe(envelope, 'inner sanitized envelope');
 }
 

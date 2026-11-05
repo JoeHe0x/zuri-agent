@@ -58,8 +58,8 @@ import {
 
 const getSkillRuntimeGuidance = () => ([
   productText(
-    "Skill 运行环境是轻舟 Chrome 浏览器扩展，不是 Node.js，也不是服务器。",
-    "Skill 运行环境是轻舟 Firefox 浏览器扩展，不是 Node.js，也不是服务器。",
+    "Skill 运行环境是Zuri Chrome 浏览器扩展，不是 Node.js，也不是服务器。",
+    "Skill 运行环境是Zuri Firefox 浏览器扩展，不是 Node.js，也不是服务器。",
   ),
   "Skill content 描述浏览器操作 SOP；资源文件承载 plugin.json、scripts、references、模板或示例。",
   "资源内容请用 get_skill_resource(name,path) 按需读取；get_skill 默认只返回资源清单。",

@@ -22,13 +22,13 @@ test.beforeAll(async () => {
     treeDpProductGate,
     `if (false && hanDominantDocument(doc)) {`,
   );
-  const extractorExport = "host.QingzhouArticleExtractor = Object.freeze({ extract });";
+  const extractorExport = "host.ZuriArticleExtractor = Object.freeze({ extract });";
   if (articleExtractorSource.split(extractorExport).length !== 2) {
     throw new Error("article extractor export must have one unambiguous test seam");
   }
   treeDpProbeArticleExtractorSource = articleExtractorSource.replace(
     extractorExport,
-    "globalThis.QingzhouArticleExtractor = Object.freeze({ extract, __testTreeDpExtract: treeDpExtract });",
+    "globalThis.ZuriArticleExtractor = Object.freeze({ extract, __testTreeDpExtract: treeDpExtract });",
   );
 });
 
@@ -47,7 +47,7 @@ async function installExtractor(page, html, { disableTreeDp = false, exposeTreeD
 
 async function extractCandidate(page) {
   return page.evaluate(() => {
-    const candidate = window.QingzhouArticleExtractor.extract(document);
+    const candidate = window.ZuriArticleExtractor.extract(document);
     return candidate && {
       name: candidate.name,
       text: candidate.text,
@@ -63,7 +63,7 @@ async function extractWithElementReadability(page, selector, { complete = true }
       content: `<article>${element.outerHTML}</article>`,
       textContent: element.innerText,
     };
-    const candidate = window.QingzhouArticleExtractor.extract(document, {
+    const candidate = window.ZuriArticleExtractor.extract(document, {
       readability,
       complete,
     });
@@ -114,7 +114,7 @@ test("tree-DP rescue expands the first repeated card into the complete central c
       content: firstCard.outerHTML,
       textContent: firstCard.innerText,
     };
-    const candidate = window.QingzhouArticleExtractor.extract(document, { readability });
+    const candidate = window.ZuriArticleExtractor.extract(document, { readability });
     return candidate && { text: candidate.text, length: candidate.length };
   });
 
@@ -187,8 +187,8 @@ test("confidence evaluates the materialized candidate and never shrinks the lega
   const result = await page.evaluate(() => {
     const first = document.querySelector(".entry");
     const readability = { content: first.outerHTML, textContent: first.innerText };
-    const article = window.QingzhouArticleExtractor.extract(document, { readability, complete: false });
-    const complete = window.QingzhouArticleExtractor.extract(document, { readability, complete: true });
+    const article = window.ZuriArticleExtractor.extract(document, { readability, complete: false });
+    const complete = window.ZuriArticleExtractor.extract(document, { readability, complete: true });
     return {
       article: { name: article?.name, text: article?.text, length: article?.length || 0 },
       complete: { name: complete?.name, text: complete?.text, length: complete?.length || 0 },
@@ -209,7 +209,7 @@ test("a BODY include root is expanded instead of nesting BODY inside the candida
   `, { exposeTreeDp: true });
 
   const candidate = await page.evaluate(() => {
-    const value = window.QingzhouArticleExtractor.__testTreeDpExtract(document);
+    const value = window.ZuriArticleExtractor.__testTreeDpExtract(document);
     return value && {
       name: value.name,
       content: value.content,
@@ -230,7 +230,7 @@ test("dependent content is emitted only through a legal ancestor root", async ({
   `, { exposeTreeDp: true });
 
   const candidate = await page.evaluate(() => {
-    const value = window.QingzhouArticleExtractor.__testTreeDpExtract(document);
+    const value = window.ZuriArticleExtractor.__testTreeDpExtract(document);
     return value && {
       content: value.content,
       firstTag: value.root.firstElementChild?.tagName || "",
@@ -260,7 +260,7 @@ test("phrasing wrappers around a malformed page cannot become Tree-DP roots", as
   `, { exposeTreeDp: true });
 
   const candidate = await page.evaluate(() => {
-    const value = window.QingzhouArticleExtractor.__testTreeDpExtract(document);
+    const value = window.ZuriArticleExtractor.__testTreeDpExtract(document);
     return value && { text: value.text };
   });
 

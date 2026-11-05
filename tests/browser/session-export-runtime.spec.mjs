@@ -114,7 +114,7 @@ test("standalone controls copy, preview images and react to validated bridge mes
     <img alt="Local preview" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1' height='1'%3E%3C/svg%3E">
   `);
   await page.setContent(html);
-  await expect(page.locator("#qingzhou-session-cta")).toBeHidden();
+  await expect(page.locator("#zuri-session-cta")).toBeHidden();
   await expect(page.locator(".session-export-continuation")).toHaveText("");
   await expect(page.locator(".session-export-continuation a")).toHaveCount(0);
   await page.evaluate(() => Object.defineProperty(navigator, "clipboard", { configurable: true, value: { writeText: async value => { window.copiedText = value; } } }));
@@ -128,27 +128,27 @@ test("standalone controls copy, preview images and react to validated bridge mes
   await expect(page.locator(".tool-details")).toBeVisible();
   await page.locator(".tool-summary").click();
   await expect(page.locator(".tool-details")).toBeHidden();
-  await page.evaluate(() => window.postMessage({ type: "qingzhou:session-export:result", action: "probe", installed: true }, "*"));
-  const cta = page.getByRole("button", { name: "导入轻舟继续对话", exact: true });
+  await page.evaluate(() => window.postMessage({ type: "zuri:session-export:result", action: "probe", installed: true }, "*"));
+  const cta = page.getByRole("button", { name: "导入Zuri继续对话", exact: true });
   await expect(cta).toBeVisible();
-  await page.evaluate(() => window.postMessage({ type: "qingzhou:session-export:result", action: "import", status: "working" }, "*"));
-  await expect(page.locator("#qingzhou-session-cta")).toBeDisabled();
-  await page.evaluate(() => window.postMessage({ type: "qingzhou:session-export:result", action: "import", ok: false, error: "Try again" }, "*"));
+  await page.evaluate(() => window.postMessage({ type: "zuri:session-export:result", action: "import", status: "working" }, "*"));
+  await expect(page.locator("#zuri-session-cta")).toBeDisabled();
+  await page.evaluate(() => window.postMessage({ type: "zuri:session-export:result", action: "import", ok: false, error: "Try again" }, "*"));
   await expect(page.getByRole("button", { name: "重试导入" })).toBeEnabled();
-  await page.evaluate(() => window.postMessage({ type: "qingzhou:session-export:result", action: "import", ok: true, sessionId: "new-session" }, "*"));
-  await expect(page.locator("#qingzhou-session-cta")).toHaveAttribute("data-qingzhou-imported-session-id", "new-session");
+  await page.evaluate(() => window.postMessage({ type: "zuri:session-export:result", action: "import", ok: true, sessionId: "new-session" }, "*"));
+  await expect(page.locator("#zuri-session-cta")).toHaveAttribute("data-zuri-imported-session-id", "new-session");
 });
 
 test("bridge labels replace baked import copy, including status text", async ({ page }) => {
   const baked = {
-    importQingzhou: "导入轻舟",
+    importZuri: "导入Zuri",
     importing: "正在导入",
     imported: "已导入",
     retryImport: "重试导入",
     importFailedRetry: "导入失败，请重试",
   };
   const english = {
-    importQingzhou: "Continue in qz",
+    importZuri: "Continue in zuri",
     importing: "Importing",
     imported: "Imported",
     retryImport: "Try again",
@@ -156,20 +156,20 @@ test("bridge labels replace baked import copy, including status text", async ({ 
   };
   const bakedJson = JSON.stringify(baked).replace(/</g, "\\u003c");
   const html = (await createDocument(page, [tableTool("only", "Single")])).replace(
-    /<script type="application\/json" id="qingzhou-export-messages">[\s\S]*?<\/script>/,
-    `<script type="application/json" id="qingzhou-export-messages">${bakedJson}</script>`,
+    /<script type="application\/json" id="zuri-export-messages">[\s\S]*?<\/script>/,
+    `<script type="application/json" id="zuri-export-messages">${bakedJson}</script>`,
   );
   await page.setContent(html);
-  await page.evaluate(() => window.postMessage({ type: "qingzhou:session-export:result", action: "probe", installed: true, labels: { importQingzhou: "nope" } }, "*"));
-  await expect(page.locator("#qingzhou-session-cta")).toHaveText("导入轻舟");
-  await page.evaluate(labels => window.postMessage({ type: "qingzhou:session-export:result", action: "probe", installed: true, labels }, "*"), english);
-  const cta = page.locator("#qingzhou-session-cta");
-  await expect(cta).toHaveText("Continue in qz");
-  await page.evaluate(() => window.postMessage({ type: "qingzhou:session-export:result", action: "import", status: "working" }, "*"));
+  await page.evaluate(() => window.postMessage({ type: "zuri:session-export:result", action: "probe", installed: true, labels: { importZuri: "nope" } }, "*"));
+  await expect(page.locator("#zuri-session-cta")).toHaveText("导入Zuri");
+  await page.evaluate(labels => window.postMessage({ type: "zuri:session-export:result", action: "probe", installed: true, labels }, "*"), english);
+  const cta = page.locator("#zuri-session-cta");
+  await expect(cta).toHaveText("Continue in zuri");
+  await page.evaluate(() => window.postMessage({ type: "zuri:session-export:result", action: "import", status: "working" }, "*"));
   await expect(cta).toHaveText("Importing");
-  await page.evaluate(() => window.postMessage({ type: "qingzhou:session-export:result", action: "import", ok: false }, "*"));
+  await page.evaluate(() => window.postMessage({ type: "zuri:session-export:result", action: "import", ok: false }, "*"));
   await expect(cta).toHaveText("Try again");
   await expect(cta).toHaveAttribute("title", "Could not import. Try again.");
-  await page.evaluate(() => window.postMessage({ type: "qingzhou:session-export:result", action: "import", ok: true, sessionId: "kept" }, "*"));
+  await page.evaluate(() => window.postMessage({ type: "zuri:session-export:result", action: "import", ok: true, sessionId: "kept" }, "*"));
   await expect(cta).toHaveText("Imported");
 });

@@ -6,7 +6,7 @@ export const test = base.extend({
   sidepanelBenchmarkReady: [async ({ page, sidepanelChromeOptions }, use) => {
     await page.addInitScript(installBenchmarkChromeStub, sidepanelChromeOptions);
     await page.goto("/extension/sidepanel/sidepanel.html", { waitUntil: "domcontentloaded" });
-    await page.waitForFunction(() => Boolean(window.qingzhouConversationBenchmark));
+    await page.waitForFunction(() => Boolean(window.zuriConversationBenchmark));
     await use();
   }, { auto: true }],
 });

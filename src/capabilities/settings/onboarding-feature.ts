@@ -9,8 +9,8 @@ interface OnboardingOptions {
   switchTab?(tab: string, options: { userInitiated: boolean }): void;
   skillsTab: string; chatTab: string; composer?: { setValue(value: string): void };
 }
-const STORAGE_KEY = "qingzhou_onboarding_v2";
-const LEGACY_STORAGE_KEY = "qingzhou_onboarding_v1";
+const STORAGE_KEY = "zuri_onboarding_v2";
+const LEGACY_STORAGE_KEY = "zuri_onboarding_v1";
 
 const TASKS = Object.freeze({
   summarize: {

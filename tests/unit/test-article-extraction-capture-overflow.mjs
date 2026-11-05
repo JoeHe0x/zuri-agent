@@ -12,7 +12,7 @@ import {
 } from "../support/article-extraction-benchmark.mjs";
 
 test("live capture bounds failed detail candidates and never retries attempted URLs in overflow", async t => {
-  const fixtureRoot = mkdtempSync(join(tmpdir(), "qingzhou-capture-budget-"));
+  const fixtureRoot = mkdtempSync(join(tmpdir(), "zuri-capture-budget-"));
   t.after(() => rmSync(fixtureRoot, { recursive: true, force: true }));
   const requests = new Map();
   const detailLinks = Array.from({ length: 60 }, (_, index) => `/detail-${index + 1}`);
@@ -34,7 +34,7 @@ test("live capture bounds failed detail candidates and never retries attempted U
   const config = join(fixtureRoot, "config.json");
   const output = join(fixtureRoot, "capture");
   writeFileSync(config, `${JSON.stringify({
-    schema: "qingzhou.article-extraction-sites.v1",
+    schema: "zuri.article-extraction-sites.v1",
     sampleTarget: 2,
     samplesPerSite: 2,
     sites: [{

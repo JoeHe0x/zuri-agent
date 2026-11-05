@@ -38,7 +38,7 @@ assert.equal(failures('import { localFeature } from "./local-feature.js";\n').le
 assert.equal(failures(`const unicodeTable = [${Array.from({ length: 5000 }, (_, index) => index).join(",")}];`).length, 0,
   "long numeric data is not minified executable logic");
 
-const root = await mkdtemp(join(tmpdir(), "qz-review-code-"));
+const root = await mkdtemp(join(tmpdir(), "zuri-review-code-"));
 try {
   await mkdir(join(root, "vendor"));
   await writeFile(join(root, "vendor/engine.mjs"), "export const engineVersion = 1;\n");

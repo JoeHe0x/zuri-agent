@@ -20,11 +20,11 @@ _benchmark_assets = None
 def extension_directory():
     global _temporary_build, _extension_directory, _benchmark_assets
     if _extension_directory is None:
-        configured = os.environ.get("QINGZHOU_TEST_EXTENSION_DIR")
+        configured = os.environ.get("ZURI_TEST_EXTENSION_DIR")
         if configured:
             directory = Path(configured).resolve()
         else:
-            _temporary_build = TemporaryDirectory(prefix="qingzhou-python-test-build-")
+            _temporary_build = TemporaryDirectory(prefix="zuri-python-test-build-")
             directory = (Path(_temporary_build.name) / "extension").resolve()
             subprocess.run([
                 "node", str(ROOT / "tests/support/extension-build.mjs"), "--output", str(directory),
@@ -32,7 +32,7 @@ def extension_directory():
         manifest = json.loads((directory / "manifest.json").read_text(encoding="utf-8"))
         if manifest.get("manifest_version") != 3:
             raise ValueError(f"Invalid test extension: {directory}")
-        _benchmark_assets = TemporaryDirectory(prefix="qingzhou-benchmark-assets-")
+        _benchmark_assets = TemporaryDirectory(prefix="zuri-benchmark-assets-")
         subprocess.run([
             "node", str(ROOT / "tests/support/benchmark-assets.mjs"), str(directory), _benchmark_assets.name,
         ], cwd=ROOT, check=True)

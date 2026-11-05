@@ -158,13 +158,13 @@ test("keyboard, outside dismissal, refresh and form close do not retain stale pi
   await expect(page.locator("#cfg-provider-picker")).toBeHidden();
   await page.locator("#cfg-provider-trigger").click();
   await expect(search).toHaveValue("");
-  await page.evaluate(() => window.__qzEmitPortMessage({ type: "config", config: {
+  await page.evaluate(() => window.__zuriEmitPortMessage({ type: "config", config: {
     provider: "replacement", model: "replacement-model", providers: [{ id: "replacement", label: "Replacement", requiresApiKey: false }],
   } }));
   await expect(page.locator("#cfg-provider-trigger")).toHaveText("Replacement");
   await expect(page.locator("#cfg-provider-list [role=option]")).toHaveCount(1);
   await expect(page.locator('#cfg-provider-list [aria-selected="true"]')).toHaveText("Replacement✓");
-  await page.evaluate(() => window.__qzEmitPortMessage({ type: "config", config: { providers: [] } }));
+  await page.evaluate(() => window.__zuriEmitPortMessage({ type: "config", config: { providers: [] } }));
   await expect(page.locator("#cfg-provider-list [role=option]")).toHaveCount(0);
   await expect(page.locator("#cfg-provider-empty")).toBeVisible();
   await page.locator("#settings-tab-advanced").click();

@@ -431,7 +431,7 @@ assert.match(
 );
 assert.match(
   runSkillScriptDefinition.description,
-  /page 必须使用当前任务已拥有的网页 tab；inner 运行在轻舟内部 Worker，不需要网页 tab/,
+  /page 必须使用当前任务已拥有的网页 tab；inner 运行在Zuri内部 Worker，不需要网页 tab/,
   "run_skill_script description should distinguish page and inner target policy",
 );
 assert.match(
@@ -446,7 +446,7 @@ assert.match(
 );
 assert.match(
   runScriptDefinition.description,
-  /target:"inner" 表示轻舟内部 offscreen 运行环境/,
+  /target:"inner" 表示Zuri内部 offscreen 运行环境/,
   "run_script description should document explicit inner mode",
 );
 assert.match(
@@ -487,17 +487,17 @@ assert.match(
 );
 assert.match(
   toolsSource,
-  /let __qzLastObservation = null/,
+  /let __zuriLastObservation = null/,
   "the page tool proxy should keep one ordered observation slot",
 );
 assert.match(
   toolsSource,
-  /if \(response\.observation[\s\S]*__qzLastObservation = response\.observation/,
+  /if \(response\.observation[\s\S]*__zuriLastObservation = response\.observation/,
   "each successful observation should overwrite the previous value in execution order",
 );
 assert.match(
   toolsSource,
-  /out\.__lastObservation = __qzSafeValueForMessage\(__qzLastObservation\)/,
+  /out\.__lastObservation = __zuriSafeValueForMessage\(__zuriLastObservation\)/,
   "the controlled envelope should carry only the last observation",
 );
 assert.match(
@@ -505,7 +505,7 @@ assert.match(
   /normalizeRunScriptObservation\(out\.__lastObservation\)[\s\S]*delete out\.__lastObservation[\s\S]*\.\.\.lastObservation/,
   "the outer run_script result should promote and hide the last observation",
 );
-assert.doesNotMatch(toolsSource, /captureRunScriptScreenFeedback|finalizeRunScriptScreenFeedback|__qzScreenActionUsed/, "run_script must not retain hidden final-capture machinery");
+assert.doesNotMatch(toolsSource, /captureRunScriptScreenFeedback|finalizeRunScriptScreenFeedback|__zuriScreenActionUsed/, "run_script must not retain hidden final-capture machinery");
 assert.doesNotMatch(
   toolsSource,
   /out\.result[\s\S]{0,180}typeof out\.result\._image/,
@@ -602,7 +602,7 @@ assert.match(
 );
 assert.doesNotMatch(
   toolsSource,
-  /__qzBridgeTimeout|const bridgeTimeout/,
+  /__zuriBridgeTimeout|const bridgeTimeout/,
   "page bridge delegates timeout ownership to the actual tool execution layer",
 );
 const { scriptTimeout } = await import("../../src/background/tools/timing.js");

@@ -122,7 +122,7 @@ function appendArticleCompactProfile(parent: HTMLElement, args: Data, result: un
 
 function appendArticleBody(parent: HTMLElement, text: unknown, imageDisplayHints: unknown = []) {
   const section = document.createElement("div");
-  section.className = "tool-article-body qz-markdown";
+  section.className = "tool-article-body zuri-markdown";
   section.dataset.toolScrollSurface = "article";
   const markdown = String(text || "").trim();
   const rendered = typeof renderMarkdown === "function"
@@ -147,7 +147,7 @@ const ARTICLE_MARKDOWN_DROP_TAGS = new Set([
 ]);
 
 const ARTICLE_MARKDOWN_ALLOWED_CLASSES = new Set([
-  "code-block", "code-copy-btn", "copyable-code-block", "markdown-code-block", "qz-icon-btn", "qz-icon-btn--xs",
+  "code-block", "code-copy-btn", "copyable-code-block", "markdown-code-block", "zuri-icon-btn", "zuri-icon-btn--xs",
 ]);
 
 function sanitizeArticleMarkdownHtml(html: unknown) {

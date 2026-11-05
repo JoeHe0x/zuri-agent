@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { assertNoRemoteCode, findRemoteCode } from "../../scripts/check-no-remote-code.mjs";
 
-const root = await mkdtemp(join(tmpdir(), "qz-remote-code-"));
+const root = await mkdtemp(join(tmpdir(), "zuri-remote-code-"));
 try {
   await mkdir(join(root, "vendor/mathjax"), { recursive: true });
   await mkdir(join(root, "sidepanel"), { recursive: true });
@@ -23,7 +23,7 @@ try {
   await writeFile(join(root, "sidepanel/panel.js"), "const local = true;");
   await writeFile(join(root, "sidepanel/export.html"), '<script defer src="https://registry.npmmirror.com/mathjax/3.2.2/files/es5/tex-svg.js"></script>');
   await assert.rejects(assertNoRemoteCode([root]), /registry\.npmmirror\.com/u);
-  await assert.rejects(assertNoRemoteCode(["/tmp/qz-remote-code-missing"]), /not a directory/u);
+  await assert.rejects(assertNoRemoteCode(["/tmp/zuri-remote-code-missing"]), /not a directory/u);
 
   await writeFile(join(root, "sidepanel/export.html"), '<script src="https://unknown-code-host.example/runtime.js"></script>');
   await assert.rejects(assertNoRemoteCode([root]), /unknown-code-host/u);

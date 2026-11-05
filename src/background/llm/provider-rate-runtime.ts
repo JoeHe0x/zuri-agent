@@ -25,7 +25,7 @@ export type RateAdmission = ActiveAdmission | {options: ModelOptions; current: n
 interface RecordedSignal extends LearningResult {signal: RateSignal; policy: RatePolicy; retryAfterMs: number; providerRetryAfterMs: number | null}
 type FailureFacts = Pick<Partial<ProviderResponseEvent>, 'status' | 'code' | 'kind' | 'retryAfterMs'>;
 
-export const PROVIDER_RATE_LEARNING_STORAGE_KEY = "_qz_provider_rate_learning_v1";
+export const PROVIDER_RATE_LEARNING_STORAGE_KEY = "_zuri_provider_rate_learning_v1";
 const DEFAULT_STORAGE_LOAD_TIMEOUT_MS = 250;
 
 export function createProviderRateLearningRuntime(options: RuntimeOptions = {}) {

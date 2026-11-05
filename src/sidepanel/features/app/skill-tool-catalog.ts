@@ -29,7 +29,7 @@ export function createSkillToolCatalog(options: CatalogOptions) {
 
   function refresh() {
     void load().catch(error => {
-      if (!options.signal.aborted) console.warn("[轻舟] load skill tool catalog failed:", error instanceof Error ? error.message : error);
+      if (!options.signal.aborted) console.warn("[Zuri] load skill tool catalog failed:", error instanceof Error ? error.message : error);
     });
   }
 

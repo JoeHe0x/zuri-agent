@@ -101,8 +101,8 @@
 }
 
 .artifact-strip-open {
-  --qz-control-size: 22px;
-  --qz-control-icon-size: 13px;
+  --zuri-control-size: 22px;
+  --zuri-control-icon-size: 13px;
 }
 
 .artifact-strip-items {
@@ -196,8 +196,8 @@
 }
 
 .artifact-solid-btn {
-  --qz-control-font-size: max(10px, calc(11px * var(--chat-meta-text-scale, 1)));
-  --qz-control-font-weight: 650;
+  --zuri-control-font-size: max(10px, calc(11px * var(--chat-meta-text-scale, 1)));
+  --zuri-control-font-weight: 650;
   margin: 0;
   border-radius: 0;
   line-height: 1.2;
@@ -256,7 +256,7 @@
 }
 
 .artifacts-header .icon-btn {
-  --qz-control-size: 28px;
+  --zuri-control-size: 28px;
 }
 
 .artifacts-body {
@@ -915,7 +915,7 @@
   margin-top: 2px;
   border: none;
   opacity: 0;
-  --qz-control-color: var(--text-muted);
+  --zuri-control-color: var(--text-muted);
 }
 
 .session-card-actions .session-action-btn {
@@ -1030,7 +1030,7 @@
   font-weight: 680;
 }
 
-.automation-editor .qz-field {
+.automation-editor .zuri-field {
   width: 100%;
   height: 34px;
   padding: 0 10px;
@@ -1066,7 +1066,7 @@
   line-height: 1.2;
 }
 
-.automation-form-grid .qz-field {
+.automation-form-grid .zuri-field {
   height: 32px;
   padding: 0 9px;
   font-size: 12px;
@@ -1085,8 +1085,8 @@
   margin-top: 10px;
 }
 
-.automation-editor-actions .qz-btn--primary,
-.automation-editor-actions .qz-btn {
+.automation-editor-actions .zuri-btn--primary,
+.automation-editor-actions .zuri-btn {
   height: 34px;
   margin-top: 0;
   padding: 0 14px;
@@ -1369,8 +1369,8 @@
 }
 
 .automation-actions .automation-action-btn {
-  --qz-control-size: 21px;
-  --qz-control-icon-size: 14px;
+  --zuri-control-size: 21px;
+  --zuri-control-icon-size: 14px;
   opacity: 0.66;
 }
 

@@ -7,8 +7,8 @@ import { serveAxFixtures } from '../benchmarks/ax-viewport.mjs';
 // Explicit live-only minimal tool loop, not the full extension Agent lifecycle.
 // Credentials must be sourced by the caller, never loaded from files by this runner.
 const apiKey = process.env.DEEPSEEK_API_KEY;
-assert.ok(apiKey, 'Source /home/box/shared/qz/deepseek.env before this explicit live run.');
-const output = resolve(process.env.QZ_AX_OUTPUT || 'tests/results/viewport-ax/live');
+assert.ok(apiKey, 'Source /home/box/shared/zuri/deepseek.env before this explicit live run.');
+const output = resolve(process.env.ZURI_AX_OUTPUT || 'tests/results/viewport-ax/live');
 await mkdir(output, { recursive: true });
 const config = { provider: 'deepseek', model: 'deepseek-flash', contextWindow: 1000000, vision: true };
 const report = { at: new Date().toISOString(), config, harness: 'Minimal live tool loop; production AX and Content handlers; isolated Chromium; not full extension Agent E2E', runs: [] };

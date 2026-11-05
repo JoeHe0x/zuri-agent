@@ -3,7 +3,7 @@
   "tabs.tab": "Aba {tabId}",
   "tabs.current": "Atual",
   "tabs.window": "Janela {windowId}",
-  "tabs.qingzhouTask": "Tarefa do qz",
+  "tabs.zuriTask": "Tarefa do zuri",
   "tabs.organizedInto": "Organizadas em “{name}”",
   "tabs.namedTabCount": "Abas: {count} · {name}",
   "tabs.groupedTabs": "Abas agrupadas: {count}",

@@ -1,5 +1,5 @@
 {
-  "schema": "qingzhou.article-extraction-sites.v1",
+  "schema": "zuri.article-extraction-sites.v1",
   "sampleTarget": 220,
   "design": {
     "purpose": "Second same-cell reserve for the 20 cells still short after strict canonical URL, DOM digest, input hash and normalized-text deduplication.",

@@ -42,7 +42,7 @@ def load_module(name: str, path: Path):
 
 
 DISTILL_PATH = HERE / "study-tree-dp-candidate-distillation.py"
-DISTILL = load_module("qingzhou_local_mlp_data", DISTILL_PATH)
+DISTILL = load_module("zuri_local_mlp_data", DISTILL_PATH)
 READABILITY = DISTILL.READABILITY
 TRAINER = DISTILL.TRAINER
 
@@ -429,7 +429,7 @@ def load_wmb_pages(directory: Path) -> list[object]:
     if not report_path.exists():
         raise ValueError(f"WebMainBench export is incomplete: {report_path} is missing")
     report = json.loads(report_path.read_text(encoding="utf8"))
-    if report.get("schema") != "qingzhou.webmainbench-tree-dp-training-export.v1":
+    if report.get("schema") != "zuri.webmainbench-tree-dp-training-export.v1":
         raise ValueError(f"unexpected WebMainBench export schema: {report.get('schema')}")
     paths = sorted(directory.glob("*.json.gz"))
     if report.get("exported") != len(paths):
@@ -540,7 +540,7 @@ def main() -> int:
             for item in wmb_holdout
         ]
     report = {
-        "schema": "qingzhou.tree-dp-local-mlp-study.v1",
+        "schema": "zuri.tree-dp-local-mlp-study.v1",
         "protocol": {
             "trainingSplits": ["base", "train"],
             "grouping": "siteFamily",

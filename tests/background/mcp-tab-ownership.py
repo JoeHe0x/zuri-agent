@@ -26,7 +26,7 @@ async def call(session: ClientSession, name: str, args: dict[str, Any]) -> dict[
 
 
 async def execute(session: ClientSession, session_id: str, name: str, args: dict[str, Any]) -> Any:
-    payload = await call(session, "qingzhou_execute_tool", {
+    payload = await call(session, "zuri_execute_tool", {
         "sessionId": session_id,
         "name": name,
         "args": args,
@@ -36,7 +36,7 @@ async def execute(session: ClientSession, session_id: str, name: str, args: dict
 
 
 async def create_session(session: ClientSession, title: str, parent_session_id: str = "") -> str:
-    payload = await call(session, "qingzhou_create_session", {
+    payload = await call(session, "zuri_create_session", {
         "title": title,
         "parentSessionId": parent_session_id,
     })
@@ -46,7 +46,7 @@ async def create_session(session: ClientSession, title: str, parent_session_id: 
 
 
 async def snapshot(session: ClientSession, session_id: str) -> dict[str, Any]:
-    return await call(session, "qingzhou_get_session_snapshot", {
+    return await call(session, "zuri_get_session_snapshot", {
         "sessionId": session_id,
         "compact": True,
         "tail": True,
@@ -86,7 +86,7 @@ async def amain(args: argparse.Namespace) -> int:
     async with streamablehttp_client(args.bridge_url, timeout=30, sse_read_timeout=120) as (read, write, _):
         async with ClientSession(read, write) as session:
             await session.initialize()
-            bridge = await call(session, "qingzhou_bridge_status", {})
+            bridge = await call(session, "zuri_bridge_status", {})
             assert bridge.get("clientCount") == 1, bridge
 
             root_a = await create_session(session, "ownership root A")
@@ -179,7 +179,7 @@ async def amain(args: argparse.Namespace) -> int:
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Verify Session tab ownership through an isolated Qingzhou MCP E2E environment.")
+    parser = argparse.ArgumentParser(description="Verify Session tab ownership through an isolated Zuri MCP E2E environment.")
     parser.add_argument("--bridge-url", required=True)
     parser.add_argument("--base-url", required=True)
     return parser.parse_args()

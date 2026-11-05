@@ -148,7 +148,7 @@ export function createSessionRuntimeState({
       supervisor.replaceRuntimes(runtimes);
       if (changed) await persist();
     } catch (error) {
-      logger?.warn?.("[轻舟] hydrate session runtime failed:", error);
+      logger?.warn?.("[Zuri] hydrate session runtime failed:", error);
       supervisor.replaceRuntimes({});
     }
   }
@@ -187,15 +187,15 @@ export function createSessionRuntimeState({
       updatedAt: now(),
     });
     persist(id, { terminal: isSettledSessionRuntimeStatus(next?.status) })
-      .catch(error => logger?.warn?.("[轻舟] persist session runtime failed:", error));
+      .catch(error => logger?.warn?.("[Zuri] persist session runtime failed:", error));
     if (hasOwnedTabPatch(patch)) scheduleTabGroupSync(id);
     if (shouldNotifyCompleted(previous, next, patch)) {
       onCompleted(id).catch(error => {
-        logger?.debug?.("[轻舟] completion notification failed:", errorMessage(error));
+        logger?.debug?.("[Zuri] completion notification failed:", errorMessage(error));
       });
       // Same transition the completion notification uses. Repeats stay quiet; the review store keeps root sessions.
       Promise.resolve(onTaskCompleted(id, next || {})).catch(error => {
-        logger?.debug?.("[轻舟] completed task count failed:", errorMessage(error));
+        logger?.debug?.("[Zuri] completed task count failed:", errorMessage(error));
       });
     }
     return next;
@@ -205,7 +205,7 @@ export function createSessionRuntimeState({
     const id = normalizeSessionId(sessionId);
     activeTools.delete(id);
     supervisor.deleteRuntime(id);
-    repository.deleteRuntime(id).catch(error => logger?.warn?.("[轻舟] remove session runtime failed:", error));
+    repository.deleteRuntime(id).catch(error => logger?.warn?.("[Zuri] remove session runtime failed:", error));
     scheduleTabGroupSync(id);
   }
 
@@ -281,7 +281,7 @@ export function createSessionRuntimeState({
     followUpResumeTimer = setTimeout(() => {
       followUpResumeTimer = null;
       resumeFollowUps(reason).catch(error => {
-        logger?.warn?.("[轻舟] resume persisted follow-ups failed:", error);
+        logger?.warn?.("[Zuri] resume persisted follow-ups failed:", error);
       });
     }, FOLLOW_UP_RESUME_DELAY_MS);
   }
@@ -303,10 +303,10 @@ export function createSessionRuntimeState({
         await entry.ready;
         resumed.push(sessionId);
       } catch (error) {
-        logger?.warn?.(`[轻舟] resume persisted follow-up failed: session=${sessionId}`, error);
+        logger?.warn?.(`[Zuri] resume persisted follow-up failed: session=${sessionId}`, error);
       }
     }
-    if (resumed.length) logger?.debug?.("[轻舟] resumed persisted follow-up queues", { reason, sessions: resumed });
+    if (resumed.length) logger?.debug?.("[Zuri] resumed persisted follow-up queues", { reason, sessions: resumed });
     return resumed;
   }
 

@@ -83,7 +83,7 @@ async function preparePage(page) {
     </main>
   `);
   await page.evaluate(() => {
-    window.qingzhouConversationBenchmark = { collectViewportAnchorState: () => null };
+    window.zuriConversationBenchmark = { collectViewportAnchorState: () => null };
     window.driverFixture = { clicks: 0, positionAttempts: 0, offscreenTop: null, clickRect: null };
     document.querySelector("#messages").addEventListener("click", event => {
       const button = event.target.closest("button");

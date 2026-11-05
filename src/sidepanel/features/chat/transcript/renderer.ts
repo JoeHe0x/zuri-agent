@@ -133,7 +133,7 @@ export function createTranscriptRenderer(options: TranscriptOptions) {
         backfillPartialTranscript(id);
       } catch (error) {
         clearPartialTranscriptRender(id);
-        console.warn("[轻舟] transcript backfill failed; scheduling snapshot recovery", error);
+        console.warn("[Zuri] transcript backfill failed; scheduling snapshot recovery", error);
         scheduleTranscriptCacheRender(id, { delay: 0 });
       }
     },
@@ -884,7 +884,7 @@ function syncUserMessageDelivery(el: HTMLElement, entry: TranscriptEntry) {
   const status = document.createElement("div");
   status.className = "msg-user-delivery";
   status.setAttribute("role", "status");
-  status.innerHTML = `<span>${tHtml("notSent")}</span><span aria-hidden="true">·</span><button class="qz-btn qz-btn--inline msg-user-retry" type="button" data-action="retry-user-message">${tHtml("resend")}</button>`;
+  status.innerHTML = `<span>${tHtml("notSent")}</span><span aria-hidden="true">·</span><button class="zuri-btn zuri-btn--inline msg-user-retry" type="button" data-action="retry-user-message">${tHtml("resend")}</button>`;
   el.appendChild(status);
 }
 
@@ -903,7 +903,7 @@ function syncUserMessageActions(el: HTMLElement, entry: TranscriptEntry, canEdit
   const actions = document.createElement("div");
   actions.className = "msg-user-actions";
   actions.innerHTML = `
-    <button class="qz-icon-btn qz-icon-btn--sm msg-action-btn msg-user-edit-btn" type="button" data-action="edit-user-message" data-tooltip="${tHtml("edit")}" aria-label="${tHtml("edit")}">
+    <button class="zuri-icon-btn zuri-icon-btn--sm msg-action-btn msg-user-edit-btn" type="button" data-action="edit-user-message" data-tooltip="${tHtml("edit")}" aria-label="${tHtml("edit")}">
       <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m15.2 5.2 3.6 3.6"/><path d="M4 20l4.2-1 11-11a2.55 2.55 0 0 0-3.6-3.6l-11 11Z"/></svg>
     </button>
   `;
@@ -996,12 +996,12 @@ function startUserMessageEdit(el: HTMLElement | null) {
     content.classList.remove("user-selectable");
     content.innerHTML = `
       <div class="msg-user-edit-shell">
-        <textarea class="qz-field qz-field--bare msg-user-edit-input" spellcheck="false" rows="1" aria-label="${tHtml("editRequest")}">${escapeHtml(entry.text || "")}</textarea>
+        <textarea class="zuri-field zuri-field--bare msg-user-edit-input" spellcheck="false" rows="1" aria-label="${tHtml("editRequest")}">${escapeHtml(entry.text || "")}</textarea>
         ${renderUserImages(entry.images || [])}
         ${renderUserDocuments(entry.documents || [])}
         <div class="msg-user-edit-actions">
-          <button class="qz-btn qz-btn--ghost qz-btn--sm msg-user-edit-cancel" type="button" data-action="cancel-user-edit">${tHtml("cancel")}</button>
-          <button class="qz-btn qz-btn--primary qz-btn--sm msg-user-edit-submit" type="button" data-action="submit-user-edit">${tHtml("send")}</button>
+          <button class="zuri-btn zuri-btn--ghost zuri-btn--sm msg-user-edit-cancel" type="button" data-action="cancel-user-edit">${tHtml("cancel")}</button>
+          <button class="zuri-btn zuri-btn--primary zuri-btn--sm msg-user-edit-submit" type="button" data-action="submit-user-edit">${tHtml("send")}</button>
         </div>
       </div>
     `;
@@ -2027,11 +2027,11 @@ function renderUserImages(images: (TranscriptImage | string)[] = []) {
 function renderUserDocuments(documents: MessageDocument[] = []) {
   if (!documents.length) return "";
   return `<div class="msg-documents">${documents.map(document => `
-    <div class="document-attachment-card qz:box-border qz:flex qz:h-13 qz:min-w-0 qz:items-stretch qz:overflow-hidden" title="${escapeHtml(document.filename || "document")}">
-      <span class="document-attachment-type qz:grid qz:flex-[0_0_44px] qz:place-items-center" aria-hidden="true">${escapeHtml(documentTypeLabel(document))}</span>
-      <span class="document-attachment-body qz:flex qz:min-w-0 qz:flex-auto qz:flex-col qz:justify-center qz:px-2 qz:py-0">
-        <span class="document-attachment-name qz:block qz:min-w-0 qz:truncate">${escapeHtml(document.filename || "document")}</span>
-        <span class="document-attachment-meta qz:block qz:min-w-0 qz:truncate">${tHtml("parsedFilename", { filename: formatDocumentSize(document.size) })}</span>
+    <div class="document-attachment-card zuri:box-border zuri:flex zuri:h-13 zuri:min-w-0 zuri:items-stretch zuri:overflow-hidden" title="${escapeHtml(document.filename || "document")}">
+      <span class="document-attachment-type zuri:grid zuri:flex-[0_0_44px] zuri:place-items-center" aria-hidden="true">${escapeHtml(documentTypeLabel(document))}</span>
+      <span class="document-attachment-body zuri:flex zuri:min-w-0 zuri:flex-auto zuri:flex-col zuri:justify-center zuri:px-2 zuri:py-0">
+        <span class="document-attachment-name zuri:block zuri:min-w-0 zuri:truncate">${escapeHtml(document.filename || "document")}</span>
+        <span class="document-attachment-meta zuri:block zuri:min-w-0 zuri:truncate">${tHtml("parsedFilename", { filename: formatDocumentSize(document.size) })}</span>
       </span>
     </div>
   `).join("")}</div>`;

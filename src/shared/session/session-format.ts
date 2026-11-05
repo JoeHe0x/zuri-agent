@@ -3,7 +3,7 @@ import { t } from "../i18n/backend.js";
 /** Persisted versions, distinct from runtime checkpoints and portable exchange files. */
 export const CURRENT_SESSION_VERSION = 1;
 export const CURRENT_SESSION_RECORD_VERSION = 4;
-export const SESSION_RECORD_TYPE = 'qz-browser-agent-session';
+export const SESSION_RECORD_TYPE = 'zuri-agent-session';
 
 export class SessionFormatError extends Error {
   readonly code: 'UNSUPPORTED_SESSION_RECORD_VERSION' | 'UNSUPPORTED_CONVERSATION_VERSION' | 'INVALID_SESSION_FORMAT';

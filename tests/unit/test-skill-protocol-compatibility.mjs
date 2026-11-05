@@ -7,10 +7,10 @@ import { appendErrorSection } from "../../src/sidepanel/tools/generic-result-ren
 
 // Literal installed-package data deliberately does not derive its protocol from the current constants.
 const installedSkill = {
-  format: "qingzhou.skill", schemaVersion: 2, name: "research-kit", scope: "resident",
+  format: "zuri.skill", schemaVersion: 2, name: "research-kit", scope: "resident",
   resources: [{
     path: "plugin.json", type: "json", content: JSON.stringify({
-      format: "qingzhou.plugin", schemaVersion: 1, id: "legacy-namespace",
+      format: "zuri.plugin", schemaVersion: 1, id: "legacy-namespace",
       settings: { fields: [{ key: "endpoint", type: "url", required: true }] },
       tools: [{ name: "inspect", runtime: "inner", script: "scripts/inspect.js", rendererId: "plugin-script" }],
     }),
@@ -32,7 +32,7 @@ test("Skill naming retains the installed manifest format and namespace-based too
 test("Skill settings read and update the existing compound identity without a storage migration", async () => {
   const manifest = discoverSkillManifests([installedSkill]).plugins[0];
   const state = {
-    _qz_skill_settings_v1: { version: 1, records: {
+    _zuri_skill_settings_v1: { version: 1, records: {
       "research-kit::legacy-namespace": {
         pluginId: "legacy-namespace", skillName: "research-kit",
         values: { endpoint: "https://before.example.test" }, updatedAt: "2026-01-01T00:00:00.000Z",
@@ -59,9 +59,9 @@ test("Skill settings read and update the existing compound identity without a st
     values: { endpoint: "https://after.example.test" },
   });
   assert.equal(writes.length, 1);
-  assert.deepEqual(Object.keys(state), ["_qz_skill_settings_v1"]);
-  assert.deepEqual(Object.keys(state._qz_skill_settings_v1.records), ["research-kit::legacy-namespace"]);
-  assert.equal(state._qz_skill_settings_v1.records[settings[0].id].values.endpoint, "https://after.example.test");
+  assert.deepEqual(Object.keys(state), ["_zuri_skill_settings_v1"]);
+  assert.deepEqual(Object.keys(state._zuri_skill_settings_v1.records), ["research-kit::legacy-namespace"]);
+  assert.equal(state._zuri_skill_settings_v1.records[settings[0].id].values.endpoint, "https://after.example.test");
 });
 
 test("historical Skill result envelopes still restore renderer identity without a live catalog", () => {

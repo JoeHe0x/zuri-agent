@@ -3,7 +3,7 @@
   "tabs.tab": "علامة التبويب {tabId}",
   "tabs.current": "الحالية",
   "tabs.window": "النافذة {windowId}",
-  "tabs.qingzhouTask": "مهمة qz",
+  "tabs.zuriTask": "مهمة zuri",
   "tabs.organizedInto": "تم تنظيمها في «{name}»",
   "tabs.namedTabCount": "علامات التبويب: {count} · {name}",
   "tabs.groupedTabs": "علامات التبويب المجمّعة: {count}",

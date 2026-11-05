@@ -54,13 +54,13 @@ test("one lazy command scope shares initialization across concurrent and later r
   assert.equal(traffic.length, 0);
   await withToolClient(async call => {
     const firstRequest = new AbortController();
-    const initial = await Promise.all([1, 2].map(() => call(bridge.endpoint, "qingzhou_bridge_status", {}, { timeoutMs: 1000, signal: firstRequest.signal })));
+    const initial = await Promise.all([1, 2].map(() => call(bridge.endpoint, "zuri_bridge_status", {}, { timeoutMs: 1000, signal: firstRequest.signal })));
     assert.ok(initial.every(value => value.connected));
     // The first request's signal does not own the lifetime of the command's connection.
     firstRequest.abort();
     await delay(20);
-    assert.equal((await call(bridge.endpoint, "qingzhou_bridge_status", {}, { timeoutMs: 1000 })).connected, true);
-    await assert.rejects(call("http://127.0.0.1:1", "qingzhou_bridge_status", {}), error => error.code === "connection_changed");
+    assert.equal((await call(bridge.endpoint, "zuri_bridge_status", {}, { timeoutMs: 1000 })).connected, true);
+    await assert.rejects(call("http://127.0.0.1:1", "zuri_bridge_status", {}), error => error.code === "connection_changed");
   });
   assertOneSession(traffic, 3);
 });
@@ -155,7 +155,7 @@ test("failed initialization is retained instead of reconnecting inside a command
   let attempts = 0;
   const fetch = async () => { attempts++; return new Response("unavailable", { status: 503 }); };
   await withToolClient(async call => {
-    for (let i = 0; i < 2; i++) await assert.rejects(call("http://127.0.0.1:1", "qingzhou_bridge_status", {}, { fetch }), error => error.code === "connection_error" && /unavailable/.test(error.message));
+    for (let i = 0; i < 2; i++) await assert.rejects(call("http://127.0.0.1:1", "zuri_bridge_status", {}, { fetch }), error => error.code === "connection_error" && /unavailable/.test(error.message));
   });
   assert.equal(attempts, 1);
 });
@@ -170,7 +170,7 @@ test("session termination has a bounded deadline and still closes transport", as
     });
   };
   const started = Date.now();
-  await withToolClient(call => call(bridge.endpoint, "qingzhou_bridge_status", {}, { fetch }));
+  await withToolClient(call => call(bridge.endpoint, "zuri_bridge_status", {}, { fetch }));
   assert.equal(cleanupAborted, true);
   assert.ok(Date.now() - started < 2000);
   assert.equal(traffic.filter(entry => entry.rpc?.method === "initialize").length, 1);
@@ -197,7 +197,7 @@ test("the whole MCP handshake is bounded when the initialized notification never
       assert.fail("no tool call should run before initialization completes");
     };
     const started = Date.now();
-    await assert.rejects(withToolClient(call => call("http://127.0.0.1:1", "qingzhou_bridge_status", {}, {
+    await assert.rejects(withToolClient(call => call("http://127.0.0.1:1", "zuri_bridge_status", {}, {
       fetch, signal: controller.signal, timeoutMs: cancelled ? 1000 : 50,
     })), error => error.code === "connection_error" && (cancelled ? error.name === "AbortError" : /handshake timed out/.test(error.message)));
     assert.equal(initialized, 1);

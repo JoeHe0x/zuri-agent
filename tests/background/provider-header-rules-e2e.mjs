@@ -8,7 +8,7 @@ import { chromium } from "playwright";
 import { ensureTestExtension } from "../support/extension-build.mjs";
 
 const extension = await ensureTestExtension();
-const profile = await mkdtemp(join(tmpdir(), "qz-provider-headers-"));
+const profile = await mkdtemp(join(tmpdir(), "zuri-provider-headers-"));
 const server = createServer({
   key: await readFile(new URL("../fixtures/tls/localhost-key.pem", import.meta.url)),
   cert: await readFile(new URL("../fixtures/tls/localhost-cert.pem", import.meta.url)),
@@ -52,8 +52,8 @@ try {
   }
   const url = "https://chatgpt.com/backend-api/header-probe";
   const request = url => fetch(url).then(response => response.json());
-  assert.equal((await worker.evaluate(request, url)).userAgent, "qz-agent/1.0.0");
-  assert.equal((await panel.evaluate(request, url)).userAgent, "qz-agent/1.0.0");
+  assert.equal((await worker.evaluate(request, url)).userAgent, "zuri-agent/1.0.0");
+  assert.equal((await panel.evaluate(request, url)).userAgent, "zuri-agent/1.0.0");
   const web = await context.newPage();
   await web.goto("https://chatgpt.com/");
   assert.match((await web.evaluate(request, url)).userAgent, /Chrome\//);
@@ -71,7 +71,7 @@ try {
     return app && !app.hasAttribute("data-workspace-booting");
   });
   assert.deepEqual(await panel.evaluate(() => chrome.declarativeNetRequest.getSessionRules()), rules);
-  assert.equal((await panel.evaluate(request, url)).userAgent, "qz-agent/1.0.0");
+  assert.equal((await panel.evaluate(request, url)).userAgent, "zuri-agent/1.0.0");
   assert.match((await web.evaluate(request, url)).userAgent, /Chrome\//);
   console.log("Provider headers: extension requests scoped, ordinary website unchanged, worker restart stable; optional permissions ungranted.");
 } finally {

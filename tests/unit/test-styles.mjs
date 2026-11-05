@@ -7,7 +7,7 @@ import { parse, walk } from "css-tree";
 import { compileStylesheet } from "../../scripts/styles.mjs";
 
 async function fixture(t) {
-  const root = await realpath(await mkdtemp(join(tmpdir(), "qz-styles-")));
+  const root = await realpath(await mkdtemp(join(tmpdir(), "zuri-styles-")));
   t.after(() => rm(root, { recursive: true, force: true }));
   const put = async (path, content) => {
     const file = join(root, path);
@@ -34,10 +34,10 @@ test("styles preserve layered imports, package style exports and imported utilit
   await put("theme/index.css", `
     @layer theme, components, utilities;
     @import "css-fixture" layer(components);
-    @import "tailwindcss/utilities.css" layer(utilities) prefix(qz) source(none);
+    @import "tailwindcss/utilities.css" layer(utilities) prefix(zuri) source(none);
     @import "./nested/card.css";
-    @theme inline prefix(qz) { --color-fixture: red; }
-    .card { @apply qz:card; }
+    @theme inline prefix(zuri) { --color-fixture: red; }
+    .card { @apply zuri:card; }
   `);
   const cardCss = await put("theme/nested/card.css", `
     @utility card {

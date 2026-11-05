@@ -3,7 +3,7 @@ import { MESSAGE_TRANSFER_BYTES, normalizeTransportError, TransportError } from 
 import type { WireMessage } from "./message-codec.js";
 import { createReceiveBudget, createTransferBudget } from "./transfer-budget.js";
 
-export const RUNTIME_REQUEST_PORT = "qz-runtime-v1";
+export const RUNTIME_REQUEST_PORT = "zuri-runtime-v1";
 const requestTransferBudget = createTransferBudget(2 * MESSAGE_TRANSFER_BYTES);
 const requestReceiveBudget = createReceiveBudget();
 interface RuntimePort {

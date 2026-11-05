@@ -6,13 +6,13 @@ const MODEL_PARAMETER_SUGGESTION_GUIDE = MODEL_PARAMETER_SUGGESTIONS
   .map(({ key, values }) => `- \`${key}\`: ${values.map(value => `\`${value}\``).join(", ")}`)
   .join("\n");
 
-export const BUILTIN_QINGZHOU_MANAGEMENT_SKILL_NAME = "qingzhou-management";
-export const getBuiltinQingzhouManagementDisplayName = () => (modelT("managementDisplayName"));
-export const getBuiltinQingzhouManagementDescription = () => (modelT("managementDescription"));
+export const BUILTIN_ZURI_MANAGEMENT_SKILL_NAME = "zuri-management";
+export const getBuiltinZuriManagementDisplayName = () => (modelT("managementDisplayName"));
+export const getBuiltinZuriManagementDescription = () => (modelT("managementDescription"));
 
-export const getQingzhouManageSettingsToolDescription = () => (modelT("manageSettings"));
+export const getZuriManageSettingsToolDescription = () => (modelT("manageSettings"));
 
-export const QINGZHOU_MANAGE_SETTINGS_TOOL_PARAMETERS = {
+export const ZURI_MANAGE_SETTINGS_TOOL_PARAMETERS = {
   type: "object",
   properties: {
     action: {
@@ -49,9 +49,9 @@ export const QINGZHOU_MANAGE_SETTINGS_TOOL_PARAMETERS = {
   required: ["action"],
 } as const;
 
-export const getQingzhouManageGuardrailsToolDescription = () => (modelT("manageGuardrails"));
+export const getZuriManageGuardrailsToolDescription = () => (modelT("manageGuardrails"));
 
-export const QINGZHOU_MANAGE_GUARDRAILS_TOOL_PARAMETERS = {
+export const ZURI_MANAGE_GUARDRAILS_TOOL_PARAMETERS = {
   type: "object",
   properties: {
     action: {
@@ -70,9 +70,9 @@ export const QINGZHOU_MANAGE_GUARDRAILS_TOOL_PARAMETERS = {
   required: ["action"],
 } as const;
 
-export const getQingzhouManageSkillSettingsToolDescription = () => (modelT("manageSkillSettings"));
+export const getZuriManageSkillSettingsToolDescription = () => (modelT("manageSkillSettings"));
 
-export const QINGZHOU_MANAGE_SKILL_SETTINGS_TOOL_PARAMETERS = {
+export const ZURI_MANAGE_SKILL_SETTINGS_TOOL_PARAMETERS = {
   type: "object",
   properties: {
     action: {
@@ -92,18 +92,18 @@ export const QINGZHOU_MANAGE_SKILL_SETTINGS_TOOL_PARAMETERS = {
   required: ["action"],
 } as const;
 
-export const getBuiltinQingzhouManagementContent = () => (modelT("builtinContent", { MODEL_PARAMETER_SUGGESTION_GUIDE }));
+export const getBuiltinZuriManagementContent = () => (modelT("builtinContent", { MODEL_PARAMETER_SUGGESTION_GUIDE }));
 
-export const getBuiltinQingzhouManagementResources = () => (createSkillHostResources({
-  id: "qingzhou-management",
-  get displayName() { return getBuiltinQingzhouManagementDisplayName(); },
+export const getBuiltinZuriManagementResources = () => (createSkillHostResources({
+  id: "zuri-management",
+  get displayName() { return getBuiltinZuriManagementDisplayName(); },
   version: "0.2.0",
-  get description() { return getBuiltinQingzhouManagementDescription(); },
+  get description() { return getBuiltinZuriManagementDescription(); },
   category: { id: "meta", get label() { return modelT("managementCategory"); } },
   tools: {
-    manage_settings: { get description() { return getQingzhouManageSettingsToolDescription(); }, parameters: QINGZHOU_MANAGE_SETTINGS_TOOL_PARAMETERS },
-    manage_guardrails: { get description() { return getQingzhouManageGuardrailsToolDescription(); }, parameters: QINGZHOU_MANAGE_GUARDRAILS_TOOL_PARAMETERS },
-    manage_skill_settings: { get description() { return getQingzhouManageSkillSettingsToolDescription(); }, parameters: QINGZHOU_MANAGE_SKILL_SETTINGS_TOOL_PARAMETERS },
+    manage_settings: { get description() { return getZuriManageSettingsToolDescription(); }, parameters: ZURI_MANAGE_SETTINGS_TOOL_PARAMETERS },
+    manage_guardrails: { get description() { return getZuriManageGuardrailsToolDescription(); }, parameters: ZURI_MANAGE_GUARDRAILS_TOOL_PARAMETERS },
+    manage_skill_settings: { get description() { return getZuriManageSkillSettingsToolDescription(); }, parameters: ZURI_MANAGE_SKILL_SETTINGS_TOOL_PARAMETERS },
   },
   get manifestTitle() { return modelT("managementManifestTitle"); },
   get manifestDescription() { return modelT("managementManifestDescription"); },
@@ -111,8 +111,8 @@ export const getBuiltinQingzhouManagementResources = () => (createSkillHostResou
 }));
 
 export default {
-  aliases: ["Agent管理", "轻舟管理", "Qingzhou settings", "qz settings"],
-  name: BUILTIN_QINGZHOU_MANAGEMENT_SKILL_NAME, get displayName() { return getBuiltinQingzhouManagementDisplayName(); },
-  get description() { return getBuiltinQingzhouManagementDescription(); }, get content() { return getBuiltinQingzhouManagementContent(); },
-  get resources() { return getBuiltinQingzhouManagementResources(); }, order: 2,
+  aliases: ["Agent管理", "Zuri管理", "Zuri settings", "zuri settings"],
+  name: BUILTIN_ZURI_MANAGEMENT_SKILL_NAME, get displayName() { return getBuiltinZuriManagementDisplayName(); },
+  get description() { return getBuiltinZuriManagementDescription(); }, get content() { return getBuiltinZuriManagementContent(); },
+  get resources() { return getBuiltinZuriManagementResources(); }, order: 2,
 };

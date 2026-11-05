@@ -54,7 +54,7 @@ test.describe("advanced model settings", () => {
     await page.evaluate(async () => {
       // Read the built module in the browser; Node's test collector must not transpile the background graph.
       const { listProviderSummaries } = await import("/extension/background/llm/provider-catalog.js");
-      window.__qzEmitPortMessage({
+      window.__zuriEmitPortMessage({
         type: "config",
         config: {
           providers: listProviderSummaries(),
@@ -273,7 +273,7 @@ test.describe("multiple Skill settings navigation", () => {
 
   test("removes the Skill tab when a registry refresh leaves no configurable Skills", async ({ page }) => {
     await openSkillSettings(page, [SETTING]);
-    await page.evaluate(() => window.__qzEmitPortMessage({ type: "plugin_registry_update" }));
+    await page.evaluate(() => window.__zuriEmitPortMessage({ type: "plugin_registry_update" }));
     await respondToRequest(page, "list_skill_settings", "skill_settings", { settings: [] });
 
     await expect(page.locator("#settings-tab-skills")).toBeHidden();
@@ -307,16 +307,16 @@ test.describe("multiple Skill settings navigation", () => {
     await expect(page.locator("#btn-save-settings")).toBeEnabled();
     await page.locator("[data-skill-settings-back]").click();
 
-    const dialog = page.locator("#qz-decision-dialog");
+    const dialog = page.locator("#zuri-decision-dialog");
     await expect(dialog).toBeVisible();
-    await expect(dialog.locator("[data-qz-decision-title]")).toHaveText("放弃未保存的修改？");
-    await dialog.locator("[data-qz-decision-cancel]").click();
+    await expect(dialog.locator("[data-zuri-decision-title]")).toHaveText("放弃未保存的修改？");
+    await dialog.locator("[data-zuri-decision-cancel]").click();
     await expect(dialog).toBeHidden();
     await expect(card).toBeVisible();
     await expect(card.locator('[data-skill-setting-field="project"]')).toHaveValue("dirty_project");
 
     await page.locator("[data-skill-settings-back]").click();
-    await dialog.locator("[data-qz-decision-confirm]").click();
+    await dialog.locator("[data-zuri-decision-confirm]").click();
     await expect(rows).toHaveCount(2);
     await expect(page.locator(".skill-settings-card")).toHaveCount(0);
   });
@@ -339,7 +339,7 @@ test.describe("multiple Skill settings navigation", () => {
     await expect(page.locator("[data-skill-settings-open]")).toHaveCount(1);
     await expect(page.locator("[data-skill-settings-open]")).toContainText("日志分析");
 
-    await page.evaluate(() => window.__qzEmitPortMessage({ type: "plugin_registry_update" }));
+    await page.evaluate(() => window.__zuriEmitPortMessage({ type: "plugin_registry_update" }));
     await respondToRequest(page, "list_skill_settings", "skill_settings", { settings: settings.slice(0, 2) });
     await expect(page.locator("[data-skill-settings-search]")).toHaveCount(0);
     await expect(page.locator("[data-skill-settings-open]")).toHaveCount(2);
@@ -370,13 +370,13 @@ async function respondToRequest(page, requestType, responseType, payload) {
 
 async function latestRequest(page, type) {
   const handle = await page.waitForFunction((requestType) => (
-    [...window.__qzPostedMessages].reverse().find(message => message?.type === requestType && message.requestId)
+    [...window.__zuriPostedMessages].reverse().find(message => message?.type === requestType && message.requestId)
   ), type);
   return await handle.jsonValue();
 }
 
 async function emitResponse(page, request, type, payload) {
   await page.evaluate(({ requestId, responseType, responsePayload }) => {
-    window.__qzEmitPortMessage({ type: responseType, requestId, ...responsePayload });
+    window.__zuriEmitPortMessage({ type: responseType, requestId, ...responsePayload });
   }, { requestId: request.requestId, responseType: type, responsePayload: payload });
 }

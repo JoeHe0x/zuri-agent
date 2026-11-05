@@ -55,7 +55,7 @@ test("a replaced document is not counted as a missed click", async () => {
     const id = await armPageInputReceipt(7);
     assert.equal(typeof id, "string");
     assert.notEqual(id, "");
-    const op = () => page.document.__qzInputReceiptsV2.ops[id];
+    const op = () => page.document.__zuriInputReceiptsV2.ops[id];
     assert.equal(op().n, 0);
     const pointerdown = page.listeners.find(item => item.type === "pointerdown");
     assert.equal(pointerdown.capture, true);
@@ -73,14 +73,14 @@ test("a replaced document is not counted as a missed click", async () => {
 
     const follow = await armPageInputReceipt(7);
     pointerdown.listener({ isTrusted: true });
-    assert.ok(page.document.__qzInputReceiptsV2.ops[follow].n > 0);
+    assert.ok(page.document.__zuriInputReceiptsV2.ops[follow].n > 0);
     const next = installPage();
     assert.equal(await readPageInputReceipt(7, follow), null);
-    assert.equal(next.document.__qzInputReceiptsV2Bound, undefined);
+    assert.equal(next.document.__zuriInputReceiptsV2Bound, undefined);
   } finally {
     runInPage = null;
     delete globalThis.document;
-    delete globalThis.__qzInputReceipt;
+    delete globalThis.__zuriInputReceipt;
     delete globalThis.addEventListener;
   }
 });
@@ -89,10 +89,10 @@ test("an old receipt flag does not block the versioned listener", async () => {
   runInPage = ({ func, args }) => func(...args);
   try {
     const page = installPage();
-    page.document.__qzInputReceiptBound = true;
-    page.document.__qzInputReceipt = 0;
+    page.document.__zuriInputReceiptBound = true;
+    page.document.__zuriInputReceipt = 0;
     const oldListener = event => {
-      if (event.isTrusted) page.document.__qzInputReceipt += 1;
+      if (event.isTrusted) page.document.__zuriInputReceipt += 1;
     };
     for (const type of ["pointerdown", "mousedown", "touchstart", "click"]) {
       page.listeners.push({ type, listener: oldListener, capture: true });
@@ -100,12 +100,12 @@ test("an old receipt flag does not block the versioned listener", async () => {
     const installed = page.listeners.length;
     const id = await armPageInputReceipt(7);
     assert.notEqual(id, "");
-    assert.equal(page.document.__qzInputReceiptsV2Bound, true);
+    assert.equal(page.document.__zuriInputReceiptsV2Bound, true);
     const click = page.listeners.slice(installed).find(item => item.type === "click");
     assert.ok(click, "the upgraded page installs its own listener");
     click.listener({ isTrusted: true });
-    assert.equal(page.document.__qzInputReceipt, 0);
-    assert.ok(page.document.__qzInputReceiptsV2.ops[id].n > 0);
+    assert.equal(page.document.__zuriInputReceipt, 0);
+    assert.ok(page.document.__zuriInputReceiptsV2.ops[id].n > 0);
     assert.ok(await readPageInputReceipt(7, id) > 0);
   } finally {
     runInPage = null;
@@ -233,16 +233,16 @@ for (const delayedExecution of [false, true]) test(`a timed-out arm leaves no pe
     assert.equal(await pending, "");
     if (delayedExecution) {
       assert.equal(execute(), null, "an arm that starts after its deadline is rejected");
-      assert.equal(page.document.__qzInputReceiptsV2, undefined);
+      assert.equal(page.document.__zuriInputReceiptsV2, undefined);
       assert.equal(page.timers.size, 0);
     } else {
-      assert.equal(Object.keys(page.document.__qzInputReceiptsV2.ops).length, 1);
+      assert.equal(Object.keys(page.document.__zuriInputReceiptsV2.ops).length, 1);
       assert.equal(page.timers.size, 1);
       const [{ callback, delay }] = page.timers.values();
       assert.equal(delay, 30000);
       context.mock.timers.tick(delay);
       callback();
-      assert.deepEqual(page.document.__qzInputReceiptsV2.ops, {}, "expiry cleans an arm whose response was lost");
+      assert.deepEqual(page.document.__zuriInputReceiptsV2.ops, {}, "expiry cleans an arm whose response was lost");
     }
     complete([{ frameId: 0, documentId: page.document.documentId, result: 0 }]);
   } finally {
@@ -269,14 +269,14 @@ test("firefox counts marked extension events and chrome still requires a trusted
     const listener = page.listeners.find(item => item.type === "pointerdown");
     const untrusted = { isTrusted: false };
     listener.listener(untrusted);
-    assert.equal(page.document.__qzInputReceiptsV2.ops[id].n, 0);
+    assert.equal(page.document.__zuriInputReceiptsV2.ops[id].n, 0);
     const marked = new WeakSet();
-    globalThis.__qzExtensionInputEvents = marked;
+    globalThis.__zuriExtensionInputEvents = marked;
     listener.listener(untrusted);
-    assert.equal(page.document.__qzInputReceiptsV2.ops[id].n, 0);
+    assert.equal(page.document.__zuriInputReceiptsV2.ops[id].n, 0);
     marked.add(untrusted);
     listener.listener(untrusted);
-    assert.ok(page.document.__qzInputReceiptsV2.ops[id].n > 0);
+    assert.ok(page.document.__zuriInputReceiptsV2.ops[id].n > 0);
     assert.ok(await readPageInputReceipt(11, id) > 0);
 
     chrome.runtime = { getURL: () => "chrome-extension://id/" };
@@ -288,14 +288,14 @@ test("firefox counts marked extension events and chrome still requires a trusted
     const extensionEvent = { isTrusted: false };
     marked.add(extensionEvent);
     chromeListener.listener(extensionEvent);
-    assert.equal(chromePage.document.__qzInputReceiptsV2.ops[chromeId].n, 0);
+    assert.equal(chromePage.document.__zuriInputReceiptsV2.ops[chromeId].n, 0);
     chromeListener.listener({ isTrusted: true });
-    assert.ok(chromePage.document.__qzInputReceiptsV2.ops[chromeId].n > 0);
+    assert.ok(chromePage.document.__zuriInputReceiptsV2.ops[chromeId].n > 0);
     assert.ok(await readPageInputReceipt(12, chromeId) > 0);
   } finally {
     if (previousRuntime === undefined) delete chrome.runtime;
     else chrome.runtime = previousRuntime;
-    delete globalThis.__qzExtensionInputEvents;
+    delete globalThis.__zuriExtensionInputEvents;
     runInPage = null;
     delete globalThis.document;
     delete globalThis.addEventListener;
@@ -332,6 +332,6 @@ function installPage() {
   globalThis.addEventListener = (type, listener, capture) => {
     listeners.push({ type, listener, capture });
   };
-  delete globalThis.__qzInputReceipt;
+  delete globalThis.__zuriInputReceipt;
   return { document, listeners, timers };
 }

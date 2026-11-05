@@ -179,7 +179,7 @@ export function createSidepanelUiRuntime({ host, storage = globalThis.chrome?.st
         target.push(value);
       };
       const { onEvent, extensions, ...ports } = host;
-      const qz: UiExtensionAPI = Object.freeze({ ...ports,
+      const zuri: UiExtensionAPI = Object.freeze({ ...ports,
         extensions: { register: extensions.register, notify: extensions.notify, hasCommand: extensions.hasCommand, invoke: extensions.invoke },
         registerPage: (page: UiPage) => register(pages, page),
         registerSettings: (section: UiSettingsSection) => register(sections, section),
@@ -195,7 +195,7 @@ export function createSidepanelUiRuntime({ host, storage = globalThis.chrome?.st
         },
       });
       const complete = () => { collecting = false; return { pages, settingsSections: sections, overlays }; };
-      const result = entry.setup(qz);
+      const result = entry.setup(zuri);
       return result instanceof Promise ? result.then(complete) : complete();
     } };
   }

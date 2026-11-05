@@ -16,7 +16,7 @@ from agent_behavior import acceptance, capture as case_capture, cases, fixtures,
 
 
 def test_navigation_redirect_preserves_query_values_in_one_header():
-    query = "key=first&key=second&empty=&note=a%0D%0AX-QZ-Injected%3A+yes"
+    query = "key=first&key=second&empty=&note=a%0D%0AX-ZURI-Injected%3A+yes"
     with fixtures.fixture_server() as origin:
         connection = HTTPConnection(urlsplit(origin).netloc, timeout=5)
         try:
@@ -24,7 +24,7 @@ def test_navigation_redirect_preserves_query_values_in_one_header():
             response = connection.getresponse()
             assert response.status == 302
             location = response.getheader("Location")
-            assert response.getheader("X-QZ-Injected") is None
+            assert response.getheader("X-ZURI-Injected") is None
             assert "\r" not in location and "\n" not in location
             assert parse_qsl(urlsplit(location).query, keep_blank_values=True) == parse_qsl(query, keep_blank_values=True)
             response.read()
@@ -136,7 +136,7 @@ def test_navigation_judge_requires_each_first_read_without_waits_or_recovery():
     for mode, watch in (("plain", False), ("watched", True)):
         spec = next(item for item in cases.build_base_cases("http://fixture.test", "navigation")
                     if item.name == f"navigation_readiness_{mode}")
-        receipts = {"open": "QZ-first-1", "navigate": "QZ-second-1", "reload": "QZ-second-2", "redirect": "QZ-landed-1"}
+        receipts = {"open": "ZURI-first-1", "navigate": "ZURI-second-1", "reload": "ZURI-second-2", "redirect": "ZURI-landed-1"}
         rows = [{"data": {"step": step, "receipt": receipt}} for step, receipt in receipts.items()]
         transcript = []
         for step, receipt in receipts.items():
@@ -153,7 +153,7 @@ def test_navigation_judge_requires_each_first_read_without_waits_or_recovery():
         for fault in ("old_document", "wait", "recovered_error", "wrong_tab", "missed_network"):
             broken = deepcopy(transcript)
             if fault == "old_document":
-                broken[5]["result"]["text"] = "QZ-second-1"
+                broken[5]["result"]["text"] = "ZURI-second-1"
             elif fault == "wait":
                 broken.insert(1, tool("wait"))
             elif fault == "recovered_error":
@@ -378,10 +378,10 @@ def test_current_page_environment_judge_rejects_page_lifecycle_shortcut():
 def test_document_judge_requires_durable_identifiers_and_tool_order():
     required = (
         "load_skill",
-        "qingzhou_documents__document_fetch",
-        "qingzhou_documents__document_parse",
-        "qingzhou_documents__document_read_chunk",
-        "qingzhou_documents__document_create",
+        "zuri_documents__document_fetch",
+        "zuri_documents__document_parse",
+        "zuri_documents__document_read_chunk",
+        "zuri_documents__document_create",
         "data_store",
     )
     transcript = [tool(name) for name in required]
@@ -656,10 +656,10 @@ def test_skill_settings_journey_proves_validation_recovery_and_secret_redaction(
         skill={"name": spec.expected["skillName"], "content": "# Skill\nmarker harbor-42"},
         resource={"path": "plugin.json", "content": json.dumps(spec.expected["pluginManifest"], ensure_ascii=False)},
         tool_results={
-            ("qingzhou_management__manage_skill_settings", "list"): {
+            ("zuri_management__manage_skill_settings", "list"): {
                 "settings": [{"id": setting_id, "skillName": spec.expected["skillName"]}],
             },
-            ("qingzhou_management__manage_skill_settings", "get"): {
+            ("zuri_management__manage_skill_settings", "get"): {
                 "setting": {"fields": [
                     {"key": "retryCount", "value": 5},
                     {"key": "apiToken", "hasValue": True},
@@ -669,10 +669,10 @@ def test_skill_settings_journey_proves_validation_recovery_and_secret_redaction(
     )
     transcript = [
         tool("load_skill", {"name": "skill-workbench"}),
-        tool("qingzhou_skill_author__create_skill", {"name": spec.expected["skillName"]}),
-        tool("qingzhou_skill_author__edit_skill_resource", {"name": spec.expected["skillName"], "path": "plugin.json"}),
-        tool("qingzhou_management__manage_skill_settings", {"action": "update", "settingId": setting_id, "values": {"retryCount": 99}}, is_error=True),
-        tool("qingzhou_management__manage_skill_settings", {"action": "update", "settingId": setting_id, "values": {"retryCount": 5, "apiToken": spec.expected["secret"]}}),
+        tool("zuri_skill_author__create_skill", {"name": spec.expected["skillName"]}),
+        tool("zuri_skill_author__edit_skill_resource", {"name": spec.expected["skillName"], "path": "plugin.json"}),
+        tool("zuri_management__manage_skill_settings", {"action": "update", "settingId": setting_id, "values": {"retryCount": 99}}, is_error=True),
+        tool("zuri_management__manage_skill_settings", {"action": "update", "settingId": setting_id, "values": {"retryCount": 5, "apiToken": spec.expected["secret"]}}),
     ]
     assert validate_journey(spec, [], transcript, client=client)["success"] is True
     no_recovery = transcript[:-1]
@@ -754,11 +754,11 @@ def test_repeated_agent_journey_keeps_each_iteration_and_fails_on_any_flake():
 
 
 def test_capture_redacts_real_secrets_inside_nested_strings_without_losing_usage(tmp_path, monkeypatch):
-    monkeypatch.delenv("QINGZHOU_CAPTURE_API_KEY", raising=False)
+    monkeypatch.delenv("ZURI_CAPTURE_API_KEY", raising=False)
     key_file = tmp_path / "fixture-key"
     key_file.write_text("fixture-api-secret", encoding="utf-8")
-    monkeypatch.setenv("QINGZHOU_CAPTURE_API_KEY_FILE", str(key_file))
-    monkeypatch.setenv("QINGZHOU_MCP_BRIDGE_TOKEN", "fixture-bridge-secret")
+    monkeypatch.setenv("ZURI_CAPTURE_API_KEY_FILE", str(key_file))
+    monkeypatch.setenv("ZURI_MCP_BRIDGE_TOKEN", "fixture-bridge-secret")
     capture = case_capture.CaseCapture.from_environment(str(tmp_path / "captures"))
     source = {
         "nested": [{"text": "prefix fixture-api-secret / fixture-bridge-secret suffix"}],
@@ -784,8 +784,8 @@ def test_capture_redacts_real_secrets_inside_nested_strings_without_losing_usage
 
 
 def test_capture_accepts_selected_environment_key_without_reading_other_credentials(tmp_path, monkeypatch):
-    monkeypatch.setenv("QINGZHOU_CAPTURE_API_KEY", "fixture-selected-secret")
-    monkeypatch.setenv("QINGZHOU_CAPTURE_API_KEY_FILE", str(tmp_path / "unused-key-file"))
+    monkeypatch.setenv("ZURI_CAPTURE_API_KEY", "fixture-selected-secret")
+    monkeypatch.setenv("ZURI_CAPTURE_API_KEY_FILE", str(tmp_path / "unused-key-file"))
     capture = case_capture.CaseCapture.from_environment(str(tmp_path / "captures"))
     assert capture.redact({"text": "prefix fixture-selected-secret suffix"}) == {
         "text": "prefix [redacted] suffix",
@@ -795,15 +795,15 @@ def test_capture_accepts_selected_environment_key_without_reading_other_credenti
 def test_capture_requires_a_nonempty_redaction_credential(tmp_path, monkeypatch):
     import pytest
 
-    monkeypatch.delenv("QINGZHOU_CAPTURE_API_KEY", raising=False)
-    monkeypatch.delenv("QINGZHOU_CAPTURE_API_KEY_FILE", raising=False)
-    with pytest.raises(ValueError, match="requires QINGZHOU_CAPTURE_API_KEY"):
+    monkeypatch.delenv("ZURI_CAPTURE_API_KEY", raising=False)
+    monkeypatch.delenv("ZURI_CAPTURE_API_KEY_FILE", raising=False)
+    with pytest.raises(ValueError, match="requires ZURI_CAPTURE_API_KEY"):
         case_capture.CaseCapture.from_environment(str(tmp_path / "captures"))
     assert not (tmp_path / "captures").exists()
     key_file = tmp_path / "empty-key"
     key_file.write_text("\n", encoding="utf-8")
-    monkeypatch.setenv("QINGZHOU_CAPTURE_API_KEY_FILE", str(key_file))
-    with pytest.raises(ValueError, match="requires QINGZHOU_CAPTURE_API_KEY"):
+    monkeypatch.setenv("ZURI_CAPTURE_API_KEY_FILE", str(key_file))
+    with pytest.raises(ValueError, match="requires ZURI_CAPTURE_API_KEY"):
         case_capture.CaseCapture.from_environment(str(tmp_path / "captures"))
 
 
@@ -831,7 +831,7 @@ class CaptureClient(FakeClient):
 
 
 def test_capture_is_opt_in_and_does_not_read_a_key_when_disabled(tmp_path, monkeypatch):
-    monkeypatch.setenv("QINGZHOU_CAPTURE_API_KEY_FILE", str(tmp_path / "missing-key"))
+    monkeypatch.setenv("ZURI_CAPTURE_API_KEY_FILE", str(tmp_path / "missing-key"))
     assert case_capture.CaseCapture.from_environment("") is None
     client = CaptureClient([{"data": {"actual": "stored"}}])
     result = asyncio.run(runner.run_case(client, case("capture", suite="realworld"), "run"))
@@ -908,9 +908,9 @@ def test_localized_live_prompts_preserve_all_nine_task_acceptance_contracts():
             "data_store", "dedupField", "create", "checkpoint", "list", "complete",
         ),
         "document_pipeline": (
-            "/docs/sample.txt", "qingzhou-documents", "load_skill", "document_fetch",
+            "/docs/sample.txt", "zuri-documents", "load_skill", "document_fetch",
             "document_parse", "document_read_chunk", "document_create", "open_tab",
-            "read_article", "save_file", "Qingzhou regression document summary", "txt",
+            "read_article", "save_file", "Zuri regression document summary", "txt",
             "dedupField", "step=document_pipeline_completed", "fileId", "docModelId", "artifactId", "1",
         ),
         "parallel_subtasks": (
@@ -973,9 +973,9 @@ def test_live_prompt_localization_rejects_unsupported_languages_and_cases():
 
 def test_family_summary_uses_recorded_tool_metadata_before_name_fallback():
     snapshot = {"transcript": [
-        {**tool("qingzhou_documents__document_fetch"), "familyId": "document"},
-        {**tool("qingzhou_documents__document_create"), "familyId": "artifact"},
-        {**tool("qingzhou_mcp__mcp_list_tools"), "familyId": "mcp"},
+        {**tool("zuri_documents__document_fetch"), "familyId": "document"},
+        {**tool("zuri_documents__document_create"), "familyId": "artifact"},
+        {**tool("zuri_mcp__mcp_list_tools"), "familyId": "mcp"},
         {**tool("custom_extension__read_file"), "familyId": "document"},
     ]}
     assert reporting.summarize_snapshot(snapshot)["familyCounts"] == {
@@ -986,18 +986,18 @@ def test_family_summary_uses_recorded_tool_metadata_before_name_fallback():
 def test_legacy_family_fallback_keeps_explicit_namespaced_tool_mappings():
     for name in ("document_fetch", "document_parse", "document_read_chunk"):
         assert reporting.timeline_family_for_tool(name) == "document"
-        assert reporting.timeline_family_for_tool(f"qingzhou_documents__{name}") == "document"
+        assert reporting.timeline_family_for_tool(f"zuri_documents__{name}") == "document"
     for name in ("document_create", "document_download", "document_list_artifacts"):
-        assert reporting.timeline_family_for_tool(f"qingzhou_documents__{name}") == "artifact"
+        assert reporting.timeline_family_for_tool(f"zuri_documents__{name}") == "artifact"
     for name in ("mcp_inspect_server", "mcp_list_tools", "mcp_search_tools", "mcp_call_tool"):
-        assert reporting.timeline_family_for_tool(f"qingzhou_mcp__{name}") == "mcp"
+        assert reporting.timeline_family_for_tool(f"zuri_mcp__{name}") == "mcp"
     assert reporting.timeline_family_for_tool("custom_extension__execute") == "process"
     assert reporting.timeline_family_for_tool("unrecognized_tool") == "other"
 
 
 def test_base_family_gate_counts_document_and_mcp_without_relaxing_coverage():
     names = ["open_tab", "get_ax_tree", "act_on_element", "data_store", "save_file",
-             "qingzhou_documents__document_fetch", "qingzhou_mcp__mcp_list_tools", "wait"]
+             "zuri_documents__document_fetch", "zuri_mcp__mcp_list_tools", "wait"]
     result = reporting.summarize_snapshot({"transcript": [tool(name) for name in names]})
     coverage = reporting.summarize_family_coverage([result], require_base_families=True)
     assert coverage["missingFamilies"] == []

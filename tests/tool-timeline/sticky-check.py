@@ -34,7 +34,7 @@ def serve_repo():
 CHROME_MOCK = """
 (() => {
   const listeners = { message: [], disconnect: [], changed: [] };
-  const storage = { qz_data_consent: { version: 1, acceptedAt: 1 } };
+  const storage = { zuri_data_consent: { version: 1, acceptedAt: 1 } };
   const clone = (value) => value == null ? value : JSON.parse(JSON.stringify(value));
   const emit = (event) => listeners.message.slice().forEach(fn => fn(event));
   const storageGet = async (keys) => {
@@ -470,7 +470,7 @@ def test_sticky_thinking_header_hides_preview_and_collapses_in_place(page):
 
 def main():
     with serve_repo() as url, sync_playwright() as p:
-        browser = p.chromium.launch(channel=os.environ.get("QINGZHOU_PLAYWRIGHT_CHANNEL", "chromium"))
+        browser = p.chromium.launch(channel=os.environ.get("ZURI_PLAYWRIGHT_CHANNEL", "chromium"))
         try:
             page, page_errors, console_errors = open_sidepanel(browser, url)
             try:

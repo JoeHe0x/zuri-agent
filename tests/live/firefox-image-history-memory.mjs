@@ -16,7 +16,7 @@ const { values } = parseArgs({ options: {
   output: { type: "string", default: "tests/results/firefox-image-history-memory.json" },
 } });
 const output = resolve(values.output), turns = Number(values.turns), interval = Number(values.interval);
-const extensionDir = resolve(process.env.QINGZHOU_FIREFOX_EXTENSION_DIR || "dist/extension-firefox");
+const extensionDir = resolve(process.env.ZURI_FIREFOX_EXTENSION_DIR || "dist/extension-firefox");
 await readFile(join(extensionDir, "background/session/repository.js"));
 await mkdir(resolve(output, ".."), { recursive: true });
 const probes = [
@@ -154,7 +154,7 @@ try {
   clearInterval(timer);
   if (report.samples.length && !report.rss) report.rss = summarize(report.samples);
   await sidebar?.close().catch(() => {});
-  if (profile?.startsWith(resolve(process.env.TMPDIR || "/tmp")) && profile.includes("qz-firefox-playwright-")) await rm(profile, { recursive: true, force: true });
+  if (profile?.startsWith(resolve(process.env.TMPDIR || "/tmp")) && profile.includes("zuri-firefox-playwright-")) await rm(profile, { recursive: true, force: true });
   for (const [, target] of probes) await rm(join(extensionDir, target), { force: true });
   await writeFile(output, JSON.stringify(report, null, 2) + "\n");
 }
@@ -179,7 +179,7 @@ export async function installBackgroundProbe(dependencies) {
       id = sessionId;
       lease = { sessionId: id, isActive: () => true };
       history.length = hashes.length = 0;
-      await chrome.storage.local.set({ qz_data_consent: { version: 1, acceptedAt: Date.now() }, _qingzhou_mcp_bridge: { enabled: false } });
+      await chrome.storage.local.set({ zuri_data_consent: { version: 1, acceptedAt: Date.now() }, _zuri_mcp_bridge: { enabled: false } });
       await repository.createMetadata({ id, title: "Image memory proxy" });
       agent = new Agent(id, { conversationRepository: repository, conversationLease: lease });
       return { id };
@@ -264,7 +264,7 @@ export async function installSidebarProbe() {
         const images = [...parsed.querySelectorAll("#messages img")];
         return { htmlBytes: html.length, images: images.length,
           inline: images.every(img => img.getAttribute("src").startsWith("data:image/")),
-          hasHistoryReferences: html.includes("qz-history-image:"),
+          hasHistoryReferences: html.includes("zuri-history-image:"),
           conversationImages: payload.session.conversation.entries.flatMap(entry => Array.isArray(entry.message.content) ? entry.message.content : [])
             .filter(part => part.type === "image_url" && part.image_url.url.startsWith("data:image/")).length };
       } finally { feature.dispose(); transport.dispose(); port.disconnect(); }

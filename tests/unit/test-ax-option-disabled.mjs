@@ -59,7 +59,7 @@ function assertDisabled(result, id, disabled) {
 function assertReleased(h) {
   const groups = callsFor(h, "DOM.resolveNode").map(params => params.objectGroup);
   assert.ok(groups.length);
-  assert.match(groups[0], /^qz-ax-option-disabled-/);
+  assert.match(groups[0], /^zuri-ax-option-disabled-/);
   assert.ok(groups.every(group => group === groups[0]));
   assert.deepEqual(callsFor(h, "Runtime.releaseObjectGroup"), [{ objectGroup: groups[0] }]);
 }

@@ -5,7 +5,7 @@ import { expect, test } from "./sidepanel-fixtures.mjs";
 import { loadFuzzCorpus } from "../support/fuzz-corpus.mjs";
 
 const root = dirname(dirname(dirname(fileURLToPath(import.meta.url))));
-const privateCorpus = process.env.QINGZHOU_FUZZ_CORPUS;
+const privateCorpus = process.env.ZURI_FUZZ_CORPUS;
 const paintedFramesPerAction = 12;
 const syntheticHistoryTurns = 6;
 const chatTextSizes = ["small", "compact", "standard", "comfortable", "large", "xlarge"];
@@ -331,12 +331,12 @@ async function runFuzzCase(input) {
     error: "",
   };
   try {
-    await window.qingzhouConversationBenchmark.runSnapshotRender({
+    await window.zuriConversationBenchmark.runSnapshotRender({
       sessionId,
       title: `${input.fixture} ${input.caseId}`,
       transcript: input.transcript,
     });
-    window.qingzhouConversationBenchmark.configureVisualState({ running: input.live });
+    window.zuriConversationBenchmark.configureVisualState({ running: input.live });
     const messages = document.querySelector("#messages");
     // Finish setup-only transitions (e.g. artifact-card exit) before measuring user actions.
     await settleInitialLayout(messages);
@@ -406,7 +406,7 @@ async function runFuzzCase(input) {
         let eventSeq = 1;
         for (let update = 1; update <= 5; update += 1) {
           const action = await measure({ messages, target: targetCard, summary, actionIndex: update, kind: "stream" }, () => {
-            window.qingzhouConversationBenchmark.dispatchBackgroundEvent({
+            window.zuriConversationBenchmark.dispatchBackgroundEvent({
               type: "thinking_update",
               spanId: `fuzz-thinking-${input.caseId}`,
               sessionId,
@@ -530,7 +530,7 @@ function buildReport(results, sources) {
 
 function renderMarkdownReport(report) {
   const lines = [
-    "# 轻舟 Viewport 稳定性随机压力测试",
+    "# Zuri Viewport 稳定性随机压力测试",
     "",
     `生成时间：${report.generatedAt}`,
     "",

@@ -64,7 +64,7 @@ test("refresh replaces stale entries and group labels without losing the configu
     provider("first", { id: "first", label: "First", priority: 1 }),
     provider("ungrouped"),
   ];
-  const emit = providers => page.evaluate(providers => window.__qzEmitPortMessage({ type: "config", config: {
+  const emit = providers => page.evaluate(providers => window.__zuriEmitPortMessage({ type: "config", config: {
     provider: "selected", model: "test-model", providers,
   } }), providers);
   const select = page.locator("#cfg-provider");

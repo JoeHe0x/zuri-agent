@@ -10,7 +10,7 @@ for (const colorScheme of ["light", "dark"]) {
           const result = await page.evaluate(async ({ focused, count }) => {
             const sessionId = "steering_border_session";
             const runId = "benchmark-visual-run";
-            const benchmark = window.qingzhouConversationBenchmark;
+            const benchmark = window.zuriConversationBenchmark;
             await benchmark.runSnapshotRender({ sessionId, transcript: [] });
             benchmark.configureVisualState({ running: true });
             const input = document.querySelector("#input");
@@ -79,12 +79,12 @@ test.describe("queued follow-up visibility", () => {
         });
       }
 
-      await window.qingzhouConversationBenchmark.runSnapshotRender({
+      await window.zuriConversationBenchmark.runSnapshotRender({
         sessionId,
         title: "连续消息可见性",
         transcript,
       });
-      window.qingzhouConversationBenchmark.configureVisualState({
+      window.zuriConversationBenchmark.configureVisualState({
         running: true,
         pendingFollowUps: [
           { clientMessageId: firstId, text: "第一条连续发送的新消息" },
@@ -98,7 +98,7 @@ test.describe("queued follow-up visibility", () => {
       messagesBefore.dispatchEvent(new Event("scroll"));
       await frames(2);
 
-      window.qingzhouConversationBenchmark.dispatchBackgroundEvent({
+      window.zuriConversationBenchmark.dispatchBackgroundEvent({
         type: "message_start",
         sessionId,
         runId,
@@ -111,7 +111,7 @@ test.describe("queued follow-up visibility", () => {
           _origin: "user",
         },
       });
-      window.qingzhouConversationBenchmark.dispatchBackgroundEvent({
+      window.zuriConversationBenchmark.dispatchBackgroundEvent({
         type: "thinking_update",
         sessionId,
         runId,
@@ -192,9 +192,9 @@ test.describe("queued follow-up visibility", () => {
         isError: false,
       });
 
-      await window.qingzhouConversationBenchmark.runSnapshotRender({ sessionId, transcript });
-      window.qingzhouConversationBenchmark.configureVisualState({ running: true });
-      window.__qzPromptAcceptance = { disposition: "queued", duplicate: false };
+      await window.zuriConversationBenchmark.runSnapshotRender({ sessionId, transcript });
+      window.zuriConversationBenchmark.configureVisualState({ running: true });
+      window.__zuriPromptAcceptance = { disposition: "queued", duplicate: false };
       await frames(3);
 
       const messages = document.querySelector("#messages");
@@ -205,7 +205,7 @@ test.describe("queued follow-up visibility", () => {
       );
       summary?.click();
       await frames(6);
-      const anchored = window.qingzhouConversationBenchmark.collectViewportAnchorState?.() || null;
+      const anchored = window.zuriConversationBenchmark.collectViewportAnchorState?.() || null;
 
       const input = document.querySelector("#input");
       const send = async text => {
@@ -218,7 +218,7 @@ test.describe("queued follow-up visibility", () => {
       await send("连续排队消息二");
       await send("连续排队消息三");
 
-      const finalAnchor = window.qingzhouConversationBenchmark.collectViewportAnchorState?.() || null;
+      const finalAnchor = window.zuriConversationBenchmark.collectViewportAnchorState?.() || null;
       return {
         summaryFound: Boolean(summary),
         anchored,
@@ -251,12 +251,12 @@ test.describe("queued follow-up visibility", () => {
     const result = await page.evaluate(async () => {
       const sessionId = "steering_queue_session";
       const runId = "steering-queue-run";
-      await window.qingzhouConversationBenchmark.runSnapshotRender({
+      await window.zuriConversationBenchmark.runSnapshotRender({
         sessionId,
         title: "引导队列",
         transcript: [{ type: "assistant", content: "正在执行原任务。", runId }],
       });
-      window.qingzhouConversationBenchmark.configureVisualState({
+      window.zuriConversationBenchmark.configureVisualState({
         running: true,
         pendingSteerings: [
           { clientMessageId: "steering-existing", text: "先检查当前页面" },
@@ -295,7 +295,7 @@ test.describe("queued follow-up visibility", () => {
       const ordinaryRowRect = ordinaryRow?.getBoundingClientRect();
       const steeringMetaTextRect = textRect(steeringMeta);
       const ordinarySteerTextRect = textRect(ordinarySteerLabel);
-      const posted = (window.__qzPostedMessages || []).find(message => (
+      const posted = (window.__zuriPostedMessages || []).find(message => (
         message.type === "steer_follow_up" && message.clientMessageId === "followup-b"
       ));
       const rowBounds = [...(queue?.querySelectorAll(".queued-followup") || [])].map(row => {
@@ -303,7 +303,7 @@ test.describe("queued follow-up visibility", () => {
         return { left: rect.left, right: rect.right, kind: row.dataset.queueKind };
       });
 
-      window.qingzhouConversationBenchmark.dispatchBackgroundEvent({
+      window.zuriConversationBenchmark.dispatchBackgroundEvent({
         type: "message_start",
         sessionId,
         runId,
@@ -423,19 +423,19 @@ test.describe("queued follow-up visibility", () => {
         clientMessageId: "followup-after-batch",
         text: "当前任务完成后，把页面结构、接口响应和脚本结果整理成一份可以继续复查的长报告",
       };
-      await window.qingzhouConversationBenchmark.runSnapshotRender({
+      await window.zuriConversationBenchmark.runSnapshotRender({
         sessionId,
         title: "批量引导出队",
         transcript: [{ type: "assistant", content: "正在执行原任务。", runId }],
       });
-      window.qingzhouConversationBenchmark.configureVisualState({
+      window.zuriConversationBenchmark.configureVisualState({
         running: true,
         pendingSteerings: steeringItems,
         pendingFollowUps: [followUp],
       });
       await frames(3);
 
-      window.qingzhouConversationBenchmark.dispatchBackgroundEvent({
+      window.zuriConversationBenchmark.dispatchBackgroundEvent({
         type: "queue_update",
         sessionId,
         runId,
@@ -454,7 +454,7 @@ test.describe("queued follow-up visibility", () => {
       };
 
       steeringItems.forEach((item, index) => {
-        window.qingzhouConversationBenchmark.dispatchBackgroundEvent({
+        window.zuriConversationBenchmark.dispatchBackgroundEvent({
           type: "message_start",
           sessionId,
           runId,

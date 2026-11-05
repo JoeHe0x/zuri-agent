@@ -617,7 +617,7 @@ function buildSessionGoalChip(runtime: Runtime = {}, sessionId = "") {
   const statusClass = goalStatusClass(goal.status);
   const tooltip = sessionGoalStatusText(goal);
   return `
-    <button class="qz-pill session-artifact-chip session-goal-chip ${statusClass}" type="button" data-session-action="goal-status" data-id="${escapeHtmlAttribute(id)}" title="${escapeHtmlAttribute(tooltip)}" aria-label="${escapeHtmlAttribute(t("viewGoal", { goal: String(tooltip) }))}">
+    <button class="zuri-pill session-artifact-chip session-goal-chip ${statusClass}" type="button" data-session-action="goal-status" data-id="${escapeHtmlAttribute(id)}" title="${escapeHtmlAttribute(tooltip)}" aria-label="${escapeHtmlAttribute(t("viewGoal", { goal: String(tooltip) }))}">
       <span class="session-goal-dot" aria-hidden="true"></span>
       <span>${escapeHtml(t("goal"))}</span>
     </button>
@@ -815,7 +815,7 @@ async function loadSessionListSource({ requestFreshState = false } = {}) {
     };
   } catch (err) {
     if (!isSessionListSnapshotSoftTimeout(err)) {
-      console.warn("[轻舟] refresh session runtime snapshot failed", err);
+      console.warn("[Zuri] refresh session runtime snapshot failed", err);
     }
     const localSessions = await localSessionsPromise.catch(() => ({}));
     return { sessions: localSessions, hydratedFromSnapshot: false };
@@ -1332,17 +1332,17 @@ function renderSessionTreeCard(node: TreeNode, focusSessionId: string | null | u
   const artifactsTitle = hasArtifacts ? t("openTaskArtifacts", { count: String(artifactSummary?.total) }) : t("openTaskArtifactsAction");
   const className = `session-card ${selected ? 'active' : ''} ${running ? 'running' : ''} ${hasArtifacts ? 'has-artifacts' : ''} ${deleting ? 'is-deleting' : ''}`;
   const treeToggleHtml = node.hasChildren ? `
-        <button class="qz-tree-toggle session-tree-toggle" type="button" data-session-action="toggle" data-id="${escapeHtmlAttribute(s.id)}" aria-label="${escapeHtmlAttribute(node.expanded ? t("collapse") : t("expand"))}" aria-expanded="${String(node.expanded)}" title="${escapeHtmlAttribute(node.expanded ? t("collapse") : t("expand"))}">
+        <button class="zuri-tree-toggle session-tree-toggle" type="button" data-session-action="toggle" data-id="${escapeHtmlAttribute(s.id)}" aria-label="${escapeHtmlAttribute(node.expanded ? t("collapse") : t("expand"))}" aria-expanded="${String(node.expanded)}" title="${escapeHtmlAttribute(node.expanded ? t("collapse") : t("expand"))}">
           ${node.expanded ? '-' : '+'}
         </button>
       ` : `<span class="session-tree-leaf ${depth > 0 ? 'child' : ''}" aria-hidden="true"></span>`;
   const artifactChipHtml = hasArtifacts ? artifactsFeature.renderSessionChip(artifactSummary || {}) : "";
   const finalActionButtonHtml = running ? `
-        <button class="qz-icon-btn qz-icon-btn--xs qz-icon-btn--danger session-stop-btn session-action-btn" type="button" data-session-action="stop" data-id="${escapeHtmlAttribute(s.id)}" title="${escapeHtmlAttribute(t("stopRun"))}" aria-label="${escapeHtmlAttribute(t("stopRun"))}">
+        <button class="zuri-icon-btn zuri-icon-btn--xs zuri-icon-btn--danger session-stop-btn session-action-btn" type="button" data-session-action="stop" data-id="${escapeHtmlAttribute(s.id)}" title="${escapeHtmlAttribute(t("stopRun"))}" aria-label="${escapeHtmlAttribute(t("stopRun"))}">
           <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><rect x="4.2" y="4.2" width="7.6" height="7.6" rx="1.4" fill="currentColor"/></svg>
         </button>
       ` : `
-        <button class="qz-icon-btn qz-icon-btn--xs qz-icon-btn--danger session-delete-btn session-action-btn" data-session-action="delete" data-id="${escapeHtmlAttribute(s.id)}" title="${escapeHtmlAttribute(deleting ? t("deleting") : t("delete"))}" aria-label="${escapeHtmlAttribute(deleting ? t("deleting") : t("delete"))}"${deleting ? ' aria-busy="true" disabled' : ''}>
+        <button class="zuri-icon-btn zuri-icon-btn--xs zuri-icon-btn--danger session-delete-btn session-action-btn" data-session-action="delete" data-id="${escapeHtmlAttribute(s.id)}" title="${escapeHtmlAttribute(deleting ? t("deleting") : t("delete"))}" aria-label="${escapeHtmlAttribute(deleting ? t("deleting") : t("delete"))}"${deleting ? ' aria-busy="true" disabled' : ''}>
           <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
         </button>
       `;
@@ -1354,10 +1354,10 @@ function renderSessionTreeCard(node: TreeNode, focusSessionId: string | null | u
           ${artifactChipHtml}
           ${goalChipHtml}
           <div class="session-card-actions" aria-label="${escapeHtmlAttribute(t("taskActions"))}">
-            <button class="qz-icon-btn qz-icon-btn--xs session-export-btn session-action-btn ${exportPreparing ? 'is-preparing' : ''}" data-session-action="export" data-id="${escapeHtmlAttribute(s.id)}" title="${exportTitle}" aria-label="${exportTitle}"${exportPreparing ? ' aria-busy="true" disabled' : ''}>
+            <button class="zuri-icon-btn zuri-icon-btn--xs session-export-btn session-action-btn ${exportPreparing ? 'is-preparing' : ''}" data-session-action="export" data-id="${escapeHtmlAttribute(s.id)}" title="${exportTitle}" aria-label="${exportTitle}"${exportPreparing ? ' aria-busy="true" disabled' : ''}>
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2Z"/><path d="M14 2v6h6M12 12v6m0 0 3-3m-3 3-3-3"/></svg>
             </button>
-            <button class="qz-icon-btn qz-icon-btn--xs session-artifact-action-btn session-action-btn ${hasArtifacts ? 'has-artifacts' : ''}" data-session-action="artifacts" data-id="${escapeHtmlAttribute(s.id)}" title="${escapeHtmlAttribute(artifactsTitle)}" aria-label="${escapeHtmlAttribute(artifactsTitle)}">
+            <button class="zuri-icon-btn zuri-icon-btn--xs session-artifact-action-btn session-action-btn ${hasArtifacts ? 'has-artifacts' : ''}" data-session-action="artifacts" data-id="${escapeHtmlAttribute(s.id)}" title="${escapeHtmlAttribute(artifactsTitle)}" aria-label="${escapeHtmlAttribute(artifactsTitle)}">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="4" rx="1"/><path d="M5 8v11a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8M10 12h4"/></svg>
             </button>
             ${finalActionButtonHtml}

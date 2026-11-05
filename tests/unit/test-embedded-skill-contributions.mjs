@@ -9,7 +9,7 @@ import { findSkillManifestResource, parseSkillManifest, skillMatchesContext } fr
 import { prepareSkillToolRegistryFromSkills, getHostCoreToolTarget, executeSkillTool } from '../../src/background/skills/skill-tool-runtime.js';
 
 const record = (name, extra = {}) => ({ name, description: `Use ${name}`, content: `# ${name}`, ...extra });
-const register = definition => qz => qz.registerSkill(definition);
+const register = definition => zuri => zuri.registerSkill(definition);
 const manifest = skill => parseSkillManifest(findSkillManifestResource(skill.resources).content, skill).plugin;
 
 test('a Skill-only contribution is ordered, immutable at the boundary, removable, and supports site activation', () => {
@@ -40,9 +40,9 @@ test('embedded registration rejects duplicate names and normalized display alias
 });
 
 test('trusted host bindings require the actual registered Skill, unchanged manifest, and exact tool identity', () => {
-  const skill = findBuiltinSkill('qingzhou-management');
-  const binding = {skillName:skill.name, manifestId:'qingzhou-management', toolName:'manage_settings', target:'manage_settings'};
-  const registry = createSkillHostRegistry([qz => qz.registerSkillHost(binding)], [skill]);
+  const skill = findBuiltinSkill('zuri-management');
+  const binding = {skillName:skill.name, manifestId:'zuri-management', toolName:'manage_settings', target:'manage_settings'};
+  const registry = createSkillHostRegistry([zuri => zuri.registerSkillHost(binding)], [skill]);
   const plugin = manifest(skill);
   const tool = plugin.tools.find(item => item.localName === 'manage_settings');
   assert.equal(registry.resolve(plugin, tool).target, 'manage_settings');
@@ -54,7 +54,7 @@ test('trusted host bindings require the actual registered Skill, unchanged manif
   }
   const changed = findBuiltinSkill(skill.name);
   changed.resources.find(item => item.path === 'plugin.json').content += ' ';
-  assert.equal(manifest(changed).tools.find(item => item.localName === 'manage_settings').capabilityId, 'qingzhou_management__manage_settings');
+  assert.equal(manifest(changed).tools.find(item => item.localName === 'manage_settings').capabilityId, 'zuri_management__manage_settings');
   const substituted = JSON.parse(findSkillManifestResource(skill.resources).content);
   substituted.tools[0].description = 'another manifest';
   const other = parseSkillManifest(JSON.stringify(substituted), skill).plugin;
@@ -64,27 +64,27 @@ test('trusted host bindings require the actual registered Skill, unchanged manif
 });
 
 test('host registration validates manifest identity, runtime, target, and duplicate bindings', () => {
-  const skill = findBuiltinSkill('qingzhou-management');
-  const definition = {skillName:skill.name, manifestId:'qingzhou-management', toolName:'manage_settings', target:'manage_settings'};
+  const skill = findBuiltinSkill('zuri-management');
+  const definition = {skillName:skill.name, manifestId:'zuri-management', toolName:'manage_settings', target:'manage_settings'};
   for (const changed of [{skillName:'missing'}, {manifestId:'wrong'}, {toolName:'missing'}, {target:'navigate'}, {target:''},
     {execute:async()=>({})}, {target:undefined}]) {
-    assert.throws(() => createSkillHostRegistry([qz => qz.registerSkillHost({...definition,...changed})], [skill]), /binding|implementation/);
+    assert.throws(() => createSkillHostRegistry([zuri => zuri.registerSkillHost({...definition,...changed})], [skill]), /binding|implementation/);
   }
-  assert.throws(() => createSkillHostRegistry([qz => {qz.registerSkillHost(definition);qz.registerSkillHost(definition);}], [skill]), /Duplicate Skill host identity/);
-  assert.throws(() => createSkillHostRegistry([qz => qz.registerSkillHost(definition)], [structuredClone(skill)]), /registered embedded manifest/);
+  assert.throws(() => createSkillHostRegistry([zuri => {zuri.registerSkillHost(definition);zuri.registerSkillHost(definition);}], [skill]), /Duplicate Skill host identity/);
+  assert.throws(() => createSkillHostRegistry([zuri => zuri.registerSkillHost(definition)], [structuredClone(skill)]), /registered embedded manifest/);
   const custom = async args => ({received:args});
-  const registry = createSkillHostRegistry([qz => qz.registerSkillHost({...definition,target:undefined,execute:custom})], [skill]);
+  const registry = createSkillHostRegistry([zuri => zuri.registerSkillHost({...definition,target:undefined,execute:custom})], [skill]);
   const plugin = manifest(skill);
   assert.equal(registry.resolve(plugin, plugin.tools.find(item => item.localName==='manage_settings')).execute, custom);
   assert.equal(createSkillHostRegistry([], []).target('manage_settings'), null);
 });
 
 test('runtime projection preserves trusted host policy, while forged stored workbench identities remain denied', async () => {
-  assert.deepEqual(listBuiltinSkills().map(skill => skill.name), ['skill-workbench','site-skill-author','qingzhou-management','find-skills','qingzhou-documents','task-retrospective','qingzhou-mcp','site-memory','zuri-artifact']);
+  assert.deepEqual(listBuiltinSkills().map(skill => skill.name), ['skill-workbench','site-skill-author','zuri-management','find-skills','zuri-documents','task-retrospective','zuri-mcp','site-memory','zuri-artifact']);
   const candidate = prepareSkillToolRegistryFromSkills(listBuiltinSkills());
-  const entry = candidate.toolIndex.get('qingzhou_management__manage_settings');
+  const entry = candidate.toolIndex.get('zuri_management__manage_settings');
   assert.equal(getHostCoreToolTarget(entry.plugin,entry.tool),'manage_settings');
-  assert.deepEqual(resolveSkillHostTarget('document_read_chunk'), {skillName:'qingzhou-documents',toolName:'qingzhou_documents__document_read_chunk'});
+  assert.deepEqual(resolveSkillHostTarget('document_read_chunk'), {skillName:'zuri-documents',toolName:'zuri_documents__document_read_chunk'});
   const ordinary = prepareSkillToolRegistryFromSkills([structuredClone(findBuiltinSkill('skill-workbench'))]);
   const forged = [...ordinary.toolIndex.values()].find(item=>item.tool.runtime==='host');
   assert.ok(forged);
@@ -104,7 +104,7 @@ test('registered host targets do not require an optional display metadata contri
   const [skill] = createEmbeddedSkillRegistry([register(plainHostDefinition('independent-host'))]).list();
   assert.equal(getCoreToolMetadata('independent_operation'),null);
   const definition = {skillName:skill.name,manifestId:skill.name,toolName:'independent_operation',target:'independent_operation'};
-  const registry = createSkillHostRegistry([qz=>qz.registerSkillHost(definition)], [skill]);
+  const registry = createSkillHostRegistry([zuri=>zuri.registerSkillHost(definition)], [skill]);
   const plugin = manifest(skill);
   assert.equal(plugin.tools[0].name,'independent_host__independent_operation','legacy runtime names retain their namespace');
   assert.equal(plugin.tools[0].capabilityId,'independent_operation');

@@ -18,7 +18,7 @@ function appendPreparingSettingsProfile(parent: HTMLElement, tool: ToolView, sta
   const args = tool.args && typeof tool.args === "object" ? tool.args : {};
   presentation.appendCompactLine(parent, {
     title: `${status.title} · ${settingsPresentation.settingsActionLabel(args.action, tool)}`,
-    subtitle: settingsPresentation.settingsTargetSummary(args, tool.name) || t("qingzhouSettings"),
+    subtitle: settingsPresentation.settingsTargetSummary(args, tool.name) || t("zuriSettings"),
     meta: [
       args.provider ? t("providerWithName", { provider: String(args.provider) }) : "",
       args.model ? t("modelWithName", { model: String(args.model) }) : "",
@@ -121,7 +121,7 @@ function settingsResultSubtitle(args: Data = {}, result: Data = {}) {
   if (result.rateLimit) return settingsSiteOpenRateLimitTitle(record(result.rateLimit));
   if (result.target) return [settingsPresentation.settingsGuardrailTypeLabel(record(result.target).type), record(result.target).value].filter(Boolean).join(" · ");
   if (result.securityGuardrails) return t("securityPolicies");
-  return settingsPresentation.settingsTargetSummary(args) || result.message || t("qingzhouSettings");
+  return settingsPresentation.settingsTargetSummary(args) || result.message || t("zuriSettings");
 }
 
 function settingsResultMeta(args: Data = {}, result: Data = {}) {

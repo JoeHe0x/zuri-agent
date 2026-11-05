@@ -304,7 +304,7 @@
     async function run() {
       const renderer = await installProductionRenderer();
       const morphChildren = await installProductionMorph();
-      const cases = window.QingzhouMathjaxCases.buildMathjaxCases();
+      const cases = window.ZuriMathjaxCases.buildMathjaxCases();
       const results = [];
       const roots = [];
       for (const [name, markdown, expectedMath, expectedIndents] of cases) {
@@ -352,7 +352,7 @@
       streamHost.innerHTML = "<h2>streaming-simulation</h2><div class=\"msg-content\"></div>";
       caseHost.prepend(streamHost);
       const streamContent = streamHost.querySelector(".msg-content");
-      const streamScenario = window.QingzhouMathjaxCases.buildMathjaxStreamScenario();
+      const streamScenario = window.ZuriMathjaxCases.buildMathjaxStreamScenario();
       const streamMarkdown = streamScenario.markdown;
       const checkpoints = streamScenario.checkpoints;
       const expectedStreamCounts = streamScenario.expectedCounts;
@@ -379,7 +379,7 @@
       streamCodeHost.innerHTML = "<h2>streaming-code-math-simulation</h2><div class=\"msg-content\"></div>";
       caseHost.prepend(streamCodeHost);
       const streamCodeContent = streamCodeHost.querySelector(".msg-content");
-      const streamCodeScenario = window.QingzhouMathjaxCases.buildMathjaxStreamCodeBlockScenario();
+      const streamCodeScenario = window.ZuriMathjaxCases.buildMathjaxStreamCodeBlockScenario();
       const streamCodeCounts = [];
       const streamCodePendingCounts = [];
       const streamCodeErrorCounts = [];

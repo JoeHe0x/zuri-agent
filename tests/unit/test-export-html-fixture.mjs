@@ -26,7 +26,7 @@ assert.equal(legacy.transcript[0]?.text, "旧版消息");
 
 const embedded = parseExportHtmlFixture(`
 <title>Rendered title</title>
-<script id="qingzhou-session-exchange" type="application/json">{"format":"qingzhou.session","version":1,"source":{"sessionId":"original-session"},"session":{"title":"Exchange title","transcript":[{"type":"assistant","content":"完整原始回复"}]}}</script>
+<script id="zuri-session-exchange" type="application/json">{"format":"zuri.session","version":1,"source":{"sessionId":"original-session"},"session":{"title":"Exchange title","transcript":[{"type":"assistant","content":"完整原始回复"}]}}</script>
 <main id="messages"><div class="msg msg-assistant"><div class="msg-content">压缩后的展示</div></div></main>
 `);
 assert.equal(embedded.sessionId, "original-session");

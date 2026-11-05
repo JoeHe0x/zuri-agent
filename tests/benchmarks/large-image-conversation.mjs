@@ -71,7 +71,7 @@ function summarizeCase(result) {
 }
 
 async function runCase(name) {
-  const profile = await mkdtemp(join(tmpdir(), 'qz-large-image-repro-'));
+  const profile = await mkdtemp(join(tmpdir(), 'zuri-large-image-repro-'));
   let context;
   let page;
   const result = { name, crashes: [], console: [] };
@@ -194,7 +194,7 @@ async function runCase(name) {
           input.dispatchEvent(new ClipboardEvent('paste', { bubbles: true, cancelable: true, clipboardData: transfer }));
         });
         await page.waitForFunction(() => document.querySelectorAll('.input-image-attachment img').length === 2);
-        await page.locator('#input').fill('QZ_IMAGE_STREAM：观察这两张图片，持续输出测试文字。');
+        await page.locator('#input').fill('ZURI_IMAGE_STREAM：观察这两张图片，持续输出测试文字。');
         await page.locator('#input').press('Enter');
         result.input.addedImageCount = 2;
         result.input.minimumFinalSnapshotBytes = 25 * result.input.imageDataUrlBytes * 2;
@@ -278,7 +278,7 @@ async function runCase(name) {
           }, 'old image messages keep their text and receive one exact placeholder');
         }
         assert.deepEqual(request.imageMessages[23], {
-          text: 'QZ_IMAGE_STREAM：观察这两张图片，持续输出测试文字。', imageCount: 2, placeholders: [],
+          text: 'ZURI_IMAGE_STREAM：观察这两张图片，持续输出测试文字。', imageCount: 2, placeholders: [],
         });
       }
     }
@@ -491,7 +491,7 @@ function installObserver({ maxErrors }) {
       return send(message);
     };
     port.onMessage.addListener(event => {
-      if (event.__qz_transport__) state.transferFrames++;
+      if (event.__zuri_transport__) state.transferFrames++;
       if (!isAppPort) return;
       if (event.type === 'message_update') state.messageUpdates++;
       if (['error', 'request_failed', 'transport_error'].includes(event.type)) {
@@ -597,13 +597,13 @@ async function startFixtureServer() {
       const body = JSON.parse(Buffer.concat(chunks).toString('utf8'));
       const requestText = (body.messages || []).flatMap(message => typeof message.content === 'string' ? message.content
         : (message.content || []).filter(part => part.type === 'text').map(part => part.text || '')).join('\n');
-      const isStreamCase = requestText.includes('QZ_IMAGE_STREAM');
+      const isStreamCase = requestText.includes('ZURI_IMAGE_STREAM');
       const isCollectionCase = body.stream === true && requestText.includes(COLLECTION_MARKER);
       const record = { case: isCollectionCase ? 'collect' : isStreamCase ? 'stream' : 'setup', bodyBytes: byteLength, stream: body.stream === true,
         imageCount: (body.messages || []).flatMap(message => Array.isArray(message.content) ? message.content : []).filter(part => part.type === 'image_url').length,
         imageMessages: (body.messages || []).filter(message => message.role === 'user' && Array.isArray(message.content)).flatMap(message => {
           const texts = message.content.filter(part => part.type === 'text').map(part => String(part.text || ''));
-          const text = texts.find(value => /^(Synthetic image turn |QZ_IMAGE_STREAM)/u.test(value));
+          const text = texts.find(value => /^(Synthetic image turn |ZURI_IMAGE_STREAM)/u.test(value));
           return text ? [{ text, imageCount: message.content.filter(part => part.type === 'image_url').length,
             placeholders: texts.filter(value => value.startsWith('[image omitted for context saving]')) }] : [];
         }),

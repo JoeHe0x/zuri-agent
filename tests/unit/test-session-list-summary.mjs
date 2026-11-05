@@ -53,7 +53,7 @@ function assertTranscriptSummary() {
   const namespacedSummary = createSessionListSummaryFromTranscript([
     {
       type: "tool",
-      name: "qingzhou_documents__document_create",
+      name: "zuri_documents__document_create",
       capabilityId: "document_create",
       title: "生成文档",
       isError: false,

@@ -26,7 +26,7 @@ assert.deepEqual(normalizeWorkspaceView({ v: 2, page: "new-capability", state: {
   { v: 2, page: "new-capability", state: { selected: ["a", "b"] } });
 const cyclic = {}; cyclic.self = cyclic;
 assert.deepEqual(normalizeWorkspaceView({ v: 2, page: "new-capability", state: cyclic }), defaultWorkspaceView());
-assert.equal(workspaceViewStorageKey(7), "qingzhou:workspace-view:7");
+assert.equal(workspaceViewStorageKey(7), "zuri:workspace-view:7");
 assert.equal(workspaceViewStorageKey(-1), "");
 
 const values = {};

@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title data-i18n="core.brand">轻舟</title>
+  <title data-i18n="core.brand">Zuri</title>
   <link rel="icon" href="data:,">
-  <link id="qingzhou-sidepanel-skin" rel="stylesheet" href="sidepanel.css" data-qingzhou-skin="default">
+  <link id="zuri-sidepanel-skin" rel="stylesheet" href="sidepanel.css" data-zuri-skin="default">
 </head>
 <body>
   <template id="data-consent-template">
-    <section class="data-consent qz-scroll qz:p-5 qz:bg-surface qz:text-body" aria-labelledby="data-consent-title">
-      <div class="qz:mx-auto qz:flex qz:w-full qz:max-w-96 qz:flex-col qz:gap-4">
+    <section class="data-consent zuri-scroll zuri:p-5 zuri:bg-surface zuri:text-body" aria-labelledby="data-consent-title">
+      <div class="zuri:mx-auto zuri:flex zuri:w-full zuri:max-w-96 zuri:flex-col zuri:gap-4">
         <div class="welcome-icon" aria-hidden="true"></div>
         <h1 id="data-consent-title"></h1>
         <p data-i18n="core.dataConsentModel"></p>
@@ -18,66 +18,66 @@
         <p data-i18n="core.dataConsentStorage"></p>
         <p data-i18n="core.dataConsentServices"></p>
         <a href="https://github.com/alibaba/qz-browser-agent/blob/main/docs/permissions.md" target="_blank" rel="noopener noreferrer" data-i18n="core.dataConsentDetails"></a>
-        <div class="qz:flex qz:flex-col qz:gap-2">
-          <button type="button" class="qz-btn qz-btn--primary qz-btn--lg" data-consent-accept data-i18n="core.dataConsentAccept"></button>
-          <button type="button" class="qz-btn qz-btn--ghost qz-btn--lg" data-consent-later data-i18n="core.dataConsentLater"></button>
+        <div class="zuri:flex zuri:flex-col zuri:gap-2">
+          <button type="button" class="zuri-btn zuri-btn--primary zuri-btn--lg" data-consent-accept data-i18n="core.dataConsentAccept"></button>
+          <button type="button" class="zuri-btn zuri-btn--ghost zuri-btn--lg" data-consent-later data-i18n="core.dataConsentLater"></button>
         </div>
-        <p role="alert" class="qz:text-danger" data-consent-error></p>
+        <p role="alert" class="zuri:text-danger" data-consent-error></p>
       </div>
     </section>
   </template>
-  <div id="app" class="qz:relative qz:flex qz:h-full qz:min-h-0 qz:w-full qz:flex-col qz:overflow-hidden qz:rounded-none" data-workspace-booting>
+  <div id="app" class="zuri:relative zuri:flex zuri:h-full zuri:min-h-0 zuri:w-full zuri:flex-col zuri:overflow-hidden zuri:rounded-none" data-workspace-booting>
     <div id="workspace-boot-fallback" class="workspace-boot-fallback hidden" role="alert"></div>
     <!-- Header -->
-    <header id="header" class="qz:relative qz:z-10 qz:grid qz:items-center">
-      <div class="header-left qz:flex qz:min-w-0 qz:items-center qz:gap-2.5">
-        <button id="btn-back" class="qz-btn qz-btn--inline hidden qz:inline-flex qz:items-center qz:gap-1" type="button" aria-label="返回对话" data-i18n-aria-label="core.backToChat">
+    <header id="header" class="zuri:relative zuri:z-10 zuri:grid zuri:items-center">
+      <div class="header-left zuri:flex zuri:min-w-0 zuri:items-center zuri:gap-2.5">
+        <button id="btn-back" class="zuri-btn zuri-btn--inline hidden zuri:inline-flex zuri:items-center zuri:gap-1" type="button" aria-label="返回对话" data-i18n-aria-label="core.backToChat">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
           <span id="btn-back-label"></span>
         </button>
-<nav class="qz-segment header-tabs">
-          <button class="qz-segment-item tab-btn active" data-tab="chat" data-i18n="core.chat">对话</button>
+<nav class="zuri-segment header-tabs">
+          <button class="zuri-segment-item tab-btn active" data-tab="chat" data-i18n="core.chat">对话</button>
         </nav>
       </div>
-      <div class="header-actions qz:flex qz:flex-none qz:min-w-max qz:justify-end">
-        <button id="btn-case-recording" class="qz-icon-btn qz-icon-btn--md icon-btn hidden" title="录制 case" data-i18n-title="core.recordCase">
+      <div class="header-actions zuri:flex zuri:flex-none zuri:min-w-max zuri:justify-end">
+        <button id="btn-case-recording" class="zuri-icon-btn zuri-icon-btn--md icon-btn hidden" title="录制 case" data-i18n-title="core.recordCase">
           <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <circle cx="12" cy="12" r="5"/>
           </svg>
         </button>
-        <button id="btn-more" class="qz-icon-btn qz-icon-btn--md icon-btn" type="button" title="历史" data-i18n-title="core.history" aria-label="历史" data-i18n-aria-label="core.history">
+        <button id="btn-more" class="zuri-icon-btn zuri-icon-btn--md icon-btn" type="button" title="历史" data-i18n-title="core.history" aria-label="历史" data-i18n-aria-label="core.history">
           <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5M12 7v5l3 2"/></svg>
         </button>
-        <button id="btn-new" class="qz-icon-btn qz-icon-btn--md icon-btn" title="新对话" data-i18n-title="core.newChat">
+        <button id="btn-new" class="zuri-icon-btn zuri-icon-btn--md icon-btn" title="新对话" data-i18n-title="core.newChat">
           <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
         </button>
-        <div id="session-title-actions" class="session-title-actions hidden qz:flex qz:items-center qz:gap-0.5">
-        <div id="chat-text-size-control" class="chat-text-size-control qz:relative qz:flex-none">
-          <button id="btn-chat-text-size" class="qz-icon-btn qz-icon-btn--sm chat-text-size-trigger" type="button" title="对话字号" data-i18n-title="core.chatTextSize" aria-label="对话字号" data-i18n-aria-label="core.chatTextSize" aria-haspopup="dialog" aria-expanded="false" aria-controls="chat-text-size-popover">
+        <div id="session-title-actions" class="session-title-actions hidden zuri:flex zuri:items-center zuri:gap-0.5">
+        <div id="chat-text-size-control" class="chat-text-size-control zuri:relative zuri:flex-none">
+          <button id="btn-chat-text-size" class="zuri-icon-btn zuri-icon-btn--sm chat-text-size-trigger" type="button" title="对话字号" data-i18n-title="core.chatTextSize" aria-label="对话字号" data-i18n-aria-label="core.chatTextSize" aria-haspopup="dialog" aria-expanded="false" aria-controls="chat-text-size-popover">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" fill="currentColor" stroke="currentColor" stroke-width="24" stroke-linejoin="round" class="chat-text-size-glyph" aria-hidden="true">
               <path d="M377.301333 203.648a19.114667 19.114667 0 0 0-17.92-12.117333h-38.613333a19.328 19.328 0 0 0-17.92 12.117333L65.109333 798.378667a19.370667 19.370667 0 0 0 17.92 26.88h16.170667c8.106667 0 15.232-4.906667 17.92-12.074667l58.794667-146.218667a19.114667 19.114667 0 0 1 17.92-12.117333h289.28c7.68 0 14.805333 4.48 17.92 12.117333l58.794666 146.645334a19.114667 19.114667 0 0 0 17.92 12.117333h19.754667a19.712 19.712 0 0 0 17.92-26.88L377.344 203.648z m69.973334 399.189333H226.56a19.370667 19.370667 0 0 1-17.92-26.922666l111.701333-283.008c6.698667-16.64 30.037333-16.64 36.309334 0l108.970666 283.434666a19.541333 19.541333 0 0 1-18.346666 26.453334z m512.170666 123.776v-209.024c-2.218667-93.738667-54.698667-141.696-157.44-143.957333-85.632 0-138.581333 32.725333-158.72 98.218667a19.712 19.712 0 0 0 18.773334 25.130666h14.378666c8.533333 0 16.170667-5.376 18.389334-13.909333 11.221333-40.832 47.104-61.44 106.752-61.44 65.92-2.261333 100.48 28.245333 102.698666 92.373333v21.546667c0 10.752-8.533333 19.285333-19.285333 19.285333h-31.36c-68.650667 2.218667-117.973333 9.386667-147.584 20.608-57.429333 25.173333-87.04 67.754667-89.258667 126.933334 4.48 81.664 53.376 125.141333 145.792 130.090666h3.584c65.450667-4.949333 110.336-26.453333 135.424-65.024l3.584-6.741333 2.261334 46.634667c.426667 10.325333 8.96 18.389333 19.285333 18.389333h14.336a19.456 19.456 0 0 0 19.285333-21.504 495.872 495.872 0 0 1-.853333-77.610667z m-184.746666 64.597334c-64.170667-2.261333-97.365333-32.298667-99.584-89.258667-2.261333-68.608 63.658667-101.376 199.125333-99.114667h12.117333c10.325333 0 19.285333 8.533333 19.285334 18.816 1.365333 110.805333-42.154667 167.296-130.986667 169.557334z"/>
             </svg>
           </button>
-          <div id="chat-text-size-popover" class="qz-popover chat-text-size-popover hidden qz:absolute qz:top-[calc(100%+5px)] qz:-end-6.5 qz:z-70 qz:grid qz:w-28 qz:grid-cols-[26px_minmax(0,1fr)_26px] qz:items-center qz:gap-0.25 qz:p-0.75" role="dialog" aria-label="调整对话字号" data-i18n-aria-label="core.adjustChatTextSize">
-            <button class="qz-icon-btn qz-icon-btn--sm chat-text-size-step" type="button" data-chat-text-size-action="decrease" title="缩小对话字号" data-i18n-title="core.decreaseTextSize" aria-label="缩小对话字号" data-i18n-aria-label="core.decreaseTextSize">A−</button>
-            <button id="chat-text-size-reset" class="qz-btn qz-btn--inline chat-text-size-value qz:h-6.5 qz:min-w-0 qz:px-0.5 qz:py-0" type="button" data-chat-text-size-action="reset" title="恢复标准字号" data-i18n-title="core.resetTextSize">100%</button>
-            <button class="qz-icon-btn qz-icon-btn--sm chat-text-size-step" type="button" data-chat-text-size-action="increase" title="放大对话字号" data-i18n-title="core.increaseTextSize" aria-label="放大对话字号" data-i18n-aria-label="core.increaseTextSize">A+</button>
+          <div id="chat-text-size-popover" class="zuri-popover chat-text-size-popover hidden zuri:absolute zuri:top-[calc(100%+5px)] zuri:-end-6.5 zuri:z-70 zuri:grid zuri:w-28 zuri:grid-cols-[26px_minmax(0,1fr)_26px] zuri:items-center zuri:gap-0.25 zuri:p-0.75" role="dialog" aria-label="调整对话字号" data-i18n-aria-label="core.adjustChatTextSize">
+            <button class="zuri-icon-btn zuri-icon-btn--sm chat-text-size-step" type="button" data-chat-text-size-action="decrease" title="缩小对话字号" data-i18n-title="core.decreaseTextSize" aria-label="缩小对话字号" data-i18n-aria-label="core.decreaseTextSize">A−</button>
+            <button id="chat-text-size-reset" class="zuri-btn zuri-btn--inline chat-text-size-value zuri:h-6.5 zuri:min-w-0 zuri:px-0.5 zuri:py-0" type="button" data-chat-text-size-action="reset" title="恢复标准字号" data-i18n-title="core.resetTextSize">100%</button>
+            <button class="zuri-icon-btn zuri-icon-btn--sm chat-text-size-step" type="button" data-chat-text-size-action="increase" title="放大对话字号" data-i18n-title="core.increaseTextSize" aria-label="放大对话字号" data-i18n-aria-label="core.increaseTextSize">A+</button>
           </div>
         </div>
-        <button id="btn-export-session" class="qz-icon-btn qz-icon-btn--sm session-title-export-btn" type="button" title="导出对话 HTML" data-i18n-title="core.exportHtml" aria-label="导出对话 HTML" data-i18n-aria-label="core.exportHtml">
+        <button id="btn-export-session" class="zuri-icon-btn zuri-icon-btn--sm session-title-export-btn" type="button" title="导出对话 HTML" data-i18n-title="core.exportHtml" aria-label="导出对话 HTML" data-i18n-aria-label="core.exportHtml">
           <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2Z"/>
             <path d="M14 2v6h6M12 12v6m0 0 3-3m-3 3-3-3"/>
           </svg>
         </button>
         </div>
-        <button id="btn-update-notice" class="qz-icon-btn qz-icon-btn--md icon-btn hidden" type="button" title="发现新版本" data-i18n-title="core.updateNotice" aria-label="发现新版本" data-i18n-aria-label="core.updateNotice">
+        <button id="btn-update-notice" class="zuri-icon-btn zuri-icon-btn--md icon-btn hidden" type="button" title="发现新版本" data-i18n-title="core.updateNotice" aria-label="发现新版本" data-i18n-aria-label="core.updateNotice">
           <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <path d="M6 9a6 6 0 1 1 12 0c0 6 2.5 7.5 2.5 7.5h-17S6 15 6 9Z"/>
             <path d="M10 20a2 2 0 0 0 4 0"/>
           </svg>
         </button>
-        <button id="btn-settings" class="qz-icon-btn qz-icon-btn--md icon-btn" title="设置" data-i18n-title="core.settings">
+        <button id="btn-settings" class="zuri-icon-btn zuri-icon-btn--md icon-btn" title="设置" data-i18n-title="core.settings">
           <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <path d="M9.4 4.2 10 2h4l.6 2.2c.2.1.5.2.7.3l2.1-1.1 2.8 2.8-1.1 2.1.3.7 2.2.6v4l-2.2.6-.3.7 1.1 2.1-2.8 2.8-2.1-1.1-.7.3-.6 2.2h-4l-.6-2.2-.7-.3-2.1 1.1-2.8-2.8 1.1-2.1-.3-.7-2.2-.6v-4L4.6 9l.3-.7-1.1-2.1 2.8-2.8 2.1 1.1.7-.3Z"/>
             <circle cx="12" cy="12" r="3.2"/>
@@ -86,33 +86,33 @@
       </div>
     </header>
 
-    <div id="session-title-bar" class="session-title-bar hidden qz:flex qz:min-h-8.5 qz:flex-none qz:items-center qz:gap-2" aria-live="polite">
-      <div class="session-title-editor qz:flex qz:h-6 qz:min-w-0 qz:flex-auto qz:items-center">
-        <button id="btn-edit-session-title" class="qz-btn qz-btn--inline session-title-edit-trigger" type="button" title="重命名对话" data-i18n-title="core.renameConversation" aria-label="重命名对话" data-i18n-aria-label="core.renameConversation" aria-expanded="false" aria-controls="session-title-input">
-          <span id="current-session-title" class="qz:block qz:min-w-0 qz:max-w-full qz:truncate"></span>
+    <div id="session-title-bar" class="session-title-bar hidden zuri:flex zuri:min-h-8.5 zuri:flex-none zuri:items-center zuri:gap-2" aria-live="polite">
+      <div class="session-title-editor zuri:flex zuri:h-6 zuri:min-w-0 zuri:flex-auto zuri:items-center">
+        <button id="btn-edit-session-title" class="zuri-btn zuri-btn--inline session-title-edit-trigger" type="button" title="重命名对话" data-i18n-title="core.renameConversation" aria-label="重命名对话" data-i18n-aria-label="core.renameConversation" aria-expanded="false" aria-controls="session-title-input">
+          <span id="current-session-title" class="zuri:block zuri:min-w-0 zuri:max-w-full zuri:truncate"></span>
         </button>
-        <input id="session-title-input" class="qz-field qz-field--bare session-title-input" type="text" autocomplete="off" spellcheck="false" enterkeyhint="done" aria-label="对话标题" data-i18n-aria-label="core.conversationTitle">
+        <input id="session-title-input" class="zuri-field zuri-field--bare session-title-input" type="text" autocomplete="off" spellcheck="false" enterkeyhint="done" aria-label="对话标题" data-i18n-aria-label="core.conversationTitle">
       </div>
     </div>
 
-    <section id="chat-search-bar" class="qz-popover chat-search-bar hidden qz:absolute qz:right-3 qz:z-60 qz:flex qz:min-h-9.5 qz:w-[min(360px,calc(100%-24px))] qz:items-center qz:gap-1 qz:p-1.25" role="search" aria-label="搜索对话" data-i18n-aria-label="core.searchConversation">
-      <input id="chat-search-input" class="qz-field qz-field--bare chat-search-input qz:h-7 qz:min-w-0 qz:flex-auto qz:px-1.75 qz:py-0" type="search" autocomplete="off" placeholder="搜索对话" data-i18n-placeholder="core.searchConversation" aria-label="搜索对话" data-i18n-aria-label="core.searchConversation">
-      <span id="chat-search-count" class="chat-search-count qz:min-w-10 qz:flex-none qz:text-center qz:select-none" aria-live="polite">0/0</span>
-      <button id="chat-search-prev" class="qz-icon-btn qz-icon-btn--sm chat-search-btn" type="button" title="上一个" data-i18n-title="core.previous" aria-label="上一个搜索结果" data-i18n-aria-label="core.previousSearchResult">
+    <section id="chat-search-bar" class="zuri-popover chat-search-bar hidden zuri:absolute zuri:right-3 zuri:z-60 zuri:flex zuri:min-h-9.5 zuri:w-[min(360px,calc(100%-24px))] zuri:items-center zuri:gap-1 zuri:p-1.25" role="search" aria-label="搜索对话" data-i18n-aria-label="core.searchConversation">
+      <input id="chat-search-input" class="zuri-field zuri-field--bare chat-search-input zuri:h-7 zuri:min-w-0 zuri:flex-auto zuri:px-1.75 zuri:py-0" type="search" autocomplete="off" placeholder="搜索对话" data-i18n-placeholder="core.searchConversation" aria-label="搜索对话" data-i18n-aria-label="core.searchConversation">
+      <span id="chat-search-count" class="chat-search-count zuri:min-w-10 zuri:flex-none zuri:text-center zuri:select-none" aria-live="polite">0/0</span>
+      <button id="chat-search-prev" class="zuri-icon-btn zuri-icon-btn--sm chat-search-btn" type="button" title="上一个" data-i18n-title="core.previous" aria-label="上一个搜索结果" data-i18n-aria-label="core.previousSearchResult">
         <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4.5 9.5 8 6l3.5 3.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
-      <button id="chat-search-next" class="qz-icon-btn qz-icon-btn--sm chat-search-btn" type="button" title="下一个" data-i18n-title="core.next" aria-label="下一个搜索结果" data-i18n-aria-label="core.nextSearchResult">
+      <button id="chat-search-next" class="zuri-icon-btn zuri-icon-btn--sm chat-search-btn" type="button" title="下一个" data-i18n-title="core.next" aria-label="下一个搜索结果" data-i18n-aria-label="core.nextSearchResult">
         <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4.5 6.5 8 10l3.5-3.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
-      <button id="chat-search-close" class="qz-icon-btn qz-icon-btn--sm chat-search-btn" type="button" title="关闭" data-i18n-title="core.close" aria-label="关闭搜索" data-i18n-aria-label="core.closeSearch">
+      <button id="chat-search-close" class="zuri-icon-btn zuri-icon-btn--sm chat-search-btn" type="button" title="关闭" data-i18n-title="core.close" aria-label="关闭搜索" data-i18n-aria-label="core.closeSearch">
         <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4.5 4.5 11.5 11.5M11.5 4.5 4.5 11.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
       </button>
     </section>
 
     <!-- Messages -->
     <main id="messages" data-chat-state="landing">
-      <div id="welcome" class="welcome qz:flex qz:h-full qz:min-h-0 qz:flex-col qz:items-center qz:justify-start qz:text-center">
-        <div class="welcome-brand qz:flex qz:flex-col qz:items-center">
+      <div id="welcome" class="welcome zuri:flex zuri:h-full zuri:min-h-0 zuri:flex-col zuri:items-center zuri:justify-start zuri:text-center">
+        <div class="welcome-brand zuri:flex zuri:flex-col zuri:items-center">
           <svg class="welcome-wordmark" viewBox="0 0 56 7" shape-rendering="crispEdges" fill="currentColor" role="img" aria-label="ZURI AGENT"><path d="M0 0h1v1h-1zM1 0h1v1h-1zM2 0h1v1h-1zM3 0h1v1h-1zM4 0h1v1h-1zM4 1h1v1h-1zM3 2h1v1h-1zM2 3h1v1h-1zM1 4h1v1h-1zM0 5h1v1h-1zM0 6h1v1h-1zM1 6h1v1h-1zM2 6h1v1h-1zM3 6h1v1h-1zM4 6h1v1h-1zM6 0h1v1h-1zM10 0h1v1h-1zM6 1h1v1h-1zM10 1h1v1h-1zM6 2h1v1h-1zM10 2h1v1h-1zM6 3h1v1h-1zM10 3h1v1h-1zM6 4h1v1h-1zM10 4h1v1h-1zM6 5h1v1h-1zM10 5h1v1h-1zM7 6h1v1h-1zM8 6h1v1h-1zM9 6h1v1h-1zM12 0h1v1h-1zM13 0h1v1h-1zM14 0h1v1h-1zM15 0h1v1h-1zM12 1h1v1h-1zM16 1h1v1h-1zM12 2h1v1h-1zM16 2h1v1h-1zM12 3h1v1h-1zM13 3h1v1h-1zM14 3h1v1h-1zM15 3h1v1h-1zM12 4h1v1h-1zM14 4h1v1h-1zM12 5h1v1h-1zM15 5h1v1h-1zM12 6h1v1h-1zM16 6h1v1h-1zM18 0h1v1h-1zM19 0h1v1h-1zM20 0h1v1h-1zM21 0h1v1h-1zM22 0h1v1h-1zM20 1h1v1h-1zM20 2h1v1h-1zM20 3h1v1h-1zM20 4h1v1h-1zM20 5h1v1h-1zM18 6h1v1h-1zM19 6h1v1h-1zM20 6h1v1h-1zM21 6h1v1h-1zM22 6h1v1h-1zM28 0h1v1h-1zM29 0h1v1h-1zM30 0h1v1h-1zM27 1h1v1h-1zM31 1h1v1h-1zM27 2h1v1h-1zM31 2h1v1h-1zM27 3h1v1h-1zM28 3h1v1h-1zM29 3h1v1h-1zM30 3h1v1h-1zM31 3h1v1h-1zM27 4h1v1h-1zM31 4h1v1h-1zM27 5h1v1h-1zM31 5h1v1h-1zM27 6h1v1h-1zM31 6h1v1h-1zM34 0h1v1h-1zM35 0h1v1h-1zM36 0h1v1h-1zM33 1h1v1h-1zM37 1h1v1h-1zM33 2h1v1h-1zM33 3h1v1h-1zM35 3h1v1h-1zM36 3h1v1h-1zM37 3h1v1h-1zM33 4h1v1h-1zM37 4h1v1h-1zM33 5h1v1h-1zM37 5h1v1h-1zM34 6h1v1h-1zM35 6h1v1h-1zM36 6h1v1h-1zM37 6h1v1h-1zM39 0h1v1h-1zM40 0h1v1h-1zM41 0h1v1h-1zM42 0h1v1h-1zM43 0h1v1h-1zM39 1h1v1h-1zM39 2h1v1h-1zM39 3h1v1h-1zM40 3h1v1h-1zM41 3h1v1h-1zM42 3h1v1h-1zM39 4h1v1h-1zM39 5h1v1h-1zM39 6h1v1h-1zM40 6h1v1h-1zM41 6h1v1h-1zM42 6h1v1h-1zM43 6h1v1h-1zM45 0h1v1h-1zM49 0h1v1h-1zM45 1h1v1h-1zM46 1h1v1h-1zM49 1h1v1h-1zM45 2h1v1h-1zM47 2h1v1h-1zM49 2h1v1h-1zM45 3h1v1h-1zM47 3h1v1h-1zM49 3h1v1h-1zM45 4h1v1h-1zM48 4h1v1h-1zM49 4h1v1h-1zM45 5h1v1h-1zM49 5h1v1h-1zM45 6h1v1h-1zM49 6h1v1h-1zM51 0h1v1h-1zM52 0h1v1h-1zM53 0h1v1h-1zM54 0h1v1h-1zM55 0h1v1h-1zM53 1h1v1h-1zM53 2h1v1h-1zM53 3h1v1h-1zM53 4h1v1h-1zM53 5h1v1h-1zM53 6h1v1h-1z"/></svg>
           <p class="welcome-subtitle" data-i18n="core.tagline">你的浏览器 AI 助手</p>
         </div>
@@ -128,12 +128,12 @@
 
     <!-- Logs panel -->
 
-    <div id="chat-dock" class="chat-dock qz:flex-none">
+    <div id="chat-dock" class="chat-dock zuri:flex-none">
       <!-- Status indicator -->
-      <div id="status-bar" class="status-bar hidden qz:flex qz:min-h-7.5 qz:items-center qz:gap-2 qz:px-3.5 qz:pt-1.5 qz:pb-0">
+      <div id="status-bar" class="status-bar hidden zuri:flex zuri:min-h-7.5 zuri:items-center zuri:gap-2 zuri:px-3.5 zuri:pt-1.5 zuri:pb-0">
         <div class="status-dot"></div>
         <span id="status-text" data-i18n="core.thinking">思考中...</span>
-        <button id="btn-abort" class="qz-icon-btn qz-icon-btn--secondary qz-icon-btn--xs abort-btn qz:ml-auto" title="停止" data-i18n-title="core.stop">
+        <button id="btn-abort" class="zuri-icon-btn zuri-icon-btn--secondary zuri-icon-btn--xs abort-btn zuri:ml-auto" title="停止" data-i18n-title="core.stop">
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="3" y="3" width="8" height="8" rx="1.5" fill="currentColor"/></svg>
         </button>
       </div>
@@ -141,26 +141,26 @@
       <div id="page-suggestions" class="page-suggestions" hidden></div>
 
       <!-- Input -->
-      <footer id="input-area" class="qz:relative qz:px-2.5 qz:pt-1.75 qz:pb-1">
+      <footer id="input-area" class="zuri:relative zuri:px-2.5 zuri:pt-1.75 zuri:pb-1">
         <section id="goal-strip" class="goal-strip hidden" aria-live="polite"></section>
-        <div data-ui-slot="composer-notices" class="qz:contents"></div>
-        <div class="input-composer-frame qz:flex qz:min-w-0 qz:flex-col">
+        <div data-ui-slot="composer-notices" class="zuri:contents"></div>
+        <div class="input-composer-frame zuri:flex zuri:min-w-0 zuri:flex-col">
           <div id="queued-followups" class="queued-followups hidden" aria-live="polite"></div>
-          <div class="input-wrapper qz:flex qz:items-center qz:gap-2">
-            <button id="btn-composer-plus" class="qz-icon-btn qz-icon-btn--sm composer-plus-btn" type="button" aria-haspopup="menu" aria-expanded="false" title="更多" data-i18n-title="core.more" aria-label="更多" data-i18n-aria-label="core.more">
+          <div class="input-wrapper zuri:flex zuri:items-center zuri:gap-2">
+            <button id="btn-composer-plus" class="zuri-icon-btn zuri-icon-btn--sm composer-plus-btn" type="button" aria-haspopup="menu" aria-expanded="false" title="更多" data-i18n-title="core.more" aria-label="更多" data-i18n-aria-label="core.more">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
             </button>
-            <button id="btn-upload-files" class="qz-icon-btn qz-icon-btn--sm element-picker-btn" type="button" title="上传文件" data-i18n-title="core.uploadFiles" aria-label="上传文件" data-i18n-aria-label="core.uploadFiles">
+            <button id="btn-upload-files" class="zuri-icon-btn zuri-icon-btn--sm element-picker-btn" type="button" title="上传文件" data-i18n-title="core.uploadFiles" aria-label="上传文件" data-i18n-aria-label="core.uploadFiles">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m21 11-8.6 8.6a5 5 0 0 1-7-7l8.6-8.6a3.3 3.3 0 0 1 4.7 4.7l-8.6 8.6a1.7 1.7 0 0 1-2.4-2.4L15.4 7"/></svg>
             </button>
-            <button id="btn-pick-element" class="qz-icon-btn qz-icon-btn--sm element-picker-btn hidden" type="button" title="选择页面元素" data-i18n-title="core.selectElement" aria-label="选择页面元素" data-i18n-aria-label="core.selectElement" aria-pressed="false">
+            <button id="btn-pick-element" class="zuri-icon-btn zuri-icon-btn--sm element-picker-btn hidden" type="button" title="选择页面元素" data-i18n-title="core.selectElement" aria-label="选择页面元素" data-i18n-aria-label="core.selectElement" aria-pressed="false">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                 <path d="M12.034 12.681a.498.498 0 0 1 .647-.647l9 3.5a.5.5 0 0 1-.033.943l-3.444 1.068a1 1 0 0 0-.66.66l-1.067 3.443a.5.5 0 0 1-.943.033z"/>
                 <path d="M5 3a2 2 0 0 0-2 2M19 3a2 2 0 0 1 2 2M5 21a2 2 0 0 1-2-2M9 3h1M9 21h2M14 3h1M3 9v1M21 9v2M3 14v1"/>
               </svg>
             </button>
-            <textarea id="input" dir="auto" class="qz:min-h-5 qz:max-h-30 qz:resize-none qz:overflow-x-hidden qz:overflow-y-hidden" placeholder="这个任务要做什么？" data-i18n-placeholder="core.taskPlaceholder" rows="1"></textarea>
-            <span data-ui-slot="composer-meta" class="qz:ml-auto qz:flex qz:min-w-0"></span>
+            <textarea id="input" dir="auto" class="zuri:min-h-5 zuri:max-h-30 zuri:resize-none zuri:overflow-x-hidden zuri:overflow-y-hidden" placeholder="这个任务要做什么？" data-i18n-placeholder="core.taskPlaceholder" rows="1"></textarea>
+            <span data-ui-slot="composer-meta" class="zuri:ml-auto zuri:flex zuri:min-w-0"></span>
             <span id="context-usage" class="context-usage"></span>
             <button id="btn-send" class="send-btn" type="button" aria-label="发送" data-i18n-aria-label="core.send" disabled>
               <span class="send-icon-stage" aria-hidden="true">
@@ -177,30 +177,30 @@
     <!-- capability-ui -->
 
     <!-- Settings overlay -->
-    <div id="settings-panel" class="settings-panel hidden qz:absolute qz:inset-0 qz:z-100 qz:flex qz:items-end qz:justify-center">
-      <div class="settings-backdrop qz:absolute qz:inset-0"></div>
-      <div class="settings-content qz:relative qz:grid qz:grid-rows-[auto_auto_minmax(0,1fr)_auto] qz:overflow-hidden">
-        <div class="settings-header qz:mb-2 qz:flex qz:items-center qz:justify-between">
+    <div id="settings-panel" class="settings-panel hidden zuri:absolute zuri:inset-0 zuri:z-100 zuri:flex zuri:items-end zuri:justify-center">
+      <div class="settings-backdrop zuri:absolute zuri:inset-0"></div>
+      <div class="settings-content zuri:relative zuri:grid zuri:grid-rows-[auto_auto_minmax(0,1fr)_auto] zuri:overflow-hidden">
+        <div class="settings-header zuri:mb-2 zuri:flex zuri:items-center zuri:justify-between">
           <h3 data-i18n="core.settings">设置</h3>
-          <button id="btn-close-settings" class="qz-icon-btn qz-icon-btn--md icon-btn" type="button" aria-label="关闭" data-i18n-aria-label="core.close">
+          <button id="btn-close-settings" class="zuri-icon-btn zuri-icon-btn--md icon-btn" type="button" aria-label="关闭" data-i18n-aria-label="core.close">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
           </button>
         </div>
-        <div class="qz-segment settings-tabs qz:mb-2 qz:grid qz:gap-1 qz:p-0.75" role="tablist" aria-label="设置分类" data-i18n-aria-label="core.settingsCategories" data-tab-count="2">
+        <div class="zuri-segment settings-tabs zuri:mb-2 zuri:grid zuri:gap-1 zuri:p-0.75" role="tablist" aria-label="设置分类" data-i18n-aria-label="core.settingsCategories" data-tab-count="2">
 
         </div>
 
-        <div id="settings-save-state" class="settings-save-state qz:z-8 qz:grid qz:grid-cols-[minmax(0,1fr)_auto] qz:items-center qz:gap-2.5">
-          <div class="settings-status-stack qz:grid qz:min-w-0 qz:gap-1">
-            <div id="settings-save-status" class="settings-save-status qz:grid qz:min-w-0 qz:grid-cols-[6px_minmax(0,1fr)] qz:items-start qz:gap-1.75" role="status" aria-live="polite" data-i18n="core.loadingSettings">正在读取配置</div>
-            <div id="settings-version-muted" class="settings-version-muted qz:truncate"></div>
+        <div id="settings-save-state" class="settings-save-state zuri:z-8 zuri:grid zuri:grid-cols-[minmax(0,1fr)_auto] zuri:items-center zuri:gap-2.5">
+          <div class="settings-status-stack zuri:grid zuri:min-w-0 zuri:gap-1">
+            <div id="settings-save-status" class="settings-save-status zuri:grid zuri:min-w-0 zuri:grid-cols-[6px_minmax(0,1fr)] zuri:items-start zuri:gap-1.75" role="status" aria-live="polite" data-i18n="core.loadingSettings">正在读取配置</div>
+            <div id="settings-version-muted" class="settings-version-muted zuri:truncate"></div>
             <div id="settings-update" class="settings-update" hidden>
-              <span id="settings-update-label" class="settings-update-label qz:truncate"></span>
-              <a id="settings-update-link" class="qz-btn qz-btn--primary qz-btn--sm" href="https://github.com/JoeHe0x/zuri-agent/releases" target="_blank" rel="noopener noreferrer" data-i18n="core.download">下载</a>
-              <button id="settings-open-extensions" class="qz-btn qz-btn--secondary qz-btn--sm" type="button" data-i18n="core.openExtensionsPage">扩展页</button>
+              <span id="settings-update-label" class="settings-update-label zuri:truncate"></span>
+              <a id="settings-update-link" class="zuri-btn zuri-btn--primary zuri-btn--sm" href="https://github.com/JoeHe0x/zuri-agent/releases" target="_blank" rel="noopener noreferrer" data-i18n="core.download">下载</a>
+              <button id="settings-open-extensions" class="zuri-btn zuri-btn--secondary zuri-btn--sm" type="button" data-i18n="core.openExtensionsPage">扩展页</button>
             </div>
           </div>
-          <button id="btn-save-settings" class="qz-btn qz-btn--primary " type="button" disabled data-i18n="core.saveSettings">保存配置</button>
+          <button id="btn-save-settings" class="zuri-btn zuri-btn--primary " type="button" disabled data-i18n="core.saveSettings">保存配置</button>
         </div>
       </div>
     </div>

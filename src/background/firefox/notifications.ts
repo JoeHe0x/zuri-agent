@@ -4,7 +4,7 @@ const RENEWALS = 12;
 
 export function installNotificationRenewal(chromeApi: NotificationChrome): void {
   const notifications = chromeApi.notifications;
-  if (!notifications?.create || (notifications.create as Marked).qzFirefoxRenewal) return;
+  if (!notifications?.create || (notifications.create as Marked).zuriFirefoxRenewal) return;
   const original = notifications.create.bind(notifications);
   const pending = new Map<string, { options: NotificationOptions; left: number }>();
   const wrapped: Marked = (notificationId: string, options: NotificationOptions = {}, callback?: (createdId: string) => void) => {
@@ -30,7 +30,7 @@ export function installNotificationRenewal(chromeApi: NotificationChrome): void 
     if (isPromise(created)) return created.then(createdId => note(createdId));
     return note(created);
   };
-  wrapped.qzFirefoxRenewal = true;
+  wrapped.zuriFirefoxRenewal = true;
   notifications.create = wrapped;
   notifications.onClosed?.addListener((id, byUser) => {
     const state = pending.get(id);
@@ -65,7 +65,7 @@ function isPromise(value: unknown): value is Promise<unknown> {
 
 interface NotificationOptions { requireInteraction?: boolean; priority?: number; [key: string]: unknown }
 type Create = (notificationId: string, options?: NotificationOptions, callback?: (createdId: string) => void) => Promise<string> | string | void;
-type Marked = Create & { qzFirefoxRenewal?: boolean };
+type Marked = Create & { zuriFirefoxRenewal?: boolean };
 interface NotificationChrome {
   notifications?: {
     create: Marked;

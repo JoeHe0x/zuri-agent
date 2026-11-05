@@ -32,7 +32,7 @@
   border-bottom: 1px solid var(--border);
 }
 
-.provider-picker-search .qz-field {
+.provider-picker-search .zuri-field {
   margin: 0;
   min-width: 0;
 }
@@ -175,18 +175,18 @@
 }
 
 .onboarding-primary-btn {
-  --qz-control-font-weight: 600;
+  --zuri-control-font-weight: 600;
 }
 
 .onboarding-setup-actions[data-mode="degraded"] .onboarding-primary-btn {
-  --qz-control-border: var(--control-border);
-  --qz-control-border-hover: var(--control-border-hover);
-  --qz-control-border-focus: var(--control-border-hover);
-  --qz-control-bg: var(--bg-elevated);
-  --qz-control-bg-hover: var(--control-surface-hover);
-  --qz-control-bg-pressed: var(--control-surface-pressed);
-  --qz-control-color: var(--text-primary);
-  --qz-control-color-hover: var(--text-primary);
+  --zuri-control-border: var(--control-border);
+  --zuri-control-border-hover: var(--control-border-hover);
+  --zuri-control-border-focus: var(--control-border-hover);
+  --zuri-control-bg: var(--bg-elevated);
+  --zuri-control-bg-hover: var(--control-surface-hover);
+  --zuri-control-bg-pressed: var(--control-surface-pressed);
+  --zuri-control-color: var(--text-primary);
+  --zuri-control-color-hover: var(--text-primary);
   box-shadow: inset 0 1px 0 color-mix(in srgb, var(--bg-primary) 82%, transparent);
 }
 
@@ -265,7 +265,7 @@
   overflow-y: auto;
   overscroll-behavior: contain;
   /* Opaque so the transcript behind the menu never shows through. */
-  --qz-popover-surface: var(--popover-surface);
+  --zuri-popover-surface: var(--popover-surface);
   background-color: var(--popover-surface);
   backdrop-filter: none;
   opacity: 1;
@@ -451,7 +451,7 @@
 }
 
 .model-preset-switcher-list {
-  --qz-menu-padding: 3px 7px 6px;
+  --zuri-menu-padding: 3px 7px 6px;
   max-height: 354px;
   overscroll-behavior: contain;
   scrollbar-gutter: stable;
@@ -608,18 +608,18 @@
   grid-template-columns: minmax(0, 1fr) auto;
 }
 
-.settings-preset-row .qz-btn {
+.settings-preset-row .zuri-btn {
   margin: 0;
   padding: 8px 10px;
   white-space: nowrap;
 }
 
-.settings-preset-row .qz-btn:disabled {
+.settings-preset-row .zuri-btn:disabled {
   opacity: 0.45;
   cursor: default;
 }
 
-.settings-preset-row .qz-btn--danger:not(:disabled):hover {
+.settings-preset-row .zuri-btn--danger:not(:disabled):hover {
   color: var(--red);
   background: var(--danger-subtle);
 }
@@ -642,19 +642,19 @@
   text-overflow: ellipsis;
 }
 
-.provider-auth-row .qz-btn,
-.provider-device-box .qz-btn {
+.provider-auth-row .zuri-btn,
+.provider-device-box .zuri-btn {
   margin: 0;
   padding: 6px 8px;
   white-space: nowrap;
 }
 
-.provider-auth-row .qz-btn:disabled {
+.provider-auth-row .zuri-btn:disabled {
   opacity: 0.45;
   cursor: default;
 }
 
-.provider-auth-row .qz-btn--danger:not(:disabled):hover {
+.provider-auth-row .zuri-btn--danger:not(:disabled):hover {
   color: var(--red);
   background: var(--danger-subtle);
 }
@@ -674,7 +674,7 @@
   text-align: center;
 }
 
-.provider-device-box .qz-field-hint {
+.provider-device-box .zuri-field-hint {
   grid-column: 1 / -1;
   margin: -2px 0 0;
 }
@@ -717,13 +717,13 @@
   gap: 5px;
 }
 
-.provider-option-row .qz-field {
+.provider-option-row .zuri-field {
   min-height: 32px;
   padding-top: 6px;
   padding-bottom: 6px;
 }
 
-.custom-option-row .qz-field {
+.custom-option-row .zuri-field {
   min-height: 34px;
   padding: 8px 10px;
   font-family: var(--font-sans);
@@ -766,64 +766,64 @@
   }
 }
 
-.qz-combobox {
+.zuri-combobox {
   position: relative;
 }
 
-.qz-combobox-input {
+.zuri-combobox-input {
   padding-right: 68px;
 }
 
-.qz-combobox.manual-only .qz-combobox-input {
+.zuri-combobox.manual-only .zuri-combobox-input {
   padding-right: 36px;
 }
 
-.qz-combobox-input[readonly]:not(:disabled) {
+.zuri-combobox-input[readonly]:not(:disabled) {
   background-color: var(--field-surface);
   color: var(--field-text);
   cursor: pointer;
   opacity: 1;
 }
 
-.qz-combobox-toggle,
-.qz-combobox-clear {
+.zuri-combobox-toggle,
+.zuri-combobox-clear {
   position: absolute;
   top: 1px;
   bottom: 1px;
   height: auto;
 }
 
-.qz-combobox-clear {
+.zuri-combobox-clear {
   right: 35px;
   width: 28px;
   border-radius: var(--radius-sm);
   opacity: 0.72;
 }
 
-.qz-combobox.manual-only .qz-combobox-clear {
+.zuri-combobox.manual-only .zuri-combobox-clear {
   right: 1px;
 }
 
-.qz-combobox-toggle {
+.zuri-combobox-toggle {
   right: 1px;
   width: 34px;
   border-left: 1px solid transparent;
   border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
 }
 
-.qz-combobox-toggle:hover,
-.qz-combobox.open .qz-combobox-toggle,
-.qz-combobox-toggle:focus-visible {
+.zuri-combobox-toggle:hover,
+.zuri-combobox.open .zuri-combobox-toggle,
+.zuri-combobox-toggle:focus-visible {
   background: var(--bg-tertiary);
   color: var(--text-primary);
   opacity: 1;
 }
 
-.qz-combobox.open .qz-combobox-toggle svg {
+.zuri-combobox.open .zuri-combobox-toggle svg {
   transform: rotate(180deg);
 }
 
-.qz-combobox-menu {
+.zuri-combobox-menu {
   position: absolute;
   z-index: 20;
   top: calc(100% + 4px);
@@ -833,7 +833,7 @@
   overflow-y: auto;
 }
 
-#cfg-model-options.qz-combobox-menu {
+#cfg-model-options.zuri-combobox-menu {
   position: fixed;
   inset: auto;
   top: var(--model-menu-top, 0);
@@ -847,7 +847,7 @@
   z-index: 140;
 }
 
-#cfg-model-options.qz-combobox-menu.open-upward {
+#cfg-model-options.zuri-combobox-menu.open-upward {
   top: auto;
   bottom: var(--model-menu-bottom, 0);
 }
@@ -884,7 +884,7 @@
   gap: 6px;
 }
 
-.model-parameter-row .qz-field {
+.model-parameter-row .zuri-field {
   min-width: 0;
   min-height: 34px;
   padding: 7px 9px;
@@ -925,19 +925,19 @@
   white-space: nowrap;
 }
 
-#cfg-model-options.qz-combobox-menu::backdrop {
+#cfg-model-options.zuri-combobox-menu::backdrop {
   background: transparent;
 }
 
-.qz-combobox-option,
-.qz-combobox-empty {
+.zuri-combobox-option,
+.zuri-combobox-empty {
   width: 100%;
   min-height: 42px;
   padding: 7px 9px;
   font: inherit;
 }
 
-.qz-combobox-option-name {
+.zuri-combobox-option-name {
   display: block;
   overflow: hidden;
   color: var(--text-primary);
@@ -949,7 +949,7 @@
   white-space: nowrap;
 }
 
-.qz-combobox-option-meta {
+.zuri-combobox-option-meta {
   display: block;
   margin-top: 3px;
   overflow: hidden;
@@ -960,7 +960,7 @@
   white-space: nowrap;
 }
 
-.qz-combobox-empty {
+.zuri-combobox-empty {
   display: grid;
   place-items: center start;
   color: var(--text-muted);
@@ -998,7 +998,7 @@
   font-family: var(--font-mono);
 }
 
-.settings-body .qz-field-hint {
+.settings-body .zuri-field-hint {
   margin-top: -4px;
 }
 
@@ -1006,11 +1006,11 @@
   gap: 5px;
 }
 
-.settings-model-capability-field .qz-field-label {
+.settings-model-capability-field .zuri-field-label {
   margin-top: 0;
 }
 
-.settings-model-capability-field .qz-field {
+.settings-model-capability-field .zuri-field {
   min-width: 0;
   min-height: 34px;
 }
@@ -1098,7 +1098,7 @@
   pointer-events: none;
 }
 
-.guardrail-add-row .qz-btn {
+.guardrail-add-row .zuri-btn {
   margin: 0;
   padding: 8px 10px;
   white-space: nowrap;
@@ -1222,7 +1222,7 @@
   gap: 7px;
 }
 
-.skill-settings-index-row.qz-btn {
+.skill-settings-index-row.zuri-btn {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto auto;
   width: 100%;
@@ -1287,7 +1287,7 @@
   min-height: 30px;
 }
 
-.skill-settings-back.qz-btn {
+.skill-settings-back.zuri-btn {
   margin: 0;
   padding-left: 6px;
   gap: 4px;

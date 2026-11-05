@@ -2,7 +2,7 @@ import contributions from "#capabilities/locales";
 import { chromeMessageId, decodeChromeMessage, HISTORICAL_LABELS_MESSAGE_ID, type LanguagePack } from "./definition.js";
 
 /** The framework owns preference persistence; capability packages own the available languages. */
-export const LANGUAGE_PREFERENCE_KEY = "qingzhou_language";
+export const LANGUAGE_PREFERENCE_KEY = "zuri_language";
 const packs = contributions.flat();
 const matches = packs.flatMap(pack => [pack.language, ...(pack.aliases || [])]
   .map(tag => ({ tag: tag.toLowerCase(), language: pack.language })))
@@ -86,11 +86,11 @@ export function createLanguageRuntime(environment: () => LanguageEnvironment = (
       const raw: unknown = await response.json();
       if (!raw || typeof raw !== "object" || Array.isArray(raw)) throw new Error("Invalid language catalog");
       const entries = raw as Record<string, unknown>;
-      if (decodeChromeMessage(entries.qz_language) !== language) throw new Error("Language catalog does not match its descriptor");
+      if (decodeChromeMessage(entries.zuri_language) !== language) throw new Error("Language catalog does not match its descriptor");
       const catalog: Record<string, string> = Object.create(null) as Record<string, string>;
       for (const [key, value] of Object.entries(entries)) {
         const text = decodeChromeMessage(value);
-        if (key.startsWith("qz_") && text !== undefined) catalog[key] = text;
+        if (key.startsWith("zuri_") && text !== undefined) catalog[key] = text;
       }
       catalogs.set(language, Object.freeze(catalog));
     })();
@@ -176,7 +176,7 @@ export function createLanguageRuntime(environment: () => LanguageEnvironment = (
     if (text !== undefined) return text;
     try {
       const native = environment().chrome?.i18n;
-      if (native?.getMessage?.("qz_language") === language) return native.getMessage(id) || undefined;
+      if (native?.getMessage?.("zuri_language") === language) return native.getMessage(id) || undefined;
     } catch { /* Old extensions and standalone tools use their authored fallback. */ }
     return undefined;
   }

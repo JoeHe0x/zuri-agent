@@ -39,7 +39,7 @@ assert.doesNotMatch(html, /id="skills-status"/, "transient Skill feedback should
 assert.doesNotMatch(css, /\.skills-status\b/, "removed toolbar feedback should not leave a local visual system behind");
 assert.match(js, /function setSkillsStatus\([^)]*\) \{[\s\S]*?showToast\(text, \{[\s\S]*?key: "skills-status"/, "Skill operations should reuse the shared Toast feedback surface");
 assert.doesNotMatch(css, /\.skill-filter-btn\s*\{/, "Skill source tabs should not override the shared list-tab visual contract");
-assert.match(extractCssRule(css, ".qz-list-toolbar-tab"), /cursor:\s*pointer/, "all shared Session and Skill list tabs should expose pointer affordance");
+assert.match(extractCssRule(css, ".zuri-list-toolbar-tab"), /cursor:\s*pointer/, "all shared Session and Skill list tabs should expose pointer affordance");
 assert.match(extractCssRule(css, ".skills-toolbar"), /border-bottom:\s*0/, "Skill and Session list headers should both remain borderless");
 assert.doesNotMatch(html, /data-skill-filter="(?:resident|global|site)"/, "scope metadata should not clutter the primary Skill navigation");
 
@@ -50,7 +50,7 @@ assert.doesNotMatch(js, /renderSkillCard\(skill,\s*\{\s*active/, "skills list sh
 assert.match(siteBadgeRule, /color:\s*var\(--text-secondary\)/, "site scope badge should stay neutral");
 assert.doesNotMatch(siteBadgeRule, /var\(--green\)|var\(--success-border\)/, "site scope badge should not use AI-ish green emphasis");
 
-assertClassTokens(html, "skill-content", ["qz:min-w-0"], "skill content should be shrinkable inside the detail pane");
+assertClassTokens(html, "skill-content", ["zuri:min-w-0"], "skill content should be shrinkable inside the detail pane");
 assert.match(skillContentRule, /overflow-wrap:\s*anywhere/, "skill content should not let long prose overflow");
 assert.match(skillContentInlineCodeRule, /display:\s*inline/, "skill inline code should remain inline");
 assert.match(skillContentInlineCodeRule, /white-space:\s*break-spaces/, "skill inline code should wrap like chat inline code");
@@ -100,13 +100,13 @@ assert.doesNotMatch(js, /function\s+highlightMarkdown(?:BodyLine)?\b|highlightYa
 assert.match(js, /highlightMarkdownDocument\(value/, "full SKILL.md should compose YAML and Markdown through the shared highlighter");
 assert.doesNotMatch(html, /skill-save-state-dot|id="skill-save-state"/, "save state should live in the save button without a separate dot");
 assert.match(html, /id="skill-actions-menu"[\s\S]*id="btn-skill-settings"[\s\S]*id="btn-export-skill"[\s\S]*role="separator"[\s\S]*id="btn-delete-skill"/, "low-frequency Skill management actions should share the overflow menu with danger last");
-assertClassTokens(html, "skill-workbench-tabs", ["qz:h-11"], "skill workbench tabs preserve their 44px visual weight");
-assertClassTokens(html, "skill-workbench-panel", ["qz:absolute"], "skill sections should share one stable workbench viewport");
-assertClassTokens(html, "skill-content-preview", ["qz:overflow-y-auto"], "skill preview should own its scroll surface");
+assertClassTokens(html, "skill-workbench-tabs", ["zuri:h-11"], "skill workbench tabs preserve their 44px visual weight");
+assertClassTokens(html, "skill-workbench-panel", ["zuri:absolute"], "skill sections should share one stable workbench viewport");
+assertClassTokens(html, "skill-content-preview", ["zuri:overflow-y-auto"], "skill preview should own its scroll surface");
 assert.match(skillMarkdownEditorCodeRule, /padding:\s*16px/, "body and full-source editors should share the workbench gutter");
 assert.match(skillResourceCodeSurfaceRule, /background:\s*var\(--bg-primary\)/, "resource code should use the same editor surface as markdown");
 assert.match(skillResourceEditorCodeRule, /padding:\s*14px 16px 38px/, "resource code should align to the same left and right gutter");
-assertClassTokens(html, "skill-config-identity-grid", ["qz:grid-cols-2"], "basic identity fields should share one compact row");
+assertClassTokens(html, "skill-config-identity-grid", ["zuri:grid-cols-2"], "basic identity fields should share one compact row");
 assert.match(skillConfigScopeRowRule, /grid-template-columns:\s*minmax\(72px,\s*min-content\) minmax\(0,\s*1fr\)/, "scope labels keep a compact minimum width and expand for longer translations");
 assert.match(
   extractCssRule(readStylesheetSource(join(root, "src/capabilities/skills/ui.css")), "@media (max-width: 380px)"),
@@ -114,7 +114,7 @@ assert.match(
   "narrow panels use a smaller label minimum while preserving room for longer translations",
 );
 assert.match(css, /--switch-width:\s*30px/, "shared switches should keep side-panel density");
-assert.match(html, /id="skill-config-enabled"\s+class="qz-switch"/, "skill enabled state should use the shared neutral switch");
+assert.match(html, /id="skill-config-enabled"\s+class="zuri-switch"/, "skill enabled state should use the shared neutral switch");
 assert.match(skillResourceRowsRule, /grid-template-columns:\s*32px minmax\(0,\s*1fr\) auto 16px/, "resource and MCP rows should remain scan-friendly at side-panel widths");
 assert.match(skillResourceTypeIconRule, /width:\s*17px/, "resource type icons should use one stable icon size");
 assert.match(skillResourceTypeIconRule, /stroke-linecap:\s*round/, "resource type icons should share the Lucide line treatment");
@@ -148,9 +148,9 @@ assert.match(saveSkillButton, /M15\.2 3a2 2 0 0 1 1\.4\.6/, "Skill save should u
 
 assert.match(extractCssRule(css, ".skill-editor"), /overflow-y:\s*auto/, "standalone editors own vertical scrolling");
 assert.match(extractCssRule(css, ".skill-workbench-panel .skill-editor"), /overflow:\s*hidden/, "workbench containment overrides the standalone scroll policy");
-assert.doesNotMatch(html.match(/id="skill-editor"[^>]*class="([^"]*)"/u)?.[1] || "", /qz:overflow/u, "unconditional utilities must not mask workbench scroll containment");
+assert.doesNotMatch(html.match(/id="skill-editor"[^>]*class="([^"]*)"/u)?.[1] || "", /zuri:overflow/u, "unconditional utilities must not mask workbench scroll containment");
 assert.match(css, /@media \(max-width: 380px\)\s*\{\s*\.skill-settings-scroll\s*\{[^}]*padding-right:\s*10px;[^}]*padding-left:\s*10px;/u, "only narrow Skill settings reduce their horizontal padding");
-assert.doesNotMatch(html.match(/class="([^"\n]*\bskill-settings-scroll\b[^"\n]*)"/u)?.[1] || "", /qz:p[rlx]-/u, "wide Skill settings retain their component padding");
+assert.doesNotMatch(html.match(/class="([^"\n]*\bskill-settings-scroll\b[^"\n]*)"/u)?.[1] || "", /zuri:p[rlx]-/u, "wide Skill settings retain their component padding");
 
 console.log("skill list visual contract tests passed");
 

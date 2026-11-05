@@ -70,14 +70,14 @@ test("development build preserves application modules and generates locked runti
     // Buffer diff formatting can consume gigabytes for a changed stylesheet; equality remains byte-exact.
     assert.ok((await readFile(join(first.outputDir, path))).equals(expected), `${path} preserves its copied or assembled asset bytes`);
   }
-  const inventory = await readFile(join(first.outputDir, ".qingzhou-build.json"), "utf8");
+  const inventory = await readFile(join(first.outputDir, ".zuri-build.json"), "utf8");
   assert.equal(inventory.includes(work), false);
   assert.equal(first.files.some(path => !path.startsWith("vendor/") && /(?:README\.md|_metadata|^local\/|\.d\.ts$)/.test(path)), false);
 });
 
 test("development and production assemble capability UI resources without emitting duplicate fragments", async t => {
   const { sourceDir, work } = await fixture(t);
-  const shell = '<head><link id="qingzhou-sidepanel-skin" rel="stylesheet" href="sidepanel.css"></head><body><!-- capability-ui --><script type="module" src="sidepanel.js"></script></body>';
+  const shell = '<head><link id="zuri-sidepanel-skin" rel="stylesheet" href="sidepanel.css"></head><body><!-- capability-ui --><script type="module" src="sidepanel.js"></script></body>';
   const fragment = '<section id="parallel-page">Parallel capability</section>';
   await put(sourceDir, "sidepanel/sidepanel.html", shell);
   await put(sourceDir, "sidepanel/sidepanel.css", ".core { color: red; }");
@@ -101,7 +101,7 @@ test("development and production assemble capability UI resources without emitti
 
 test("language assets stay outside bundles and rebuilds remove unloaded packages without stale catalogs", async t => {
   const { sourceDir, outputDir, work } = await fixture(t);
-  await put(sourceDir, "_locales/en/messages.json", '{"extensionName":{"message":"Qingzhou"}}');
+  await put(sourceDir, "_locales/en/messages.json", '{"extensionName":{"message":"Zuri"}}');
   await put(sourceDir, "shared/definition.ts", "export const defineMessages = (namespace: string, messages: object) => ({ namespace, messages });");
   await put(sourceDir, "shared/copy.ts", 'import { defineMessages } from "./definition.js"; export default defineMessages("core", {save: {en:"Save {name}", "zh-CN":"保存 {name}"}});');
   await put(sourceDir, "capabilities/languages/index.ts", 'export { default as locales } from "./locales.js";');
@@ -114,7 +114,7 @@ test("language assets stay outside bundles and rebuilds remove unloaded packages
     const result = await buildExtension({ sourceDir, outputDir: mode === "development" ? outputDir : join(work, mode), mode });
     const nativeMessages = await readFile(join(result.outputDir, "_locales/ja/messages.json"), "utf8");
     assert.match(nativeMessages, /\{name\} を保存する/);
-    assert.equal(JSON.parse(nativeMessages).qz_language.message, "ja");
+    assert.equal(JSON.parse(nativeMessages).zuri_language.message, "ja");
     assert.ok(!result.files.includes("capabilities/languages/ja/core.json"));
     const contentState = {};
     runInNewContext(await readFile(join(result.outputDir, "content/content-script.js"), "utf8"), contentState);
@@ -131,7 +131,7 @@ test("language assets stay outside bundles and rebuilds remove unloaded packages
   const rebuilt = await buildExtension({ sourceDir, outputDir });
   assert.ok(!rebuilt.files.includes("_locales/ja/messages.json"));
   await assert.rejects(access(join(outputDir, "_locales/ja/messages.json")));
-  assert.equal(JSON.parse(await readFile(join(outputDir, "_locales/en/messages.json"), "utf8")).extensionName.message, "Qingzhou");
+  assert.equal(JSON.parse(await readFile(join(outputDir, "_locales/en/messages.json"), "utf8")).extensionName.message, "Zuri");
   assert.match(await readFile(join(outputDir, "shared/copy.js"), "utf8"), /Save \{name\}/);
 });
 
@@ -215,10 +215,10 @@ test("debug source map URLs decode once before checking source boundaries", () =
   const normalize = (path, sourceMapRoot = "") => JSON.parse(stableDebugSourceMap(
     JSON.stringify({ version: 3, sources: [path], sourceRoot: sourceMapRoot, mappings: "" }), sourceRoot, mapDirectory,
   ));
-  assert.deepEqual(normalize(encoded, "..").sources, [`qingzhou://extension/${encoded}`]);
+  assert.deepEqual(normalize(encoded, "..").sources, [`zuri://extension/${encoded}`]);
   assert.deepEqual(normalize("%E6%96%87%E4%BB%B6.ts", "../%E7%9B%AE%E5%BD%95").sources,
-    ["qingzhou://extension/%E7%9B%AE%E5%BD%95/%E6%96%87%E4%BB%B6.ts"]);
-  assert.deepEqual(normalize("npm:marked/src/defaults.ts").sources, ["qingzhou://npm/marked/src/defaults.ts"]);
+    ["zuri://extension/%E7%9B%AE%E5%BD%95/%E6%96%87%E4%BB%B6.ts"]);
+  assert.deepEqual(normalize("npm:marked/src/defaults.ts").sources, ["zuri://npm/marked/src/defaults.ts"]);
   for (const path of ["../../outside.ts", "%2e%2e/%2e%2e/outside.ts", "npm:%2e%2e/outside.ts"]) {
     assert.throws(() => normalize(path), /debug source escaped extension root/);
   }
@@ -247,7 +247,7 @@ test("production debug maps chain TS through bundles and Terser with stable sour
     assert.ok(first.files.includes(path.slice(0, -4)), `orphaned map ${path}`);
     const text = await readFile(join(first.outputDir, path), 'utf8');
     const map = JSON.parse(text);
-    assert.ok(map.sources.every(source => source.startsWith('qingzhou://extension/')), path);
+    assert.ok(map.sources.every(source => source.startsWith('zuri://extension/')), path);
     assert.equal(map.sources.length, map.sourcesContent.length);
     assert.equal(text.includes(work), false, path);
   }
@@ -255,11 +255,11 @@ test("production debug maps chain TS through bundles and Terser with stable sour
   const code = await readFile(join(first.outputDir, entry), 'utf8');
   const map = JSON.parse(await readFile(join(first.outputDir, `${entry}.map`), 'utf8'));
   assert.match(code, /sourceMappingURL=service-worker\.js\.map/);
-  assert.equal(map.sourcesContent[map.sources.indexOf('qingzhou://extension/shared/trace-helper.ts')], original);
-  assertOriginalMarker(code, map, 'debug-map-marker:', 'qingzhou://extension/shared/trace-helper.ts', 1);
+  assert.equal(map.sourcesContent[map.sources.indexOf('zuri://extension/shared/trace-helper.ts')], original);
+  assertOriginalMarker(code, map, 'debug-map-marker:', 'zuri://extension/shared/trace-helper.ts', 1);
   const minified = await minify({ [entry]: code }, { module: true, compress: { passes: 2 }, mangle: true,
     sourceMap: { content: map, filename: entry, url: 'service-worker.js.map', includeSources: true } });
-  assertOriginalMarker(minified.code, JSON.parse(minified.map), 'debug-map-marker:', 'qingzhou://extension/shared/trace-helper.ts', 1);
+  assertOriginalMarker(minified.code, JSON.parse(minified.map), 'debug-map-marker:', 'zuri://extension/shared/trace-helper.ts', 1);
   const minifiedDir = join(work, 'minified');
   await put(minifiedDir, 'package.json', '{"type":"module"}');
   await put(minifiedDir, entry, minified.code);
@@ -268,10 +268,10 @@ test("production debug maps chain TS through bundles and Terser with stable sour
   assert.throws(run, /debug-map-marker:7/);
   const classicCode = await readFile(join(first.outputDir, 'content/content-script.js'), 'utf8');
   const classicMap = JSON.parse(await readFile(join(first.outputDir, 'content/content-script.js.map'), 'utf8'));
-  assertOriginalMarker(classicCode, classicMap, 'globalThis.answer', 'qingzhou://extension/content/content-script.ts', 1);
+  assertOriginalMarker(classicCode, classicMap, 'globalThis.answer', 'zuri://extension/content/content-script.ts', 1);
   assert.ok(first.files.includes('shared/value.js.map'), 'offscreen dependencies retain their adjacent source maps');
   const ordinary = await buildExtension({ sourceDir, outputDir: first.outputDir, mode: 'production' });
-  assert.equal(ordinary.files.some(path => !path.startsWith('vendor/') && (path.endsWith('.map') || path.startsWith('.qingzhou-debug/'))), false);
+  assert.equal(ordinary.files.some(path => !path.startsWith('vendor/') && (path.endsWith('.map') || path.startsWith('.zuri-debug/'))), false);
 });
 
 test("Side Panel chunks defer evaluation and retain maps, vendor paths and dependency provenance", async t => {
@@ -290,10 +290,10 @@ test("Side Panel chunks defer evaluation and retain maps, vendor paths and depen
   assert.ok(chunk, "the deferred implementation has its own emitted output");
   const source = await readFile(join(outputDir, chunk.output), "utf8");
   const map = JSON.parse(await readFile(join(outputDir, `${chunk.output}.map`), "utf8"));
-  assertOriginalMarker(source, map, "lazy-chunk-marker", "qingzhou://extension/sidepanel/heavy.ts", 2);
+  assertOriginalMarker(source, map, "lazy-chunk-marker", "zuri://extension/sidepanel/heavy.ts", 2);
   const compressed = await minify(source, { module: true, compress: { passes: 2 }, mangle: true,
     sourceMap: { content: map, includeSources: true } });
-  assertOriginalMarker(compressed.code, JSON.parse(compressed.map), "lazy-chunk-marker", "qingzhou://extension/sidepanel/heavy.ts", 2);
+  assertOriginalMarker(compressed.code, JSON.parse(compressed.map), "lazy-chunk-marker", "zuri://extension/sidepanel/heavy.ts", 2);
   const vendorChunk = first.bundling.chunks.find(item => item.inputs.includes("sidepanel/pdf.js"));
   assert.match(await readFile(join(outputDir, vendorChunk.output), "utf8"), /from "\.\.\/vendor\/pdf\.mjs"/u);
   const provenance = await checkDependencyAssets({ extensionDir: outputDir });
@@ -481,7 +481,7 @@ test("embedded runtime and Worker execute after production host minification", a
   for (const path of ["runner-sandbox.ts", "workers/inner-runner.ts", "shared/script-runtime.ts"]) await put(sourceDir, path, await readFile(join(ROOT, "src", path), "utf8"));
   await put(sourceDir, "capabilities/script/index.ts", "export { default as tools } from './tools.js';\n");
   await put(sourceDir, "capabilities/script/tools.ts", `declare const SCRIPT_RUNTIME_SOURCE: string;
-export default () => {};\nexport function expression() { return SCRIPT_RUNTIME_SOURCE + ';QZ_SCRIPT_RUNTIME.safeValueForMessage(new Uint8Array([4, 5]), "page");'; }`);
+export default () => {};\nexport function expression() { return SCRIPT_RUNTIME_SOURCE + ';ZURI_SCRIPT_RUNTIME.safeValueForMessage(new Uint8Array([4, 5]), "page");'; }`);
   const result = await buildExtension({ sourceDir, outputDir, mode: "production" });
   assert.deepEqual(result.embeddedScripts, [
     { entry: "shared/script-runtime.ts", host: "capabilities/script/tools.js" },
@@ -491,14 +491,14 @@ export default () => {};\nexport function expression() { return SCRIPT_RUNTIME_S
   const pageHost = await minify(await readFile(join(outputDir, "capabilities/script/tools.js"), "utf8"), { module: true, compress: { passes: 2 }, mangle: true });
   const { expression } = await import(`data:text/javascript;base64,${Buffer.from(pageHost.code).toString("base64")}`);
   const value = runInNewContext(expression());
-  assert.equal(value.__qz_type, "Uint8Array");
+  assert.equal(value.__zuri_type, "Uint8Array");
   assert.deepEqual(Array.from(value.sample), [4, 5]);
   const host = await minify(await readFile(join(outputDir, "runner-sandbox.js"), "utf8"), { ecma: 2020, compress: { passes: 2 }, mangle: true, format: { comments: false } });
   const sandbox = sandboxFixture(host.code);
-  sandbox.send({ type: "execute", requestId: "compiled", scriptSource: 'return "轻舟 ✅";' });
+  sandbox.send({ type: "execute", requestId: "compiled", scriptSource: 'return "Zuri ✅";' });
   const worker = sandbox.workers[0];
   assert.doesNotMatch(worker.source, /sourceMappingURL|interface WorkerExecute/);
-  assert.equal((await runInnerWorker(worker.source, worker.sent[0].source)).result.result, "轻舟 ✅");
+  assert.equal((await runInnerWorker(worker.source, worker.sent[0].source)).result.result, "Zuri ✅");
   const before = await treeDigest(outputDir);
   await put(sourceDir, "workers/inner-runner.ts", "const broken: = ;");
   await assert.rejects(buildExtension({ sourceDir, outputDir, mode: "production" }), /Unexpected/);
@@ -520,12 +520,12 @@ test("embedded debug sidecars retain exact executable fragments without leaking 
   const sandbox = sandboxFixture(await readFile(join(outputDir, 'runner-sandbox.js'), 'utf8'));
   sandbox.send({ type: 'execute', requestId: 'debug-worker', scriptSource: 'return 42;' });
   for (const item of result.embeddedDebugScripts) {
-    assert.ok(item.artifact.startsWith('.qingzhou-debug/embedded/'));
+    assert.ok(item.artifact.startsWith('.zuri-debug/embedded/'));
     assert.equal(item.map, `${item.artifact}.map`);
     const fragment = await readFile(join(outputDir, item.artifact), 'utf8');
     const map = JSON.parse(await readFile(join(outputDir, item.map), 'utf8'));
     assert.doesNotMatch(fragment, /sourceMappingURL/, 'runtime strings must not contain debug source maps');
-    assert.ok(map.sources.includes(`qingzhou://extension/${item.entry}`));
+    assert.ok(map.sources.includes(`zuri://extension/${item.entry}`));
     assert.ok(map.sourcesContent.every(source => typeof source === 'string'));
     if (item.symbol === 'INNER_WORKER_SOURCE') {
       assert.equal(fragment, sandbox.workers[0].source);
@@ -536,19 +536,19 @@ test("embedded debug sidecars retain exact executable fragments without leaking 
       assert.equal(fragment, exported.fragment, 'debug fragment must remain byte-identical after the host is minified');
     }
     if (item.symbol === 'ELEMENT_PAGE_SCRIPT_SOURCE') {
-      assertOriginalMarker(fragment, map, '"#"', 'qingzhou://extension/content/page-scripts/element.ts', 0);
+      assertOriginalMarker(fragment, map, '"#"', 'zuri://extension/content/page-scripts/element.ts', 0);
     }
   }
   const ordinary = await buildExtension({ sourceDir, outputDir, mode: 'production' });
   assert.equal(ordinary.embeddedDebugScripts.length, 0);
-  assert.equal(ordinary.files.some(path => path.startsWith('.qingzhou-debug/')), false);
+  assert.equal(ordinary.files.some(path => path.startsWith('.zuri-debug/')), false);
 });
 
 test("embedded page functions retain their named exports after production minification", async t => {
   const { sourceDir, outputDir } = await fixture(t);
   await put(sourceDir, "content/page-scripts/element.ts", 'export function selector(element: {id: string}) { return "#" + element.id; }');
   await put(sourceDir, "background/tools/page-scripts.ts", `declare const ELEMENT_PAGE_SCRIPT_SOURCE: string;
-export function declaration() { return 'function(){' + ELEMENT_PAGE_SCRIPT_SOURCE + ';return QZ_ELEMENT_PAGE_SCRIPTS.selector(this);}' }`);
+export function declaration() { return 'function(){' + ELEMENT_PAGE_SCRIPT_SOURCE + ';return ZURI_ELEMENT_PAGE_SCRIPTS.selector(this);}' }`);
   const result = await buildExtension({ sourceDir, outputDir, mode: "production" });
   assert.equal(result.files.includes("content/page-scripts/element.js"), false);
   const host = await minify(await readFile(join(outputDir, "background/tools/page-scripts.js"), "utf8"), {module: true, compress: {passes: 2}, mangle: true});
@@ -587,8 +587,8 @@ test("watch preserves the last valid skin after an invalid utility and cleans ol
   await cp(join(ROOT, "src/themes/default"), join(sourceDir, "themes/default"), { recursive: true });
   await put(sourceDir, "sidepanel/sidepanel.css", '@import "../themes/default/index.css";');
   await put(sourceDir, "capabilities/cards/index.ts", 'export { default as renderers } from "./render.js";');
-  await put(sourceDir, "capabilities/cards/render.ts", 'export default () => "qz:w-[181px]";');
-  await put(sourceDir, "capabilities/cards/ui.css", ".watch-card { @apply qz:text-secondary; }");
+  await put(sourceDir, "capabilities/cards/render.ts", 'export default () => "zuri:w-[181px]";');
+  await put(sourceDir, "capabilities/cards/ui.css", ".watch-card { @apply zuri:text-secondary; }");
   const skins = [];
   const errors = [];
   const watcher = await watchExtension({ sourceDir, outputDir }, {
@@ -600,12 +600,12 @@ test("watch preserves the last valid skin after an invalid utility and cleans ol
     assert.match(skins.at(-1), /width:\s*181px;/u);
     assert.match(skins.at(-1), /\.watch-card\s*\{\s*color:\s*var\(--text-secondary\);/u);
     const before = await treeDigest(outputDir);
-    await put(sourceDir, "capabilities/cards/ui.css", ".watch-card { @apply qz:not-a-real-utility; }");
+    await put(sourceDir, "capabilities/cards/ui.css", ".watch-card { @apply zuri:not-a-real-utility; }");
     await until(() => errors.length > 0);
     assert.match(errors[0].message, /(?:unknown utility|not-a-real-utility)/iu);
     assert.equal(await treeDigest(outputDir), before, "a CSS error cannot replace the usable extension with partial output");
-    await put(sourceDir, "capabilities/cards/render.ts", 'export default () => "qz:w-[193px]";');
-    await put(sourceDir, "capabilities/cards/ui.css", ".watch-card { @apply qz:p-5; }");
+    await put(sourceDir, "capabilities/cards/render.ts", 'export default () => "zuri:w-[193px]";');
+    await put(sourceDir, "capabilities/cards/ui.css", ".watch-card { @apply zuri:p-5; }");
     await until(() => /width:\s*193px;/u.test(skins.at(-1)) && /\.watch-card\s*\{\s*padding:/u.test(skins.at(-1)));
     assert.doesNotMatch(skins.at(-1), /181px/u, "removed utility candidates cannot survive a successful rebuild");
     assert.doesNotMatch(skins.at(-1), /\.watch-card\s*\{[^}]*color:/u, "the repaired CSS replaces the previous declarations");
@@ -720,7 +720,7 @@ test("a real watch process retains ownership between builds and releases it on S
     child.kill("SIGTERM");
     assert.deepEqual(await exited, [0, null]);
     await buildExtension({ sourceDir, outputDir, mode: "production" });
-    const manifest = JSON.parse(await readFile(join(outputDir, ".qingzhou-build.json"), "utf8"));
+    const manifest = JSON.parse(await readFile(join(outputDir, ".zuri-build.json"), "utf8"));
     assert.equal(manifest.mode, "production");
     assert.equal(manifest.bundling.enabled, true);
   } finally {
@@ -733,7 +733,7 @@ test("an abandoned legacy output lock is recovered and a failed rebuild preserve
   const { sourceDir, outputDir } = await fixture(t);
   await buildExtension({ sourceDir, outputDir });
   const before = await treeDigest(outputDir);
-  const lock = join(dirname(outputDir), ".output.qingzhou-build-lock");
+  const lock = join(dirname(outputDir), ".output.zuri-build-lock");
   await mkdir(lock);
   await writeFile(join(lock, "owner.json"), JSON.stringify({ pid: 2147483647, token: "abandoned-fixture" }));
   await put(sourceDir, "shared/value.ts", "export const value = ;");
@@ -768,7 +768,7 @@ test("dev restarts after SIGKILL and continues rebuilding without manual lock cl
 
 test("killing npm stops its watcher and an immediate npm restart owns the output", { timeout: 30_000 }, async t => {
   const { sourceDir, outputDir } = await fixture(t);
-  const lock = join(dirname(outputDir), ".output.qingzhou-build-lock");
+  const lock = join(dirname(outputDir), ".output.zuri-build-lock");
   const args = ["run", "dev", "--", "--source-dir", sourceDir, "--output-dir", outputDir];
   const children = [];
   const watcherPids = [];
@@ -798,7 +798,7 @@ test("killing npm stops its watcher and an immediate npm restart owns the output
       assert.notEqual(nextPid, previousPid);
       await until(() => !isBuildProcessRunning(previousPid));
       // Exited owners include unreaped Linux zombies: their abandoned lock is recoverable.
-      await put(dirname(outputDir), ".abandoned.qingzhou-build-lock/owner.json", JSON.stringify({ pid: previousPid }));
+      await put(dirname(outputDir), ".abandoned.zuri-build-lock/owner.json", JSON.stringify({ pid: previousPid }));
       const release = await acquireBuildOutput({ sourceDir, outputDir: join(dirname(outputDir), "abandoned") });
       await release();
       previousPid = nextPid;
@@ -846,7 +846,7 @@ async function fixture(t) {
 }
 
 async function workspace(t) {
-  const work = await mkdtemp(join(tmpdir(), "qingzhou-build-test-"));
+  const work = await mkdtemp(join(tmpdir(), "zuri-build-test-"));
   t.after(() => rm(work, { recursive: true, force: true }));
   return work;
 }

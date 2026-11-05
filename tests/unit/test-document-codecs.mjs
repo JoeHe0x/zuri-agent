@@ -18,8 +18,8 @@ test("a new parser composes with built-ins and preserves the shared document mod
   const parsed = await registry.parse(bytes, { filename: "note.qznote" });
   assert.equal(parsed.blocks[0].text, "Hello 你好");
   assert.equal(parsed.chunkSize, 6000);
-  assert.equal(registry.inferFormat({ mimeType: "application/vnd.qingzhou.note+json" }), "json-note");
-  assert.equal(registry.mimeType("json-note"), "application/vnd.qingzhou.note+json");
+  assert.equal(registry.inferFormat({ mimeType: "application/vnd.zuri.note+json" }), "json-note");
+  assert.equal(registry.mimeType("json-note"), "application/vnd.zuri.note+json");
   assert.equal(registry.outputFormats.includes("json-note"), false, "a parser-only codec cannot become an output format");
   assert.deepEqual(registry.outputFormats, ["docx", "xlsx", "pdf", "html", "txt", "csv"]);
   const output = await registry.encode({ format: "html", ...parsed });

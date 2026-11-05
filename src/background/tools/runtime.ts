@@ -197,7 +197,7 @@ export async function sendToContent(tabId: number | undefined, action: string, p
 
 const coreToolDefinitions = createToolRegistry();
 export const defineTool = coreToolDefinitions.defineTool;
-const TOOL_RUNTIME_CONTEXT = Symbol("qingzhou.toolRuntime");
+const TOOL_RUNTIME_CONTEXT = Symbol("zuri.toolRuntime");
 const EMPTY_TOOL_RUNTIME_DEPENDENCIES: ToolRuntimeDependencies = Object.freeze({
   sessions: null,
   skills: null,
@@ -768,7 +768,7 @@ function shouldTraceDiagnosticTool(name = "") {
     || value === "load_skill_resource"
     || value.includes("skill")
     || value.includes("plugin")
-    || value.includes("qingzhou_skill_author");
+    || value.includes("zuri_skill_author");
 }
 
 function normalizeToolPolicy(options: ToolContext = {}) {

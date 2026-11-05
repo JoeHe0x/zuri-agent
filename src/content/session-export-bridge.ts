@@ -3,7 +3,7 @@ import { readSessionImportLabels, sessionImportButtonText, type SessionImportLab
 import { refreshContentLanguage, t } from "./i18n.js";
 import { isAllowedSessionExchangeLocation } from "../shared/session/session-exchange-source.js";
 declare global {
-  interface Window { __QINGZHOU_SESSION_EXPORT_BRIDGE_VERSION?: string }
+  interface Window { __ZURI_SESSION_EXPORT_BRIDGE_VERSION?: string }
 }
 export {};
 
@@ -11,14 +11,14 @@ export {};
  * Session export bridge.
  *
  * This intentionally runs at document_start without the page-reading vendor stack so an
- * exported conversation can detect Qingzhou before deferred render dependencies finish.
+ * exported conversation can detect Zuri before deferred render dependencies finish.
  */
 
 (() => {
   const BRIDGE_VERSION = "2026-07-16-session-export-import";
-  const QINGZHOU_SESSION_EXPORT_PROBE = "qingzhou:session-export:probe";
-  const QINGZHOU_SESSION_EXPORT_RESULT = "qingzhou:session-export:result";
-  const QINGZHOU_SESSION_EXCHANGE_SCRIPT_ID = "qingzhou-session-exchange";
+  const ZURI_SESSION_EXPORT_PROBE = "zuri:session-export:probe";
+  const ZURI_SESSION_EXPORT_RESULT = "zuri:session-export:result";
+  const ZURI_SESSION_EXCHANGE_SCRIPT_ID = "zuri-session-exchange";
   let importPending = false;
   let importLabels: SessionImportLabels | null = null;
   let loadedLanguage: string | null = null;
@@ -27,8 +27,8 @@ export {};
   let languageWatching = false;
   let buttonWatching = false;
 
-  if (window.__QINGZHOU_SESSION_EXPORT_BRIDGE_VERSION === BRIDGE_VERSION) return;
-  window.__QINGZHOU_SESSION_EXPORT_BRIDGE_VERSION = BRIDGE_VERSION;
+  if (window.__ZURI_SESSION_EXPORT_BRIDGE_VERSION === BRIDGE_VERSION) return;
+  window.__ZURI_SESSION_EXPORT_BRIDGE_VERSION = BRIDGE_VERSION;
 
   window.addEventListener("message", handleProbeMessage);
   document.addEventListener("click", handleImportClick, true);
@@ -36,7 +36,7 @@ export {};
   armImportCopy();
 
   function handleProbeMessage(event: MessageEvent<unknown>) {
-    if (event.source !== window || !isRecord(event.data) || event.data.type !== QINGZHOU_SESSION_EXPORT_PROBE) return;
+    if (event.source !== window || !isRecord(event.data) || event.data.type !== ZURI_SESSION_EXPORT_PROBE) return;
     if (!getPayloadScript()) return;
     startImportCopy();
     postBridgeResult("probe", probeDetail(String(event.data?.requestId || "")));
@@ -89,7 +89,7 @@ export {};
 
   function watchImportButton() {
     if (buttonWatching) return;
-    const button = document.getElementById("qingzhou-session-cta");
+    const button = document.getElementById("zuri-session-cta");
     const parent = button?.parentElement;
     if (!parent) return;
     buttonWatching = true;
@@ -98,7 +98,7 @@ export {};
       childList: true,
       attributes: true,
       characterData: true,
-      attributeFilter: ["aria-busy", "title", "data-qingzhou-imported-session-id", "data-qingzhou-session-import", "disabled"],
+      attributeFilter: ["aria-busy", "title", "data-zuri-imported-session-id", "data-zuri-session-import", "disabled"],
     });
   }
 
@@ -142,11 +142,11 @@ export {};
 
   function applyImportButton() {
     if (!importLabels) return;
-    const button = document.getElementById("qingzhou-session-cta");
-    if (!(button instanceof HTMLButtonElement) || !button.hasAttribute("data-qingzhou-session-import")) return;
+    const button = document.getElementById("zuri-session-cta");
+    if (!(button instanceof HTMLButtonElement) || !button.hasAttribute("data-zuri-session-import")) return;
     const text = sessionImportButtonText({
       busy: button.getAttribute("aria-busy") === "true",
-      imported: Boolean(button.getAttribute("data-qingzhou-imported-session-id")),
+      imported: Boolean(button.getAttribute("data-zuri-imported-session-id")),
       titled: Boolean(button.title),
     }, importLabels);
     if (button.textContent !== text) button.textContent = text;
@@ -155,7 +155,7 @@ export {};
   async function handleImportClick(event: MouseEvent) {
     if (!event.isTrusted) return;
     const target = event.target instanceof Element ? event.target : event.target instanceof Node ? event.target.parentElement : null;
-    const button = target?.closest?.("[data-qingzhou-session-import]");
+    const button = target?.closest?.("[data-zuri-session-import]");
     if (!button || !document.contains(button)) return;
     const script = getPayloadScript();
     if (!script) return;
@@ -204,10 +204,10 @@ export {};
 
   function getPayloadScript() {
     if (!isAllowedLocation()) return null;
-    const script = document.getElementById(QINGZHOU_SESSION_EXCHANGE_SCRIPT_ID);
+    const script = document.getElementById(ZURI_SESSION_EXCHANGE_SCRIPT_ID);
     if (!(script instanceof HTMLScriptElement) || script.type !== "application/json") return null;
     const header = String(script.textContent || "").slice(0, 256);
-    if (!/"format"\s*:\s*"qingzhou\.session"/u.test(header)) return null;
+    if (!/"format"\s*:\s*"zuri\.session"/u.test(header)) return null;
     if (!/"version"\s*:\s*1(?:\D|$)/u.test(header)) return null;
     return script;
   }
@@ -221,7 +221,7 @@ export {};
       ? "*"
       : location.origin;
     window.postMessage({
-      type: QINGZHOU_SESSION_EXPORT_RESULT,
+      type: ZURI_SESSION_EXPORT_RESULT,
       action,
       ...detail,
     }, targetOrigin);

@@ -87,7 +87,7 @@ function loadHumanGold(labelsDir, corpusDir, manifestPath, manifest) {
   if (!existsSync(labelsPath)) throw new Error(`gold labels have no labels directory: ${labelsDir}`);
   const labelManifest = json(labelManifestPath);
   const corpusBytes = readFileSync(manifestPath);
-  if (labelManifest.schema !== "qingzhou.article-extraction-manual-label-set.v1") {
+  if (labelManifest.schema !== "zuri.article-extraction-manual-label-set.v1") {
     throw new Error(`unsupported gold label schema: ${labelManifest.schema || "missing"}`);
   }
   if (labelManifest.method !== "human-reviewed-frozen-dom") {
@@ -134,7 +134,7 @@ function loadHumanGold(labelsDir, corpusDir, manifestPath, manifest) {
       }
     }
     const label = json(join(labelsPath, `${sample.id}.json`));
-    if (label.schema !== "qingzhou.article-extraction-manual-label.v1") {
+    if (label.schema !== "zuri.article-extraction-manual-label.v1") {
       throw new Error(`${sample.id} has unsupported gold label schema: ${label.schema || "missing"}`);
     }
     if (label.sampleId !== sample.id) throw new Error(`${sample.id} gold label has mismatched sampleId: ${label.sampleId || "missing"}`);
@@ -942,7 +942,7 @@ async function captureCore(config, outputDir, workers, screenshots, {
   }
 }
 
-const CAPTURE_CHECKPOINT_SCHEMA = "qingzhou.article-extraction-capture-checkpoint.v1";
+const CAPTURE_CHECKPOINT_SCHEMA = "zuri.article-extraction-capture-checkpoint.v1";
 
 function captureCheckpointIdentity(configPath, config, suite, screenshots) {
   return {
@@ -1075,7 +1075,7 @@ async function captureCommand() {
   const idWidth = Math.max(4, String(result.target).length);
   const replacementPlan = buildReplacementPlan(config);
   const manifest = {
-    schema: "qingzhou.article-extraction-corpus.v1",
+    schema: "zuri.article-extraction-corpus.v1",
     suite,
     capturedAt: new Date().toISOString(),
     config: relative(root, configPath),
@@ -1511,15 +1511,15 @@ async function initScripts({ defuddleBundle = "" } = {}) {
     join(extensionDir, "content/content-script.js"), upstream.marked,
   ];
   const prelude = `
-    globalThis.__qingzhouBenchmarkListener = null;
+    globalThis.__zuriBenchmarkListener = null;
     const runtime = {
-      getManifest: () => ({ name: "Qingzhou Benchmark", version: "0.0.0" }),
-      onMessage: { addListener(listener) { globalThis.__qingzhouBenchmarkListener = listener; } },
+      getManifest: () => ({ name: "Zuri Benchmark", version: "0.0.0" }),
+      onMessage: { addListener(listener) { globalThis.__zuriBenchmarkListener = listener; } },
       sendMessage: async () => ({ ok: true }),
     };
     Object.defineProperty(globalThis, "chrome", { configurable: true, value: { runtime } });
-    globalThis.__callQingzhouContent = (action, params = {}) => new Promise((resolve, reject) => {
-      const listener = globalThis.__qingzhouBenchmarkListener;
+    globalThis.__callZuriContent = (action, params = {}) => new Promise((resolve, reject) => {
+      const listener = globalThis.__zuriBenchmarkListener;
       if (typeof listener !== "function") return reject(new Error("content script listener is unavailable"));
       try { listener({ action, ...params }, {}, resolve); } catch (error) { reject(error); }
     });
@@ -1557,10 +1557,10 @@ async function assertBenchmarkRuntime(page, { defuddle = false, nativeDefuddleMa
     turndown: typeof globalThis.TurndownService,
     gfm: typeof globalThis.turndownPluginGfm?.gfm,
     marked: typeof globalThis.marked?.parse,
-    listener: typeof globalThis.__qingzhouBenchmarkListener,
-    internalCandidates: typeof globalThis.__qingzhouArticleBenchmark?.collect,
-    extractSourceText: typeof globalThis.__qingzhouArticleBenchmark?.lastExtractText,
-    productArticleSerializer: typeof globalThis.__qingzhouContentBenchmark?.serializeArticleContent,
+    listener: typeof globalThis.__zuriBenchmarkListener,
+    internalCandidates: typeof globalThis.__zuriArticleBenchmark?.collect,
+    extractSourceText: typeof globalThis.__zuriArticleBenchmark?.lastExtractText,
+    productArticleSerializer: typeof globalThis.__zuriContentBenchmark?.serializeArticleContent,
     defuddle: typeof globalThis.Defuddle,
     defuddleMarkdown: typeof globalThis.Defuddle?.createMarkdownContent,
   }));
@@ -1592,14 +1592,14 @@ async function createRunContext(browser, scripts) {
 }
 
 async function readCurrent(page, { source = "auto", maxChunks = 30 } = {}) {
-  await page.evaluate(() => globalThis.__qingzhouArticleBenchmark.clearLastExtractText());
+  await page.evaluate(() => globalThis.__zuriArticleBenchmark.clearLastExtractText());
   const chunks = [];
   const chunkEnds = [];
   let offset = 0;
   let first = null;
   let last = null;
   for (let index = 0; index < maxChunks; index += 1) {
-    const result = await page.evaluate(({ nextOffset, nextSource }) => globalThis.__callQingzhouContent("readArticle", {
+    const result = await page.evaluate(({ nextOffset, nextSource }) => globalThis.__callZuriContent("readArticle", {
       source: nextSource, offset: nextOffset, limit: 20_000,
     }), { nextOffset: offset, nextSource: source });
     if (result?.error) throw new Error(result.error);
@@ -1620,7 +1620,7 @@ async function readCurrent(page, { source = "auto", maxChunks = 30 } = {}) {
       return value;
     }
   }, markdown);
-  const sourceText = await page.evaluate(() => globalThis.__qingzhouArticleBenchmark.lastExtractText());
+  const sourceText = await page.evaluate(() => globalThis.__zuriArticleBenchmark.lastExtractText());
   return {
     ...first,
     markdown,
@@ -1634,12 +1634,12 @@ async function readCurrent(page, { source = "auto", maxChunks = 30 } = {}) {
 
 async function readInternalCandidates(page, { candidateProvenance = false } = {}) {
   const summary = await page.evaluate((provenance) => {
-    return globalThis.__qingzhouArticleBenchmark.collect(document, { provenance });
+    return globalThis.__zuriArticleBenchmark.collect(document, { provenance });
   }, candidateProvenance);
   if (candidateProvenance) {
     const provenance = summary?.diagnostics?.provenance;
     if (summary?.diagnostics?.candidateProvenanceEnabled !== true
-      || provenance?.schema !== "qingzhou.article-extraction-provenance.v1"
+      || provenance?.schema !== "zuri.article-extraction-provenance.v1"
       || !Array.isArray(provenance?.sourceTree?.elements)
       || !Array.isArray(provenance?.sourceTree?.textUnits)
       || !Array.isArray(provenance?.sourceTree?.treeElements)
@@ -1647,7 +1647,7 @@ async function readInternalCandidates(page, { candidateProvenance = false } = {}
       || !provenance?.candidates
       || typeof provenance.candidates !== "object"
       || INTERNAL_CANDIDATE_KEYS.some(key => (
-        provenance.candidates[key]?.schema !== "qingzhou.article-extraction-candidate-provenance.v1"
+        provenance.candidates[key]?.schema !== "zuri.article-extraction-candidate-provenance.v1"
       ))) {
       throw new Error("candidate provenance was requested but the extractor returned an incomplete provenance record");
     }
@@ -1661,12 +1661,12 @@ async function readInternalCandidates(page, { candidateProvenance = false } = {}
     let output = null;
     let error = descriptor.error || "";
     try {
-      await page.evaluate(key => globalThis.__qingzhouArticleBenchmark.force(key), descriptor.key);
+      await page.evaluate(key => globalThis.__zuriArticleBenchmark.force(key), descriptor.key);
       output = await readCurrent(page, { source: "article", maxChunks: INTERNAL_CANDIDATE_MAX_CHUNKS });
     } catch (nextError) {
       error = `${nextError?.name || "Error"}: ${nextError?.message || nextError}`;
     } finally {
-      await page.evaluate(() => globalThis.__qingzhouArticleBenchmark.clear()).catch(() => {});
+      await page.evaluate(() => globalThis.__zuriArticleBenchmark.clear()).catch(() => {});
     }
     candidates.push({ ...descriptor, error, output });
   }
@@ -1710,7 +1710,7 @@ async function readDefuddle(page, { markdownMode = "shared", url = "" } = {}) {
     const content = String(parsed?.content || "");
     const extracted = new DOMParser().parseFromString(content, "text/html");
     const text = extracted.body?.innerText || extracted.body?.textContent || "";
-    const markdownShared = globalThis.__qingzhouContentBenchmark.serializeArticleContent({ content, text });
+    const markdownShared = globalThis.__zuriContentBenchmark.serializeArticleContent({ content, text });
     const markdownNative = includeNativeMarkdown ? String(parsed?.contentMarkdown || "") : "";
     if (includeNativeMarkdown && !markdownNative && content.trim()) {
       throw new Error("Defuddle bundle does not provide native Markdown output");
@@ -1943,7 +1943,7 @@ function internalCandidateDiagnostics(
     };
   });
   return {
-    schema: "qingzhou.article-extraction-internal-candidates.v3",
+    schema: "zuri.article-extraction-internal-candidates.v3",
     id: sample.id,
     siteId: sample.siteId,
     type: sample.type,
@@ -2063,7 +2063,7 @@ function aggregateGold(items) {
 
 function crossExtractorOracleReport(samples, algorithms, gold) {
   const extractors = [
-    "qingzhou-current",
+    "zuri-current",
     "legacy-readability",
     "trafilatura-python",
     ...(algorithms["defuddle-shared"]
@@ -2150,7 +2150,7 @@ function crossExtractorOracleReport(samples, algorithms, gold) {
 }
 
 function internalCandidateOracleReport(samples, diagnostics, algorithms, gold) {
-  const baselineName = "qingzhou-current";
+  const baselineName = "zuri-current";
   const diagnosticsById = new Map(diagnostics.map(item => [item.id, item]));
   const baselineById = new Map((algorithms[baselineName] || []).map(item => [item.id, item]));
   const items = [];
@@ -2246,8 +2246,8 @@ async function runCommand() {
   const outputDir = resolve(option("--output", join(corpusDir, "run-current")));
   const workers = numberOption("--workers", 4);
   const candidateProvenance = flag("--candidate-provenance");
-  const upstream = resolve(option("--upstream", "/tmp/qingzhou-trafilatura-source"));
-  const python = option("--python", "/tmp/qingzhou-trafilatura-venv/bin/python");
+  const upstream = resolve(option("--upstream", "/tmp/zuri-trafilatura-source"));
+  const python = option("--python", "/tmp/zuri-trafilatura-venv/bin/python");
   const defuddleBundleValue = option("--defuddle-bundle");
   const defuddleBundle = defuddleBundleValue ? resolve(defuddleBundleValue) : "";
   if (defuddleBundle && !existsSync(defuddleBundle)) {
@@ -2292,7 +2292,7 @@ async function runCommand() {
       let internalCandidates = null;
       const browserAlgorithms = [
         "legacy-readability",
-        "qingzhou-current",
+        "zuri-current",
         ...(defuddleBundle ? ["defuddle"] : []),
       ];
       for (const algorithm of browserAlgorithms) {
@@ -2302,7 +2302,7 @@ async function runCommand() {
           const started = performance.now();
           const value = algorithm === "legacy-readability"
             ? await readLegacy(page)
-            : algorithm === "qingzhou-current"
+            : algorithm === "zuri-current"
               ? await readCurrent(page)
               : await readDefuddle(page, {
                 markdownMode: defuddleMarkdown,
@@ -2315,7 +2315,7 @@ async function runCommand() {
           } else {
             outputs[algorithm] = { ...value, elapsedMs };
           }
-          if (algorithm === "qingzhou-current") {
+          if (algorithm === "zuri-current") {
             try {
               internalCandidates = await readInternalCandidates(page, { candidateProvenance });
             } catch (error) {
@@ -2360,7 +2360,7 @@ async function runCommand() {
 
   const algorithms = {
     "legacy-readability": [],
-    "qingzhou-current": [],
+    "zuri-current": [],
     "trafilatura-python": [],
     ...(defuddleBundle && defuddleMarkdown === "both"
       ? { "defuddle-shared": [], "defuddle-native": [] }
@@ -2376,7 +2376,7 @@ async function runCommand() {
     const goldSplit = gold?.splitById.get(sample.id) || "";
     const browserAlgorithms = [
       "legacy-readability",
-      "qingzhou-current",
+      "zuri-current",
       ...(defuddleBundle && defuddleMarkdown === "both"
         ? ["defuddle-shared", "defuddle-native"]
         : defuddleBundle
@@ -2402,8 +2402,8 @@ async function runCommand() {
         outputChars: normalizedText(value.text).length,
         metrics: !label || goldStatus === "extract"
           ? scoreOutput(value.text, reference, productMarkdown, {
-            sourceText: name === "qingzhou-current" || name.startsWith("defuddle") ? value.sourceText : value.text,
-            chunkEnds: name === "qingzhou-current" ? value.chunkEnds : [],
+            sourceText: name === "zuri-current" || name.startsWith("defuddle") ? value.sourceText : value.text,
+            chunkEnds: name === "zuri-current" ? value.chunkEnds : [],
           })
           : null,
       });
@@ -2432,14 +2432,14 @@ async function runCommand() {
     const diagnostics = internalCandidateDiagnostics(
       sample,
       internalCandidates,
-      outputs["qingzhou-current"],
+      outputs["zuri-current"],
       reference,
       goldStatus,
       goldSplit,
       { candidateProvenance },
     );
     internalDiagnostics.push(diagnostics);
-    writeJson(join(outputDir, "outputs", "qingzhou-internal", `${sample.id}.json`), diagnostics);
+    writeJson(join(outputDir, "outputs", "zuri-internal", `${sample.id}.json`), diagnostics);
   }
   writeFileSync(
     join(outputDir, "internal-candidates.jsonl"),
@@ -2473,7 +2473,7 @@ async function runCommand() {
     };
   };
   const report = {
-    schema: gold ? "qingzhou.article-extraction-report.v4" : "qingzhou.article-extraction-report.v2",
+    schema: gold ? "zuri.article-extraction-report.v4" : "zuri.article-extraction-report.v2",
     suite: manifest.suite,
     corpus: {
       manifest: relative(root, manifestPath),
@@ -2555,9 +2555,9 @@ async function runCommand() {
       "",
       "## Cross-extractor ensemble oracle",
       "",
-      `Each page selects the highest-gold-F1 complete output from ${oracle.extractors.join(", ")}; exact ties prefer ${oracle.baseline}. This is an ensemble upper bound across end-to-end extractors, not evidence that an internal Qingzhou candidate reranker can reproduce it. Selection loss is the macro F1 gap from ${oracle.baseline} to this upper bound.`,
+      `Each page selects the highest-gold-F1 complete output from ${oracle.extractors.join(", ")}; exact ties prefer ${oracle.baseline}. This is an ensemble upper bound across end-to-end extractors, not evidence that an internal Zuri candidate reranker can reproduce it. Selection loss is the macro F1 gap from ${oracle.baseline} to this upper bound.`,
       "",
-      "| Group | Extract pages | Oracle F1 | Qingzhou F1 | Selection loss | Improvable pages | No extractor output | Selected extractors |",
+      "| Group | Extract pages | Oracle F1 | Zuri F1 | Selection loss | Improvable pages | No extractor output | Selected extractors |",
       "| --- | ---: | ---: | ---: | ---: | ---: | ---: | --- |",
     );
     for (const shard of ["base", "increment", "combined"]) {
@@ -2573,11 +2573,11 @@ async function runCommand() {
     const internalOracle = report.internalCandidateOracle;
     lines.push(
       "",
-      "## Qingzhou internal candidate oracle",
+      "## Zuri internal candidate oracle",
       "",
-      `Each page selects the highest-gold-F1 product-serialized output from ${internalOracle.candidates.join(", ")}; exact ties follow that order. Probe work is excluded from Qingzhou performance timing and candidate text is capped at ${internalOracle.contentCapChars} characters.`,
+      `Each page selects the highest-gold-F1 product-serialized output from ${internalOracle.candidates.join(", ")}; exact ties follow that order. Probe work is excluded from Zuri performance timing and candidate text is capped at ${internalOracle.contentCapChars} characters.`,
       "",
-      "| Group | Extract pages | Oracle F1 | Qingzhou F1 | Selection loss | Improvable pages | No candidate output | Selected candidates |",
+      "| Group | Extract pages | Oracle F1 | Zuri F1 | Selection loss | Improvable pages | No candidate output | Selected candidates |",
       "| --- | ---: | ---: | ---: | ---: | ---: | ---: | --- |",
     );
     for (const shard of ["base", "increment", "combined"]) {

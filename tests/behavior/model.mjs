@@ -120,7 +120,7 @@ export function classifyEvidence(target) {
   if (normalized === "background/mcp-tab-ownership-e2e.mjs") {
     return evidence(normalized, "automated", "e2e", "e2e:mcp-tab-ownership");
   }
-  if (["qingzhou-documents/e2e-check.py", "session-exchange/e2e-check.py"].includes(normalized)) {
+  if (["zuri-documents/e2e-check.py", "session-exchange/e2e-check.py"].includes(normalized)) {
     return evidence(normalized, "automated", "e2e", `e2e:python:${normalized}`);
   }
   if (normalized === "data-grid/browser-matrix.mjs") {
@@ -236,7 +236,7 @@ export function commandForGroup(group) {
   if (group.key === "unit") {
     return command(common, "node", [
       "--test",
-      `--test-concurrency=${clampNumber(process.env.QINGZHOU_TEST_CONCURRENCY, 1, 16, 4)}`,
+      `--test-concurrency=${clampNumber(process.env.ZURI_TEST_CONCURRENCY, 1, 16, 4)}`,
       "--test-reporter=spec",
       "--require=./tests/support/unit-bootstrap.cjs",
       ...paths,
@@ -250,8 +250,8 @@ export function commandForGroup(group) {
       "tests/config/playwright.config.mjs",
       ...paths,
     ], {
-      QINGZHOU_PLAYWRIGHT_WORKERS: String(clampNumber(
-        process.env.QINGZHOU_BEHAVIOR_PLAYWRIGHT_WORKERS,
+      ZURI_PLAYWRIGHT_WORKERS: String(clampNumber(
+        process.env.ZURI_BEHAVIOR_PLAYWRIGHT_WORKERS,
         1,
         4,
         1,
@@ -285,7 +285,7 @@ export function commandForGroup(group) {
     ]],
     "agent:model-regression": ["node", ["tests/background/agent-behavior-e2e.mjs", "--suite", "all"]],
     "probe:notification-return": ["node", ["tests/behavior/probes/notification-return.mjs"]],
-    "live:page-batch": ["node", ["tests/live/deepseek-extension.mjs"], { QINGZHOU_LIVE_CASES: "pageBatch" }],
+    "live:page-batch": ["node", ["tests/live/deepseek-extension.mjs"], { ZURI_LIVE_CASES: "pageBatch" }],
     "live:ax-viewport": ["node", ["tests/live/ax-viewport.mjs"]],
     "live:ax-viewport-public": ["node", ["tests/live/ax-viewport-public.mjs"]],
   };

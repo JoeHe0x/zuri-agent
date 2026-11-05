@@ -24,8 +24,8 @@ DEFAULT_OUTPUT_DIR = REPO_DIR / "dist" / "releases"
 DEFAULT_BUILD_SCRIPT = REPO_DIR / "scripts" / "build-extension.mjs"
 PACKAGE_ROOT = "zuri-agent-extension"
 # Keep equal to FIREFOX_GECKO_ID in scripts/firefox-manifest.mjs.
-FIREFOX_GECKO_ID = "qz-browser-agent@heleifz.github.io"
-FIREFOX_PACKAGE_NAME = "qz-browser-agent-firefox"
+FIREFOX_GECKO_ID = "zuri-agent@heleifz.github.io"
+FIREFOX_PACKAGE_NAME = "zuri-agent-firefox"
 FIREFOX_KEPT_PERMISSIONS = ("webNavigation", "webRequest", "webRequestBlocking")
 FIREFOX_DATA_COLLECTION_REQUIRED = ("websiteContent", "browsingActivity")
 RELEASE_NOTICES = ("LICENSE", "NOTICE", "THIRD_PARTY_NOTICES.md")
@@ -69,7 +69,7 @@ def main() -> int:
             extension_dir = REPO_DIR / "src"
             source_label = f"git {args.git_ref} ({git_commit[:12]})"
         else:
-            source_tmp = tempfile.TemporaryDirectory(prefix="qingzhou-release-")
+            source_tmp = tempfile.TemporaryDirectory(prefix="zuri-release-")
             source_dir = args.extension_dir.resolve()
             extension_dir = copy_extension_worktree(source_dir, Path(source_tmp.name))
             source_label = f"worktree {source_dir}"
@@ -119,7 +119,7 @@ def main() -> int:
             try:
                 validate_webstore_package(output.package)
                 # Audit the actual upload bytes, not just the pre-ZIP staging directory.
-                with tempfile.TemporaryDirectory(prefix="qingzhou-store-audit-") as audit_tmp:
+                with tempfile.TemporaryDirectory(prefix="zuri-store-audit-") as audit_tmp:
                     with zipfile.ZipFile(output.package) as archive:
                         archive.extractall(audit_tmp)
                     assert_no_remote_code(Path(audit_tmp))
@@ -198,7 +198,7 @@ def main() -> int:
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Build a local qz extension package from an isolated source snapshot.",
+        description="Build a local zuri extension package from an isolated source snapshot.",
     )
     parser.add_argument("--version", required=True, help="Release version, for example 0.1.0.")
     parser.add_argument("--target", choices=["manual", "webstore", "firefox"], default="manual",
@@ -212,7 +212,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--git-ref", default="HEAD", help="Git ref to package when --source=git.")
     parser.add_argument("--extension-dir", type=Path, default=DEFAULT_EXTENSION_DIR)
     parser.add_argument("--output-dir", type=Path, default=DEFAULT_OUTPUT_DIR)
-    parser.add_argument("--title", default="", help="Markdown title. Defaults to qz <version>.")
+    parser.add_argument("--title", default="", help="Markdown title. Defaults to zuri <version>.")
     parser.add_argument("--summary", default="", help="One-line release summary.")
     parser.add_argument("--feature", dest="features", action="append", default=[], help="Feature bullet. Can repeat.")
     parser.add_argument("--notes", default="", help="Additional markdown appended to README.")
@@ -260,9 +260,9 @@ def load_manifest(extension_dir: Path) -> dict:
             raise SystemExit(f"{manifest_path} has invalid default locale messages: {error}") from error
     brand_text = (name + " " + description).lower()
     # Keep localized and historical names; the short international name must be a whole word.
-    known_brand = any(brand in brand_text for brand in ("轻舟", "輕舟", "軽舟", "qingzhou", "zuri")) or re.search(r"\bqz\b", brand_text)
+    known_brand = any(brand in brand_text for brand in ("Zuri", "輕舟", "軽舟", "zuri", "zuri")) or re.search(r"\bqz\b", brand_text)
     if data.get("manifest_version") != 3 or not known_brand:
-        raise SystemExit(f"{manifest_path} does not look like the qz extension manifest")
+        raise SystemExit(f"{manifest_path} does not look like the zuri extension manifest")
     return data
 
 
@@ -309,7 +309,7 @@ def assert_isolated_prepared_source(origin_repo: Path) -> None:
 
 def run_commit_publisher(args: argparse.Namespace) -> int:
     commit = resolve_git_commit(args.git_ref)
-    with tempfile.TemporaryDirectory(prefix="qingzhou-release-") as temporary:
+    with tempfile.TemporaryDirectory(prefix="zuri-release-") as temporary:
         snapshot = Path(temporary)
         export_release_from_git(commit, snapshot)
         npm = shutil.which("npm")
@@ -482,7 +482,7 @@ def collect_debug_files(extension_dir: Path) -> dict[str, bytes]:
     files: dict[str, bytes] = {}
     for path in sorted(extension_dir.rglob("*.map")):
         relative = path.relative_to(extension_dir)
-        if relative.parts[0] == ".qingzhou-debug":
+        if relative.parts[0] == ".zuri-debug":
             continue
         runtime = path.with_suffix("")
         if not runtime.is_file():
@@ -494,13 +494,13 @@ def collect_debug_files(extension_dir: Path) -> dict[str, bytes]:
             runtime.write_text(text.rstrip()[:-len(directive)].rstrip() + "\n", encoding="utf-8")
         files[f"maps/{relative.as_posix()}"] = path.read_bytes()
         path.unlink()
-    embedded = extension_dir / ".qingzhou-debug"
+    embedded = extension_dir / ".zuri-debug"
     if embedded.exists():
         for path in sorted(embedded.rglob("*")):
             if path.is_file():
                 files[f"debug/{path.relative_to(embedded).as_posix()}"] = path.read_bytes()
         shutil.rmtree(embedded)
-    build_manifest = extension_dir / ".qingzhou-build.json"
+    build_manifest = extension_dir / ".zuri-build.json"
     if build_manifest.is_file():
         files["build.json"] = build_manifest.read_bytes()
         build_manifest.unlink()
@@ -624,7 +624,7 @@ def validate_webstore_package(path: Path) -> None:
                 raise ValueError(f"invalid Web Store ZIP path: {name}")
             if name.endswith("/manifest.json"):
                 raise ValueError(f"extra manifest in Web Store ZIP: {name}")
-            if name.endswith((".map", ".debug.zip")) or any(part.startswith((".qingzhou-", ".env")) for part in name.split("/")):
+            if name.endswith((".map", ".debug.zip")) or any(part.startswith((".zuri-", ".env")) for part in name.split("/")):
                 raise ValueError(f"development file in Web Store ZIP: {name}")
         if "manifest.json" not in files:
             raise ValueError("Web Store ZIP requires manifest.json at its root")
@@ -686,7 +686,7 @@ def validate_firefox_package(path: Path) -> None:
             if name.endswith("/manifest.json"):
                 raise ValueError(f"extra manifest in Firefox ZIP: {name}")
             if name.endswith((".map", ".ts", ".tsx", ".debug.zip")) or any(
-                part.startswith((".qingzhou-", ".env")) for part in name.split("/")
+                part.startswith((".zuri-", ".env")) for part in name.split("/")
             ):
                 raise ValueError(f"development file in Firefox ZIP: {name}")
         if "manifest.json" not in files:
@@ -760,8 +760,8 @@ def build_readme(
     features: list[str],
     notes: str,
 ) -> str:
-    final_title = title.strip() or f"qz {version}"
-    final_summary = summary.strip() or f"qz {version} release."
+    final_title = title.strip() or f"zuri {version}"
+    final_summary = summary.strip() or f"zuri {version} release."
     final_features = [item.strip() for item in features if item.strip()]
     lines = [
         f"# {final_title}",

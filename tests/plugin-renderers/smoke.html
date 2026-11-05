@@ -492,7 +492,7 @@
       assertSmoke(Boolean(inferred.querySelector(".tool-data-table")), "MCP inferred renderer: a single flat record array uses the shared table");
       assertSmoke(inferred.textContent.includes("G3026"), "MCP inferred renderer: table contains structured MCP rows");
 
-      const encodedUrl = "https://www.baidu.com/s?wd=%E6%9B%B2%E9%99%A2%E9%A3%8E%E8%8D%B7&src=qingzhou";
+      const encodedUrl = "https://www.baidu.com/s?wd=%E6%9B%B2%E9%99%A2%E9%A3%8E%E8%8D%B7&src=zuri";
       const textFallback = renderCase("mcp_text_fallback", {
         content: [{ type: "text", text: `2026-07-11 ${encodedUrl}` }],
       });

@@ -37,7 +37,7 @@ test.describe("historical message edit viewport stability", () => {
         runId: "historical-edit-tail-run",
       });
 
-      await window.qingzhouConversationBenchmark.runSnapshotRender({ sessionId, transcript });
+      await window.zuriConversationBenchmark.runSnapshotRender({ sessionId, transcript });
       await frames(4);
 
       const messages = document.querySelector("#messages");

@@ -18,12 +18,12 @@ test('external origins, suffix impersonation and unsupported protocols cannot im
 });
 test('official GitHub Pages can import only under the project path', () => {
   assert.deepEqual(SESSION_EXCHANGE_HTTPS_ALLOWLIST, [
-    { hostname: 'alibaba.github.io', pathnamePrefix: '/qz-browser-agent/' },
+    { hostname: 'alibaba.github.io', pathnamePrefix: '/zuri-agent/' },
   ]);
   for (const value of [
     'https://alibaba.github.io/qz-browser-agent/examples/travel/',
     'https://alibaba.github.io/qz-browser-agent/',
-    'https://ALIBABA.GITHUB.IO/qz-browser-agent/examples/travel/?lang=zh-CN#top',
+    'https://ALIBABA.GITHUB.IO/zuri-agent/examples/travel/?lang=zh-CN#top',
   ]) {
     assert.equal(isAllowedSessionExchangeLocation(new URL(value)), true, value);
     assert.equal(isAllowedSessionExportSource(value), true, value);
@@ -32,12 +32,12 @@ test('official GitHub Pages can import only under the project path', () => {
     'https://alibaba.github.io/other-repo/',
     'https://alibaba.github.io/qz-browser-agent-evil/',
     'http://alibaba.github.io/qz-browser-agent/',
-    'https://evil.alibaba.github.io.example.com/qz-browser-agent/',
+    'https://evil.alibaba.github.io.example.com/zuri-agent/',
     'https://x.alibaba.github.io/qz-browser-agent/',
     'https://alibaba.github.io/qz-browser-agent',
     'https://alibaba.github.io/qz-browser-agent/../other-repo/',
-    'https://alibaba.github.io.evil.com/qz-browser-agent/',
-    'https://alibaba.github.io/QZ-browser-agent/',
+    'https://alibaba.github.io.evil.com/zuri-agent/',
+    'https://alibaba.github.io/ZURI-browser-agent/',
   ]) {
     assert.equal(isAllowedSessionExchangeLocation(new URL(value)), false, value);
     assert.equal(isAllowedSessionExportSource(value), false, value);

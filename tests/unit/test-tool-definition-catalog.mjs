@@ -7,7 +7,7 @@ import {
   formatActionLabel,
   formatToolActionTitle,
 } from "../../src/shared/tools/tool-metadata.js";
-import { QINGZHOU_DOCUMENT_TOOL_SPECS } from "../../src/capabilities/documents/skill-contract.js";
+import { ZURI_DOCUMENT_TOOL_SPECS } from "../../src/capabilities/documents/skill-contract.js";
 import {
   discoverSkillManifests,
   normalizeSkillManifest,
@@ -16,8 +16,8 @@ import {
 } from "../../src/shared/skills/skill-manifest.js";
 import { listBuiltinSkills } from "../../src/shared/skills/builtin-skills.js";
 import {
-  QINGZHOU_SKILL_FORMAT,
-  QINGZHOU_SKILL_SCHEMA_VERSION,
+  ZURI_SKILL_FORMAT,
+  ZURI_SKILL_SCHEMA_VERSION,
 } from "../../src/shared/skills/skill-utils.js";
 import {
   createSessionRecord,
@@ -137,9 +137,9 @@ function assertSharedActionLabels() {
 
 function assertBuiltinCapabilitiesInheritPresentation() {
   const discovered = discoverSkillManifests(listBuiltinSkills());
-  const documents = discovered.plugins.find(plugin => plugin.id === "qingzhou-documents");
-  const management = discovered.plugins.find(plugin => plugin.id === "qingzhou-management");
-  const mcp = discovered.plugins.find(plugin => plugin.id === "qingzhou-mcp");
+  const documents = discovered.plugins.find(plugin => plugin.id === "zuri-documents");
+  const management = discovered.plugins.find(plugin => plugin.id === "zuri-management");
+  const mcp = discovered.plugins.find(plugin => plugin.id === "zuri-mcp");
   assert.ok(documents);
   assert.ok(management);
   assert.ok(mcp);
@@ -180,11 +180,11 @@ function assertBuiltinCapabilitiesInheritPresentation() {
   assert.equal(isPageContextToolName({ name: "wait" }), false);
   assert.equal(isPageContextToolName({ name: "wait_for_user" }), false);
 
-  for (const skill of listBuiltinSkills().filter(item => ["qingzhou-documents", "qingzhou-management", "qingzhou-mcp"].includes(item.name))) {
+  for (const skill of listBuiltinSkills().filter(item => ["zuri-documents", "zuri-management", "zuri-mcp"].includes(item.name))) {
     const manifest = JSON.parse(skill.resources.find(resource => resource.path === "plugin.json").content);
     assert.equal(manifest.tools.every(tool => !Object.hasOwn(tool, "title")), true, `${skill.name} titles should come from capability metadata`);
   }
-  assert.equal(Object.values(QINGZHOU_DOCUMENT_TOOL_SPECS).every(spec => !Object.hasOwn(spec, "title")), true);
+  assert.equal(Object.values(ZURI_DOCUMENT_TOOL_SPECS).every(spec => !Object.hasOwn(spec, "title")), true);
 }
 
 function assertIdentityProtocolUsesOneCodec() {
@@ -231,8 +231,8 @@ function assertUntrustedPluginsCannotClaimCoreCapabilities() {
     }],
   }, {
     name: "third-party-skill",
-    format: QINGZHOU_SKILL_FORMAT,
-    schemaVersion: QINGZHOU_SKILL_SCHEMA_VERSION,
+    format: ZURI_SKILL_FORMAT,
+    schemaVersion: ZURI_SKILL_SCHEMA_VERSION,
     scope: "global",
     source: "user",
     builtin: false,
@@ -265,7 +265,7 @@ function assertToolIdentitySurvivesTranscriptRoundTrip() {
     runId: "run_identity",
     spanId: "span_identity",
     toolCallId: "call_identity",
-    toolName: "qingzhou_documents__document_create",
+    toolName: "zuri_documents__document_create",
     ...identity,
     args: { format: "pdf" },
   });
@@ -274,7 +274,7 @@ function assertToolIdentitySurvivesTranscriptRoundTrip() {
     runId: "run_identity",
     spanId: "span_identity",
     toolCallId: "call_identity",
-    toolName: "qingzhou_documents__document_create",
+    toolName: "zuri_documents__document_create",
     statusText: "生成中",
   });
   assert.equal(state.transcript.find(entry => entry.type === "tool").capabilityId, "document_create");
@@ -284,7 +284,7 @@ function assertToolIdentitySurvivesTranscriptRoundTrip() {
     runId: "run_identity",
     spanId: "span_identity",
     toolCallId: "call_identity",
-    toolName: "qingzhou_documents__document_create",
+    toolName: "zuri_documents__document_create",
     ...identity,
     args: { format: "pdf" },
     result: { artifactId: "artifact_1", filename: "result.pdf" },
@@ -306,7 +306,7 @@ function assertPresentationHasNoRuntimeAliasSpecialCases() {
     "src/shared/session/session-list-summary.js",
   ]) {
     const text = source(file);
-    assert.doesNotMatch(text, /qingzhou_documents__|qingzhou_management__|qingzhou_mcp__/i, `${file} should resolve wrapped tools through capability metadata`);
+    assert.doesNotMatch(text, /zuri_documents__|zuri_management__|zuri_mcp__/i, `${file} should resolve wrapped tools through capability metadata`);
     assert.doesNotMatch(text, /getDocumentToolCoreName/, `${file} should not contain document-specific alias normalization`);
   }
   const renderer = source("src/sidepanel/tools/tool-renderer.ts");

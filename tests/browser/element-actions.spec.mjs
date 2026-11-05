@@ -71,7 +71,7 @@ async function createHarness(mode, launchOptions = {}) {
     } else res.end(html);
   });
   await new Promise(resolve => server.listen(0, "127.0.0.1", resolve));
-  const directory = await mkdtemp(join(tmpdir(), "qingzhou-element-actions-"));
+  const directory = await mkdtemp(join(tmpdir(), "zuri-element-actions-"));
   let browser;
   const close = async () => {
     await browser?.close(); server.closeAllConnections();
@@ -251,7 +251,7 @@ for (const mode of ["desktop", "mobile"]) {
     const h = await createHarness(mode);
     const events = (state, id, type) => state.events.filter(event => event.id === id && event.type === type);
     try {
-      for (const [id, value] of [["text", "订单🙂"], ["textarea", "第一行\n第二行🙂  "], ["textarea", ""], ["controlled", "Accepted-轻舟"]]) {
+      for (const [id, value] of [["text", "订单🙂"], ["textarea", "第一行\n第二行🙂  "], ["textarea", ""], ["controlled", "Accepted-Zuri"]]) {
         const filled = await h.act(id, "fill", { value });
         expect(filled, JSON.stringify(filled)).toMatchObject({ filled: true, value, submitDispatched: false, method: "cdp" });
         expect(filled).not.toHaveProperty("submitted");
@@ -260,7 +260,7 @@ for (const mode of ["desktop", "mobile"]) {
         expect(events(state, id, "input").length).toBeGreaterThan(0);
         expect(events(state, id, "input").every(event => event.trusted)).toBe(true);
       }
-      expect((await h.state()).acceptedValue).toBe("Accepted-轻舟");
+      expect((await h.state()).acceptedValue).toBe("Accepted-Zuri");
       const spacedText = "  keep  spaces🙂  ";
       const spaced = await h.act("rich", "fill", { value: spacedText });
       expect(spaced).toMatchObject({ filled: true, method: "cdp" });
@@ -424,7 +424,7 @@ test("a click that navigates is not reported as undelivered input", async () => 
       globalThis.receiptReads = 0;
       chrome.scripting.executeScript = async options => {
         const source = String(options?.func || "");
-        if (!source.includes("__qzInputReceipts") || options.args?.[1] !== false) return original(options);
+        if (!source.includes("__zuriInputReceipts") || options.args?.[1] !== false) return original(options);
         // A committed navigation leaves this read on a document that was never armed.
         receiptReads += 1;
         const root = globalThis;
@@ -619,7 +619,7 @@ test("a confirmed miss is one click and an unknown receipt still presses", async
       globalThis.receiptMode = "zero";
       chrome.scripting.executeScript = async options => {
         const source = String(options?.func || "");
-        if (source.includes("__qzInputReceipts") && options.args?.[1] === false) {
+        if (source.includes("__zuriInputReceipts") && options.args?.[1] === false) {
           const real = await original(options);
           const result = receiptMode === "zero" ? 0 : null;
           return real.map(frame => ({ ...frame, result }));

@@ -1,5 +1,5 @@
 {
-  "schema": "qingzhou.article-extraction-final-corpus-policy.v1",
+  "schema": "zuri.article-extraction-final-corpus-policy.v1",
   "scope": "chinese-realworld-1500-v3",
   "exactSamples": 1500,
   "exactBaseSamples": 500,

@@ -8,6 +8,6 @@
   "browser-permissions.name.history": "ब्राउज़िंग इतिहास",
   "browser-permissions.name.desktopCapture": "स्क्रीन रिकॉर्डिंग",
   "browser-permissions.name.downloads.open": "डाउनलोड की गई फ़ाइलें खोलना",
-  "browser-permissions.required": "qz के साइड पैनल में «{permission}» की अनुमति दें और फिर कोशिश करें।",
+  "browser-permissions.required": "zuri के साइड पैनल में «{permission}» की अनुमति दें और फिर कोशिश करें।",
   "browser-permissions.denied": "«{permission}» की अनुमति नहीं मिली, इसलिए कार्रवाई रद्द कर दी गई। अनुमति देने के लिए फिर से कोशिश करें।"
 }

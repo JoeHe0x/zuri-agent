@@ -65,7 +65,7 @@ const html = `<!doctype html><meta charset="utf-8"><title>Direct node</title>
 async function createHarness({ reloadFixture = false, secondary = false } = {}) {
   const server = createServer((_req, res) => { res.writeHead(200, { "Content-Type": "text/html" }); res.end(html); });
   await new Promise(resolve => server.listen(0, "127.0.0.1", resolve));
-  const directory = await mkdtemp(join(tmpdir(), "qingzhou-direct-node-"));
+  const directory = await mkdtemp(join(tmpdir(), "zuri-direct-node-"));
   let browser;
   const close = async () => {
     await browser?.close();
@@ -86,7 +86,7 @@ async function createHarness({ reloadFixture = false, secondary = false } = {}) 
     if (reloadFixture) {
       // A prior Content contract can answer ping without exposing the node bridge.
       manifest.version = "0.0.1";
-      await writeFile(contentPath, `${currentContent}\n;globalThis.__qzInvoke = undefined;`);
+      await writeFile(contentPath, `${currentContent}\n;globalThis.__zuriInvoke = undefined;`);
     }
     await writeFile(manifestPath, JSON.stringify(manifest));
     const extensions = [extension];
@@ -204,7 +204,7 @@ async function createHarness({ reloadFixture = false, secondary = false } = {}) 
             return await Promise.all(contexts.filter(context => context.origin.startsWith("chrome-extension://")).map(async context => {
               const result = await chrome.debugger.sendCommand(target, "Runtime.evaluate", {
                 contextId: context.id, returnByValue: true,
-                expression: "({ extensionId: chrome.runtime?.id || '', bridge: typeof globalThis.__qzInvoke === 'function' })",
+                expression: "({ extensionId: chrome.runtime?.id || '', bridge: typeof globalThis.__zuriInvoke === 'function' })",
               });
               return { contextId: context.id, origin: context.origin, ...result.result.value };
             }));
@@ -214,7 +214,7 @@ async function createHarness({ reloadFixture = false, secondary = false } = {}) 
       async removeBridge() {
         return worker.evaluate(async () => {
           const tabId = elementHarness.tabId();
-          await chrome.scripting.executeScript({ target: { tabId }, func: () => { delete globalThis.__qzInvoke; } });
+          await chrome.scripting.executeScript({ target: { tabId }, func: () => { delete globalThis.__zuriInvoke; } });
           return { ping: await chrome.tabs.sendMessage(tabId, { action: "ping" }), injections: elementHarness.injections() };
         });
       },
@@ -730,18 +730,18 @@ test("first console read after a UID click keeps earlier logs and the click exce
   const h = await createHarness();
   try {
     await h.page.evaluate(() => {
-      console.log("qz-before-uid");
-      document.querySelector("#save").addEventListener("click", () => { throw new Error("qz-uid-click-error"); });
+      console.log("zuri-before-uid");
+      document.querySelector("#save").addEventListener("click", () => { throw new Error("zuri-uid-click-error"); });
     });
     const target = targets((await tree(h)).snapshot, "button", "Save text")[0];
     const exception = h.page.waitForEvent("pageerror");
     expect(await h.call("act_on_element", { target, action: "click" })).not.toHaveProperty("code");
-    expect((await exception).message).toContain("qz-uid-click-error");
+    expect((await exception).message).toContain("zuri-uid-click-error");
     for (let read = 0; read < 2; read++) {
-      const result = await h.call("read_console_messages", { textPattern: "qz-(before-uid|uid-click-error)" });
+      const result = await h.call("read_console_messages", { textPattern: "zuri-(before-uid|uid-click-error)" });
       expect(result, JSON.stringify(result)).not.toHaveProperty("code");
-      expect(result.results.filter(item => item.text === "qz-before-uid")).toHaveLength(1);
-      expect(result.results.filter(item => item.type === "exception" && item.text.includes("qz-uid-click-error"))).toHaveLength(1);
+      expect(result.results.filter(item => item.text === "zuri-before-uid")).toHaveLength(1);
+      expect(result.results.filter(item => item.type === "exception" && item.text.includes("zuri-uid-click-error"))).toHaveLength(1);
     }
     expect((await h.state()).hits.save).toBe(1);
   } finally { await h.close(); }

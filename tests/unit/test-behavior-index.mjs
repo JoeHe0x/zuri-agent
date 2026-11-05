@@ -20,7 +20,7 @@ assert.ok(plan.commands.length < plan.evidenceItems.length / 2, "shared evidence
 assert.equal(plan.evidenceItems.some(item => item.mode === "unknown"), false, "every evidence path needs an execution policy");
 const browserCommand = plan.commands.find(item => item.key === "browser");
 assert.equal(
-  browserCommand?.env?.QINGZHOU_PLAYWRIGHT_WORKERS,
+  browserCommand?.env?.ZURI_PLAYWRIGHT_WORKERS,
   "1",
   "behavior browser evidence should default to deterministic single-worker execution",
 );
@@ -79,7 +79,7 @@ assert.equal(detectSkippedCommandOutput("2 skipped, 15 passed"), false, "test-le
 assert.equal(detectSkippedCommandOutput('{"stage":"done","ok":true}'), false);
 
 // Documentation language must not change report fields, coverage filters, or executed evidence.
-const fixtureRoot = mkdtempSync(join(tmpdir(), "qz-behavior-index-"));
+const fixtureRoot = mkdtempSync(join(tmpdir(), "zuri-behavior-index-"));
 try {
   mkdirSync(join(fixtureRoot, "unit"));
   writeFileSync(join(fixtureRoot, "unit/test-example.mjs"), "// Synthetic evidence path.\n");

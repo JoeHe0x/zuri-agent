@@ -19,10 +19,10 @@ test("CSS-only fixture arguments remain compatible and each application can over
 });
 
 test("each server serves its frozen control markup instead of sharing the mutable repository fixture", async t => {
-  const root = await mkdtemp(join(tmpdir(), "qingzhou-controls-comparison-"));
+  const root = await mkdtemp(join(tmpdir(), "zuri-controls-comparison-"));
   t.after(() => rm(root, { recursive: true, force: true }));
   const referenceHtml = '<main class="data-toolbar">Original control</main>';
-  const candidateHtml = '<main class="data-toolbar qz:flex">Candidate control</main>';
+  const candidateHtml = '<main class="data-toolbar zuri:flex">Candidate control</main>';
   const servers = [];
   try {
     for (const controlsHtml of [referenceHtml, candidateHtml]) {
@@ -35,17 +35,17 @@ test("each server serves its frozen control markup instead of sharing the mutabl
 
 test("real application markup and module class changes are detected without a pixel tolerance", async t => {
   if (!imageMagickCommandAvailable()) return t.skip(MISSING_IMAGEMAGICK_REASON);
-  const directory = await mkdtemp(join(tmpdir(), "qingzhou-css-comparison-"));
+  const directory = await mkdtemp(join(tmpdir(), "zuri-css-comparison-"));
   t.after(() => rm(directory, { recursive: true, force: true }));
   const stylesheet = String.raw`body { margin: 0; background: white; } #app { width: 180px; height: 90px; background: #d4e4f4; }
     #content { width: 80px; height: 20px; background: #476783; }
-    .qz\:p-4 { padding: 16px; } #app.qz\:bg-red { background: red; }`;
+    .zuri\:p-4 { padding: 16px; } #app.zuri\:bg-red { background: red; }`;
   const captures = {};
   const browser = await chromium.launch();
   t.after(() => browser.close());
   for (const [name, htmlClass, scriptClass] of [
-    ["reference", "", ""], ["equivalent", "qz:unused", ""],
-    ["markup-layout", "qz:p-4", ""], ["module-color", "", "qz:bg-red"],
+    ["reference", "", ""], ["equivalent", "zuri:unused", ""],
+    ["markup-layout", "zuri:p-4", ""], ["module-color", "", "zuri:bg-red"],
   ]) {
     const fixtureDir = join(directory, name);
     await mkdir(join(fixtureDir, "sidepanel"), { recursive: true });

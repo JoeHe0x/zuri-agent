@@ -33,7 +33,7 @@ export function createSessionExchangeBridge({
     const payload = normalizeSessionExchangePayload(message.payload);
     const windowId = sender?.tab?.windowId;
     openSidePanel(sender?.tab?.windowId).catch(error => {
-      logger.debug?.("[轻舟] open side panel for exported session failed:", errorMessage(error));
+      logger.debug?.("[Zuri] open side panel for exported session failed:", errorMessage(error));
     });
     const result = await importSessionExchange(payload, {
       sourceWindowId: windowId,
@@ -52,7 +52,7 @@ export function createSessionExchangeBridge({
   function revealForImport(sender: chrome.runtime.MessageSender = {}) {
     // sidePanel.open has to start on this message turn so the click stays a user gesture.
     openSidePanel(sender?.tab?.windowId).catch(error => {
-      logger.debug?.("[轻舟] open side panel for session import failed:", errorMessage(error));
+      logger.debug?.("[Zuri] open side panel for session import failed:", errorMessage(error));
     });
     return { needsConsent: !consentAccepted() };
   }

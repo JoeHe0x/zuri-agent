@@ -20,13 +20,13 @@ for (const colorScheme of ["light", "dark"]) {
       await page.goto("/__test_health");
       await page.evaluate(() => {
         localStorage.clear();
-        localStorage.setItem("qingzhou_onboarding_v2", JSON.stringify({ status: "dismissed" }));
+        localStorage.setItem("zuri_onboarding_v2", JSON.stringify({ status: "dismissed" }));
       });
       await page.addInitScript(installBenchmarkChromeStub, {
         localStorage: { _sessions: sessions },
       });
       await page.goto("/extension/sidepanel/sidepanel.html", { waitUntil: "domcontentloaded" });
-      await page.waitForFunction(() => Boolean(window.qingzhouConversationBenchmark));
+      await page.waitForFunction(() => Boolean(window.zuriConversationBenchmark));
 
       await page.locator('button.tab-btn[data-tab="sessions"]').click();
       await expect(page.locator("#sessions-list")).toContainText("滚动条测试任务 01");
@@ -72,13 +72,13 @@ for (const colorScheme of ["light", "dark"]) {
 
       const generic = await page.evaluate(() => {
         const element = document.createElement("div");
-        element.className = "qz-scroll";
+        element.className = "zuri-scroll";
         document.body.append(element);
         const read = () => ({ width: getComputedStyle(element, "::-webkit-scrollbar").width,
           radius: getComputedStyle(element, "::-webkit-scrollbar-thumb").borderRadius,
           scrollbarWidth: getComputedStyle(element).scrollbarWidth });
         const quiet = read();
-        element.classList.add("qz-scroll--native");
+        element.classList.add("zuri-scroll--native");
         const native = read();
         element.remove();
         return { quiet, native };
@@ -98,7 +98,7 @@ for (const colorScheme of ["light", "dark"]) {
         await page.locator(`.data-table-select[data-table="${table}"]`).click();
         await expect(page.locator("#data-table-search")).toHaveValue(table);
         await expect.poll(() => page.locator("#data-preview").evaluate(element => ({
-          grid: element.classList.contains("grid-mode"), native: element.classList.contains("qz-scroll--native"),
+          grid: element.classList.contains("grid-mode"), native: element.classList.contains("zuri-scroll--native"),
           scrollbarWidth: getComputedStyle(element).scrollbarWidth,
         }))).toEqual({ grid: native, native, scrollbarWidth: native ? "auto" : "thin" });
       }

@@ -59,7 +59,7 @@ export async function independentChrome({ profile, extensionPath, name, outputDi
     await rm(join(profile, "DevToolsActivePort"), { force: true });
     const netLog = join(outputDirectory, `${name}-${++serial}-netlog.json`);
     const executable = process.env.CHROME_EXECUTABLE || chromium.executablePath();
-    const noSandbox = process.platform === "linux" && (process.getuid?.() === 0 || process.env.QZ_TEST_NO_SANDBOX === "1");
+    const noSandbox = process.platform === "linux" && (process.getuid?.() === 0 || process.env.ZURI_TEST_NO_SANDBOX === "1");
     child = spawn(executable, [
       `--user-data-dir=${profile}`, ...(headless ? ["--headless=new"] : []), "--no-first-run", "--no-default-browser-check",
       "--remote-debugging-address=127.0.0.1", "--remote-debugging-port=0",
@@ -91,7 +91,7 @@ export async function independentChrome({ profile, extensionPath, name, outputDi
   };
   const closeExtensionPages = async () => {
     for (const page of context?.pages() || []) {
-      if (page.url().startsWith("chrome-extension://") || page.url().includes("/qz-connect")) await page.close();
+      if (page.url().startsWith("chrome-extension://") || page.url().includes("/zuri-connect")) await page.close();
     }
   };
   try { await start(); } catch (error) { await stop(); throw error; }

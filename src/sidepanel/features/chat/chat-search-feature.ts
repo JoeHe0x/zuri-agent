@@ -218,7 +218,7 @@ function stripMarkdownMathFromSearchText(text = "") {
   const source = String(text || "");
   if (!source) return "";
   try {
-    return extractMarkdownMathPlaceholders(source).markdown.replace(/@@QZ_MATH_\d+@@/g, " ");
+    return extractMarkdownMathPlaceholders(source).markdown.replace(/@@ZURI_MATH_\d+@@/g, " ");
   } catch (_err) {
     return source;
   }

@@ -39,7 +39,7 @@ const SYSTEM_PROMPT = `你是无损 HTML 转 Markdown 转写器，不是正文�
 8. 除 approvedHtml 中真正的代码块外，不得使用四空格缩进或代码围栏。逐字保留所有可见字符（包括标点、编号、乱码与重复项）。如果收到 previousValidationError，必须针对它修复，不能原样返回已被判错的 baselineMarkdown。
 
 只返回 JSON 对象：
-{"schema":"qingzhou.gold-markdown-response.v1","sampleId":"原样返回","markdown":"完整 Markdown","warnings":[]}
+{"schema":"zuri.gold-markdown-response.v1","sampleId":"原样返回","markdown":"完整 Markdown","warnings":[]}
 
 即使输入很长，也必须返回完整结果，不能使用省略号、truncated、略、其余同上等缩写。`;
 
@@ -814,10 +814,10 @@ function qualityRank(quality) {
 async function runtimeScripts() {
   const extensionDir = await ensureTestExtension();
   const prelude = `
-    globalThis.__qingzhouBenchmarkListener = null;
+    globalThis.__zuriBenchmarkListener = null;
     const runtime = {
-      getManifest: () => ({ name: "Qingzhou Gold Markdown", version: "0.0.0" }),
-      onMessage: { addListener(listener) { globalThis.__qingzhouBenchmarkListener = listener; } },
+      getManifest: () => ({ name: "Zuri Gold Markdown", version: "0.0.0" }),
+      onMessage: { addListener(listener) { globalThis.__zuriBenchmarkListener = listener; } },
       sendMessage: async () => ({ ok: true }),
     };
     Object.defineProperty(globalThis, "chrome", { configurable: true, value: { runtime } });
@@ -885,8 +885,8 @@ async function materializeApprovedPage(page, corpus, sample, label) {
     const kept = new Set([...semantic, ...generic]);
     const regionElements = allRegions.filter(element => kept.has(element));
     const regionIds = new Map(regionElements.map((element, index) => [element, `R${String(index + 1).padStart(4, "0")}`]));
-    for (const [element, id] of regionIds) element.setAttribute("data-qz-review-region", id);
-    const region = id => document.querySelector(`[data-qz-review-region="${CSS.escape(id)}"]`);
+    for (const [element, id] of regionIds) element.setAttribute("data-zuri-review-region", id);
+    const region = id => document.querySelector(`[data-zuri-review-region="${CSS.escape(id)}"]`);
     const missing = [...includeIds, ...excludeIds].filter(id => !region(id));
     if (missing.length) return { error: `unknown review region ids: ${missing.join(", ")}` };
     const selected = includeIds.map(region).sort((left, right) => (
@@ -902,7 +902,7 @@ async function materializeApprovedPage(page, corpus, sample, label) {
     const fragments = selected.map(element => {
       const clone = element.cloneNode(true);
       for (const id of excludeIds) {
-        clone.querySelector(`[data-qz-review-region="${CSS.escape(id)}"]`)?.remove();
+        clone.querySelector(`[data-zuri-review-region="${CSS.escape(id)}"]`)?.remove();
       }
       clone.querySelectorAll("script,style,noscript,svg,canvas,iframe,template,[hidden],[aria-hidden='true']").forEach(node => node.remove());
       clone.querySelectorAll("[style]").forEach(node => {
@@ -913,9 +913,9 @@ async function materializeApprovedPage(page, corpus, sample, label) {
       const comments = [];
       while (walker.nextNode()) comments.push(walker.currentNode);
       comments.forEach(node => node.remove());
-      clone.querySelectorAll("[data-qz-review-region],[data-qz-review-block]").forEach(node => {
-        node.removeAttribute("data-qz-review-region");
-        node.removeAttribute("data-qz-review-block");
+      clone.querySelectorAll("[data-zuri-review-region],[data-zuri-review-block]").forEach(node => {
+        node.removeAttribute("data-zuri-review-region");
+        node.removeAttribute("data-zuri-review-block");
       });
       return clone;
     });
@@ -995,7 +995,7 @@ async function materializeApprovedPage(page, corpus, sample, label) {
 
 async function serializeDraft(page, approved) {
   return page.evaluate(({ content, text }) => {
-    const serialize = globalThis.__qingzhouContentBenchmark?.serializeArticleContent;
+    const serialize = globalThis.__zuriContentBenchmark?.serializeArticleContent;
     if (typeof serialize !== "function") throw new Error("product Markdown serializer is unavailable");
     return serialize({ content, text });
   }, { content: approved.html, text: approved.sourceText });
@@ -1185,7 +1185,7 @@ function recordReusable(record, markdownPath, identity, { sample, labelBytes, mo
     && record?.model === model
   );
   if (!record
-    || record.schema !== "qingzhou.article-extraction-gold-markdown.v1"
+    || record.schema !== "zuri.article-extraction-gold-markdown.v1"
     || !sourceCompatible
     || !existsSync(markdownPath)) return false;
   const markdown = readFileSync(markdownPath, "utf8");
@@ -1322,7 +1322,7 @@ async function convertExtract({ page, corpus, sample, label, labelBytes, api, pr
   let lastProblem = "";
   for (let semanticAttempt = 1; semanticAttempt <= 3; semanticAttempt += 1) {
     const packet = {
-      schema: "qingzhou.gold-markdown-request.v1",
+      schema: "zuri.gold-markdown-request.v1",
       sampleId: sample.id,
       inputSha256: sample.inputSha256,
       pageType: sample.type || "",
@@ -1360,7 +1360,7 @@ async function convertExtract({ page, corpus, sample, label, labelBytes, api, pr
       lastProblem = `model finish_reason=${response.finishReason}`;
       continue;
     }
-    if (response.result?.schema !== "qingzhou.gold-markdown-response.v1"
+    if (response.result?.schema !== "zuri.gold-markdown-response.v1"
       || response.result?.sampleId !== sample.id
       || typeof response.result?.markdown !== "string") {
       lastProblem = "response schema, sampleId, or markdown is invalid";
@@ -1466,7 +1466,7 @@ async function convertExtract({ page, corpus, sample, label, labelBytes, api, pr
   return {
     markdown: `${String(markdown || "").trim()}\n`,
     record: {
-      schema: "qingzhou.article-extraction-gold-markdown.v1",
+      schema: "zuri.article-extraction-gold-markdown.v1",
       qaPolicyVersion: QA_POLICY_VERSION,
       sampleId: sample.id,
       inputSha256: sample.inputSha256,
@@ -1627,7 +1627,7 @@ async function main() {
           result = {
             markdown: "",
             record: {
-              schema: "qingzhou.article-extraction-gold-markdown.v1",
+              schema: "zuri.article-extraction-gold-markdown.v1",
               qaPolicyVersion: QA_POLICY_VERSION,
               sampleId: sample.id,
               inputSha256: sample.inputSha256,
@@ -1720,7 +1720,7 @@ async function main() {
     const markdownPath = join(output, "markdown", `${sample.id}.md`);
     const markdown = existsSync(markdownPath) ? readFileSync(markdownPath, "utf8") : null;
     const expectedStatus = json(join(labels, "labels", `${sample.id}.json`)).status;
-    if (record.schema !== "qingzhou.article-extraction-gold-markdown.v1"
+    if (record.schema !== "zuri.article-extraction-gold-markdown.v1"
       || record.qaPolicyVersion !== QA_POLICY_VERSION
       || record.status !== expectedStatus
       || markdown === null
@@ -1733,7 +1733,7 @@ async function main() {
     }
   }
   const summary = {
-    schema: "qingzhou.article-extraction-gold-markdown-set.v1",
+    schema: "zuri.article-extraction-gold-markdown-set.v1",
     complete: failures.length === 0
       && exactCoverage
       && artifactFailures.length === 0

@@ -146,7 +146,7 @@ export async function capabilityUiAssets(sourceDir, { includes = () => true } = 
     let assembled = contents.replace(slot, () => fragments);
     if (stylesheets.length) {
       // Dependency styles precede the active skin, exactly as in a handwritten document head.
-      const skin = /<link\b(?=[^>]*\bid=["']qingzhou-sidepanel-skin["'])(?:[^"'<>]|"[^"]*"|'[^']*')*>/i;
+      const skin = /<link\b(?=[^>]*\bid=["']zuri-sidepanel-skin["'])(?:[^"'<>]|"[^"]*"|'[^']*')*>/i;
       if (!skin.test(assembled)) throw new Error("Side Panel stylesheet contributions require an active skin link");
       assembled = assembled.replace(skin, tag => `${stylesheets.join("\n")}\n${tag}`);
     }

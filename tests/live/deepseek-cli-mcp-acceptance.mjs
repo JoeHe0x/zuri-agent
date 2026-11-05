@@ -122,7 +122,7 @@ export function verifyLiveCase({ id, rows, followUpRows, markdown, sourceRows } 
     }
     if (id === "readme-review") {
       assert.match(text, /README\.md/i); assert.match(text, /README\.zh-CN\.md/i);
-      assert.match(text, /https?:\/\/(?:github\.com|raw\.githubusercontent\.com)\/alibaba\/qz-browser-agent/);
+      assert.match(text, /https?:\/\/(?:github\.com|raw\.githubusercontent\.com)\/alibaba\/zuri-agent/);
       result.checks.push("bilingual-readme-references", "repository-source-url");
     }
     if (id === "city-choice") { assert.match(text, /https?:\/\/[^\s)]+wikipedia\.org\//); result.checks.push("wikipedia-source-url"); }

@@ -28,7 +28,7 @@ from sklearn.model_selection import GroupKFold
 
 HERE = Path(__file__).resolve().parent
 GLOBAL_PATH = HERE / "study-tree-dp-global-choice.py"
-SPEC = importlib.util.spec_from_file_location("qingzhou_global_choice", GLOBAL_PATH)
+SPEC = importlib.util.spec_from_file_location("zuri_global_choice", GLOBAL_PATH)
 if SPEC is None or SPEC.loader is None:
     raise RuntimeError(f"cannot load {GLOBAL_PATH}")
 GLOBAL = importlib.util.module_from_spec(SPEC)
@@ -251,7 +251,7 @@ def main() -> int:
             "rows": rows[key],
         })
     report = {
-        "schema": "qingzhou.tree-dp-global-tree-study.v1",
+        "schema": "zuri.tree-dp-global-tree-study.v1",
         "protocol": {
             "model": "small-nonlinear-root-energy-over-empty-and-legal-roots",
             "runtimeReadabilityCandidate": False,

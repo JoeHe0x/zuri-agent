@@ -164,7 +164,7 @@ async function runFixture(fixturePath, sampleArtifactDir) {
     page.on("pageerror", err => pageErrors.push(err.message));
     page.on("console", msg => {
       if (msg.type() === "error" && !isIgnorableConsoleError(msg.text())) pageErrors.push(msg.text());
-      if (!jsonOnly && msg.type() === "debug" && /轻舟 perf/.test(msg.text())) {
+      if (!jsonOnly && msg.type() === "debug" && /Zuri perf/.test(msg.text())) {
         console.error(msg.text());
       }
     });
@@ -172,7 +172,7 @@ async function runFixture(fixturePath, sampleArtifactDir) {
     await page.goto(`${server.url}/extension/sidepanel/sidepanel.html?benchmark=conversation-render`, {
       waitUntil: "domcontentloaded",
     });
-    await page.waitForFunction(() => Boolean(window.qingzhouConversationBenchmark));
+    await page.waitForFunction(() => Boolean(window.zuriConversationBenchmark));
     const syntaxHighlighting = !boolArg(args.disableSyntaxHighlight, false);
     if (!syntaxHighlighting) {
       await page.evaluate(async () => {
@@ -259,7 +259,7 @@ async function runBenchmarkMode(page, fixture, mode, runtime = {}) {
     await page.addStyleTag({ content: "#messages > .msg { animation: none !important; }" });
   }
   if (mode === "tool-presentation-streaming") {
-    return page.evaluate(() => window.qingzhouConversationBenchmark.runToolPresentationStateRegression());
+    return page.evaluate(() => window.zuriConversationBenchmark.runToolPresentationStateRegression());
   }
   if (mode === "data-grid-tab-state") {
     return runDataGridTabStateBenchmark(page);
@@ -267,7 +267,7 @@ async function runBenchmarkMode(page, fixture, mode, runtime = {}) {
   if (mode === "stream-fixture") {
     const streamFixture = buildFixtureStreamReplay(fixture, args);
     const result = await page.evaluate(({ input, options }) => {
-      return window.qingzhouConversationBenchmark.runLiveReplay(input, options);
+      return window.zuriConversationBenchmark.runLiveReplay(input, options);
     }, {
       input: streamFixture,
       options: streamReplayOptions(args),
@@ -279,7 +279,7 @@ async function runBenchmarkMode(page, fixture, mode, runtime = {}) {
   if (mode === "stream-fixture-expanded") {
     const streamFixture = buildFixtureStreamReplay(fixture, args);
     const result = await page.evaluate(({ input, options }) => {
-      return window.qingzhouConversationBenchmark.runLiveReplay(input, options);
+      return window.zuriConversationBenchmark.runLiveReplay(input, options);
     }, {
       input: streamFixture,
       options: {
@@ -308,30 +308,30 @@ async function runBenchmarkMode(page, fixture, mode, runtime = {}) {
     });
   }
   if (mode === "snapshot-render") {
-    return page.evaluate(input => window.qingzhouConversationBenchmark.runSnapshotRender(input), fixture);
+    return page.evaluate(input => window.zuriConversationBenchmark.runSnapshotRender(input), fixture);
   }
   if (mode === "expand-tool-raw") {
     return runExpandToolRawBenchmark(page, fixture);
   }
   if (mode === "live-replay") {
-    return page.evaluate(input => window.qingzhouConversationBenchmark.runLiveReplay(input), fixture);
+    return page.evaluate(input => window.zuriConversationBenchmark.runLiveReplay(input), fixture);
   }
   if (mode === "all") {
     const streamFixture = buildFixtureStreamReplay(fixture, args);
     const results = {
-      sessionSwitch: await page.evaluate(input => window.qingzhouConversationBenchmark.runSessionSwitch(input), fixture),
-      snapshotRender: await page.evaluate(input => window.qingzhouConversationBenchmark.runSnapshotRender(input), fixture),
+      sessionSwitch: await page.evaluate(input => window.zuriConversationBenchmark.runSessionSwitch(input), fixture),
+      snapshotRender: await page.evaluate(input => window.zuriConversationBenchmark.runSnapshotRender(input), fixture),
       liveReplay: Array.isArray(fixture.events) && fixture.events.length
-        ? await page.evaluate(input => window.qingzhouConversationBenchmark.runLiveReplay(input), fixture)
+        ? await page.evaluate(input => window.zuriConversationBenchmark.runLiveReplay(input), fixture)
         : null,
       streamFixture: await page.evaluate(({ input, options }) => {
-        return window.qingzhouConversationBenchmark.runLiveReplay(input, options);
+        return window.zuriConversationBenchmark.runLiveReplay(input, options);
       }, {
         input: streamFixture,
         options: streamReplayOptions(args),
       }).then(result => ({ ...result, benchmark: "stream-fixture", streamFixture: streamFixture.stream })),
       streamFixtureExpanded: await page.evaluate(({ input, options }) => {
-        return window.qingzhouConversationBenchmark.runLiveReplay(input, options);
+        return window.zuriConversationBenchmark.runLiveReplay(input, options);
       }, {
         input: streamFixture,
         options: {
@@ -352,12 +352,12 @@ async function runBenchmarkMode(page, fixture, mode, runtime = {}) {
     });
     return results;
   }
-  return page.evaluate(input => window.qingzhouConversationBenchmark.runSessionSwitch(input), fixture);
+  return page.evaluate(input => window.zuriConversationBenchmark.runSessionSwitch(input), fixture);
 }
 
 async function reloadBenchmarkSurface(page, { syntaxHighlighting = true } = {}) {
   await page.reload({ waitUntil: "domcontentloaded" });
-  await page.waitForFunction(() => Boolean(window.qingzhouConversationBenchmark));
+  await page.waitForFunction(() => Boolean(window.zuriConversationBenchmark));
   if (!syntaxHighlighting) {
     await page.evaluate(async () => {
       const { hljs } = await import("/extension/sidepanel/ui/highlight-config.js");
@@ -385,7 +385,7 @@ async function runStreamFixturePagerBenchmark(page, fixture, args = {}, { intera
       error: "",
       result: null,
     };
-    state.promise = window.qingzhouConversationBenchmark.runLiveReplay(input, options).then(
+    state.promise = window.zuriConversationBenchmark.runLiveReplay(input, options).then(
       result => {
         state.result = result;
         state.done = true;
@@ -397,7 +397,7 @@ async function runStreamFixturePagerBenchmark(page, fixture, args = {}, { intera
         return null;
       },
     );
-    window.__qingzhouPagerStreamBenchmark = state;
+    window.__zuriPagerStreamBenchmark = state;
   }, { input: streamFixture, options: replayOptions });
 
   const samples = [];
@@ -408,7 +408,7 @@ async function runStreamFixturePagerBenchmark(page, fixture, args = {}, { intera
   let replayDone = false;
   while (Date.now() < deadline) {
     const status = await page.evaluate(() => {
-      const state = window.__qingzhouPagerStreamBenchmark;
+      const state = window.__zuriPagerStreamBenchmark;
       return { done: Boolean(state?.done), error: state?.error || "" };
     });
     if (status.error) throw new Error(status.error);
@@ -446,11 +446,11 @@ async function runStreamFixturePagerBenchmark(page, fixture, args = {}, { intera
   if (!replayDone) throw new Error(`stream fixture pager benchmark timed out after ${DEFAULT_TIMEOUT_MS}ms`);
 
   const replay = await page.evaluate(async () => {
-    const state = window.__qingzhouPagerStreamBenchmark;
+    const state = window.__zuriPagerStreamBenchmark;
     if (!state) throw new Error("pager stream benchmark state is missing");
     await state.promise;
     const payload = { result: state.result, error: state.error || "" };
-    delete window.__qingzhouPagerStreamBenchmark;
+    delete window.__zuriPagerStreamBenchmark;
     return payload;
   });
   if (replay.error) throw new Error(replay.error);
@@ -789,7 +789,7 @@ async function sampleStreamingPagerInteraction(page, { direction = 1, preferredM
         details: card?.querySelector(":scope > .tool-timeline-details"),
         scrollTop: messages?.scrollTop ?? null,
         scrollHeight: messages?.scrollHeight ?? null,
-        anchor: window.qingzhouConversationBenchmark.collectViewportAnchorState?.() || null,
+        anchor: window.zuriConversationBenchmark.collectViewportAnchorState?.() || null,
       };
     };
     const frameTrace = [];
@@ -923,7 +923,7 @@ function summarizePagerDelta(values = []) {
 async function runDataGridTabStateBenchmark(page) {
   const tableName = "__data_grid_tab_state_benchmark__";
   await page.evaluate(async table => {
-    await window.qingzhouConversationBenchmark.reset({ debug: true, clearStorage: false });
+    await window.zuriConversationBenchmark.reset({ debug: true, clearStorage: false });
     const dataStore = await import(new URL("../shared/data-store.js", location.href).href);
     await dataStore.clearDataTable(table).catch(() => {});
     await dataStore.insertDataRows(table, [
@@ -950,11 +950,11 @@ async function runDataGridTabStateBenchmark(page) {
   await page.locator('[data-tab="chat"]').click();
   const overlayClosedAfterLeave = await page.locator("#data-row-detail").evaluate(el => el.classList.contains("hidden"));
   await page.waitForTimeout(5200);
-  await page.evaluate(() => { window.__qingzhouPerf = []; });
+  await page.evaluate(() => { window.__zuriPerf = []; });
   await page.locator('[data-tab="data"]').click();
   await page.waitForFunction(() => (
-    Array.isArray(window.__qingzhouPerf)
-    && window.__qingzhouPerf.some(entry => entry?.name === "data.render_grid")
+    Array.isArray(window.__zuriPerf)
+    && window.__zuriPerf.some(entry => entry?.name === "data.render_grid")
   ));
   await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
   const afterReturn = await readDataGridTabState(page);
@@ -972,7 +972,7 @@ async function runDataGridTabStateBenchmark(page) {
     before,
     afterReturn,
     overlayClosedAfterLeave,
-    perfTrace: await page.evaluate(() => Array.isArray(window.__qingzhouPerf) ? window.__qingzhouPerf.slice() : []),
+    perfTrace: await page.evaluate(() => Array.isArray(window.__zuriPerf) ? window.__zuriPerf.slice() : []),
   };
 }
 
@@ -986,7 +986,7 @@ async function readDataGridTabState(page) {
 }
 
 async function runExpandToolRawBenchmark(page, fixture) {
-  await page.evaluate(input => window.qingzhouConversationBenchmark.runSnapshotRender(input), fixture);
+  await page.evaluate(input => window.zuriConversationBenchmark.runSnapshotRender(input), fixture);
   const interaction = await page.evaluate(async () => {
     const settle = () => new Promise(resolve => {
       requestAnimationFrame(() => requestAnimationFrame(resolve));
@@ -997,7 +997,7 @@ async function runExpandToolRawBenchmark(page, fixture) {
       return {
         ok: false,
         reason: "no-tool-timeline",
-        expanded: window.qingzhouConversationBenchmark.collectMetrics({ phase: "no-tool-timeline" }),
+        expanded: window.zuriConversationBenchmark.collectMetrics({ phase: "no-tool-timeline" }),
       };
     }
 
@@ -1015,7 +1015,7 @@ async function runExpandToolRawBenchmark(page, fixture) {
     summary.click();
     const repeatClickHandlerMs = performance.now() - repeatStart;
     const slotReused = Boolean(firstBody && firstBody === group.querySelector(".tool-timeline-slot-body"));
-    const expanded = window.qingzhouConversationBenchmark.collectMetrics({
+    const expanded = window.zuriConversationBenchmark.collectMetrics({
       phase: "expanded-without-raw",
       elapsedMs: expandedMs,
     });
@@ -1039,7 +1039,7 @@ async function runExpandToolRawBenchmark(page, fixture) {
     rawButton.click();
     await settle();
     const rawOpenMs = performance.now() - rawStart;
-    const rawOpen = window.qingzhouConversationBenchmark.collectMetrics({
+    const rawOpen = window.zuriConversationBenchmark.collectMetrics({
       phase: "raw-open",
       elapsedMs: rawOpenMs,
     });
@@ -1294,34 +1294,34 @@ function digestBenchmarkTranscript(transcript = []) {
       if (entry.type === "user") {
         return {
           type: "user",
-          textHash: qzTextHash(entry.text || ""),
+          textHash: zuriTextHash(entry.text || ""),
           images: Array.isArray(entry.images) ? entry.images.length : 0,
         };
       }
       if (entry.type === "assistant") {
         return {
           type: "assistant",
-          contentHash: qzTextHash(entry.content || ""),
+          contentHash: zuriTextHash(entry.content || ""),
           contentChars: String(entry.content || "").length,
         };
       }
       if (entry.type === "thinking") {
         return {
           type: "thinking",
-          textHash: qzTextHash(entry.text || ""),
+          textHash: zuriTextHash(entry.text || ""),
           textChars: String(entry.text || "").length,
         };
       }
       return {
         type: "tool",
         name: entry.name || "tool",
-        argsHash: qzTextHash(stableJson(entry.args ?? {})),
-        resultHash: qzTextHash(stableJson(entry.result ?? null)),
+        argsHash: zuriTextHash(stableJson(entry.args ?? {})),
+        resultHash: zuriTextHash(stableJson(entry.result ?? null)),
         isError: entry.isError === true,
       };
     });
   return {
-    digest: qzTextHash(stableJson(entries)),
+    digest: zuriTextHash(stableJson(entries)),
     count: entries.length,
     roles: entries.reduce((acc, entry) => {
       acc[entry.type] = (acc[entry.type] || 0) + 1;
@@ -1352,12 +1352,12 @@ function summarizeExpectedStreamEntry(entry = {}) {
   return {
     type: entry.type,
     chars: String(text).length,
-    hash: qzTextHash(text),
+    hash: zuriTextHash(text),
     preview: String(text).slice(0, 120),
   };
 }
 
-function qzTextHash(text) {
+function zuriTextHash(text) {
   let hash = 5381;
   const source = String(text || "");
   for (let i = 0; i < source.length; i += 1) {
@@ -2031,7 +2031,7 @@ function renderVisualAuditReviewHtml(audit = {}) {
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>轻舟 Chat 视觉审计</title>
+  <title>Zuri Chat 视觉审计</title>
   <style>
     :root { color-scheme: light dark; --bg:#f7f8f8; --panel:#fff; --line:#e5e8e7; --text:#202423; --muted:#7a8280; --ok:#2f8f70; --bad:#b94b4b; --warn:#9b762e; }
     * { box-sizing:border-box; }
@@ -2408,7 +2408,7 @@ function readFixture(file) {
 }
 
 function installBenchmarkChromeStub() {
-  const storageData = { qz_data_consent: { version: 1, acceptedAt: 1 } };
+  const storageData = { zuri_data_consent: { version: 1, acceptedAt: 1 } };
   const storageListeners = [];
   const composerDrafts = {};
   const clone = value => {
@@ -2428,13 +2428,13 @@ function installBenchmarkChromeStub() {
       try { listener(changes, "local"); } catch (_err) {}
     }
   };
-  window.__QZ_CONVERSATION_BENCHMARK__ = true;
-  window.__qzBenchMessages = [];
-  window.__qzBenchLongTasks = [];
+  window.__ZURI_CONVERSATION_BENCHMARK__ = true;
+  window.__zuriBenchMessages = [];
+  window.__zuriBenchLongTasks = [];
   try {
     const observer = new PerformanceObserver(list => {
       for (const entry of list.getEntries()) {
-        window.__qzBenchLongTasks.push({
+        window.__zuriBenchLongTasks.push({
           name: entry.name,
           startTime: entry.startTime,
           duration: entry.duration,
@@ -2450,7 +2450,7 @@ function installBenchmarkChromeStub() {
         const messageListeners = [];
         return {
           postMessage(message) {
-            window.__qzBenchMessages.push(clone(message));
+            window.__zuriBenchMessages.push(clone(message));
             let response = null;
             if (message?.type === "get_config") {
               response = { type: "config", config: { provider: "benchmark", model: "benchmark" } };
@@ -2597,7 +2597,7 @@ function contentType(file) {
 
 async function readLongTaskSummary(page) {
   return page.evaluate(() => {
-    const items = Array.isArray(window.__qzBenchLongTasks) ? window.__qzBenchLongTasks : [];
+    const items = Array.isArray(window.__zuriBenchLongTasks) ? window.__zuriBenchLongTasks : [];
     const total = items.reduce((sum, item) => sum + (Number(item.duration) || 0), 0);
     const max = items.reduce((value, item) => Math.max(value, Number(item.duration) || 0), 0);
     return { count: items.length, totalMs: total, maxMs: max };
@@ -2606,7 +2606,7 @@ async function readLongTaskSummary(page) {
 
 async function resetLongTaskSummary(page) {
   await page.evaluate(() => {
-    if (Array.isArray(window.__qzBenchLongTasks)) window.__qzBenchLongTasks.length = 0;
+    if (Array.isArray(window.__zuriBenchLongTasks)) window.__zuriBenchLongTasks.length = 0;
   });
 }
 
@@ -2621,7 +2621,7 @@ function diffLongTasks(before = {}, after = {}) {
 async function maybeWriteScreenshot(page, requested) {
   if (!requested) return "";
   const target = requested === true
-    ? "/tmp/qingzhou-conversation-render-benchmark.png"
+    ? "/tmp/zuri-conversation-render-benchmark.png"
     : resolve(String(requested));
   mkdirSync(dirname(target), { recursive: true });
   if (args.fullPage === true) await expandConversationForFullPageScreenshot(page);
@@ -2723,10 +2723,10 @@ function resolveArtifactDir(args, fixture, mode, baselineDir) {
   if (args.artifactDir) return resolve(String(args.artifactDir));
   if (args.updateBaseline === true) return baselineDir;
   if (args.compareBaseline === true) {
-    return join("/tmp/qingzhou-conversation-render", fixtureSlug(fixture), viewportSlug(), `${mode}-${timestampSlug()}`);
+    return join("/tmp/zuri-conversation-render", fixtureSlug(fixture), viewportSlug(), `${mode}-${timestampSlug()}`);
   }
   if (mode === "visual-audit") {
-    return join("/tmp/qingzhou-conversation-visual-audit", fixtureSlug(fixture), `${viewportSlug()}-${COLOR_SCHEME}`, timestampSlug());
+    return join("/tmp/zuri-conversation-visual-audit", fixtureSlug(fixture), `${viewportSlug()}-${COLOR_SCHEME}`, timestampSlug());
   }
   return "";
 }

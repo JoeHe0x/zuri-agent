@@ -115,7 +115,7 @@ test("external plugins cannot declare behavior, while trusted host aliases inher
   const toolRegistrySnapshot = registry.snapshot();
   const core = toolRegistrySnapshot.get("manage_settings");
   assert.throws(() => { core.behavior = {}; }, TypeError, "registered behavior remains immutable");
-  const skill = findBuiltinSkill("qingzhou-management");
+  const skill = findBuiltinSkill("zuri-management");
   const plugin = parseSkillManifest(findSkillManifestResource(skill.resources).content, skill).plugin;
   const tool = plugin.tools.find(item => item.localName === "manage_settings");
   const resolve = plugin => runtime.resolveDefinition(tool.name, { toolRegistrySnapshot, skillToolRegistrySnapshot: {
@@ -143,13 +143,13 @@ test("external plugins cannot declare behavior, while trusted host aliases inher
 });
 
 test('capability declarations alone place new tool names into the same graph, with barrier precedence', async () => {
-  const registry = createToolRegistry(), qz = { registerTool: registry.forCapability('sample-capability') };
+  const registry = createToolRegistry(), zuri = { registerTool: registry.forCapability('sample-capability') };
   const base = { description: 'Fixture', page: 'tab', parameters: { type: 'object', properties: { tabId: { type: 'number' } } }, execute: () => ({}) };
-  qz.registerTool({ ...base, name: 'sample_local', behavior: { parallelTab: true } });
-  qz.registerTool({ ...base, name: 'sample_read', behavior: { parallelRead: true } });
-  qz.registerTool({ ...base, name: 'sample_barrier', behavior: { parallelTab: true, parallelRead: true, barrier: true } });
-  qz.registerTool({ ...base, name: 'sample_creator', workingTab: 'created', behavior: { parallelOpen: true, barrier: true } });
-  qz.registerTool({ name: 'sample_global', description: 'Global', behavior: { barrier: true },
+  zuri.registerTool({ ...base, name: 'sample_local', behavior: { parallelTab: true } });
+  zuri.registerTool({ ...base, name: 'sample_read', behavior: { parallelRead: true } });
+  zuri.registerTool({ ...base, name: 'sample_barrier', behavior: { parallelTab: true, parallelRead: true, barrier: true } });
+  zuri.registerTool({ ...base, name: 'sample_creator', workingTab: 'created', behavior: { parallelOpen: true, barrier: true } });
+  zuri.registerTool({ name: 'sample_global', description: 'Global', behavior: { barrier: true },
     parameters: { type: 'object', properties: {} }, execute: () => ({}) });
   const lookup = { toolRegistrySnapshot: registry.snapshot() };
   assert.equal(tools.getParallelReadTab('sample_read', { tabId: 4 }, lookup), 4);
@@ -212,13 +212,13 @@ test('a barrier predicate is evaluated once per planned call; throwing predicate
 });
 
 test('uid targets pin their registered tab for batch planning and working-tab defaults', async () => {
-  const registry = createToolRegistry(), qz = { registerTool: registry.forCapability('uid-fixture') };
+  const registry = createToolRegistry(), zuri = { registerTool: registry.forCapability('uid-fixture') };
   const parameters = { type: 'object', properties: {
     target: { type: 'string' }, targets: { type: 'array', items: { type: 'string' } }, tabId: { type: 'number' },
   } };
-  qz.registerTool({ name: 'uid_single', description: 'Fixture', page: 'owned', parameters,
+  zuri.registerTool({ name: 'uid_single', description: 'Fixture', page: 'owned', parameters,
     behavior: { parallelTab: true }, execute: () => ({}) });
-  qz.registerTool({ name: 'uid_multi', description: 'Fixture', page: 'owned', parameters,
+  zuri.registerTool({ name: 'uid_multi', description: 'Fixture', page: 'owned', parameters,
     behavior: { parallelTab: true, uidTargets: args => (Array.isArray(args.targets) ? args.targets : []) }, execute: () => ({}) });
   const lookup = { toolRegistrySnapshot: registry.snapshot() };
   for (const [uid, tabId] of [['t41.0000a1.1', 41], ['t41.0000a2.2', 41], ['t42.0000b1.1', 42]]) {
@@ -326,8 +326,8 @@ test('a uid lane anchors later tab creation to its ordered working-tab selection
 });
 
 test('page-context enrichment leaves uid-targeted calls on their registered tabs', async () => {
-  const registry = createToolRegistry(), qz = { registerTool: registry.forCapability('uid-enrich-fixture') };
-  qz.registerTool({ name: 'uid_probe', description: 'Fixture', page: 'owned',
+  const registry = createToolRegistry(), zuri = { registerTool: registry.forCapability('uid-enrich-fixture') };
+  zuri.registerTool({ name: 'uid_probe', description: 'Fixture', page: 'owned',
     parameters: { type: 'object', properties: {
       target: { type: 'string' }, selector: { type: 'string' }, root: { type: 'string' },
       targets: { type: 'array', items: { type: 'string' } }, tabId: { type: 'number' },

@@ -1,7 +1,7 @@
 import type { CliConnectionStatus } from "../../shared/mcp-connection.js";
 
-export const BRIDGE_STORAGE_KEY = "_qingzhou_mcp_bridge";
-const CLIENT_ID_KEY = "_qingzhou_mcp_bridge_client_id";
+export const BRIDGE_STORAGE_KEY = "_zuri_mcp_bridge";
+const CLIENT_ID_KEY = "_zuri_mcp_bridge_client_id";
 export const DEFAULT_ENDPOINT = "http://127.0.0.1:18765";
 export const RETRY_LIMIT = 3;
 export const LEASE_WAIT_LIMIT = 1;
@@ -51,7 +51,7 @@ export function connectionEndpoint(value: unknown): string {
     if (u.protocol === "http:" && ["127.0.0.1", "localhost"].includes(u.hostname)
       && !u.username && !u.password && u.pathname === "/" && !u.search && !u.hash) return u.origin;
   } catch { /* Report a stable validation code below. */ }
-  throw Object.assign(new Error("Use a local qz address such as http://127.0.0.1:18765."), { code: "MCP_CONNECTION_INVALID_ENDPOINT" });
+  throw Object.assign(new Error("Use a local zuri address such as http://127.0.0.1:18765."), { code: "MCP_CONNECTION_INVALID_ENDPOINT" });
 }
 
 export function connectionName(value: string): string {

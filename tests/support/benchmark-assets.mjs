@@ -12,7 +12,7 @@ const overlays = new Map();
 export async function prepareBenchmarkAssets(extensionDir, outputDir, { extensionUrlPrefix = "/extension" } = {}) {
   const key = resolve(extensionDir);
   if (extensionUrlPrefix === "/extension" && !outputDir && overlays.has(key)) return overlays.get(key);
-  const directory = outputDir || await mkdtemp(join(tmpdir(), "qingzhou-benchmark-assets-"));
+  const directory = outputDir || await mkdtemp(join(tmpdir(), "zuri-benchmark-assets-"));
   if (!outputDir) process.once("exit", () => rmSync(directory, { recursive: true, force: true }));
   await mkdir(directory, { recursive: true });
   const extensionRoot = join(repositoryRoot, "src");

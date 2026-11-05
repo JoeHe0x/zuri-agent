@@ -41,7 +41,7 @@ const tools = readProjectFile("src/background/tools/runtime.js");
 const elementRuntime = readProjectFile("src/background/tools/element-runtime.js");
 const agent = readProjectFile("src/background/agent/agent.ts");
 const dynamicContext = readProjectFile("src/background/agent/context.ts");
-const qingzhouPlugin = readProjectFile("src/shared/skills/skill-manifest.js");
+const zuriPlugin = readProjectFile("src/shared/skills/skill-manifest.js");
 
 assert.doesNotMatch(
   `${serviceWorker}\n${sessionTabs}`,
@@ -180,17 +180,17 @@ assert.match(
 );
 
 assert.doesNotMatch(
-  qingzhouPlugin,
+  zuriPlugin,
   /context\.activeTab|context\.tabs/,
   "site plugin activation should not use global active tab or all browser tabs",
 );
 assert.match(
-  qingzhouPlugin,
+  zuriPlugin,
   /context\.workingTab\?\.url/,
   "site plugin activation should still use the session working tab",
 );
 assert.match(
-  qingzhouPlugin,
+  zuriPlugin,
   /context\.taskSiteTabs/,
   "site plugin activation should include task site history",
 );

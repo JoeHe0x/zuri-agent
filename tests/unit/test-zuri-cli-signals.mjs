@@ -70,7 +70,7 @@ function startCommand(t, args, cwd, env) {
     get stdout() { return stdout; }, get stderr() { return stderr; },
     async ready() {
       const deadline = Date.now() + 8000;
-      while (!stderr.includes("QZ_STDIN_READY:")) {
+      while (!stderr.includes("ZURI_STDIN_READY:")) {
         assert.equal(child.exitCode, null, `CLI exited before reading stdin: ${stdout}\n${stderr}`);
         assert.ok(Date.now() < deadline, `CLI did not begin reading stdin: ${stdout}\n${stderr}`);
         await delay(10);
@@ -101,7 +101,7 @@ test("real process signals stop CLI observation without stopping its service or 
   skip: process.platform === "win32" ? "POSIX process-group signals; Windows handler logic is covered above." : false,
   timeout: 90000,
 }, async t => {
-  const work = await mkdtemp(join(tmpdir(), "qz-cli-signals-"));
+  const work = await mkdtemp(join(tmpdir(), "zuri-cli-signals-"));
   const stateDir = join(work, "state");
   t.after(async () => {
     try { await stopDaemon({ stateDir }); }
@@ -110,23 +110,23 @@ test("real process signals stop CLI observation without stopping its service or 
   const running = await ensureDaemon({ stateDir, preferredPort: 0 });
   const npm = await npmEntry();
   await mkdir(join(work, "node_modules/.bin"), { recursive: true });
-  await symlink(bin, join(work, "node_modules/.bin/qz"));
+  await symlink(bin, join(work, "node_modules/.bin/zuri"));
   await writeFile(join(work, "package.json"), JSON.stringify({ private: true }));
   // Readiness only: the real CLI, transport, signal listeners and npm wrappers are unchanged.
-  const preload = `if (process.argv[1]?.endsWith('/bin.mjs') || process.argv[1]?.endsWith('/cli.mjs') || process.argv[1]?.endsWith('/.bin/qz')) {
-    process.stderr.write('QZ_CLI_PID:' + process.pid + '\\n');
+  const preload = `if (process.argv[1]?.endsWith('/bin.mjs') || process.argv[1]?.endsWith('/cli.mjs') || process.argv[1]?.endsWith('/.bin/zuri')) {
+    process.stderr.write('ZURI_CLI_PID:' + process.pid + '\\n');
     const on = process.stdin.on;
     process.stdin.on = function(event, ...args) {
       const result = on.call(this, event, ...args);
-      if (event === 'data') queueMicrotask(() => process.stderr.write('QZ_STDIN_READY:' + process.pid + '\\n'));
+      if (event === 'data') queueMicrotask(() => process.stderr.write('ZURI_STDIN_READY:' + process.pid + '\\n'));
       return result;
     };
   }`;
   const env = { ...process.env, PATH: `${dirname(process.execPath)}${delimiter}${process.env.PATH || ""}`,
-    QZ_STATE_DIR: stateDir, NO_COLOR: "1", NODE_OPTIONS: `--import=data:text/javascript,${encodeURIComponent(preload)}`,
+    ZURI_STATE_DIR: stateDir, NO_COLOR: "1", NODE_OPTIONS: `--import=data:text/javascript,${encodeURIComponent(preload)}`,
     npm_config_ignore_scripts: "true", npm_config_offline: "true", npm_config_audit: "false", npm_config_fund: "false" };
   const post = async (path, body) => {
-    const response = await localFetch(`${running.endpoint}/v1/qingzhou/${path}`, {
+    const response = await localFetch(`${running.endpoint}/v1/zuri/${path}`, {
       method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body), signal: AbortSignal.timeout(8000),
     });
     assert.equal(response.ok, true, `${path}: ${response.status}`);
@@ -138,8 +138,8 @@ test("real process signals stop CLI observation without stopping its service or 
   const launches = [
     { name: "bin", args: [bin], cwd: root, deliveries: ["group"] },
     { name: "source", args: [source], cwd: root, deliveries: ["group"] },
-    { name: "npm run", args: [npm, "run", "qz", "--"], cwd: root, deliveries: ["group", "cli"] },
-    { name: "npm exec", args: [npm, "exec", "--offline", "--", "qz"], cwd: work, deliveries: ["group", "cli"] },
+    { name: "npm run", args: [npm, "run", "zuri", "--"], cwd: root, deliveries: ["group", "cli"] },
+    { name: "npm exec", args: [npm, "exec", "--offline", "--", "zuri"], cwd: work, deliveries: ["group", "cli"] },
   ];
   for (const launch of launches) for (const signal of ["SIGINT", "SIGTERM"]) {
     for (const delivery of launch.deliveries) for (const phase of ["stdin", "stream"]) {
@@ -159,10 +159,10 @@ test("real process signals stop CLI observation without stopping its service or 
           [request] = snapshots;
           assert.equal(request.params.sessionId, taskId);
         }
-        const cliPid = Number(command.stderr.match(/QZ_CLI_PID:(\d+)/)?.[1]);
+        const cliPid = Number(command.stderr.match(/ZURI_CLI_PID:(\d+)/)?.[1]);
         assert.ok(cliPid);
-        // npm signals its shell, which may keep qz as a separate child. A single-PID
-        // signal must target qz itself; terminal Ctrl-C targets the entire group.
+        // npm signals its shell, which may keep zuri as a separate child. A single-PID
+        // signal must target zuri itself; terminal Ctrl-C targets the entire group.
         process.kill(delivery === "group" ? -command.child.pid : cliPid, signal);
         const exited = await waitForExit(command);
         // npm may re-emit the signal after its child exits. Its child's JSON must survive either way.

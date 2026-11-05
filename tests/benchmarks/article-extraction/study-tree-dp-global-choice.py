@@ -25,7 +25,7 @@ from sklearn.model_selection import GroupKFold
 
 HERE = Path(__file__).resolve().parent
 SINGLE_PATH = HERE / "study-tree-dp-single-root-structured.py"
-SPEC = importlib.util.spec_from_file_location("qingzhou_single_root_study", SINGLE_PATH)
+SPEC = importlib.util.spec_from_file_location("zuri_single_root_study", SINGLE_PATH)
 if SPEC is None or SPEC.loader is None:
     raise RuntimeError(f"cannot load {SINGLE_PATH}")
 SINGLE = importlib.util.module_from_spec(SPEC)
@@ -671,7 +671,7 @@ def main() -> int:
         }
 
     report = {
-        "schema": "qingzhou.tree-dp-global-choice-study.v1",
+        "schema": "zuri.tree-dp-global-choice-study.v1",
         "protocol": {
             "model": "page-normalized-linear-softmax-over-empty-and-legal-roots",
             "runtimeReadabilityCandidate": False,

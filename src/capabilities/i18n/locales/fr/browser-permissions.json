@@ -8,6 +8,6 @@
   "browser-permissions.name.history": "historique de navigation",
   "browser-permissions.name.desktopCapture": "enregistrement de l’écran",
   "browser-permissions.name.downloads.open": "ouverture des fichiers téléchargés",
-  "browser-permissions.required": "Accordez l’autorisation « {permission} » dans le panneau latéral de qz, puis réessayez.",
+  "browser-permissions.required": "Accordez l’autorisation « {permission} » dans le panneau latéral de zuri, puis réessayez.",
   "browser-permissions.denied": "L’autorisation « {permission} » a été refusée et l’action a été annulée. Réessayez pour l’accorder."
 }

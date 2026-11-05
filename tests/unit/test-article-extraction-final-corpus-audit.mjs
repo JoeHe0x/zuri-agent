@@ -40,7 +40,7 @@ function materializeSample(corpusDir, value) {
 }
 
 test("final corpus audit proves preservation, split, provenance, assets, and diversity contracts", () => {
-  const root = mkdtempSync(join(tmpdir(), "qingzhou-final-corpus-audit-"));
+  const root = mkdtempSync(join(tmpdir(), "zuri-final-corpus-audit-"));
   const baseDir = join(root, "base");
   const incrementDir = join(root, "increment");
   const finalDir = join(root, "final");

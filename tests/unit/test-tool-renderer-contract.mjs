@@ -228,10 +228,10 @@ function testToolUrlsDecodeDisplayOnly() {
     ${extractFunction("linkifyText")}
     ({ decodeToolUrlForDisplay, linkifyText });
   `, { String, decodeURI, escapeHtml });
-  const rawUrl = "https://www.baidu.com/s?wd=%E6%9B%B2%E9%99%A2%E9%A3%8E%E8%8D%B7%26safe%3D1&src=qingzhou";
+  const rawUrl = "https://www.baidu.com/s?wd=%E6%9B%B2%E9%99%A2%E9%A3%8E%E8%8D%B7%26safe%3D1&src=zuri";
   const html = runtime.linkifyText(`页面已跳转 ${rawUrl}`);
   assert.match(html, /曲院风荷%26safe%3D1/, "tool URL labels should decode readable text without decoding structural delimiters");
-  assert.match(html, /href="https:\/\/www\.baidu\.com\/s\?wd=%E6%9B%B2[^\"]*&amp;src=qingzhou"/, "tool URL hrefs should preserve their original encoded address");
+  assert.match(html, /href="https:\/\/www\.baidu\.com\/s\?wd=%E6%9B%B2[^\"]*&amp;src=zuri"/, "tool URL hrefs should preserve their original encoded address");
   assert.equal(
     runtime.decodeToolUrlForDisplay("https://example.com/%E6%B5%8B%E8%AF%95/%E4%A"),
     "https://example.com/测试/%E4%A",
@@ -386,11 +386,11 @@ function testToolTimelinePagerUsesStableMenuColumn() {
   assert.match(extractCssRule(".tool-family-submenu"), /position:\s*relative/, "family submenus should anchor one stable pager without reserving a full-height column");
   assert.match(extractCssRule(".tool-family-panel-nav"), /position:\s*absolute[\s\S]*top:\s*7px[\s\S]*right:\s*1px/, "family pager should occupy only the first submenu row");
   assert.match(extractCssRule(".tool-family-primary-batch"), /padding-right:\s*calc\(var\(--tool-timeline-pager-width\) \+ 8px\)/, "only the first batch row should reserve pager space");
-  assert.match(thinkingNav, /timeline-pager thinking-group-slot-nav[\s\S]*qz-icon-btn qz-icon-btn--secondary qz-icon-btn--xs timeline-pager-btn thinking-group-nav-btn/, "thinking navigation should use the shared pager and compact icon primitive");
-  assert.match(toolNav, /timeline-pager tool-timeline-slot-nav[\s\S]*qz-icon-btn qz-icon-btn--secondary qz-icon-btn--xs timeline-pager-btn tool-timeline-nav-btn/, "both levels of tool navigation should use the shared pager and compact icon primitive");
+  assert.match(thinkingNav, /timeline-pager thinking-group-slot-nav[\s\S]*zuri-icon-btn zuri-icon-btn--secondary zuri-icon-btn--xs timeline-pager-btn thinking-group-nav-btn/, "thinking navigation should use the shared pager and compact icon primitive");
+  assert.match(toolNav, /timeline-pager tool-timeline-slot-nav[\s\S]*zuri-icon-btn zuri-icon-btn--secondary zuri-icon-btn--xs timeline-pager-btn tool-timeline-nav-btn/, "both levels of tool navigation should use the shared pager and compact icon primitive");
   assert.match(extractCssRule(".timeline-pager"), /grid-template-columns:\s*22px\s+30px\s+22px[\s\S]*gap:\s*4px[\s\S]*width:\s*82px/, "all pagers should share one fixed geometry");
   assert.match(css, /--control-height-xs:\s*22px/, "pager geometry should come from the shared compact control token");
-  assert.match(css, /\.qz-icon-btn--xs\s*\{[\s\S]*?--qz-control-size:\s*var\(--control-height-xs\)/, "compact icon geometry should have one primitive definition");
+  assert.match(css, /\.zuri-icon-btn--xs\s*\{[\s\S]*?--zuri-control-size:\s*var\(--control-height-xs\)/, "compact icon geometry should have one primitive definition");
   assert.doesNotMatch(timelineRenderer, /timelinePagerCounterWidth|--timeline-pager-counter-width/, "pager spacing should not vary with the current counter length");
   assert.doesNotMatch(css, /\.thinking-group-nav-btn\s*\{[\s\S]*?width:/, "thinking navigation should not keep a private geometry implementation");
   assert.doesNotMatch(css, /\.tool-timeline-nav-btn\s*\{[\s\S]*?width:/, "tool navigation should not keep a private geometry implementation");
@@ -1066,7 +1066,7 @@ function testSkillDocumentResourcesStayBinarySafe() {
   );
   assert.match(
     skillsProfile,
-    /docModelId[\s\S]*t\("docmodelidLoadQingzhouDocumentsThenUseDocumentReadChunkTo",\s*\{\s*id:/,
+    /docModelId[\s\S]*t\("docmodelidLoadZuriDocumentsThenUseDocumentReadChunkTo",\s*\{\s*id:/,
     "truncated skill documents should show the existing document continuation path",
   );
 }
@@ -1112,21 +1112,21 @@ function testReadArticleUsesCanonicalMarkdownRenderer() {
   assert.match(
     renderer,
     /import \{ renderMarkdown as renderMarkdownHtml \} from "\.\.\/features\/chat\/markdown-feature\.js";/,
-    "read_article should reuse the existing QZ Markdown renderer",
+    "read_article should reuse the existing ZURI Markdown renderer",
   );
   assert.match(
     renderer,
     /const renderMarkdown = \(?value\)?\s*=>\s*renderMarkdownHtml\(value,\s*\{\s*math: false\s*\}\)/,
     "article Markdown should disable math heuristics while using the shared renderer",
   );
-  assert.match(articleBody, /tool-article-body qz-markdown/, "article details should opt into the shared Markdown skin");
+  assert.match(articleBody, /tool-article-body zuri-markdown/, "article details should opt into the shared Markdown skin");
   assert.match(articleBody, /sanitizeArticleMarkdownHtml\(rendered\)/, "article HTML should be sanitized after Markdown rendering");
   assert.doesNotMatch(articleBody, /\.format|format\s*===/, "article rendering should not branch on a format field");
   assert.match(sanitizer, /ARTICLE_MARKDOWN_ALLOWED_TAGS/, "article sanitizer should use an explicit element allowlist");
   assert.match(sanitizer, /ARTICLE_MARKDOWN_DROP_TAGS/, "active content should be removed rather than unwrapped");
   assert.match(browserOperationsProfile, /sanitizeArticleMarkdownUrl[\s\S]*"http:", "https:"/, "article URLs should be protocol filtered");
-  assert.match(css, /:is\(\.msg-assistant \.msg-content, \.qz-markdown\) table/, "tool articles should share chat Markdown table styling");
-  assert.match(css, /\.tool-article-body\.qz-markdown table[\s\S]*max-width:\s*none/, "wide article tables should scroll inside the bounded article surface");
+  assert.match(css, /:is\(\.msg-assistant \.msg-content, \.zuri-markdown\) table/, "tool articles should share chat Markdown table styling");
+  assert.match(css, /\.tool-article-body\.zuri-markdown table[\s\S]*max-width:\s*none/, "wide article tables should scroll inside the bounded article surface");
 }
 
 function testReadDomUsesRawHtmlRenderer() {

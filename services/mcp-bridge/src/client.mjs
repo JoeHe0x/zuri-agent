@@ -5,10 +5,10 @@ import { PACKAGE_VERSION } from "./package-info.mjs";
 
 export const GUIDE_URL = "https://github.com/alibaba/qz-browser-agent/blob/main/services/mcp-bridge/README.md";
 export { INSTALL_URL } from "./package-info.mjs";
-export const SERVICE_NAME = "qz-browser-agent";
+export const SERVICE_NAME = "zuri-agent";
 export const PROTOCOL_VERSION = 1;
 
-export class QzError extends Error {
+export class ZuriError extends Error {
   constructor(code, message, details = {}) {
     super(message);
     this.code = code;
@@ -18,10 +18,10 @@ export class QzError extends Error {
 
 export function localUrl(value) {
   let url;
-  try { url = new URL(value); } catch { throw new QzError("invalid_endpoint", "The local service URL is invalid."); }
+  try { url = new URL(value); } catch { throw new ZuriError("invalid_endpoint", "The local service URL is invalid."); }
   if (url.protocol !== "http:" || !["127.0.0.1", "localhost"].includes(url.hostname)
     || url.username || url.password || url.hash || url.search || url.port === "0") {
-    throw new QzError("invalid_endpoint", "Use an HTTP local service URL on 127.0.0.1 or localhost.");
+    throw new ZuriError("invalid_endpoint", "Use an HTTP local service URL on 127.0.0.1 or localhost.");
   }
   return url;
 }
@@ -50,7 +50,7 @@ export async function localFetch(input, init) {
       headers: { ...Object.fromEntries(prepared.headers), host: url.host } }, res => {
       if (res.statusCode >= 300 && res.statusCode < 400) {
         res.resume();
-        reject(new QzError("redirect_blocked", "The local service returned a redirect."));
+        reject(new ZuriError("redirect_blocked", "The local service returned a redirect."));
         return;
       }
       try {
@@ -68,10 +68,10 @@ export async function localFetch(input, init) {
 export async function readHealth(endpoint, { timeoutMs = 1000, fetch = localFetch } = {}) {
   const url = localUrl(endpoint);
   const response = await fetch(`${url.origin}/health`, { signal: AbortSignal.timeout(timeoutMs) });
-  if (!response.ok) throw new QzError("connection_unavailable", `The qz connection health check failed (${response.status}).`);
+  if (!response.ok) throw new ZuriError("connection_unavailable", `The zuri connection health check failed (${response.status}).`);
   const health = await response.json();
   if (health.service !== SERVICE_NAME || health.protocolVersion !== PROTOCOL_VERSION || !health.instanceId) {
-    throw new QzError("incompatible_service", "The local service is not a compatible qz installation.");
+    throw new ZuriError("incompatible_service", "The local service is not a compatible zuri installation.");
   }
   return health;
 }
@@ -88,7 +88,7 @@ function initialize(client, transport, timeoutMs, signal) {
   let timer, aborted;
   return new Promise((resolve, reject) => {
     const fail = error => {
-      const failure = new QzError("connection_error", `Could not initialize the MCP connection: ${error.message}`);
+      const failure = new ZuriError("connection_error", `Could not initialize the MCP connection: ${error.message}`);
       if (error.name === "AbortError") failure.name = error.name;
       reject(failure);
     };
@@ -105,10 +105,10 @@ export async function withToolClient(operation) {
   const call = async (target, name, args, { timeoutMs = 180000, signal, fetch = localFetch } = {}) => {
     signal?.throwIfAborted();
     const origin = localUrl(target).origin;
-    if (endpoint && endpoint !== origin) throw new QzError("connection_changed", "The local service changed during the command.");
+    if (endpoint && endpoint !== origin) throw new ZuriError("connection_changed", "The local service changed during the command.");
     if (!client) {
       endpoint = origin;
-      client = new Client({ name: "qz-cli", version: PACKAGE_VERSION });
+      client = new Client({ name: "zuri-cli", version: PACKAGE_VERSION });
       transport = new StreamableHTTPClientTransport(new URL("/mcp", origin), {
         fetch, requestInit: { redirect: "error" },
         reconnectionOptions: { maxRetries: 0, maxReconnectionDelay: 0, initialReconnectionDelay: 0, reconnectionDelayGrowFactor: 1 },
@@ -121,10 +121,10 @@ export async function withToolClient(operation) {
     const value = resultValue(result);
     if (result.isError) {
       if (value && typeof value.code === "string" && typeof value.message === "string") {
-        throw new QzError(value.code, value.message,
+        throw new ZuriError(value.code, value.message,
           value.details && typeof value.details === "object" && !Array.isArray(value.details) ? value.details : {});
       }
-      throw new QzError("tool_error", typeof value === "string" ? value : "The browser tool failed.", { result: value });
+      throw new ZuriError("tool_error", typeof value === "string" ? value : "The browser tool failed.", { result: value });
     }
     return value;
   };

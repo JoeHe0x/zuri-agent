@@ -8,7 +8,7 @@ export const FIREFOX_INSTALL_HINT = "Install Mozilla Firefox 154 or newer with n
 const FIREFOX_CHANNEL = /firefox|gecko/i;
 
 /** Chromium suites stay on the Chrome package. Firefox channels belong to verify:firefox. */
-export function assertChromiumChannel(channel = process.env.QINGZHOU_PLAYWRIGHT_CHANNEL || "") {
+export function assertChromiumChannel(channel = process.env.ZURI_PLAYWRIGHT_CHANNEL || "") {
   if (FIREFOX_CHANNEL.test(channel)) {
     throw new Error(`Chromium tests load the Chrome package (dist/extension) in Chromium. Channel "${channel}" is not used here. Run npm run verify:firefox for dist/extension-firefox in Firefox.`);
   }

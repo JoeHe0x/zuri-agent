@@ -104,7 +104,7 @@ test('batch import requires expectations, validates all rows before writing, and
   await assert.rejects(workspace.import({ skills: [skill('one')], expected: {} }), /expected record/);
   await assert.rejects(workspace.import({ skills: [skill('one'), skill('bad')], expected: { one: null, bad: null } }), /invalid plugin/);
   assert.deepEqual(storage.snapshot()._skills, {});
-  await assert.rejects(workspace.import({ skills: [skill('qingzhou-documents')], expected: { 'qingzhou-documents': null } }), { code: 'SKILL_READ_ONLY' });
+  await assert.rejects(workspace.import({ skills: [skill('zuri-documents')], expected: { 'zuri-documents': null } }), { code: 'SKILL_READ_ONLY' });
   const result = await workspace.import({ skills: [skill('one')], expected: { one: null } });
   assert.equal(result.count, 1);
   await assert.rejects(workspace.import({ skills: [skill('one', 'overwrite')], expected: { one: null } }), conflict);

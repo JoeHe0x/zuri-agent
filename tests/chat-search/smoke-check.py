@@ -44,7 +44,7 @@ def run(args):
     with serve_repo() as base_url, sync_playwright() as p:
         browser = p.chromium.launch(
             headless=not args.headed,
-            channel=os.environ.get("QINGZHOU_PLAYWRIGHT_CHANNEL", "chromium"),
+            channel=os.environ.get("ZURI_PLAYWRIGHT_CHANNEL", "chromium"),
         )
         page = browser.new_page(
             locale="zh-CN",
@@ -59,7 +59,7 @@ def run(args):
           const listeners = { message: [], disconnect: [], changed: [] };
           const session = { id: 'sess-chat-search', title: '搜索测试任务', parentSessionId: 'root' };
           const storage = {
-            qz_data_consent: { version: 1, acceptedAt: 1 },
+            zuri_data_consent: { version: 1, acceptedAt: 1 },
             _sessions: {},
             _skills: {
               'search-smoke-skill': {
@@ -82,7 +82,7 @@ def run(args):
                 scope: 'site',
                 status: 'active',
                 license: 'Internal',
-                compatibility: 'Qingzhou 0.4+',
+                compatibility: 'Zuri 0.4+',
                 'allowed-tools': 'page_read page_click',
                 domains: ['example.com', 'www.example.com'],
                 urlPatterns: [
@@ -103,7 +103,7 @@ def run(args):
                     type: 'json',
                     description: '插件声明',
                     content: JSON.stringify({
-                      format: 'qingzhou.plugin',
+                      format: 'zuri.plugin',
                       schemaVersion: 1,
                       id: 'search-smoke-plugin',
                       displayName: 'Skill 搜索测试',
@@ -119,7 +119,7 @@ def run(args):
                     }, null, 2),
                   },
                 ],
-                format: 'qingzhou.skill',
+                format: 'zuri.skill',
                 schemaVersion: 2,
                 createdAt: '2026-07-10 10:00:00',
                 updatedAt: '2026-07-10 10:00:00',
@@ -515,10 +515,10 @@ def run(args):
             page.wait_for_function("document.querySelector('#git-skill-sources-status')?.textContent.includes('已是最新')", timeout=args.timeout)
             check(page.evaluate("window.__gitSourceRequests[2]?.sourceId") == "git-opencli-skills", "Repository update should use the persisted source identity")
             page.click('[data-git-source-action="remove"]')
-            page.wait_for_selector("#qz-decision-dialog[open]", timeout=args.timeout)
-            check(page.locator("#qz-decision-message").inner_text() == "当前来源包含 1 个已安装 Skill。", "Unbind should explain the safe cleanup choice")
+            page.wait_for_selector("#zuri-decision-dialog[open]", timeout=args.timeout)
+            check(page.locator("#zuri-decision-message").inner_text() == "当前来源包含 1 个已安装 Skill。", "Unbind should explain the safe cleanup choice")
             capture(page, "git-source-remove")
-            page.click('[data-qz-decision-value="delete"]')
+            page.click('[data-zuri-decision-value="delete"]')
             page.wait_for_function("document.querySelector('#git-skill-sources-status')?.textContent.includes('清除 1 个 Skill')", timeout=args.timeout)
             check(page.evaluate("window.__gitSourceRequests[3]?.deleteUnmodifiedSkills") is True, "Repository cleanup should request deletion of unchanged Skills only")
             page.click("#btn-close-git-skill-sources")
@@ -920,7 +920,7 @@ def run(args):
             saved_skill = page.evaluate("window.__skillWorkbenchStorage._skills['search-smoke-skill']")
             check(saved_skill.get("metadata", {}).get("displayName") == "Skill 工作台测试", "Saving should persist structured displayName")
             check(saved_skill.get("license") == "Internal", "Saving should silently preserve license metadata")
-            check(saved_skill.get("compatibility") == "Qingzhou 0.4+", "Saving should silently preserve compatibility metadata")
+            check(saved_skill.get("compatibility") == "Zuri 0.4+", "Saving should silently preserve compatibility metadata")
             check(saved_skill.get("allowed-tools") == "page_read page_click", "Saving should silently preserve allowed-tools metadata")
             check(saved_skill.get("resources", [])[0].get("path") == "scripts/extract-renamed.mjs", "Saving should persist an inline resource rename")
             layout = page.evaluate("""

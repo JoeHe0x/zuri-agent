@@ -258,7 +258,7 @@ async function refreshOpenSlashMenu() {
     };
     renderSlashMenu();
   } catch (err) {
-    console.debug("[轻舟] refresh slash resources after registry update failed:", err instanceof Error ? err.message : err);
+    console.debug("[Zuri] refresh slash resources after registry update failed:", err instanceof Error ? err.message : err);
   }
 }
 
@@ -329,12 +329,12 @@ function renderSlashMenu() {
     return (item.kind === "command" ? "" : groupHeaders()) + (!prev || item.kind !== prev.kind ? label : "");
   };
   const rows = slashMenuState.items.map((item, index) => slashMenuState.mention ? `
-    <button class="qz-menu-item slash-item slash-tab ${index === slashMenuState.selected ? "active" : ""}" type="button" data-slash-index="${index}">
+    <button class="zuri-menu-item slash-item slash-tab ${index === slashMenuState.selected ? "active" : ""}" type="button" data-slash-index="${index}">
       ${item.icon ? `<img class="slash-tab-icon" src="${escapeHtmlAttribute(item.icon)}" alt="">` : `<span class="slash-tab-icon"></span>`}
       <span class="slash-title">${escapeHtml(item.title)}</span>
     </button>` : `
     ${slashHeader(item, index)}
-    <button class="qz-menu-item slash-item ${item.group && groups.size ? "slash-item-nested " : ""}${index === slashMenuState.selected ? "active" : ""}" type="button" data-slash-index="${index}"${item.subtitle ? ` title="${escapeHtmlAttribute(item.subtitle)}"` : ""}>
+    <button class="zuri-menu-item slash-item ${item.group && groups.size ? "slash-item-nested " : ""}${index === slashMenuState.selected ? "active" : ""}" type="button" data-slash-index="${index}"${item.subtitle ? ` title="${escapeHtmlAttribute(item.subtitle)}"` : ""}>
       <span class="slash-icon ${escapeHtmlAttribute(slashKindClass(item))}">${item.kind === "skill" && item.icon ? `<img class="slash-skill-icon" src="${escapeHtmlAttribute(item.icon)}" alt="">` : slashIcon(item.run ? "add" : item.kind)}</span>
       <span class="slash-title">${escapeHtml(item.title)}</span>
       <span class="slash-meta">${escapeHtml(item.meta)}</span>

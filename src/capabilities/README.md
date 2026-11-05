@@ -1,6 +1,6 @@
 # Capabilities
 
-Add a package under `src/capabilities/` to extend qz with tools, result cards, pages, model
+Add a package under `src/capabilities/` to extend zuri with tools, result cards, pages, model
 providers, or embedded Skills. Declare its contributions in `index.ts`; the build discovers them
 automatically.
 
@@ -31,8 +31,8 @@ const t = createTranslator(defineMessages("example-tool", {
   text: { "zh-CN": "要返回的文本", en: "Text to return." },
 }));
 
-export default function (qz: ToolExtensionAPI) {
-  qz.registerTool({
+export default function (zuri: ToolExtensionAPI) {
+  zuri.registerTool({
     name: "example_echo",
     get title() { return t("title"); },
     get description() { return t("description"); },
@@ -53,7 +53,7 @@ task's tab from the call context. Require an explicitly owned target.
 
 Tools using bookmarks or history declare `requires: { browserPermission: "bookmarks" }` or
 `"history"`. The host waits for user authorization before starting the tool deadline. Obtain the
-Chrome API inside the handler through `qz.getBookmarks()` or `qz.getHistory()` so newly granted
+Chrome API inside the handler through `zuri.getBookmarks()` or `zuri.getHistory()` so newly granted
 permissions take effect immediately. See [permission handling](../../docs/permissions.md#on-demand-access).
 
 ## One package, separate runtimes
@@ -102,8 +102,8 @@ readers must not scroll, focus or activate tabs. Native screenshot fallback seri
 capture and restoration transaction per window. Installed Skill manifests, trusted Skill host aliases,
 model arguments and result
 payloads cannot grant scheduling authority; the selected definition must come from a core registry
-snapshot. Any build-time capability can use these fields through `qz.registerTool`; there is no tool-name
-allowlist. For example, `qz.registerTool({ ...definition, behavior: { ...definition.behavior, barrier: true } })`
+snapshot. Any build-time capability can use these fields through `zuri.registerTool`; there is no tool-name
+allowlist. For example, `zuri.registerTool({ ...definition, behavior: { ...definition.behavior, barrier: true } })`
 marks a tool that may touch global resources. Skill/plugin tools (`source: "plugin"`) are always barriers;
 manifest fields cannot opt them into parallel execution. `run_skill_script` remains a barrier.
 `run_script` declares `parallelTab: true` and a barrier predicate: inner mode or code that may use
@@ -172,11 +172,11 @@ In `renderers.ts`:
 ```ts
 import type { RendererExtensionAPI } from "#sdk/sidepanel";
 
-export default function (qz: RendererExtensionAPI) {
-  qz.registerRenderer(qz.project("example.echo", (parent, view) => {
+export default function (zuri: RendererExtensionAPI) {
+  zuri.registerRenderer(zuri.project("example.echo", (parent, view) => {
     parent.textContent = String(view.result ?? "");
   }));
-  qz.registerPresentation({
+  zuri.registerPresentation({
     id: "example.echo",
     argsSummary: ({ args }) => `(${String(args.text ?? "")})`,
   });
@@ -216,10 +216,10 @@ Declare `export { default as ui } from "./ui.js";` in the index, then register t
 import type { UiExtensionAPI } from "#sdk/sidepanel";
 import { t } from "./i18n.js";
 
-export default function (qz: UiExtensionAPI) {
-  const view = qz.mountTemplate("example-ui");
+export default function (zuri: UiExtensionAPI) {
+  const view = zuri.mountTemplate("example-ui");
   const page = view.querySelector<HTMLElement>("#example-page")!;
-  qz.registerPage({ id: "example", title: t("pageTitle"), order: 80, elements: [page] });
+  zuri.registerPage({ id: "example", title: t("pageTitle"), order: 80, elements: [page] });
 }
 ```
 
@@ -227,10 +227,10 @@ Define `pageTitle` in the package's messages and export `translations`; the [loc
 guide](../../docs/localization.md) shows how to write `i18n.ts`. Use `capture/restore` to preserve
 page position and `activate/deactivate` to handle navigation.
 
-`qz.on` subscribes to read-only events accepted by the framework. Use `qz.onDispose` to release
-owned resources, bind DOM listeners to `qz.signal`, and check lifecycle cancellation before
+`zuri.on` subscribes to read-only events accepted by the framework. Use `zuri.onDispose` to release
+owned resources, bind DOM listeners to `zuri.signal`, and check lifecycle cancellation before
 asynchronous updates. Discard late results after disposal. Store UI preferences in the package
-namespace through `qz.storage`; use host APIs for task and resource data. Cooperate with other
+namespace through `zuri.storage`; use host APIs for task and resource data. Cooperate with other
 packages through optional commands and handle their absence.
 
 ### Settings
@@ -239,7 +239,7 @@ packages through optional commands and handle their absence.
 }` share navigation and a Save button, but retain their own drafts, persistence, and cancellation
 signals. Each group commits independently; failed groups keep their drafts for retry.
 
-For ordinary forms, use `createSettingsForm(qz, { initialValue, getDraft, setDraft, load, save,
+For ordinary forms, use `createSettingsForm(zuri, { initialValue, getDraft, setDraft, load, save,
 renderState })`. Pass its `activate/deactivate/save` methods to the settings registration and call
 `changed()` on input. The helper separates the submitted snapshot from later edits and handles
 revisions and late results. Writes already submitted to Chrome may complete after cancellation.
@@ -268,8 +268,8 @@ Declare `export { default as skills } from "./skills.js";` in the index, then re
 ```ts
 import type { SkillExtensionAPI } from "#sdk/shared/skill-definition";
 
-export default function (qz: SkillExtensionAPI) {
-  qz.registerSkill({
+export default function (zuri: SkillExtensionAPI) {
+  zuri.registerSkill({
     name: "example-guide",
     displayName: "Example guide",
     description: "Use when organizing notes from web pages.",
@@ -304,8 +304,8 @@ packages and user history.
 ## Templates and styles
 
 The build includes `ui.html/ui.css` beside UI and renderer implementations. Asset paths resolve
-relative to the source file, and exports use the same skin. Reuse `qz-*` controls and complete
-static `qz:` classes; put complex states in the `components` layer. The build supplies Tailwind and
+relative to the source file, and exports use the same skin. Reuse `zuri-*` controls and complete
+static `zuri:` classes; put complex states in the `components` layer. The build supplies Tailwind and
 the shared skin. See the [design system](../../docs/design-system.md) for available classes.
 
 Keep copy with its package. Preserve tool identifiers, action values, enums, and stored values

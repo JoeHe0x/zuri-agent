@@ -18,7 +18,7 @@ export default {
   },
   opencodego: {
     override: true,
-    requestHeaders: { "User-Agent": "qz-agent/1.0.0" },
+    requestHeaders: { "User-Agent": "zuri-agent/1.0.0" },
     sessionAffinityHeader: "x-opencode-session",
     contentThinkTags: true,
   },
@@ -34,7 +34,7 @@ export default {
     endpoint: "https://api.kimi.com/coding/v1/messages",
     anthropicVersion: "2023-06-01",
     modelsAuthHeader: "x-api-key",
-    requestHeaders: { "User-Agent": "qz-agent/1.0.0" },
+    requestHeaders: { "User-Agent": "zuri-agent/1.0.0" },
     anthropicRequestDefaults: { thinking: { type: "enabled", budget_tokens: 1024 } },
   },
 } satisfies Readonly<Record<string, ProviderPreset>>;

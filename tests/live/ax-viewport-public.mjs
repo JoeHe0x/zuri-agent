@@ -14,7 +14,7 @@ assert.ok(Number.isInteger(minimumTrials) && minimumTrials >= 1 && minimumTrials
 const pauseMs = Number(values['pause-ms']);
 assert.ok(Number.isInteger(pauseMs) && pauseMs >= 0 && pauseMs <= 60000, '--pause-ms must be an integer from 0 to 60000');
 const apiKey = process.env.DEEPSEEK_API_KEY;
-assert.ok(apiKey, 'Source /home/box/shared/qz/deepseek.env before this explicit live run.');
+assert.ok(apiKey, 'Source /home/box/shared/zuri/deepseek.env before this explicit live run.');
 const output = resolve(values.output || 'tests/results/viewport-ax/round2');
 assert.ok(!existsSync(resolve(output, 'results.json')), 'Choose a new output directory; earlier attempts must not be overwritten.');
 await mkdir(output, { recursive: true });

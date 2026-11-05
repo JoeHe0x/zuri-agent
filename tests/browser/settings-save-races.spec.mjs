@@ -6,7 +6,7 @@ const config = { provider: "custom", apiKey: "test-key", model: "test-model", cu
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(installBenchmarkChromeStub, { config });
   await page.goto("/extension/sidepanel/sidepanel.html", { waitUntil: "domcontentloaded" });
-  await page.waitForFunction(() => Boolean(window.qingzhouConversationBenchmark));
+  await page.waitForFunction(() => Boolean(window.zuriConversationBenchmark));
   await page.locator("#btn-settings").click();
   await expect(page.locator("#cfg-context-preset")).toHaveValue("128K");
 });
@@ -15,11 +15,11 @@ async function save(page, context = "256K") {
   await page.locator("#cfg-context-preset").selectOption(context);
   await expect(page.locator("#btn-save-settings")).toBeEnabled();
   await page.locator("#btn-save-settings").click();
-  return page.evaluate(() => window.__qzPostedMessages.filter(message => message.type === "save_config").at(-1));
+  return page.evaluate(() => window.__zuriPostedMessages.filter(message => message.type === "save_config").at(-1));
 }
 
 async function respond(page, request, error = "") {
-  await page.evaluate(({ request, error }) => window.__qzEmitPortMessage(error
+  await page.evaluate(({ request, error }) => window.__zuriEmitPortMessage(error
     ? { type: "error", requestId: request.requestId, message: error }
     : { type: "config_saved", requestId: request.requestId, config: request.config }), { request, error });
 }
@@ -67,7 +67,7 @@ test("current failures preserve the draft and a retry can complete", async ({ pa
 const customProtocols = [{ id: "openai", label: "OpenAI" }, { id: "anthropic", label: "Anthropic" }, { id: "vendor-native", label: "Native service" }];
 
 test("registered protocols are selectable and saved without changing their endpoint", async ({ page }) => {
-  await page.evaluate(config => window.__qzEmitPortMessage({ type: "config", config }), { ...config, customProtocols });
+  await page.evaluate(config => window.__zuriEmitPortMessage({ type: "config", config }), { ...config, customProtocols });
   const protocol = page.locator("#cfg-custom-protocol");
   await expect(protocol.locator("option")).toHaveText(["OpenAI", "Anthropic", "Native service"]);
   await protocol.selectOption("vendor-native");
@@ -81,7 +81,7 @@ test("registered protocols are selectable and saved without changing their endpo
 
 test("an old preset keeps its unavailable protocol across loading, selection and saving", async ({ page }) => {
   const preset = { ...config, id: "old-native", name: "Archived native", customProtocol: "retired-native", customEndpoint: "https://native.example/v1" };
-  await page.evaluate(config => window.__qzEmitPortMessage({ type: "config", config }), { ...preset, activePresetId: preset.id, presets: [preset], customProtocols });
+  await page.evaluate(config => window.__zuriEmitPortMessage({ type: "config", config }), { ...preset, activePresetId: preset.id, presets: [preset], customProtocols });
   await expect(page.locator("#cfg-custom-protocol")).toHaveValue("retired-native");
   await page.locator("#cfg-custom-protocol").selectOption("anthropic");
   await page.locator("#cfg-preset").selectOption("old-native");
@@ -92,7 +92,7 @@ test("an old preset keeps its unavailable protocol across loading, selection and
 });
 
 test("built-in protocol completion keeps its existing endpoint hints", async ({ page }) => {
-  await page.evaluate(config => window.__qzEmitPortMessage({ type: "config", config }), { ...config, customProtocols });
+  await page.evaluate(config => window.__zuriEmitPortMessage({ type: "config", config }), { ...config, customProtocols });
   const endpoint = page.locator("#cfg-custom-endpoint");
   for (const [protocol, suffix] of [["anthropic", "messages"], ["openai", "chat/completions"]]) {
     await page.locator("#cfg-custom-protocol").selectOption(protocol);
@@ -108,30 +108,30 @@ test("an unmatched late save response cannot enter the broadcast config path", a
   await respond(page, { requestId: "timed-out-request", config: { ...config, contextWindow: 256000 } });
   await expect(page.locator("#settings-panel")).toBeVisible();
   await expect(page.locator("#cfg-context-preset")).toHaveValue("512K");
-  await page.evaluate(config => window.__qzEmitPortMessage({ type: "config_saved", config }), config);
+  await page.evaluate(config => window.__zuriEmitPortMessage({ type: "config_saved", config }), config);
   await expect(page.locator("#settings-panel")).toBeVisible();
   await expect(page.locator("#cfg-context-preset")).toHaveValue("512K");
   // A fresh background snapshot still owns the ordinary config path.
-  await page.evaluate(config => window.__qzEmitPortMessage({ type: "config", config }), config);
+  await page.evaluate(config => window.__zuriEmitPortMessage({ type: "config", config }), config);
   await expect(page.locator("#cfg-context-preset")).toHaveValue("128K");
 });
 
 test("a Skill save cannot close or replace a newly opened form", async ({ page }) => {
   const setting = { id: "test::one", pluginId: "one", skillName: "test", skillDisplayName: "Test", configured: true, fields: [{ key: "value", type: "text", label: "Value", value: "initial" }] };
-  const listing = await page.evaluate(() => window.__qzPostedMessages.find(message => message.type === "list_skill_settings"));
-  await page.evaluate(({ listing, setting }) => window.__qzEmitPortMessage({ type: "skill_settings", requestId: listing.requestId, settings: [setting] }), { listing, setting });
+  const listing = await page.evaluate(() => window.__zuriPostedMessages.find(message => message.type === "list_skill_settings"));
+  await page.evaluate(({ listing, setting }) => window.__zuriEmitPortMessage({ type: "skill_settings", requestId: listing.requestId, settings: [setting] }), { listing, setting });
   await page.locator("#settings-tab-skills").click();
   const field = page.locator('[data-skill-setting-field="value"]');
   await field.fill("submitted");
   await page.locator("#btn-save-settings").click();
-  const first = await page.evaluate(() => window.__qzPostedMessages.filter(message => message.type === "save_skill_settings").at(-1));
+  const first = await page.evaluate(() => window.__zuriPostedMessages.filter(message => message.type === "save_skill_settings").at(-1));
   await page.locator("#btn-close-settings").click();
   await page.locator("#btn-settings").click();
   await expect(field).toBeEnabled();
   await field.fill("new draft");
   await page.locator("#btn-save-settings").click();
-  const second = await page.evaluate(() => window.__qzPostedMessages.filter(message => message.type === "save_skill_settings").at(-1));
-  await page.evaluate(({ first, setting }) => window.__qzEmitPortMessage({ type: "skill_settings_saved", requestId: first.requestId, setting: { ...setting, fields: [{ ...setting.fields[0], value: "submitted" }] } }), { first, setting });
+  const second = await page.evaluate(() => window.__zuriPostedMessages.filter(message => message.type === "save_skill_settings").at(-1));
+  await page.evaluate(({ first, setting }) => window.__zuriEmitPortMessage({ type: "skill_settings_saved", requestId: first.requestId, setting: { ...setting, fields: [{ ...setting.fields[0], value: "submitted" }] } }), { first, setting });
   await expect(page.locator("#settings-panel")).toBeVisible();
   await expect(field).toHaveValue("new draft");
   await expect(field).toBeDisabled();
@@ -142,7 +142,7 @@ test("a Skill save cannot close or replace a newly opened form", async ({ page }
   await expect(page.locator("#settings-save-status")).toHaveText("Skill save failure");
   await field.fill("recovered");
   await page.locator("#btn-save-settings").click();
-  const third = await page.evaluate(() => window.__qzPostedMessages.filter(message => message.type === "save_skill_settings").at(-1));
-  await page.evaluate(({ third, setting }) => window.__qzEmitPortMessage({ type: "skill_settings_saved", requestId: third.requestId, setting: { ...setting, fields: [{ ...setting.fields[0], value: "recovered" }] } }), { third, setting });
+  const third = await page.evaluate(() => window.__zuriPostedMessages.filter(message => message.type === "save_skill_settings").at(-1));
+  await page.evaluate(({ third, setting }) => window.__zuriEmitPortMessage({ type: "skill_settings_saved", requestId: third.requestId, setting: { ...setting, fields: [{ ...setting.fields[0], value: "recovered" }] } }), { third, setting });
   await expect(page.locator("#settings-panel")).toBeHidden();
 });

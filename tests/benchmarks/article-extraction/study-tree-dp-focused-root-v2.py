@@ -46,11 +46,11 @@ def load_module(name: str, path: Path):
 
 
 MODES = load_module(
-    "qingzhou_focused_root_modes",
+    "zuri_focused_root_modes",
     HERE / "study-tree-dp-focused-collection-em.py",
 )
 GLOBAL = load_module(
-    "qingzhou_focused_root_global",
+    "zuri_focused_root_global",
     HERE / "study-tree-dp-global-choice.py",
 )
 CORE = MODES.CORE
@@ -694,7 +694,7 @@ def main() -> int:
 
     gate = mode_gate_oof(rows, args.folds)
     report = {
-        "schema": "qingzhou.tree-dp-focused-root-study.v2",
+        "schema": "zuri.tree-dp-focused-root-study.v2",
         "protocol": {
             "trainingSplits": ["base", "train"],
             "trainingCohort": "human-page-type-detail",

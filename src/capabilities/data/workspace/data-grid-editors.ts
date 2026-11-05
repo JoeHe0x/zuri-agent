@@ -95,7 +95,7 @@ export function createDataGridEditors(options: DataGridEditorOptions) {
     const readonly = editable ? "" : " readonly";
     return `
       <div class="data-cell-detail-editor">
-        <textarea data-data-cell-detail-input class="qz-field qz-field--mono data-cell-detail-input"
+        <textarea data-data-cell-detail-input class="zuri-field zuri-field--mono data-cell-detail-input"
           spellcheck="false" data-field="${escapeHtmlAttribute(field)}" ${readonly}
         >${escapeHtml(formatDetailValue(value))}</textarea>
       </div>
@@ -220,7 +220,7 @@ export function createDataGridEditors(options: DataGridEditorOptions) {
       await copyPlainText(text);
       setCopyButton(t("copied"), "success");
     } catch (error) {
-      console.warn("[轻舟数据] row detail copy failed", error);
+      console.warn("[Zuri数据] row detail copy failed", error);
       setCopyButton(t("failed"), "error");
     }
   }

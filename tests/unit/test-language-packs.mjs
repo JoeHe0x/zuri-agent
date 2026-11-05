@@ -33,9 +33,9 @@ const nativePack = pack => JSON.parse(assets.get(resolve(source, `_locales/${pac
 const builtinLabels = {
   "skill-workbench": ["skill-workbench.name", "skill-workbench.workbenchDescription"],
   "site-skill-author": ["skills.siteAuthorName", "skills.siteAuthorDescription"],
-  "qingzhou-documents": ["documents-model.documentsDisplayName", "documents-model.documentsDescription"],
-  "qingzhou-mcp": ["mcp-model.mcpDisplayName", "mcp-model.mcpDescription"],
-  "qingzhou-management": ["settings-model.managementDisplayName", "settings-model.managementDescription"],
+  "zuri-documents": ["documents-model.documentsDisplayName", "documents-model.documentsDescription"],
+  "zuri-mcp": ["mcp-model.mcpDisplayName", "mcp-model.mcpDescription"],
+  "zuri-management": ["settings-model.managementDisplayName", "settings-model.managementDescription"],
 };
 function withPack(pack, run) {
   const previous = Object.getOwnPropertyDescriptor(globalThis, "chrome");
@@ -125,7 +125,7 @@ test("the public extension ships all twelve declared native language packs", () 
   assert.equal(assets.size, packs.length);
   for (const pack of packs) {
     const messages = nativePack(pack);
-    assert.equal(messages.qz_language.message, pack.language);
+    assert.equal(messages.zuri_language.message, pack.language);
     assert.ok(messages.extensionName.message);
     assert.ok(messages.extensionDescription.message);
   }
@@ -235,7 +235,7 @@ test("chrome store review copy is translated in every catalog and names the stor
 });
 
 test("built-in skill cards and tool titles use each language pack while identifiers and user-authored text stay stable", t => {
-  const directory = mkdtempSync(join(tmpdir(), "qingzhou-locale-registrations-"));
+  const directory = mkdtempSync(join(tmpdir(), "zuri-locale-registrations-"));
   t.after(() => rmSync(directory, { recursive: true, force: true }));
   let originalNames;
   for (const pack of packs.filter(pack => pack.catalog)) {

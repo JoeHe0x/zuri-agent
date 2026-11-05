@@ -60,16 +60,16 @@ function buildMcpSdk() {
       export { CfWorkerJsonSchemaValidator } from "@modelcontextprotocol/sdk/validation/cfworker";
     `, resolveDir: ROOT, sourcefile: "mcp-sdk-entry.js" },
     outfile: "vendor/mcp-sdk.mjs", bundle: true, write: false, metafile: true,
-    platform: "browser", format: "iife", globalName: "qzMcpSdk", target: "chrome114",
+    platform: "browser", format: "iife", globalName: "zuriMcpSdk", target: "chrome114",
     banner: { js: "let cached;\nexport function getMcpSdk() {\nif (cached) return cached;" },
-    footer: { js: "return cached = qzMcpSdk;\n}" },
+    footer: { js: "return cached = zuriMcpSdk;\n}" },
     sourcemap: "linked", sourcesContent: true, legalComments: "none", plugins: [{
       name: "mcp-interpreted-schema-validator",
       setup(context) {
         // The SDK's default Ajv provider compiles schemas with Function, even when unused.
-        // qz already selects CfWorker explicitly; make the SDK default use the same interpreter.
-        context.onResolve({ filter: /\/validation\/ajv-provider\.js$/ }, () => ({ path: "mcp-validator", namespace: "qz" }));
-        context.onLoad({ filter: /^mcp-validator$/, namespace: "qz" }, () => ({
+        // zuri already selects CfWorker explicitly; make the SDK default use the same interpreter.
+        context.onResolve({ filter: /\/validation\/ajv-provider\.js$/ }, () => ({ path: "mcp-validator", namespace: "zuri" }));
+        context.onLoad({ filter: /^mcp-validator$/, namespace: "zuri" }, () => ({
           contents: 'export { CfWorkerJsonSchemaValidator as AjvJsonSchemaValidator } from "@modelcontextprotocol/sdk/validation/cfworker";',
           resolveDir: ROOT, loader: "js",
         }));

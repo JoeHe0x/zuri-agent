@@ -18,7 +18,7 @@ process.kill(primary.runnerPid, 0);
 const clientId = primary.clientId;
 const reportPath = values.report.replace(/\.json$/, `-supplement-${Date.now()}.json`);
 const report = { ok: false, startedAt: new Date().toISOString(), primaryReport: values.report, tasks: [], operations: [], failures: [] };
-const client = new Client({ name: "qz-live-supplement", version: "1.0.0" });
+const client = new Client({ name: "zuri-live-supplement", version: "1.0.0" });
 const transport = new StreamableHTTPClientTransport(new URL("/mcp", endpoint), { fetch: localFetch });
 const sessions = new Set();
 try {
@@ -27,8 +27,8 @@ try {
   await inputCase("confirmation", "Use wait_for_user to ask for confirmation before opening https://example.com/. After I approve, read its page title and reply with it.");
   const table = primary.tasks.find(item => item.id === "earthquake-watch" && item.ok)?.table;
   assert.ok(table, "Primary run must have a verified real USGS table");
-  const exported = await mcp("qingzhou_export_data_table", { table: table.table, format: "csv" });
-  const downloaded = await mcp("qingzhou_list_downloads", { id: exported.downloadId });
+  const exported = await mcp("zuri_export_data_table", { table: table.table, format: "csv" });
+  const downloaded = await mcp("zuri_list_downloads", { id: exported.downloadId });
   const item = downloaded.downloads[0]; assert.equal(item.state, "complete");
   const file = realpathSync(item.filepath);
   const expected = table.exports.find(item => item.format === "csv");
@@ -37,13 +37,13 @@ try {
   const bytes = readFileSync(file);
   assert.deepEqual(bytes, readFileSync(expected.savedPath), "MCP export exactly matches the earlier CLI export of the same real table");
   report.export = { table: table.table, downloadId: exported.downloadId, bytes: bytes.length, matchesCliBytes: true };
-  const settings = await mcp("qingzhou_get_settings", { key: "model" });
+  const settings = await mcp("zuri_get_settings", { key: "model" });
   const cliSettings = await cli(["settings", "get", "model"]);
   assert.deepEqual(settings, cliSettings); report.settings = { key: "model", matched: true };
   report.ok = true;
 } catch (error) { report.failures.push({ message: error.message, stack: error.stack }); process.exitCode = 1; }
 finally {
-  for (const sessionId of sessions) await mcp("qingzhou_stop_session", { sessionId }).catch(() => {});
+  for (const sessionId of sessions) await mcp("zuri_stop_session", { sessionId }).catch(() => {});
   await transport.terminateSession().catch(() => {}); await client.close().catch(() => {});
   report.finishedAt = new Date().toISOString(); persist();
   console.log(JSON.stringify({ finished: true, ok: report.ok, reportPath, failures: report.failures.map(item => item.message) }));
@@ -71,8 +71,8 @@ async function cli(args) {
 async function inputCase(kind, prompt) {
   const entry = { kind, prompt, ok: false }; report.tasks.push(entry); persist();
   let finished = false, result, failure, sessionId;
-  const pending = mcp("qingzhou_create_session", { title: `Live supplement: ${kind}`, firstMessage: prompt, stream: true, waitTimeoutSeconds: 180 }, { onprogress: progress => {
-    const event = progress._meta?.["qz/task-event"];
+  const pending = mcp("zuri_create_session", { title: `Live supplement: ${kind}`, firstMessage: prompt, stream: true, waitTimeoutSeconds: 180 }, { onprogress: progress => {
+    const event = progress._meta?.["zuri/task-event"];
     if (event?.type === "created") { sessionId = event.session?.id || event.sessionId; entry.sessionId = sessionId; sessions.add(sessionId); }
   } }).then(value => result = value, error => failure = error).finally(() => finished = true);
   const deadline = Date.now() + 180_000;
@@ -96,7 +96,7 @@ async function inputCase(kind, prompt) {
     assert.equal(result.snapshot.status, "completed"); assert.equal(entry.responded, true);
     entry.snapshot = result.snapshot; entry.ok = true; sessions.delete(sessionId); persist();
   } catch (error) {
-    if (sessionId) await mcp("qingzhou_stop_session", { sessionId }).catch(() => {});
+    if (sessionId) await mcp("zuri_stop_session", { sessionId }).catch(() => {});
     await pending; throw error;
   }
 }

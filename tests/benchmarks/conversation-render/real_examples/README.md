@@ -1,6 +1,6 @@
 # Local conversation samples
 
-Place qz HTML exports here to replay them with the current renderer. JSON files with a nonempty
+Place zuri HTML exports here to replay them with the current renderer. JSON files with a nonempty
 `transcript` array are also supported; [stub.json](stub.json) shows the format. The benchmark treats
 exports as recorded data and simulates Chrome APIs.
 

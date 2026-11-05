@@ -27,15 +27,15 @@ starts the event page from `background.scripts`. This checkout was not loaded th
 | Scripts | The Chrome module graph, plus `background/firefox-boot.js` and `sidepanel/firefox-boot.js`. Those boot modules patch Firefox APIs, then import the shared background and side panel. |
 | Background | `background.scripts` is `background/firefox-boot.js` with `"type": "module"`. The Firefox manifest omits `background.service_worker`. Firefox starts the event page and does not run a service worker entry ([bug 1573659](https://bugzilla.mozilla.org/show_bug.cgi?id=1573659)). |
 | Workspace page | `sidebar_action.default_panel` is `sidepanel/sidepanel.html`. The copy in this package loads `firefox-boot.js`. `open_at_install` is `false`, so install does not open the sidebar. |
-| Session automations | Disabled. The boot sets `qzSessionAutomationsEnabled` to false and clears `qingzhou.automation.scheduler`. The sidebar omits the automations controls. Stored records stay in `storage.local` and do not run. |
-| MCP keepalive | While the CLI connection is enabled, the event page calls `runtime.getPlatformInfo` every 10 seconds and keeps `qingzhou-mcp-bridge-reconnect` armed. Firefox stores the bridge `connectionId` so a wake pairs the same lease. The boundary is in [MCP keepalive and reconnect](firefox-differences.md#mcp-keepalive-and-reconnect). |
+| Session automations | Disabled. The boot sets `zuriSessionAutomationsEnabled` to false and clears `zuri.automation.scheduler`. The sidebar omits the automations controls. Stored records stay in `storage.local` and do not run. |
+| MCP keepalive | While the CLI connection is enabled, the event page calls `runtime.getPlatformInfo` every 10 seconds and keeps `zuri-mcp-bridge-reconnect` armed. Firefox stores the bridge `connectionId` so a wake pairs the same lease. The boundary is in [MCP keepalive and reconnect](firefox-differences.md#mcp-keepalive-and-reconnect). |
 | Content scripts | The same three registrations: MCP connect on loopback, session export at `document_start`, and the page tools at `document_idle`. |
 | Permissions kept | `activeTab`, `alarms`, `tabs`, `tabGroups`, `scripting`, `storage`, `downloads`, `geolocation`, `clipboardWrite`, `notifications`, `declarativeNetRequest`, `unlimitedStorage`, and optional `history`, `bookmarks`, `downloads.open`. |
 | Permissions added in this package only | `webNavigation`, `webRequest`, and `webRequestBlocking`, used by the page and network approximations. |
 | Permissions removed from this package only | `sidePanel`, `debugger`, `offscreen`, and optional `desktopCapture`. Firefox rejects these names. They remain in [`src/manifest.json`](../src/manifest.json). |
 | Data collection | `websiteContent` and `browsingActivity` are required. `locationInfo` and `bookmarksInfo` are optional. `none` is not declared. |
 | Minimum version | `browser_specific_settings.gecko.strict_min_version` is `154.0`, because `sandbox` and `content_security_policy.sandbox` require Firefox 154 (`data_collection_permissions` needs 140). |
-| Add-on id | Provisional `qz-browser-agent@heleifz.github.io`. Confirm it before any signed build. Changing it later changes stored data and the AMO identity. |
+| Add-on id | Provisional `zuri-agent@heleifz.github.io`. Confirm it before any signed build. Changing it later changes stored data and the AMO identity. |
 | Chrome `key` | Omitted from the Firefox manifest. The Chrome extension id stays `ghbaodmonhcgkfeejcpffknlggbjhjgj`. |
 | Sandbox declaration | `sandbox.pages` and `content_security_policy.sandbox` are copied through. Firefox documents `content_security_policy.sandbox` from version 154. The runner page is created from the hidden offscreen frame. |
 
@@ -67,7 +67,7 @@ where Firefox added the API later than Chrome.
 | `permissions.contains` and `permissions.request` | Supported for the optional permissions that remain. | History, bookmarks, and `downloads.open` still use the in-panel allow card. |
 | `notifications` of type `basic`, plus `onClicked` | Supported. `buttons`, `requireInteraction`, `priority`, image and list templates, and `getPermissionLevel` are ignored or absent. | A basic completion notification can appear. It does not stay on screen the way `requireInteraction: true` does in Chrome, and its click does not open the sidebar. |
 | `clipboardWrite` | Supported since Firefox 51. | Copy actions in the sidebar keep the permission. |
-| `geolocation` permission and `navigator.geolocation` in the sidebar | The manifest permission exists since Firefox 54. The side panel reads the location after the in-app consent card. | `get_location` still asks inside qz. Whether Firefox also shows its own location prompt needs a device check. |
+| `geolocation` permission and `navigator.geolocation` in the sidebar | The manifest permission exists since Firefox 54. The side panel reads the location after the in-app consent card. | `get_location` still asks inside zuri. Whether Firefox also shows its own location prompt needs a device check. |
 | `declarativeNetRequest` session rules | The API, `modifyHeaders`, and `initiatorDomains` exist since Firefox 113. | The calls are the same. Whether those rules match extension requests is in the next section. |
 | `extension.isAllowedFileSchemeAccess` | Firefox 48–152 always returned `false`. From Firefox 153 the value follows **Access local files on your computer** in the add-on permissions. | The flag can become true on Firefox 153+. The error text still names `chrome://extensions`. |
 | `commands.getAll` and `commands.onCommand` | Supported. | The model-preset command event can fire. Opening the workspace for that command is not wired. |
@@ -94,7 +94,7 @@ behavior.
 | PDF creation | `document` PDF rendering opens a tab and calls `Page.printToPDF`. | PDF artifacts fail with the debugger error. Other document formats that encode bytes in the background keep their current path. |
 | Child frames and cross-origin iframes | CDP uses `Page.getFrameTree`, `DOM.getFrameOwner`, and `Target.setAutoAttach`. Content scripts are top-frame only. | iframe targets that Chrome resolves through CDP fail. Top-frame content-script reads continue. |
 | Git Skill download through CDP | `Network.loadNetworkResource` and `IO.read` fetch an archive from a tab. | Importing a Skill repository through that page path fails. |
-| Provider and Skill header rules | Session rules set `initiatorDomains` to `runtime.id`. In Chrome that id is the `chrome-extension` host. In Firefox `runtime.id` is the email-shaped add-on id, and the origin host is an internal UUID. | User-Agent and Skill managed headers can miss the extension's own requests. Kimi, DashScope, ChatGPT, and OpenCode calls that require `qz-agent/1.0.0` can fail until the condition is confirmed. |
+| Provider and Skill header rules | Session rules set `initiatorDomains` to `runtime.id`. In Chrome that id is the `chrome-extension` host. In Firefox `runtime.id` is the email-shaped add-on id, and the origin host is an internal UUID. | User-Agent and Skill managed headers can miss the extension's own requests. Kimi, DashScope, ChatGPT, and OpenCode calls that require `zuri-agent/1.0.0` can fail until the condition is confirmed. |
 | `desktopCapture.chooseDesktopMedia` | Not a Firefox permission or API. The recorder already returns "desktopCapture is unavailable" when the method is missing. `getDisplayMedia` is a different picker. | Case recording does not start. Replacing the picker changes the chooser, the stream id, and the audio options. |
 | Shortcut settings | The settings buttons open `chrome://extensions/shortcuts`. | The buttons do not open Firefox's shortcut page (`about:addons`). Display of `commands.getAll` can still show the current binding. |
 | File URL instructions | The `FILE_ACCESS_REQUIRED` text tells the user to enable file access at `chrome://extensions`. | On Firefox 153+ the real control is the add-on's local-file permission. The current sentence sends the user to a Chrome URL. |
@@ -111,7 +111,7 @@ API, not the current tool result.
 | Chrome API or feature | Firefox reality | User-visible effect |
 | --- | --- | --- |
 | `chrome.debugger.attach` / `sendCommand` / `detach` | Permission `version_added` is false. No debugger API page. | Any tool that needs a debugger lease fails with `DEBUGGER_UNAVAILABLE` when it does not already catch that error. The "debugging this browser" infobar cannot be shown. |
-| CDP domains used by qz: `Accessibility.*`, `DOM.*`, `Emulation.*`, `Input.*`, `IO.*`, `Network.*`, `Page.captureScreenshot`, `Page.printToPDF`, `Page.getFrameTree`, `Runtime.evaluate` on a debugger execution context, `Target.setAutoAttach` | No extension binding. | Accessibility snapshots, trusted input, element geometry from the debugger, mobile emulation, response bodies, full-page screenshots, PDF print, and out-of-process frame attach do not run. |
+| CDP domains used by zuri: `Accessibility.*`, `DOM.*`, `Emulation.*`, `Input.*`, `IO.*`, `Network.*`, `Page.captureScreenshot`, `Page.printToPDF`, `Page.getFrameTree`, `Runtime.evaluate` on a debugger execution context, `Target.setAutoAttach` | No extension binding. | Accessibility snapshots, trusted input, element geometry from the debugger, mobile emulation, response bodies, full-page screenshots, PDF print, and out-of-process frame attach do not run. |
 | `chrome.offscreen` | No API and no permission. | The offscreen document is never created. Inner `run_script`, SVG rasterization, and the keepalive ping do not run. |
 | `chrome.sidePanel` | `version_added` is false for the API and the permission. | Per-tab panels, `setPanelBehavior`, and `sidePanel.open({ windowId \| tabId })` do not exist. `sidebar_action` is a different surface and is listed above for confirmation. |
 | `chrome.desktopCapture` | Not implemented. | The Chrome desktop chooser, including its window and audio result, cannot be opened. |
@@ -129,7 +129,7 @@ remaining differences, including the debugging infobar, are in
 [Firefox differences from Chrome](firefox-differences.md).
 
 Session automations are disabled. The alarm API can take a one-minute period, which the survey
-above records, and this package does not arm `qingzhou.automation.scheduler`. An event page can
+above records, and this package does not arm `zuri.automation.scheduler`. An event page can
 be discarded, and the sidebar opens only from a user gesture, so an unattended session cannot
 finish reliably. Definitions already stored for the add-on stay in `storage.local` and do not
 start. The sidebar has no control that creates, edits, or runs one. `manage_sessions` automation

@@ -1,6 +1,6 @@
 /** Map sidePanel.open and the toolbar click onto Firefox sidebarAction. */
 
-const SIDEBAR_PROMPT_ID = "qz-open-sidebar";
+const SIDEBAR_PROMPT_ID = "zuri-open-sidebar";
 const SIDEBAR_PORT_NAME = "sidepanel";
 
 /**
@@ -14,7 +14,7 @@ export function installWorkspacePanel(chromeApi: WorkspaceChrome, host: Diagnost
   const diagnostics: SidebarDiagnostics = {
     attempts: 0, opened: 0, refused: 0, prompts: 0, notified: 0, notificationClicks: 0, lastSource: "", lastError: "", lastAt: "",
   };
-  host.qzFirefoxSidebar = diagnostics;
+  host.zuriFirefoxSidebar = diagnostics;
   const inNotificationClick = trackNotificationClicks(chromeApi.notifications);
   const prompt = installSidebarPrompt(chromeApi, diagnostics);
   const panelUrl = () => {
@@ -26,7 +26,7 @@ export function installWorkspacePanel(chromeApi: WorkspaceChrome, host: Diagnost
     diagnostics.refused += 1;
     diagnostics.lastError = message;
     diagnostics.lastAt = new Date().toISOString();
-    console.error(`[轻舟] firefox sidebarAction failed (${source}):`, message);
+    console.error(`[Zuri] firefox sidebarAction failed (${source}):`, message);
     if (isSidebarGestureError(error)) {
       // An open sidebar already receives the reveal; a badge there would point at a closed panel.
       void sidebarShowing(sidebar).then(showing => {
@@ -186,9 +186,9 @@ function sidebarPromptCopy(chromeApi: WorkspaceChrome): { title: string; message
   let language = "";
   try { language = chromeApi.i18n?.getUILanguage?.() || ""; } catch { language = ""; }
   if (language.toLowerCase().startsWith("zh")) {
-    return { title: "轻舟", message: "点击工具栏中的轻舟图标查看。", tooltip: "轻舟：点击打开侧边栏" };
+    return { title: "Zuri", message: "点击工具栏中的Zuri图标查看。", tooltip: "Zuri：点击打开侧边栏" };
   }
-  return { title: "qz", message: "Click the qz icon in the toolbar to view.", tooltip: "qz: click to open the sidebar" };
+  return { title: "zuri", message: "Click the zuri icon in the toolbar to view.", tooltip: "zuri: click to open the sidebar" };
 }
 
 function errorMessage(error: unknown): string {
@@ -212,7 +212,7 @@ function explainSidebarError(error: unknown): Error {
 type SidebarSource = "api" | "notification" | "toolbar";
 type NotificationListener = (notificationId: string) => unknown;
 
-/** Read `qzFirefoxSidebar` in the background console to see what sidebarAction returned. */
+/** Read `zuriFirefoxSidebar` in the background console to see what sidebarAction returned. */
 export interface SidebarDiagnostics {
   attempts: number;
   opened: number;
@@ -224,7 +224,7 @@ export interface SidebarDiagnostics {
   lastError: string;
   lastAt: string;
 }
-interface DiagnosticsHost { qzFirefoxSidebar?: SidebarDiagnostics }
+interface DiagnosticsHost { zuriFirefoxSidebar?: SidebarDiagnostics }
 interface SidebarPrompt { show(options: { notify: boolean }): void; clear(): void; dismiss(): void }
 interface RuntimePort { name?: string; sender?: { tab?: unknown; url?: string } }
 interface WorkspaceChrome {

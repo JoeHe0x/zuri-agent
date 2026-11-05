@@ -27,7 +27,7 @@ for (const key of ["reference-dir", "candidate-dir", "output"]) {
 const fixtureDirs = fixtureDirectories(values);
 skipWithoutImageMagick("CSS and markup comparison");
 for (const [side, directory] of Object.entries(fixtureDirs)) {
-  const build = JSON.parse(readFileSync(join(directory, ".qingzhou-build.json"), "utf8"));
+  const build = JSON.parse(readFileSync(join(directory, ".zuri-build.json"), "utf8"));
   if (build.mode !== "development") throw new Error(`${side} fixture requires a development build with individual modules`);
 }
 const output = resolve(values.output);
@@ -118,7 +118,7 @@ try {
           const port = connect(...args), post = port.postMessage;
           port.postMessage = message => {
             post(message);
-            if (message.type === "list_skill_settings") queueMicrotask(() => window.__qzEmitPortMessage({
+            if (message.type === "list_skill_settings") queueMicrotask(() => window.__zuriEmitPortMessage({
               type: "skill_settings", requestId: message.requestId, settings: [{
                 id: "css-example::example", pluginId: "example", skillName: "css-example",
                 skillDisplayName: "设计系统示例", title: "设计系统示例", configured: true,
@@ -170,9 +170,9 @@ try {
         }
 
         await page.goto(`${origin}/extension/sidepanel/sidepanel.html`, { waitUntil: "domcontentloaded" });
-        await page.waitForFunction(() => window.qingzhouConversationBenchmark && !document.querySelector("#app").hasAttribute("data-workspace-booting"));
+        await page.waitForFunction(() => window.zuriConversationBenchmark && !document.querySelector("#app").hasAttribute("data-workspace-booting"));
         await capture(page, side, profile, "app-welcome");
-        await page.evaluate(input => window.qingzhouConversationBenchmark.runSnapshotRender(input, { debug: false }), fixture);
+        await page.evaluate(input => window.zuriConversationBenchmark.runSnapshotRender(input, { debug: false }), fixture);
         await capture(page, side, profile, "app-transcript");
         await page.locator(".tool-summary").first().click();
         await capture(page, side, profile, "app-tool-expanded");
@@ -185,7 +185,7 @@ try {
         await page.evaluate(async () => {
           const { insertDataRows } = await import("/extension/shared/data-store.js");
           await insertDataRows("设计系统示例", [
-            { 名称: "轻舟", 状态: "可用", 数量: 12, 备注: "中文和 Latin text" },
+            { 名称: "Zuri", 状态: "可用", 数量: 12, 备注: "中文和 Latin text" },
             { 名称: "数据表", 状态: "进行中", 数量: 5, 备注: "多列内容保持既有密度" },
             { 名称: "Capability", 状态: "已完成", 数量: 30, 备注: "复用公共控件" },
           ]);
@@ -216,7 +216,7 @@ try {
         await page.locator(".data-grid-table.copy-confirmed").waitFor({ state: "visible" });
         await capture(page, side, profile, "app-data-copied");
         if (!await page.locator(".data-grid-table.copy-confirmed").count()
-            || !await page.evaluate(() => window.__cssAuditCopiedText?.includes("轻舟"))) {
+            || !await page.evaluate(() => window.__cssAuditCopiedText?.includes("Zuri"))) {
           throw new Error("Data copy feedback must remain active throughout the captured state");
         }
         await page.locator(".data-grid-table.copy-confirmed").waitFor({ state: "hidden" });
@@ -229,7 +229,7 @@ try {
         // Each revision exports through its own production API. Only the skin is
         // replaced; export-specific rules and real revision markup stay intact.
 
-        const exported = await page.evaluate(input => window.qingzhouConversationBenchmark.renderSessionDocument({
+        const exported = await page.evaluate(input => window.zuriConversationBenchmark.renderSessionDocument({
           session: { id: input.sessionId, title: input.title }, transcript: input.transcript,
         }), fixture);
         writeFileSync(join(output, `${profile.id}-${side}-export.html`), exported.html);

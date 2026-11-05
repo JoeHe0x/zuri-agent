@@ -8,6 +8,6 @@
   "browser-permissions.name.history": "방문 기록",
   "browser-permissions.name.desktopCapture": "화면 녹화",
   "browser-permissions.name.downloads.open": "다운로드한 파일 열기",
-  "browser-permissions.required": "qz 사이드 패널에서 {permission} 권한을 허용한 후 다시 시도하세요.",
+  "browser-permissions.required": "zuri 사이드 패널에서 {permission} 권한을 허용한 후 다시 시도하세요.",
   "browser-permissions.denied": "{permission} 권한이 허용되지 않아 작업이 취소되었습니다. 필요하면 다시 시도하여 권한을 허용하세요."
 }

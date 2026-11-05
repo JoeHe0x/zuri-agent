@@ -343,7 +343,7 @@ function scheduleRootSessionTitleGeneration(session: SessionMetadata | null, fir
       initialTitle,
     }))
     .catch((err) => {
-      console.warn("[轻舟] generate session title failed", err);
+      console.warn("[Zuri] generate session title failed", err);
     });
 }
 
@@ -861,7 +861,7 @@ function prepareSessionPrompt({
         promptDocuments,
         async message => {
           void scheduleTitleForFirstAcceptedPrompt(id, session, titleSeed)
-            .catch(error => console.warn("[轻舟] accepted title generation failed", error));
+            .catch(error => console.warn("[Zuri] accepted title generation failed", error));
           await notifyMessageAccepted(onMessageAccepted, message, {
             disposition: "started",
             duplicate: false,
@@ -875,7 +875,7 @@ function prepareSessionPrompt({
 function notifyMessageAccepted(callback: PromptHook | undefined, message: unknown, admission: Fields = {}) {
   return Promise.resolve()
     .then(() => callback?.(message, admission))
-    .catch(error => console.warn("[轻舟] accepted message side effect failed", error));
+    .catch(error => console.warn("[Zuri] accepted message side effect failed", error));
 }
 
 async function scheduleTitleForFirstAcceptedPrompt(sessionId: string, session: SessionMetadata | null, titleSeed: string) {
@@ -894,7 +894,7 @@ function launchSessionPrompt(sessionId: string, firstMessage: unknown, signal?: 
   if (!text) return false;
   startSessionPromptTask({ sessionId, text, swallowErrors: true }, signal)
     .then(task => task.promise)
-    .catch((err) => console.warn("[轻舟] launch session prompt failed:", err));
+    .catch((err) => console.warn("[Zuri] launch session prompt failed:", err));
   return true;
 }
 
@@ -1782,7 +1782,7 @@ async function collectWaitSessionSummaries(sessionIds: string[], num: number) {
     }
     if (!artifactsResolved) {
       artifacts = await sessionArtifacts.collect(id).catch((err) => {
-        console.debug("[轻舟] collect wait session artifacts failed:", errorMessage(err));
+        console.debug("[Zuri] collect wait session artifacts failed:", errorMessage(err));
         return sessionArtifacts.empty();
       });
     }
@@ -1891,8 +1891,8 @@ async function deleteSessionRuntime(sessionId: string, meta: Fields = {}, signal
       const releaseDocumentParsing = await blockChatDocumentParsing(id);
       try {
         stored = await deleteStoredSession(id);
-        await removeChatSessionDocuments(id).catch(error => console.warn("[轻舟] deleted Session document cleanup failed", error));
-        await removeSessionObservations(id).catch(error => console.warn("[轻舟] deleted Session observation cleanup failed", error));
+        await removeChatSessionDocuments(id).catch(error => console.warn("[Zuri] deleted Session document cleanup failed", error));
+        await removeSessionObservations(id).catch(error => console.warn("[Zuri] deleted Session observation cleanup failed", error));
       } finally {
         releaseDocumentParsing?.();
       }
@@ -1902,7 +1902,7 @@ async function deleteSessionRuntime(sessionId: string, meta: Fields = {}, signal
   const hadRuntime = Boolean(snapshot.hadAgent || snapshot.hadTask);
 
   await sessionTabs.closeOwnedTabsAfterTerminal(id, "delete_session").catch((err) => {
-    console.debug("[轻舟] close deleted session owned tabs failed:", errorMessage(err));
+    console.debug("[Zuri] close deleted session owned tabs failed:", errorMessage(err));
   });
   sessionArtifacts.clearListSummaryPatch(id);
   sessionArtifacts.clearSummaryRefresh(id);
@@ -2028,7 +2028,7 @@ async function stopSingleSessionRuntime(sessionId: string, meta: Fields = {}, si
       void Promise.resolve()
         .then(() => automationRuntime.syncSessionOutcome(id))
         .catch((err) => {
-          console.warn("[轻舟] automation stop outcome sync failed:", err);
+          console.warn("[Zuri] automation stop outcome sync failed:", err);
         });
     },
   });
@@ -2051,7 +2051,7 @@ async function stopSingleSessionRuntime(sessionId: string, meta: Fields = {}, si
   }
 
   sessionTabs.closeOwnedTabsAfterTerminal(id, "stop_session").catch((err) => {
-    console.debug("[轻舟] close stopped session owned tabs failed:", errorMessage(err));
+    console.debug("[Zuri] close stopped session owned tabs failed:", errorMessage(err));
   });
   const stateEvent = {
     type: "state",
@@ -2084,7 +2084,7 @@ async function releaseTerminalRunResources(sessionId: string, runId: unknown, ev
   try {
     await releaseRunResources({ sessionId: id, runId: rid, eventType });
   } catch (error) {
-    console.warn("[轻舟] release terminal run resources failed:", error);
+    console.warn("[Zuri] release terminal run resources failed:", error);
   }
 }
 

@@ -33,7 +33,7 @@ from sklearn.model_selection import GroupKFold
 HERE = Path(__file__).resolve().parent
 UTILITY_PATH = HERE / "study-tree-dp-utility-model.py"
 SPEC = importlib.util.spec_from_file_location(
-    "qingzhou_bounded_action_base", UTILITY_PATH
+    "zuri_bounded_action_base", UTILITY_PATH
 )
 if SPEC is None or SPEC.loader is None:
     raise RuntimeError(f"cannot load {UTILITY_PATH}")
@@ -1025,7 +1025,7 @@ def main():
             "localBeta": final_beta.tolist(),
         }
     report = {
-        "schema": "qingzhou.tree-dp-bounded-action-study.v2",
+        "schema": "zuri.tree-dp-bounded-action-study.v2",
         "protocol": {
             "trainingSplits": ["base", "train"],
             "grouping": "siteFamily",

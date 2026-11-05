@@ -27,7 +27,7 @@ from sklearn.model_selection import GroupKFold
 HERE = Path(__file__).resolve().parent
 RELATIVE_PATH = HERE / "study-tree-dp-relative-root.py"
 SPEC = importlib.util.spec_from_file_location(
-    "qingzhou_relative_root_tree_base", RELATIVE_PATH
+    "zuri_relative_root_tree_base", RELATIVE_PATH
 )
 if SPEC is None or SPEC.loader is None:
     raise RuntimeError(f"cannot load {RELATIVE_PATH}")
@@ -279,7 +279,7 @@ def main() -> int:
 
     summary = GLOBAL_DISTILL.summary(rows)
     report = {
-        "schema": "qingzhou.tree-dp-relative-root-tree-study.v1",
+        "schema": "zuri.tree-dp-relative-root-tree-study.v1",
         "protocol": {
             "trainingSplits": ["base", "train"],
             "grouping": "siteFamily",

@@ -13,15 +13,15 @@ Use this skill when the user wants to create, edit, delete, import, or publish a
 6. To inspect the full installed Skill system, call this skill's listing tool with \`all/global/site/resident\`. Review the existing names before deciding to create a new skill or update one.
 7. Use this skill's create tool for new skills, resource-editing tool for \`plugin.json\`, \`scripts/*.js\`, and \`references/*.md\`, update tool for existing content or metadata, and delete tool for removal. Edit one resource with one action per call.
 8. Scripts should implement reusable, well-defined local operations suitable for tool calls, not entire workflows. The skill itself is the user-selectable entry point; do not add Skill slash commands.
-9. qz refreshes the Skill registry after a write or update. Newly declared tools and result views should become available to the current conversation immediately.
-10. Scripts default to \`runtime:"page"\` on the current task's page. Page tools automatically receive an optional \`tabRef\` parameter: pass a task-owned tab alias or positive integer ID (numeric strings also work), or omit it to use the current task's working tab. If declaring it in \`plugin.json\`, use \`tabRef\` with \`type:["integer","string"]\`. Unknown aliases fail rather than falling back to the working tab. For page-independent scripts using their own settings or network APIs, use \`runtime:"inner"\`: read manifest settings through \`$plugin.config\` and use standard \`fetch\` only for origins declared in \`network.allowedOrigins\`. Do not assign \`runtime:"host"\` to user-created Skills; it is reserved for controlled Background actions explicitly registered by qz core.
+9. zuri refreshes the Skill registry after a write or update. Newly declared tools and result views should become available to the current conversation immediately.
+10. Scripts default to \`runtime:"page"\` on the current task's page. Page tools automatically receive an optional \`tabRef\` parameter: pass a task-owned tab alias or positive integer ID (numeric strings also work), or omit it to use the current task's working tab. If declaring it in \`plugin.json\`, use \`tabRef\` with \`type:["integer","string"]\`. Unknown aliases fail rather than falling back to the working tab. For page-independent scripts using their own settings or network APIs, use \`runtime:"inner"\`: read manifest settings through \`$plugin.config\` and use standard \`fetch\` only for origins declared in \`network.allowedOrigins\`. Do not assign \`runtime:"host"\` to user-created Skills; it is reserved for controlled Background actions explicitly registered by zuri core.
 11. Skill script tools automatically receive a required \`timeout\` argument; do not add it to the business schema. Values are in seconds: \`timeout <= 0\` waits indefinitely; \`timeout > 0\` sets the maximum wait. Choose it deliberately for Skill tools, \`run_script\`, and \`run_skill_script\` according to task complexity.
 12. Tool availability follows the skill's \`scope\`, not an extra manifest setting. \`resident\` is always available; \`site\` is available when the page matches domains/urlPatterns or after the current conversation calls \`load_skill\`; \`global\` is available only after \`load_skill\` in the current conversation. \`builtin\`, \`readOnly\`, and \`source\` describe origin and permissions, not loading policy.
-13. For external MCP, first \`load_skill("qingzhou-mcp")\` and follow its registry search, unregistered-URL inspection, and minimal test-call workflow. Persist selected server/tool bindings only when ongoing reuse is confirmed. Call registered MCP tools by their Skill tool names.
+13. For external MCP, first \`load_skill("zuri-mcp")\` and follow its registry search, unregistered-URL inspection, and minimal test-call workflow. Persist selected server/tool bindings only when ongoing reuse is confirmed. Call registered MCP tools by their Skill tool names.
 14. Discover a Skill ZIP URL with the existing page or Network tools. Make its source page the current task's working tab, then pass the URL to the page-ZIP import tool. That tool does not scan or guess download links. It downloads in the page's authenticated context; Background handles extraction, validation, and Skill storage. Do not assemble base64 or parse ZIP files in page scripts.
 15. For supported GitHub or GitLab repository/directory URLs, use the Git inspection/import tool. It opens the repository, waits for sign-in if needed, discovers the branch and ZIP, and records an updatable source. Never pass \`overwrite:true\` for name or local-edit conflicts without user confirmation.
 16. When the user explicitly asks to install a local Skill into a Git repository, use the Git installation tool. The current product's publishing adapter must support the target URL. The directory determines the installation path; the tool creates or updates \`<directory>/<skill-name>/SKILL.md\` and resources in one commit. If no adapter is available, export the Skill for the user to commit.
-17. Skill packages may include DOCX, XLSX, or PDF references. \`load_skill_resource(name,path)\` uses the document pipeline to return the first preview chunk and docModelId. To read more, first \`load_skill("qingzhou-documents")\`, then call \`document_read_chunk\`. Binary resources cannot be edited with text replace/append/set operations.
+17. Skill packages may include DOCX, XLSX, or PDF references. \`load_skill_resource(name,path)\` uses the document pipeline to return the first preview chunk and docModelId. To read more, first \`load_skill("zuri-documents")\`, then call \`document_read_chunk\`. Binary resources cannot be edited with text replace/append/set operations.
 
 ## Page-mode prerequisites
 
@@ -32,7 +32,7 @@ Use this skill when the user wants to create, edit, delete, import, or publish a
 ## Content and scripts
 
 - \`SKILL.md\` / skill content explains how to complete the task. For a video-search skill, for example, describe opening the site, searching, filtering, visiting details, recognizing success, and handling verification or empty results.
-- \`plugin.json\` is optional. It exposes scripts in the model's tool schema and renders results with qz components.
+- \`plugin.json\` is optional. It exposes scripts in the model's tool schema and renders results with zuri components.
 - \`scripts/*.js\` is optional. A script becomes a tool only when explicitly declared in \`plugin.json.tools[]\`. Use \`runtime:"page"\` for page actions and \`runtime:"inner"\` for computation, Skill settings, or external APIs. Keep scripts focused on local operations.
 - If a tool needs multiple prerequisite steps, its description or skill content must say to read the workflow with \`load_skill\` first and then run the script on the appropriate page.
 - Use this skill's exposed Skill tools to create, update, and delete skills, so authoring logic, directory rules, and result views use the same entry point. Do not call bare core tools directly.
@@ -46,18 +46,18 @@ Use this skill when the user wants to create, edit, delete, import, or publish a
 
 ## MCP integration
 
-qz supports remote HTTP MCP only, not local stdio. \`qingzhou-mcp\` handles discovery, inspection, and one-off calls. This skill persists configurations already confirmed for reuse:
+zuri supports remote HTTP MCP only, not local stdio. \`zuri-mcp\` handles discovery, inspection, and one-off calls. This skill persists configurations already confirmed for reuse:
 
-1. Before editing, \`load_skill("qingzhou-mcp")\`. Use its inspection results, tools[].name/description/inputSchema, minimal test calls, and the user's goal to select bindings. Do not wrap every server tool by default.
+1. Before editing, \`load_skill("zuri-mcp")\`. Use its inspection results, tools[].name/description/inputSchema, minimal test calls, and the user's goal to select bindings. Do not wrap every server tool by default.
 2. Set a top-level category in \`plugin.json\` using a stable, user-facing business category such as Research, Data, Travel, or Development. Use \`{ "id": "mcp", "label": "MCP" }\` only for a general MCP gateway spanning multiple use cases.
 3. Read the available renderer registry and choose a standard renderer such as table/list/fields/summary/article/image_grid/tree/markdown/text based on real test-call results. Map structuredContent or JSON text directly; use text/markdown for natural-language-only results. Do not invent fields.
 4. Declare the server in plugin.json.mcpServers. For each selected tool, set \`runtime:"mcp"\`, \`mcp:{ server, tool }\`, and a renderer matching its result. Set the renderer on the tool or in top-level renderers.tools.
-5. Before saving, qz verifies that enabled servers complete tools/list. Fix the URL/headers or explicitly set a temporarily unavailable server to \`enabled:false\`. Do not bypass validation.
-6. Reload the saved skill with \`load_skill(name)\`. Follow the qingzhou-mcp registry workflow to verify pluginTool.name, make the real call through that Skill tool, and confirm the intended renderer is used instead of a generic text fallback.
+5. Before saving, zuri verifies that enabled servers complete tools/list. Fix the URL/headers or explicitly set a temporarily unavailable server to \`enabled:false\`. Do not bypass validation.
+6. Reload the saved skill with \`load_skill(name)\`. Follow the zuri-mcp registry workflow to verify pluginTool.name, make the real call through that Skill tool, and confirm the intended renderer is used instead of a generic text fallback.
 
 \`\`\`json
 {
-  "format": "qingzhou.plugin",
+  "format": "zuri.plugin",
   "schemaVersion": 1,
   "id": "docs-mcp",
   "displayName": "Documentation MCP",
@@ -100,7 +100,7 @@ qz supports remote HTTP MCP only, not local stdio. \`qingzhou-mcp\` handles disc
 
 \`\`\`json
 {
-  "format": "qingzhou.plugin",
+  "format": "zuri.plugin",
   "schemaVersion": 1,
   "id": "page-inspector",
   "displayName": "Page inspector",
@@ -187,7 +187,7 @@ Scripts read settings through \`$plugin.config.<key>\`. Secret values are popula
 
 ## Script conventions
 
-Skill scripts use the same source form as run_script.code: normally one \`async () => { ... }\` function expression, which qz invokes. Do not use top-level return, an IIFE, main(), or a result wrapper. \`runtime:"page"\` runs on the current task's working tab or a task-owned page selected with \`tabRef\`. \`runtime:"inner"\` runs in a Worker without a DOM or tab requirement, with standard Web APIs, \`$plugin.config\`, fetch, and tools/tool.
+Skill scripts use the same source form as run_script.code: normally one \`async () => { ... }\` function expression, which zuri invokes. Do not use top-level return, an IIFE, main(), or a result wrapper. \`runtime:"page"\` runs on the current task's working tab or a task-owned page selected with \`tabRef\`. \`runtime:"inner"\` runs in a Worker without a DOM or tab requirement, with standard Web APIs, \`$plugin.config\`, fetch, and tools/tool.
 
 \`\`\`js
 async () => {
@@ -258,10 +258,10 @@ Return \`{ summary: {...}, data: { rows:[...], totalRows: 10, truncated: false }
 - name is a stable lowercase English ID containing only letters, digits, and hyphens. displayName is the localized name. For Chinese skills, supply displayName explicitly rather than putting the Chinese name only in the content heading.
 - Supply a category for Skill organization and automatic tool grouping in the conversation. Use a business category users recognize instead of relying on the default.
 - The renderer-discovery tool defines the available renderers.tools types. Read the registry before creating a Skill with a UI; choose a renderer and design the return value to match its schema.
-- Configured renderers use qz's standard views and grouping. Tools without renderers use generic script-result presentation.
+- Configured renderers use zuri's standard views and grouping. Tools without renderers use generic script-result presentation.
 - Compose existing components with layout.blocks for complex views; do not invent a one-off visual structure.
-- For user configuration, declare generic settings.fields and qz adds a card under Settings → Skills.
-- settings.fields declares field structure and optional initial defaults, not the user's current values. For actual configuration reads/writes, load qingzhou-management, use qingzhou_management__manage_skill_settings list/get/update, and verify with get. Do not put secret defaults in manifests.
+- For user configuration, declare generic settings.fields and zuri adds a card under Settings → Skills.
+- settings.fields declares field structure and optional initial defaults, not the user's current values. For actual configuration reads/writes, load zuri-management, use zuri_management__manage_skill_settings list/get/update, and verify with get. Do not put secret defaults in manifests.
 
 ## Quality requirements
 

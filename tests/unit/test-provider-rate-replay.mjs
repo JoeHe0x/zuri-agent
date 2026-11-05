@@ -38,7 +38,7 @@ test("provider rate replay restores request times from the earliest compatible s
 });
 
 test("provider rate replay rejects collapsed export time and can analyze a reliable suffix", async () => {
-  const directory = mkdtempSync(join(tmpdir(), "qingzhou-provider-rate-collapsed-"));
+  const directory = mkdtempSync(join(tmpdir(), "zuri-provider-rate-collapsed-"));
   const file = join(directory, "fixture.html");
   try {
     const messages = Array.from({ length: 11 }, (_unused, index) => assistant(`call-${index}`, 40 + index));
@@ -126,7 +126,7 @@ test("learning replay raises only a proven capacity lower bound and reduces late
 });
 
 test("provider rate replay renders a finite, self-contained SVG", async () => {
-  const directory = mkdtempSync(join(tmpdir(), "qingzhou-provider-rate-"));
+  const directory = mkdtempSync(join(tmpdir(), "zuri-provider-rate-"));
   const file = join(directory, "fixture.html");
   try {
     writeFileSync(file, exportHtml({
@@ -172,7 +172,7 @@ test("provider rate replay renders a finite, self-contained SVG", async () => {
 
 function exportHtml({ title, messages, transcript }) {
   const exchange = {
-    format: "qingzhou.session",
+    format: "zuri.session",
     source: { sessionId: "fixture-session" },
     session: {
       title,
@@ -182,7 +182,7 @@ function exportHtml({ title, messages, transcript }) {
       transcript,
     },
   };
-  return `<script id="qingzhou-session-exchange" type="application/json">${JSON.stringify(exchange)}</script>`;
+  return `<script id="zuri-session-exchange" type="application/json">${JSON.stringify(exchange)}</script>`;
 }
 
 function assistant(callId, tokens) {

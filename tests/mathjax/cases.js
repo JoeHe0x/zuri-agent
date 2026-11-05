@@ -138,7 +138,7 @@
     };
   }
 
-  global.QingzhouMathjaxCases = {
+  global.ZuriMathjaxCases = {
     buildMathjaxCases,
     buildMathjaxStreamScenario,
     buildMathjaxStreamCodeBlockScenario,

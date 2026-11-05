@@ -73,9 +73,9 @@ test("grid suppresses the header-sort advisory while preserving sorting, column 
   await expect(cells).toHaveText(["original alpha", "another alpha"]);
   await page.evaluate(() => window.feature.openArtifactTable("beta"));
   await expect(cells).toHaveText(["original beta"]);
-  await page.evaluate(() => console.warn("qz warning probe"));
+  await page.evaluate(() => console.warn("zuri warning probe"));
   expect(warnings.filter(message => message.includes("Using column headerSort with selectableRangeColumns"))).toEqual([]);
-  expect(warnings).toContain("qz warning probe");
+  expect(warnings).toContain("zuri warning probe");
 });
 
 test("registration, references, plain-text import and image browsing do not load either engine", async ({ page }) => {

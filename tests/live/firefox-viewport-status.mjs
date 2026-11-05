@@ -16,13 +16,13 @@ import { installLiveTableProbe } from "../support/live-table-reveal.mjs";
 import { runFirefoxTableRevealJourneys } from "./firefox-table-reveal-journeys.mjs";
 
 // Explicit real-provider tests. Only the temporary sidebar receives the event probe.
-const apiKey = readTestApiKey("deepseek", { keyFile: process.env.QINGZHOU_DEEPSEEK_AK_FILE || "" });
-const model = process.env.QINGZHOU_DEEPSEEK_MODEL || "deepseek-flash";
-const source = process.env.QINGZHOU_FIREFOX_EXTENSION_DIR;
-assert.ok(source, "Build Firefox first and set QINGZHOU_FIREFOX_EXTENSION_DIR");
-const output = resolve(process.env.QINGZHOU_LIVE_REPORT || "tests/results/firefox-viewport-status.json");
+const apiKey = readTestApiKey("deepseek", { keyFile: process.env.ZURI_DEEPSEEK_AK_FILE || "" });
+const model = process.env.ZURI_DEEPSEEK_MODEL || "deepseek-flash";
+const source = process.env.ZURI_FIREFOX_EXTENSION_DIR;
+assert.ok(source, "Build Firefox first and set ZURI_FIREFOX_EXTENSION_DIR");
+const output = resolve(process.env.ZURI_LIVE_REPORT || "tests/results/firefox-viewport-status.json");
 await mkdir(dirname(output), { recursive: true });
-const work = await mkdtemp(join(tmpdir(), "qz-firefox-live-"));
+const work = await mkdtemp(join(tmpdir(), "zuri-firefox-live-"));
 const extensionDir = join(work, "extension");
 const report = { ok: false, model, scenarios: {}, requests: [], transport: "Real DeepSeek through a test-only loopback forwarder; original request payloads and upstream SSE chunks preserved." };
 let session, bridge, gate, slowResponse;
@@ -65,7 +65,7 @@ const origin = `http://127.0.0.1:${server.address().port}`;
 const scrub = value => JSON.stringify(value, null, 2).split(apiKey).join("[redacted]");
 const save = () => writeFile(output, scrub(report));
 const sidebar = expression => session.extension("sidebar", expression);
-const call = (method, ...args) => sidebar(`return await view.__qzFirefoxLive[${JSON.stringify(method)}](...view.JSON.parse(${JSON.stringify(JSON.stringify(args))}));`);
+const call = (method, ...args) => sidebar(`return await view.__zuriFirefoxLive[${JSON.stringify(method)}](...view.JSON.parse(${JSON.stringify(JSON.stringify(args))}));`);
 const finish = async task => {
   const deadline = Date.now() + 180000;
   while (Date.now() < deadline) {
@@ -93,11 +93,11 @@ try {
   const html = join(extensionDir, "sidepanel/sidepanel.html");
   await writeFile(html, (await readFile(html, "utf8")).replace("</head>", '<script src="./live-test-hook.js"></script></head>'));
   const profile = join(work, "profile");
-  if (process.env.QINGZHOU_FIREFOX_CA_FILE) {
+  if (process.env.ZURI_FIREFOX_CA_FILE) {
     await mkdir(profile, { recursive: true });
     const run = promisify(execFile);
     await run("certutil", ["-N", "--empty-password", "-d", `sql:${profile}`]);
-    await run("certutil", ["-A", "-n", "Live test environment CA", "-t", "C,,", "-i", process.env.QINGZHOU_FIREFOX_CA_FILE, "-d", `sql:${profile}`]);
+    await run("certutil", ["-A", "-n", "Live test environment CA", "-t", "C,,", "-i", process.env.ZURI_FIREFOX_CA_FILE, "-d", `sql:${profile}`]);
     report.environmentCertificateImported = true;
   }
   session = await openFirefoxSidebar({ extensionDir, profile });
@@ -119,14 +119,14 @@ try {
     while(Date.now()-start<12000) {
       content.document.querySelector('[data-consent-accept]')?.click();
       const app=content.document.querySelector('#app');
-      if(view.__qzFirefoxLive && app && !app.hasAttribute('data-workspace-booting') && !app.hasAttribute('data-consent-pending')) return true;
+      if(view.__zuriFirefoxLive && app && !app.hasAttribute('data-workspace-booting') && !app.hasAttribute('data-consent-pending')) return true;
       await new Promise(resolve=>content.setTimeout(resolve,100));
     }
     throw new Error('Firefox sidebar did not become ready');
   `);
   await call("request", "save_config", { config: { provider: "deepseek", apiKey, model, vision: false, contextWindow: 128000, trimOldToolResults: true } }, "config_saved");
 
-  if (process.env.QINGZHOU_LIVE_FIREFOX_TABLES === "1") {
+  if (process.env.ZURI_LIVE_FIREFOX_TABLES === "1") {
     await runFirefoxTableRevealJourneys({ session, sidebar, call, finish, output: dirname(output), report, save });
     assert.deepEqual(report.pageDiagnostics.filter(item => item.type === "pageerror"), [], "Live page reads must not throw component exceptions");
   } else {
@@ -263,7 +263,7 @@ function installSidebarProbe() {
     return wait(event => event.requestId === requestId && [responseType, "error", "request_failed"].includes(event.type)
       || event.type === responseType && payload.sessionId && event.sessionId === payload.sessionId, after, 30000);
   }
-  globalThis.__qzFirefoxLive = {
+  globalThis.__zuriFirefoxLive = {
     request, events: after => events.slice(after),
     finished: task => events.some(event => matches(event, { type: "agent_end", sessionId: task.sessionId, runId: task.runId })),
     async start(text) {

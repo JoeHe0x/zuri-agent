@@ -1,7 +1,7 @@
 /** Chrome Web Store review prompt. Packaging does not emit a separate Firefox target,
  * so Firefox is rejected here at runtime together with the store-install check. */
 
-export const CHROME_STORE_REVIEW_STORAGE_KEY = "qz_chrome_store_review";
+export const CHROME_STORE_REVIEW_STORAGE_KEY = "zuri_chrome_store_review";
 export const CHROME_STORE_REVIEW_VERSION = 1;
 export const CHROME_STORE_REVIEW_TASK_THRESHOLD = 5;
 export const CHROME_WEB_STORE_REVIEWS_URL = "https://chromewebstore.google.com/detail/qz/dknbdgkgoinlgjpfebapkklbmjjgdblm/reviews";

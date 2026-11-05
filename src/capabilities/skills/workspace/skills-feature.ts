@@ -261,10 +261,10 @@ export function createSkillsFeature(options: SkillsOptions) {
   btnSkillActions?.addEventListener("click", () => {
     const open = skillActionsMenu?.classList.contains("hidden");
     setSkillActionsMenuOpen(open, { restoreFocus: false });
-    if (open) requestAnimationFrame(() => skillActionsMenu?.querySelector<HTMLElement>(".qz-menu-item")?.focus({ preventScroll: true }));
+    if (open) requestAnimationFrame(() => skillActionsMenu?.querySelector<HTMLElement>(".zuri-menu-item")?.focus({ preventScroll: true }));
   }, { signal: lifecycleSignal });
   skillActionsMenu?.addEventListener("click", (event) => {
-    if ((event.target instanceof Element ? event.target : null)?.closest<HTMLElement>(".qz-menu-item")) setSkillActionsMenuOpen(false, { restoreFocus: false });
+    if ((event.target instanceof Element ? event.target : null)?.closest<HTMLElement>(".zuri-menu-item")) setSkillActionsMenuOpen(false, { restoreFocus: false });
   }, { signal: lifecycleSignal });
   document.addEventListener("click", (event) => {
     if (!isElementVisible(skillActionsMenu)) return;
@@ -815,7 +815,7 @@ export function createSkillsFeature(options: SkillsOptions) {
     }
     return {
       title: t("noPersonalSkillsYet"),
-      description: t("importASkillPackageOrAskQingzhouToTurnA"),
+      description: t("importASkillPackageOrAskZuriToTurnA"),
     };
   }
 
@@ -1111,7 +1111,7 @@ export function createSkillsFeature(options: SkillsOptions) {
     } catch (err) {
       if (generation === gitPublishInspectGeneration) {
         gitPublishTarget = null;
-        console.debug("[轻舟] inspect Git publish target failed:", (err instanceof Error ? err.message : err));
+        console.debug("[Zuri] inspect Git publish target failed:", (err instanceof Error ? err.message : err));
       }
       return null;
     } finally {
@@ -2117,18 +2117,18 @@ export function createSkillsFeature(options: SkillsOptions) {
     const readOnlyAttr = readonly ? " readonly" : "";
     const disabledAttr = readonly ? " disabled" : "";
     return `
-      <div class="skill-mcp-edit-item qz-scroll" data-index="${index}">
+      <div class="skill-mcp-edit-item zuri-scroll" data-index="${index}">
         <div class="skill-mcp-detail-header">
-          <button class="qz-icon-btn qz-icon-btn--md icon-btn" type="button" title="${escapeHtmlAttribute(t("backToMcpServers"))}" aria-label="${escapeHtmlAttribute(t("backToMcpServers"))}" data-skill-mcp-action="back">
+          <button class="zuri-icon-btn zuri-icon-btn--md icon-btn" type="button" title="${escapeHtmlAttribute(t("backToMcpServers"))}" aria-label="${escapeHtmlAttribute(t("backToMcpServers"))}" data-skill-mcp-action="back">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M10 3 5 8l5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </button>
           <strong>${escapeHtml(draft.id || `mcp-${index + 1}`)}</strong>
           <label class="skill-mcp-enabled" title="${escapeHtmlAttribute(draft.enabled === false ? t("clickToEnableMcp") : t("clickToDisableMcp"))}">
-            <input class="qz-switch skill-mcp-edit-enabled" type="checkbox" aria-label="${escapeHtmlAttribute(draft.enabled === false ? t("disabledClickToEnableMcp") : t("enabledClickToDisableMcp"))}"${draft.enabled === false ? "" : " checked"}${disabledAttr}>
+            <input class="zuri-switch skill-mcp-edit-enabled" type="checkbox" aria-label="${escapeHtmlAttribute(draft.enabled === false ? t("disabledClickToEnableMcp") : t("enabledClickToDisableMcp"))}"${draft.enabled === false ? "" : " checked"}${disabledAttr}>
             <span class="skill-mcp-enabled-text">${draft.enabled === false ? t("disabledStatus") : t("enabled")}</span>
           </label>
           ${readonly ? "" : `
-            <button class="qz-icon-btn qz-icon-btn--sm qz-icon-btn--danger icon-btn skill-mcp-delete-btn" type="button" title="${escapeHtmlAttribute(t("deleteMcp"))}" aria-label="${escapeHtmlAttribute(t("deleteMcp"))}" data-skill-mcp-action="delete" data-index="${index}">
+            <button class="zuri-icon-btn zuri-icon-btn--sm zuri-icon-btn--danger icon-btn skill-mcp-delete-btn" type="button" title="${escapeHtmlAttribute(t("deleteMcp"))}" aria-label="${escapeHtmlAttribute(t("deleteMcp"))}" data-skill-mcp-action="delete" data-index="${index}">
               <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M6 7l1 14h10l1-14"/><path d="M9 7V4h6v3"/></svg>
             </button>
           `}
@@ -2136,31 +2136,31 @@ export function createSkillsFeature(options: SkillsOptions) {
         <section class="skill-mcp-form-section">
           <label>
             <span>ID</span>
-            <input class="qz-field qz-field--sm qz-field--mono skill-mcp-edit-id" type="text" value="${escapeHtmlAttribute(draft.id || "")}" placeholder="context7"${readOnlyAttr}>
+            <input class="zuri-field zuri-field--sm zuri-field--mono skill-mcp-edit-id" type="text" value="${escapeHtmlAttribute(draft.id || "")}" placeholder="context7"${readOnlyAttr}>
           </label>
           <label>
             <span>${escapeHtml(t("remoteUrl"))}</span>
-            <input class="qz-field qz-field--sm qz-field--mono skill-mcp-edit-url" type="url" value="${escapeHtmlAttribute(draft.url || "")}" placeholder="https://example.com/mcp"${readOnlyAttr}>
+            <input class="zuri-field zuri-field--sm zuri-field--mono skill-mcp-edit-url" type="url" value="${escapeHtmlAttribute(draft.url || "")}" placeholder="https://example.com/mcp"${readOnlyAttr}>
           </label>
           <div class="skill-mcp-timeout-row">
             <label>
               <span>${escapeHtml(t("connectionTimeout"))}</span>
-              <input class="qz-field qz-field--sm qz-field--mono skill-mcp-edit-timeout" type="number" min="1000" step="1000" value="${escapeHtmlAttribute(draft.timeoutMs || "")}" placeholder="30000 ms"${readOnlyAttr}>
+              <input class="zuri-field zuri-field--sm zuri-field--mono skill-mcp-edit-timeout" type="number" min="1000" step="1000" value="${escapeHtmlAttribute(draft.timeoutMs || "")}" placeholder="30000 ms"${readOnlyAttr}>
             </label>
             <label>
               <span>${escapeHtml(t("callTimeout"))}</span>
-              <input class="qz-field qz-field--sm qz-field--mono skill-mcp-edit-call-timeout" type="number" min="1000" step="1000" value="${escapeHtmlAttribute(draft.callTimeoutMs || "")}" placeholder="${escapeHtmlAttribute(t("sameAsConnectionTimeout"))}"${readOnlyAttr}>
+              <input class="zuri-field zuri-field--sm zuri-field--mono skill-mcp-edit-call-timeout" type="number" min="1000" step="1000" value="${escapeHtmlAttribute(draft.callTimeoutMs || "")}" placeholder="${escapeHtmlAttribute(t("sameAsConnectionTimeout"))}"${readOnlyAttr}>
             </label>
           </div>
         </section>
         <section class="skill-mcp-form-section">
           <label>
             <span>Headers JSON</span>
-            <textarea class="qz-field qz-field--sm qz-field--mono skill-mcp-edit-headers" spellcheck="false" wrap="soft" rows="5"${readOnlyAttr}>${escapeHtml(draft.headersText || "{}")}</textarea>
+            <textarea class="zuri-field zuri-field--sm zuri-field--mono skill-mcp-edit-headers" spellcheck="false" wrap="soft" rows="5"${readOnlyAttr}>${escapeHtml(draft.headersText || "{}")}</textarea>
           </label>
         </section>
         <div class="skill-mcp-test-row">
-          <button class="qz-btn qz-btn--secondary qz-btn--sm " type="button" data-skill-mcp-action="test" data-index="${index}">${escapeHtml(t("testConnection"))}</button>
+          <button class="zuri-btn zuri-btn--secondary zuri-btn--sm " type="button" data-skill-mcp-action="test" data-index="${index}">${escapeHtml(t("testConnection"))}</button>
           <span class="skill-mcp-test-result" role="status" aria-live="polite"></span>
         </div>
       </div>
@@ -2408,12 +2408,12 @@ export function createSkillsFeature(options: SkillsOptions) {
     const detailHeader = document.createElement("div");
     detailHeader.className = "skill-resource-detail-header";
     detailHeader.innerHTML = `
-      <button class="qz-icon-btn qz-icon-btn--md icon-btn" type="button" title="${escapeHtmlAttribute(t("backToResources"))}" aria-label="${escapeHtmlAttribute(t("backToResources"))}" data-skill-resource-action="back">
+      <button class="zuri-icon-btn zuri-icon-btn--md icon-btn" type="button" title="${escapeHtmlAttribute(t("backToResources"))}" aria-label="${escapeHtmlAttribute(t("backToResources"))}" data-skill-resource-action="back">
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M10 3 5 8l5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
       <strong class="skill-resource-detail-name" title="${escapeHtmlAttribute(readonly ? activePath : t("doubleClickToRename"))}"${readonly ? "" : ` tabindex="0" role="button" aria-label="${escapeHtmlAttribute(t("renameResourceFile"))}"`}>${escapeHtml(activePath)}</strong>
       ${readonly ? "" : `
-        <button class="qz-icon-btn qz-icon-btn--sm qz-icon-btn--danger icon-btn skill-resource-delete-btn" type="button" title="${escapeHtmlAttribute(t("deleteResource"))}" aria-label="${escapeHtmlAttribute(t("deleteResource"))}" data-skill-resource-action="delete" data-index="${activeSkillResourceIndex}">
+        <button class="zuri-icon-btn zuri-icon-btn--sm zuri-icon-btn--danger icon-btn skill-resource-delete-btn" type="button" title="${escapeHtmlAttribute(t("deleteResource"))}" aria-label="${escapeHtmlAttribute(t("deleteResource"))}" data-skill-resource-action="delete" data-index="${activeSkillResourceIndex}">
           <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M6 7l1 14h10l1-14"/><path d="M9 7V4h6v3"/></svg>
         </button>
       `}

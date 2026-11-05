@@ -241,7 +241,7 @@ export function createWorkspaceComposition(options: WorkspaceOptions) {
         const id = pendingSessionRevealId;
         pendingSessionRevealId = null;
         try { await navigation.switchToSession(id, { source: "notification" }); await navigation.refreshCurrentSessionTitle(); }
-        catch (error) { console.warn("[轻舟] reveal notification session failed", error); }
+        catch (error) { console.warn("[Zuri] reveal notification session failed", error); }
       }
       workspaceStarted = true;
       notifyStableViewChange();

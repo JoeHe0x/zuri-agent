@@ -25,15 +25,15 @@ function persistFixtureStorage(key) {
     const post = port.postMessage;
     port.postMessage = message => {
       if (message.type === "get_composer_draft") {
-        window.__qzPostedMessages.push(structuredClone(message));
-        queueMicrotask(() => window.__qzEmitPortMessage({
+        window.__zuriPostedMessages.push(structuredClone(message));
+        queueMicrotask(() => window.__zuriEmitPortMessage({
           type: "get_composer_draft_result", requestId: message.requestId, sessionId: message.sessionId,
           draft: JSON.parse(localStorage.getItem(`draft:${message.sessionId}`) || "null"),
         }));
         return;
       }
       if (message.type !== "create_ui_session" && message.type !== "sync_composer_draft") return post(message);
-      window.__qzPostedMessages.push(structuredClone(message));
+      window.__zuriPostedMessages.push(structuredClone(message));
       if (message.type === "sync_composer_draft") localStorage.setItem(`draft:${message.sessionId}`, JSON.stringify(message.draft));
       queueMicrotask(async () => {
         const session = { id: message.id, title: message.title };
@@ -43,7 +43,7 @@ function persistFixtureStorage(key) {
           await storage.set({ _sessions: { ..._sessions, [session.id]: session } });
           if (message.composerDraft) localStorage.setItem(`draft:${session.id}`, JSON.stringify(message.composerDraft));
         }
-        window.__qzEmitPortMessage({
+        window.__zuriEmitPortMessage({
           type: `${message.type}_result`, requestId: message.requestId,
           ...(message.type === "create_ui_session" ? { session } : {}),
         });
@@ -134,12 +134,12 @@ test("saving a changed language reloads the panel once and retains the chat draf
   const screenshot = resolve("tests/results/i18n/language-settings/ja-reloaded.png");
   await page.screenshot({ path: screenshot, animations: "disabled" });
   await testInfo.attach("language-settings-reloaded", { path: screenshot, contentType: "image/png" });
-  expect(await page.evaluate(() => window.__qzPostedMessages.some(message => message.type === "save_config" || message.type === "prompt"))).toBe(false);
+  expect(await page.evaluate(() => window.__zuriPostedMessages.some(message => message.type === "save_config" || message.type === "prompt"))).toBe(false);
 });
 
 async function configSaveRequest(page, count = 1) {
-  await expect.poll(() => page.evaluate(() => window.__qzPostedMessages.filter(message => message.type === "save_config").length)).toBe(count);
-  return page.evaluate(() => window.__qzPostedMessages.filter(message => message.type === "save_config").at(-1));
+  await expect.poll(() => page.evaluate(() => window.__zuriPostedMessages.filter(message => message.type === "save_config").length)).toBe(count);
+  return page.evaluate(() => window.__zuriPostedMessages.filter(message => message.type === "save_config").at(-1));
 }
 
 async function respondToConfigSave(page, request, error = "") {
@@ -147,7 +147,7 @@ async function respondToConfigSave(page, request, error = "") {
   const config = { ...request.config, contextWindow: ({ "128K": 128000, "256K": 256000 })[request.config.contextWindow] ?? request.config.contextWindow };
   await page.evaluate(({ request, error, config, key }) => {
     if (!error) localStorage.setItem(key, JSON.stringify(config));
-    window.__qzEmitPortMessage(error
+    window.__zuriEmitPortMessage(error
       ? { type: "error", requestId: request.requestId, message: error }
       : { type: "config_saved", requestId: request.requestId, config });
   }, { request, error, config, key: configFixtureKey });
@@ -247,7 +247,7 @@ test("language can be saved before a model is configured", async ({ page }) => {
   await expect(page.locator("#i18n-language-select")).toHaveValue("fr");
   await expect(page.locator("#btn-save-settings")).toBeDisabled();
   await expect(page.locator("#settings-panel")).toBeVisible();
-  expect(await page.evaluate(() => window.__qzPostedMessages.some(message => message.type === "save_config"))).toBe(false);
+  expect(await page.evaluate(() => window.__zuriPostedMessages.some(message => message.type === "save_config"))).toBe(false);
 });
 
 test("switching groups preserves a language draft and closing without saving discards it", async ({ page }) => {
@@ -425,5 +425,5 @@ test("Advanced keeps language settings when the built-in settings capability is 
   await page.locator("#i18n-language-select").selectOption("ko");
   await page.locator("#btn-save-settings").click();
   await expectReload(page, "ko");
-  expect(await page.evaluate(() => window.__qzPostedMessages.some(message => message.type === "save_config"))).toBe(false);
+  expect(await page.evaluate(() => window.__zuriPostedMessages.some(message => message.type === "save_config"))).toBe(false);
 });

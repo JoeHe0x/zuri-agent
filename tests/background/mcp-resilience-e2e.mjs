@@ -12,18 +12,18 @@ import { chromium } from "playwright";
 import { acceptDataDisclosure } from "../support/data-consent.mjs";
 import { EXTENSION_PATH, PROJECT_ROOT } from "../support/isolated-extension-mcp.mjs";
 
-const idleDurationMs = Number(process.env.QINGZHOU_MCP_IDLE_MS || 125000);
+const idleDurationMs = Number(process.env.ZURI_MCP_IDLE_MS || 125000);
 assert.ok(Number.isFinite(idleDurationMs) && idleDurationMs >= 120000,
-  "QINGZHOU_MCP_IDLE_MS must be a finite duration of at least 120000 ms");
+  "ZURI_MCP_IDLE_MS must be a finite duration of at least 120000 ms");
 const fixture = await startFixture();
-const directory = await mkdtemp(join(tmpdir(), "qz-mcp-resilience-"));
+const directory = await mkdtemp(join(tmpdir(), "zuri-mcp-resilience-"));
 const report = { ok: false, idleDurationMs, idleWorkerConsoleCaptured: false, idleSamples: [] };
 let environment, fallback, connectionPage;
 try {
   environment = await launchEnvironment();
   report.bridgeConfig = await environment.page.evaluate(async () => {
     const { endpoint, enabled, name, retryCount, status, pollTimeoutMs } =
-      (await chrome.storage.local.get("_qingzhou_mcp_bridge"))._qingzhou_mcp_bridge;
+      (await chrome.storage.local.get("_zuri_mcp_bridge"))._zuri_mcp_bridge;
     return { endpoint, enabled, name, retryCount, status, pollTimeoutMs };
   });
   const browserPage = await environment.context.newPage();
@@ -31,7 +31,7 @@ try {
   await environment.page.close();
   await environment.connectionPage.close();
   assert.ok(environment.context.pages().every(page => !page.url().startsWith("chrome-extension://")
-    && !page.url().includes("/qz-connect")), "idle observation must have no qz panel or connection page open");
+    && !page.url().includes("/zuri-connect")), "idle observation must have no zuri panel or connection page open");
   await environment.detach();
   assert.equal(environment.chrome.exitCode, null, "detaching Playwright must leave the independent Chrome process alive");
   const idleStartedAt = Date.now();
@@ -71,7 +71,7 @@ try {
   assert.equal(cliConnection.result.connected, true);
   report.afterIdleCliConnect = true;
 
-  const created = await call("qingzhou_create_session", { title: "Resilient browser task" });
+  const created = await call("zuri_create_session", { title: "Resilient browser task" });
   const sessionId = created.session.id;
   const opened = await execute("open_tab", { url: fixture.url }, sessionId);
   const tabId = opened.result.id;
@@ -169,11 +169,11 @@ function call(name, args, endpoint = environment.bridge.endpoint) {
   return callTool(endpoint, name, { ...args, timeoutSeconds: 30 }, { timeoutMs: 30000 });
 }
 function execute(name, args, sessionId, endpoint) {
-  return call("qingzhou_execute_tool", { name, args, sessionId, wait: true }, endpoint);
+  return call("zuri_execute_tool", { name, args, sessionId, wait: true }, endpoint);
 }
 async function connect(endpoint) {
-  await connectionPage.goto(`${endpoint}/qz-connect`);
-  await connectionPage.locator('[data-qz-connection-state="connected"]').waitFor();
+  await connectionPage.goto(`${endpoint}/zuri-connect`);
+  await connectionPage.locator('[data-zuri-connection-state="connected"]').waitFor();
   await until(async () => (await readHealth(endpoint)).status.connected, "extension did not reconnect");
 }
 async function until(check, message, timeoutMs = 15000) {
@@ -204,13 +204,13 @@ async function launchEnvironment() {
   const registryPath = join(directory, "browsers.json");
   let node = await startBridge({ port: 0, registryPath, requestTimeoutSeconds: 30 });
   let rejectPolls = false;
-  const capturePoll = request => { if (request.url === "/v1/qingzhou/poll") pollRequests.push({ at: Date.now(), url: `${node.endpoint}${request.url}` }); };
+  const capturePoll = request => { if (request.url === "/v1/zuri/poll") pollRequests.push({ at: Date.now(), url: `${node.endpoint}${request.url}` }); };
   const installFailureInjection = () => {
     const handlers = node.server.listeners("request");
     node.server.removeAllListeners("request");
     node.server.on("request", (request, response) => {
       capturePoll(request);
-      if (rejectPolls && request.url === "/v1/qingzhou/poll") {
+      if (rejectPolls && request.url === "/v1/zuri/poll") {
         failedPollRequests.push({ at: Date.now(), url: `${node.endpoint}${request.url}` });
         response.writeHead(503, { "content-type": "application/json" });
         response.end(JSON.stringify({ error: "Isolated resilience outage" }));
@@ -231,7 +231,7 @@ async function launchEnvironment() {
     } };
   const chrome = spawn(process.env.CHROME_EXECUTABLE || chromium.executablePath(), [
     `--user-data-dir=${profile}`, "--headless=new", "--no-first-run", "--no-default-browser-check",
-    ...(process.platform === "linux" && (process.getuid?.() === 0 || process.env.QZ_TEST_NO_SANDBOX === "1") ? ["--no-sandbox"] : []),
+    ...(process.platform === "linux" && (process.getuid?.() === 0 || process.env.ZURI_TEST_NO_SANDBOX === "1") ? ["--no-sandbox"] : []),
     "--remote-debugging-address=127.0.0.1", "--remote-debugging-port=0",
     `--disable-extensions-except=${EXTENSION_PATH}`, `--load-extension=${EXTENSION_PATH}`, "about:blank",
   ], { stdio: ["ignore", "pipe", "pipe"] });
@@ -265,16 +265,16 @@ async function launchEnvironment() {
     }, "Chrome debugging endpoint did not start");
     await attach();
     await context.route("http://127.0.0.1:18765/**", route => route.abort());
-    const isQzWorker = worker => worker.url().endsWith("/background/service-worker.js");
-    const worker = context.serviceWorkers().find(isQzWorker) || await context.waitForEvent("serviceworker", { predicate: isQzWorker });
+    const isZuriWorker = worker => worker.url().endsWith("/background/service-worker.js");
+    const worker = context.serviceWorkers().find(isZuriWorker) || await context.waitForEvent("serviceworker", { predicate: isZuriWorker });
     const extensionId = new URL(worker.url()).host;
     const page = await context.newPage();
     await page.goto(`chrome-extension://${extensionId}/sidepanel/sidepanel.html`);
     await acceptDataDisclosure(page, { disableBridge: false });
     await page.waitForFunction(() => !document.querySelector("#app")?.hasAttribute("data-workspace-booting"));
     const initialConnection = await context.newPage();
-    await initialConnection.goto(`${bridge.endpoint}/qz-connect`);
-    await initialConnection.locator('[data-qz-connection-state="connected"]').waitFor();
+    await initialConnection.goto(`${bridge.endpoint}/zuri-connect`);
+    await initialConnection.locator('[data-zuri-connection-state="connected"]').waitFor();
     await until(async () => (await readHealth(bridge.endpoint)).status.connected, "extension did not connect");
     return { bridge, get context() { return context; }, get debugEndpoint() { return debugEndpoint; }, extensionId,
       page, connectionPage: initialConnection,
@@ -321,12 +321,12 @@ async function stopExtensionWorker(environment) {
     });
     await command("ServiceWorker.enable");
     await until(() => [...versions.values()].some(version => version.scriptURL?.startsWith(`chrome-extension://${environment.extensionId}/`)),
-      "qz worker version did not appear", 5000);
+      "zuri worker version did not appear", 5000);
     const version = [...versions.values()].find(version => version.scriptURL?.startsWith(`chrome-extension://${environment.extensionId}/`));
     assert.equal(version.runningStatus, "running", "the resilience test must stop an actually running worker");
     stoppedVersionId = "";
     await command("ServiceWorker.stopWorker", { versionId: version.versionId });
-    await until(() => stoppedVersionId === version.versionId, "Chrome did not report the qz worker stopped", 5000);
+    await until(() => stoppedVersionId === version.versionId, "Chrome did not report the zuri worker stopped", 5000);
     return { versionId: version.versionId, stopped: true, debuggerTarget: "page" };
   } finally {
     socket.close();

@@ -1,7 +1,7 @@
 import { expect, test } from "./sidepanel-fixtures.mjs";
 
 test.beforeEach(async ({ page }) => {
-  await page.evaluate(() => window.qingzhouConversationBenchmark.runSnapshotRender({
+  await page.evaluate(() => window.zuriConversationBenchmark.runSnapshotRender({
     sessionId: "search-keyboard",
     transcript: [
       { type: "user", text: "needle one" },

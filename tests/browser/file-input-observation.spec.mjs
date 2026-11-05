@@ -10,7 +10,7 @@ async function installContentScript(page, html) {
     if (!window.chrome) Object.defineProperty(window, "chrome", { configurable: true, value: {} });
     let listener = null;
     const runtime = {
-      getManifest: () => ({ name: "Qingzhou Test", version: "0.0.0" }),
+      getManifest: () => ({ name: "Zuri Test", version: "0.0.0" }),
       onMessage: {
         addListener(nextListener) {
           listener = nextListener;
@@ -22,7 +22,7 @@ async function installContentScript(page, html) {
       configurable: true,
       value: runtime,
     });
-    window.__callQingzhouContent = (action, params = {}) => new Promise((resolve, reject) => {
+    window.__callZuriContent = (action, params = {}) => new Promise((resolve, reject) => {
       if (typeof listener !== "function") {
         reject(new Error("content-script listener is not installed"));
         return;
@@ -37,34 +37,34 @@ async function installContentScript(page, html) {
   for (const script of contentScripts) {
     await page.addScriptTag({ url: testAssetUrl(script) });
   }
-  await expect.poll(() => page.evaluate(() => window.__QZ_CONTENT_READY)).toBe(true);
+  await expect.poll(() => page.evaluate(() => window.__ZURI_CONTENT_READY)).toBe(true);
 }
 
 async function callContent(page, action, params = {}) {
   return page.evaluate(
-    ({ nextAction, nextParams }) => window.__callQingzhouContent(nextAction, nextParams),
+    ({ nextAction, nextParams }) => window.__callZuriContent(nextAction, nextParams),
     { nextAction: action, nextParams: params },
   );
 }
 
 const contentLanguages = {
   ja: { v: 1, locale: "ja", messages: {
-    brand: "Qingzhou", noStableSelector: "この要素の安定したセレクターを生成できませんでした", importFailed: "チャットをインポートできませんでした",
+    brand: "Zuri", noStableSelector: "この要素の安定したセレクターを生成できませんでした", importFailed: "チャットをインポートできませんでした",
   } },
   ar: { v: 1, locale: "ar", messages: {
-    brand: "Qingzhou", noStableSelector: "تعذّر إنشاء محدّد ثابت لهذا العنصر", importFailed: "تعذّر استيراد المحادثة",
+    brand: "Zuri", noStableSelector: "تعذّر إنشاء محدّد ثابت لهذا العنصر", importFailed: "تعذّر استيراد المحادثة",
   } },
 };
 
 async function startPicker(page, resultKey = "picked") {
   await page.evaluate(key => {
     globalThis[key] = null;
-    void window.__callQingzhouContent("startElementPicker").then(result => { globalThis[key] = result; });
+    void window.__callZuriContent("startElementPicker").then(result => { globalThis[key] = result; });
   }, resultKey);
 }
 
 async function selectWithoutStableSelector(page) {
-  await expect(page.locator("div[data-qingzhou-element-picker]")).toHaveCount(1);
+  await expect(page.locator("div[data-zuri-element-picker]")).toHaveCount(1);
   await page.evaluate(() => {
     const target = document.querySelector('[data-testid="pick-me"]');
     const querySelectorAll = document.querySelectorAll;
@@ -74,7 +74,7 @@ async function selectWithoutStableSelector(page) {
     finally { document.querySelectorAll = querySelectorAll; }
   });
   await expect.poll(() => page.evaluate(() => globalThis.picked?.code)).toBe("ELEMENT_PICKER_SELECTOR_FAILED");
-  await expect(page.locator("[data-qingzhou-element-picker]")).toHaveCount(0);
+  await expect(page.locator("[data-zuri-element-picker]")).toHaveCount(0);
   return page.evaluate(() => globalThis.picked);
 }
 
@@ -92,11 +92,11 @@ test("Content cancels a picker before a delayed language reply without reviving 
   });
   await startPicker(page);
   await expect.poll(() => page.evaluate(() => globalThis.languageRequests)).toBe(1);
-  await expect(page.locator("[data-qingzhou-element-picker]")).toHaveCount(0);
+  await expect(page.locator("[data-zuri-element-picker]")).toHaveCount(0);
   expect(await callContent(page, "cancelElementPicker")).toMatchObject({ ok: true, status: "cancelled" });
   await page.evaluate(result => globalThis.releaseLanguage({ ok: true, result }), contentLanguages.ja);
   await expect.poll(() => page.evaluate(() => globalThis.picked?.status)).toBe("cancelled");
-  await expect(page.locator("[data-qingzhou-element-picker]")).toHaveCount(0);
+  await expect(page.locator("[data-zuri-element-picker]")).toHaveCount(0);
   await page.getByTestId("pick-me").click();
   expect(await page.evaluate(() => globalThis.normalClicks)).toBe(1);
 
@@ -144,23 +144,23 @@ test("a newer Content picker supersedes a pending start while sharing its langua
   expect(await page.evaluate(() => globalThis.languageRequests)).toBe(1);
   await page.evaluate(result => globalThis.releaseLanguage({ ok: true, result }), contentLanguages.ja);
   await expect.poll(() => page.evaluate(() => globalThis.olderPicker?.status)).toBe("cancelled");
-  await expect(page.locator("div[data-qingzhou-element-picker]")).toHaveCount(1);
+  await expect(page.locator("div[data-zuri-element-picker]")).toHaveCount(1);
   await page.getByTestId("pick-me").click();
   await expect.poll(() => page.evaluate(() => globalThis.picked?.status)).toBe("selected");
-  await expect(page.locator("[data-qingzhou-element-picker]")).toHaveCount(0);
+  await expect(page.locator("[data-zuri-element-picker]")).toHaveCount(0);
 });
 
 test("self-contained Content resolves picker selectors without vendor globals and releases its listeners", async ({ page }) => {
   await installContentScript(page, '<main><button data-testid="pick-me">Pick target</button><button>Other</button></main>');
-  expect(await page.evaluate(() => ["Readability", "TurndownService", "turndownPluginGfm", "QingzhouFinder"].map(name => typeof globalThis[name])))
+  expect(await page.evaluate(() => ["Readability", "TurndownService", "turndownPluginGfm", "ZuriFinder"].map(name => typeof globalThis[name])))
     .toEqual(["undefined", "undefined", "undefined", "undefined"]);
   await page.evaluate(() => {
     globalThis.normalClicks = 0;
     document.querySelector('[data-testid="pick-me"]').addEventListener("click", () => { globalThis.normalClicks++; });
     globalThis.picked = null;
-    void window.__callQingzhouContent("startElementPicker").then(result => { globalThis.picked = result; });
+    void window.__callZuriContent("startElementPicker").then(result => { globalThis.picked = result; });
   });
-  await expect(page.locator("div[data-qingzhou-element-picker]")).toHaveCount(1);
+  await expect(page.locator("div[data-zuri-element-picker]")).toHaveCount(1);
   await page.getByTestId("pick-me").click();
   await expect.poll(() => page.evaluate(() => globalThis.picked?.status)).toBe("selected");
   const selected = await page.evaluate(() => ({
@@ -170,16 +170,16 @@ test("self-contained Content resolves picker selectors without vendor globals an
     normalClicks: globalThis.normalClicks,
   }));
   expect(selected).toMatchObject({ ok: true, exactTarget: true, count: 1, normalClicks: 0 });
-  await expect(page.locator("[data-qingzhou-element-picker]")).toHaveCount(0);
+  await expect(page.locator("[data-zuri-element-picker]")).toHaveCount(0);
   await page.getByTestId("pick-me").click();
   expect(await page.evaluate(() => globalThis.normalClicks)).toBe(1);
   await page.evaluate(() => {
     globalThis.picked = null;
-    void window.__callQingzhouContent("startElementPicker").then(result => { globalThis.picked = result; });
+    void window.__callZuriContent("startElementPicker").then(result => { globalThis.picked = result; });
   });
   await page.keyboard.press("Escape");
   await expect.poll(() => page.evaluate(() => globalThis.picked?.status)).toBe("cancelled");
-  await expect(page.locator("[data-qingzhou-element-picker]")).toHaveCount(0);
+  await expect(page.locator("[data-zuri-element-picker]")).toHaveCount(0);
 });
 
 test("element operations preserve selector errors and recover with the same matched target", async ({ page }) => {

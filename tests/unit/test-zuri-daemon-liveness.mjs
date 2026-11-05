@@ -14,11 +14,11 @@ const procStatus = state => `Name:\tqz-fixture\nState:\t${state}\nPid:\t${fixtur
 const osError = code => Object.assign(new Error(`Fixture ${code}`), { code });
 
 async function fixture(t) {
-  const stateDir = await mkdtemp(join(tmpdir(), "qz-process-state-"));
+  const stateDir = await mkdtemp(join(tmpdir(), "zuri-process-state-"));
   t.after(() => rm(stateDir, { recursive: true, force: true }));
   const options = { stateDir, scopeId: randomUUID(), buildId: "liveness-test", preferredPort: 0 };
   const paths = daemonPaths(options);
-  const record = { service: "qz-browser-agent", protocolVersion: 1, scopeId: options.scopeId,
+  const record = { service: "zuri-agent", protocolVersion: 1, scopeId: options.scopeId,
     buildId: options.buildId, instanceId: randomUUID(), processId: fixturePid, endpoint: "http://127.0.0.1:12345" };
   await writeFile(paths.state, JSON.stringify(record));
   return { options, paths, record };

@@ -8,7 +8,7 @@ for (const colorScheme of ["light", "dark"]) {
     test.beforeEach(async ({ page }) => {
       await page.addInitScript({ content: `(${installBenchmarkChromeStub})({}); (${installRecallTransport})();` });
       await page.goto("/extension/sidepanel/sidepanel.html", { waitUntil: "domcontentloaded" });
-      await page.waitForFunction(() => Boolean(window.qingzhouConversationBenchmark));
+      await page.waitForFunction(() => Boolean(window.zuriConversationBenchmark));
       await page.evaluate(installRecallBackend);
     });
 
@@ -29,8 +29,8 @@ for (const colorScheme of ["light", "dark"]) {
         await expect(page.locator(".input-document-attachment.is-ready")).toContainText("notes.txt");
         await page.locator("#input").fill("Edited: check the totals too");
         await page.locator("#btn-send").click();
-        await expect.poll(() => page.evaluate(() => window.__qzPostedMessages.filter(item => item.type === "prompt").length)).toBe(1);
-        const sent = await page.evaluate(() => window.__qzPostedMessages.find(item => item.type === "prompt"));
+        await expect.poll(() => page.evaluate(() => window.__zuriPostedMessages.filter(item => item.type === "prompt").length)).toBe(1);
+        const sent = await page.evaluate(() => window.__zuriPostedMessages.find(item => item.type === "prompt"));
         expect(sent.text).toBe("Edited: check the totals too");
         expect(sent.images).toHaveLength(1);
         expect(sent.documents).toHaveLength(1);
@@ -61,7 +61,7 @@ for (const colorScheme of ["light", "dark"]) {
         });
         await expect(page.locator(".input-document-attachment")).toHaveCount(1);
         expect(await page.evaluate(() => window.__recall.recallRequests)).toBe(1);
-        expect(await page.evaluate(() => window.__qzPostedMessages.filter(m => m.type === "prompt"))).toEqual([]);
+        expect(await page.evaluate(() => window.__zuriPostedMessages.filter(m => m.type === "prompt"))).toEqual([]);
         await page.evaluate(() => window.__recall.releaseWrite());
         await expect(page.locator("#input")).toHaveValue("Please inspect the screenshot and notes\n\nUnsent draft");
         await expect(page.locator(".input-document-attachment.is-ready")).toHaveCount(2);
@@ -101,7 +101,7 @@ for (const colorScheme of ["light", "dark"]) {
         await expect(page.locator("#input")).toHaveValue("Unsent draft");
         await expect(page.locator(".input-document-attachment")).toHaveCount(1);
         await expect(page.locator("#queued-followups .queued-followup")).toHaveCount(0);
-        expect(await page.evaluate(() => window.__qzPostedMessages.filter(m => m.type === "prompt"))).toEqual([]);
+        expect(await page.evaluate(() => window.__zuriPostedMessages.filter(m => m.type === "prompt"))).toEqual([]);
       });
 
       test(`extreme ${queueKind}: failed attachment copying preserves the queue, then one retry succeeds`, async ({ page }) => {
@@ -151,8 +151,8 @@ for (const colorScheme of ["light", "dark"]) {
         await page.locator('.queued-followup[data-client-message-id="long"] .queued-followup-delete').click();
         await expect(page.locator("#input")).toHaveValue(text);
         await page.locator("#btn-send").click();
-        await expect.poll(() => page.evaluate(() => window.__qzPostedMessages.filter(m => m.type === "prompt").length)).toBe(1);
-        const sent = await page.evaluate(() => window.__qzPostedMessages.find(m => m.type === "prompt"));
+        await expect.poll(() => page.evaluate(() => window.__zuriPostedMessages.filter(m => m.type === "prompt").length)).toBe(1);
+        const sent = await page.evaluate(() => window.__zuriPostedMessages.find(m => m.type === "prompt"));
         expect(sent.text).toBe(text.trim());
         expect(sent.images).toHaveLength(1);
         expect(sent.documents).toHaveLength(1);
@@ -270,8 +270,8 @@ for (const colorScheme of ["light", "dark"]) {
 
 async function switchSession(page, sessionId) {
   await page.evaluate(async id => {
-    await window.qingzhouConversationBenchmark.seedSession({ sessionId: id, title: id, transcript: [] });
-    await window.qingzhouConversationBenchmark.switchToSession(id, { source: "benchmark" });
+    await window.zuriConversationBenchmark.seedSession({ sessionId: id, title: id, transcript: [] });
+    await window.zuriConversationBenchmark.switchToSession(id, { source: "benchmark" });
   }, sessionId);
 }
 
@@ -304,7 +304,7 @@ async function seed(page, { queueKind = "followup", existingDraft = false, queue
     }
   }, { queueKind, existingDraft, queuedText });
   await switchSession(page, "recall");
-  await page.evaluate(() => window.qingzhouConversationBenchmark.configureVisualState({ running: true,
+  await page.evaluate(() => window.zuriConversationBenchmark.configureVisualState({ running: true,
     pendingFollowUps: window.__recall.agent.getPendingFollowUps(), pendingSteerings: window.__recall.agent.getPendingSteerings() }));
 }
 
@@ -327,11 +327,11 @@ function installRecallTransport() {
         return window.__recallTransport.dispatch(message, { postMessage: value => {
           if (message.type === "restore_queued_message" && window.__recall.loseReply) {
             window.__recall.loseReply = false;
-            window.__qzEmitPortMessage({ type: "error", requestId: message.requestId, code: "PORT_DISCONNECTED", message: "connection lost after commit" });
-          } else window.__qzEmitPortMessage(value);
+            window.__zuriEmitPortMessage({ type: "error", requestId: message.requestId, code: "PORT_DISCONNECTED", message: "connection lost after commit" });
+          } else window.__zuriEmitPortMessage(value);
         } });
       })
-        .catch(error => window.__qzEmitPortMessage({ type: "error", requestId: message.requestId, code: error.code || "TEST_FAILURE", message: error.message }));
+        .catch(error => window.__zuriEmitPortMessage({ type: "error", requestId: message.requestId, code: error.code || "TEST_FAILURE", message: error.message }));
     };
     return port;
   };
@@ -352,7 +352,7 @@ async function installRecallBackend() {
         pendingFollowUpMessages: event.pendingFollowUpMessages, pendingSteeringMessages: event.pendingSteeringMessages };
       supervisor.setRuntime(sessionId, runtime);
       if (sessionId === "recall") backend.runtime = runtime;
-      window.__qzEmitPortMessage({ ...event, sessionId });
+      window.__zuriEmitPortMessage({ ...event, sessionId });
     },
   });
   backend.agent = await supervisor.getAgent("recall");
@@ -423,9 +423,9 @@ async function runQueuedRecallFuzz(page, testInfo, { width, colorScheme }) {
       await agent.followUp(item.text, item.images ? [image] : [], item.id, documents);
     }
     const probe = window.__recallProbe = { phase: "interaction", frames: [], inputs: [], seq: 1, content: "正在整理行程。".repeat(130) };
-    const publish = () => window.qingzhouConversationBenchmark.dispatchBackgroundEvent({ type: "message_update", sessionId: "recall", runId: "benchmark-visual-run",
+    const publish = () => window.zuriConversationBenchmark.dispatchBackgroundEvent({ type: "message_update", sessionId: "recall", runId: "benchmark-visual-run",
       eventSeq: ++probe.seq, spanId: "recall-stream", content: probe.content });
-    window.qingzhouConversationBenchmark.dispatchBackgroundEvent({ type: "message_start", sessionId: "recall", runId: "benchmark-visual-run", eventSeq: 1,
+    window.zuriConversationBenchmark.dispatchBackgroundEvent({ type: "message_start", sessionId: "recall", runId: "benchmark-visual-run", eventSeq: 1,
       spanId: "recall-stream", message: { role: "assistant", content: probe.content } });
     probe.timer = setInterval(() => { probe.content += "继续核对。"; publish(); }, 65);
     for (const type of ["click", "wheel"]) document.addEventListener(type, event => {
@@ -495,7 +495,7 @@ async function runQueuedRecallFuzz(page, testInfo, { width, colorScheme }) {
         await expect(page.locator("#input")).toHaveValue(text);
         await expect(page.locator(".input-image-attachment")).toHaveCount(imageCount);
         await expect(page.locator(".input-document-attachment.is-ready")).toHaveCount(documentCount);
-        await page.evaluate(() => window.qingzhouConversationBenchmark.configureVisualState({ running: true,
+        await page.evaluate(() => window.zuriConversationBenchmark.configureVisualState({ running: true,
           pendingFollowUps: window.__recall.agent.getPendingFollowUps(), pendingSteerings: window.__recall.agent.getPendingSteerings() }));
         actions.push({ kind: "switch-away-back" });
       }
@@ -510,10 +510,10 @@ async function runQueuedRecallFuzz(page, testInfo, { width, colorScheme }) {
       await page.evaluate(() => { window.__recallProbe.phase = "interaction"; });
       actions.push({ kind: "wheel-up-tail" });
     }
-    expect(await page.evaluate(() => window.__qzPostedMessages.filter(item => item.type === "prompt"))).toEqual([]);
+    expect(await page.evaluate(() => window.__zuriPostedMessages.filter(item => item.type === "prompt"))).toEqual([]);
     await page.locator("#btn-send").click();
-    await expect.poll(() => page.evaluate(() => window.__qzPostedMessages.filter(item => item.type === "prompt").length)).toBe(1);
-    const sent = await page.evaluate(() => window.__qzPostedMessages.find(item => item.type === "prompt"));
+    await expect.poll(() => page.evaluate(() => window.__zuriPostedMessages.filter(item => item.type === "prompt").length)).toBe(1);
+    const sent = await page.evaluate(() => window.__zuriPostedMessages.find(item => item.type === "prompt"));
     expect(sent.text).toBe(text);
     expect(sent.images).toHaveLength(imageCount);
     expect(sent.documents).toHaveLength(documentCount);

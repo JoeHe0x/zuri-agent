@@ -17,7 +17,7 @@ test('local page scripts overlap without a bridge; tool scripts remain barriers 
   });
   await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
   const origin = `http://127.0.0.1:${server.address().port}`;
-  const directory = await mkdtemp(join(tmpdir(), 'qz-script-dataflow-'));
+  const directory = await mkdtemp(join(tmpdir(), 'zuri-script-dataflow-'));
   let browser;
   try {
     const extension = join(directory, 'extension');

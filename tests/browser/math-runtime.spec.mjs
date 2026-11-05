@@ -300,8 +300,8 @@ test("exported html embeds self-contained formulas and opens offline", async ({ 
   expect(html).not.toMatch(/<script\s[^>]*\bsrc=/i);
   expect(html).not.toMatch(/chrome-extension:|moz-extension:|cdn\.jsdelivr|registry\.npmmirror|unpkg\.com/i);
   expect(html).not.toMatch(/url\(\s*['"]?(?!data:|#)[^)'"]+/i);
-  expect(html).toContain('id="qingzhou-session-exchange"');
-  expect(html).toContain('"format":"qingzhou.session"');
+  expect(html).toContain('id="zuri-session-exchange"');
+  expect(html).toContain('"format":"zuri.session"');
   expect(html).toContain('"version":1');
   expect(html.match(/<svg\b/gi)?.length).toBe(3);
   expect(html).not.toMatch(/fill="red"/);

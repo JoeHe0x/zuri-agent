@@ -36,7 +36,7 @@ try {
   fallback?.classList.add("hidden");
   app?.removeAttribute("data-workspace-boot-fallback");
 } catch (error) {
-  console.error("[轻舟] side panel startup failed", error);
+  console.error("[Zuri] side panel startup failed", error);
   revealFallback(t("startupFailed"), "error");
 } finally {
   clearTimeout(timeout);

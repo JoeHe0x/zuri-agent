@@ -26,7 +26,7 @@ for (const colorScheme of ["light", "dark"]) {
           content: `第 ${index + 1} 条消息用于验证滚动状态下的左右留白。`,
         })),
       ];
-      await window.qingzhouConversationBenchmark.runSnapshotRender({
+      await window.zuriConversationBenchmark.runSnapshotRender({
         sessionId,
         title: "对话左右留白",
         transcript,

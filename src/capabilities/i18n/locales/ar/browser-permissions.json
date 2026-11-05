@@ -8,6 +8,6 @@
   "browser-permissions.name.history": "سجل التصفح",
   "browser-permissions.name.desktopCapture": "تسجيل الشاشة",
   "browser-permissions.name.downloads.open": "فتح الملفات التي تم تنزيلها",
-  "browser-permissions.required": "امنح إذن «{permission}» في اللوحة الجانبية لـ qz، ثم أعد المحاولة.",
+  "browser-permissions.required": "امنح إذن «{permission}» في اللوحة الجانبية لـ zuri، ثم أعد المحاولة.",
   "browser-permissions.denied": "لم يُمنح إذن «{permission}»، لذا أُلغي الإجراء. أعد المحاولة لمنح الإذن عند الحاجة."
 }

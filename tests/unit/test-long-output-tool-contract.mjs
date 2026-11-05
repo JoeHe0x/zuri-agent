@@ -9,7 +9,7 @@ const filesDocumentsToolsSource = readFileSync(join(root, "src/capabilities/docu
 const toolErrorLocalizationSource = readFileSync(join(root, "src/shared/tools/tool-error-localization.ts"), "utf8");
 const { createTranslator } = await import("../../src/shared/i18n/index.js");
 const { default: documentMessages } = await import("../../src/capabilities/documents/messages.js");
-const { QINGZHOU_DOCUMENT_TOOL_SPECS } = await import("../../src/capabilities/documents/skill-contract.js");
+const { ZURI_DOCUMENT_TOOL_SPECS } = await import("../../src/capabilities/documents/skill-contract.js");
 
 globalThis.chrome ||= {};
 const { resolveToolDefinition } = await import("../../src/background/tools/runtime.js");
@@ -61,7 +61,7 @@ assert.doesNotMatch(toolsSource, /assertDirectDataStorePayloadAllowed|DATA_STORE
 assert.doesNotMatch(toolErrorLocalizationSource, /DATA_STORE_DIRECT_PAYLOAD_TOO_LARGE|直接写入 Data 表的数据过大/, "removed data_store direct payload guard should not have a localized error message");
 
 assert.deepEqual(
-  Object.keys(QINGZHOU_DOCUMENT_TOOL_SPECS.document_create.parameters.properties),
+  Object.keys(ZURI_DOCUMENT_TOOL_SPECS.document_create.parameters.properties),
   ["format", "filename", "title", "docModelId", "download", "saveAs", "blocks", "sheets"],
   "document_create should put long blocks/sheets last",
 );

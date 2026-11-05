@@ -685,7 +685,7 @@ async function clearStaleOptionDisabled(send: CdpCommand, nodes: AxNode[]) {
   const candidates = nodes.filter(node => (node.role?.value === "option" || node.role?.value === "optgroup")
     && node.properties?.some(prop => prop.name === "disabled" && prop.value?.value === true));
   if (!candidates.length) return;
-  const objectGroup = `qz-ax-option-disabled-${crypto.randomUUID()}`;
+  const objectGroup = `zuri-ax-option-disabled-${crypto.randomUUID()}`;
   try {
     for (const node of candidates) {
       if (!node.backendDOMNodeId) continue;

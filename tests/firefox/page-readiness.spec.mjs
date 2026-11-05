@@ -54,7 +54,7 @@ function callTool(session, name, args) {
     const request = ${JSON.stringify({ name, args })};
     const context = Cu.cloneInto({ sessionId: "firefox-readiness", runId: "run", workingTabId: request.args.tabId, source: "agent" }, content);
     try {
-      const result = await view.__qzFirefoxPageTools.execute(request.name, Cu.cloneInto(request.args, content), undefined, context);
+      const result = await view.__zuriFirefoxPageTools.execute(request.name, Cu.cloneInto(request.args, content), undefined, context);
       return JSON.parse(JSON.stringify(result));
     } catch (error) {
       const failure = Cu.waiveXrays(error);

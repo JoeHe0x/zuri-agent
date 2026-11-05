@@ -37,8 +37,8 @@ def load_module(name: str, path: Path):
 
 DISTILL_PATH = HERE / "study-tree-dp-candidate-distillation.py"
 MLP_PATH = HERE / "study-tree-dp-global-mlp.py"
-DISTILL = load_module("qingzhou_global_distill_data", DISTILL_PATH)
-MLP = load_module("qingzhou_global_distill_mlp", MLP_PATH)
+DISTILL = load_module("zuri_global_distill_data", DISTILL_PATH)
+MLP = load_module("zuri_global_distill_mlp", MLP_PATH)
 TRAINER = DISTILL.TRAINER
 GLOBAL = MLP.GLOBAL
 
@@ -315,7 +315,7 @@ def main() -> int:
         }, ensure_ascii=False), flush=True)
 
     report = {
-        "schema": "qingzhou.tree-dp-global-candidate-distillation.v1",
+        "schema": "zuri.tree-dp-global-candidate-distillation.v1",
         "protocol": {
             "trainingSplits": ["base", "train"],
             "grouping": "siteFamily",

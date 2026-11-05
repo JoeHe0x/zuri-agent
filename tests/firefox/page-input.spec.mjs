@@ -56,8 +56,8 @@ test("uid and css input succeed once on a page without a content CSP", async ({ 
         target: { tabId: ${Number(tabId)} },
         world: "ISOLATED",
         func: () => ({
-          bound: document.__qzInputReceiptsV2Bound === true,
-          marked: globalThis.__qzExtensionInputEvents instanceof WeakSet,
+          bound: document.__zuriInputReceiptsV2Bound === true,
+          marked: globalThis.__zuriExtensionInputEvents instanceof WeakSet,
         }),
       });
       return frame && frame.result;
@@ -104,7 +104,7 @@ function targetFor(snapshot, label) {
 function callTool(session, name, args) {
   return session.extension("background", `
     const request = ${JSON.stringify({ name, args })};
-    const tools = view.__qzFirefoxPageTools;
+    const tools = view.__zuriFirefoxPageTools;
     if (!tools || typeof tools.execute !== "function") throw new Error("Firefox page tool harness is missing");
     const context = Cu.cloneInto({
       sessionId: "firefox-page-input",

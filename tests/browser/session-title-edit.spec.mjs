@@ -6,7 +6,7 @@ for (const colorScheme of ["light", "dark"]) {
 
     test("edits in place without moving the chat layout", async ({ page }, testInfo) => {
       await page.evaluate(async () => {
-        await window.qingzhouConversationBenchmark.runSnapshotRender({
+        await window.zuriConversationBenchmark.runSnapshotRender({
           sessionId: "manual-title-session",
           title: "原始对话标题",
           transcript: [{ type: "assistant", content: "用于验证标题栏布局。" }],
@@ -85,7 +85,7 @@ for (const colorScheme of ["light", "dark"]) {
       await expect(page.locator("#current-session-title")).toHaveText("失焦保存标题");
 
       const renameRequest = await page.evaluate(() => (
-        window.__qzPostedMessages.filter(message => message?.type === "rename_session").at(-1) || null
+        window.__zuriPostedMessages.filter(message => message?.type === "rename_session").at(-1) || null
       ));
       expect(renameRequest).toMatchObject({
         type: "rename_session",
@@ -110,7 +110,7 @@ for (const colorScheme of ["light", "dark"]) {
       const originalTitle = "Luxembourg City three-day itinerary: museums, fortifications, and restaurants";
       const editedTitle = "Luxembourg cultural itinerary: museums, fortifications, restaurants, and transportation";
       await page.evaluate(async title => {
-        await window.qingzhouConversationBenchmark.runSnapshotRender({
+        await window.zuriConversationBenchmark.runSnapshotRender({
           sessionId: "english-title-session",
           title,
           transcript: [{ type: "assistant", content: "The itinerary is ready." }],
@@ -152,7 +152,7 @@ for (const colorScheme of ["light", "dark"]) {
       await expect(title).toHaveText(editedTitle);
       await expect(title).toHaveAttribute("title", editedTitle);
       const renameRequest = await page.evaluate(() => (
-        window.__qzPostedMessages.filter(message => message?.type === "rename_session").at(-1) || null
+        window.__zuriPostedMessages.filter(message => message?.type === "rename_session").at(-1) || null
       ));
       expect(renameRequest).toMatchObject({
         type: "rename_session",
@@ -172,12 +172,12 @@ test.describe("session title editing failure", () => {
 
   test("restores the persisted title when saving fails", async ({ page }) => {
     await page.evaluate(async () => {
-      await window.qingzhouConversationBenchmark.runSnapshotRender({
+      await window.zuriConversationBenchmark.runSnapshotRender({
         sessionId: "failed-title-session",
         title: "保留的标题",
         transcript: [{ type: "assistant", content: "保存失败后保持原状。" }],
       });
-      window.__qzRenameSessionFailure = true;
+      window.__zuriRenameSessionFailure = true;
     });
 
     await page.locator("#btn-edit-session-title").click();

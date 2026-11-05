@@ -60,7 +60,7 @@ test("the macOS accent darkens only as far as the label needs and Firefox's acce
 test("the stylesheet fallback is Firefox's primary button and passes in both schemes", () => {
   const skin = firefoxSidebarCss();
   const pair = name => {
-    const match = new RegExp(`--qz-ff-${name}: light-dark\\((#[0-9a-f]{6}), (#[0-9a-f]{6})\\);`).exec(skin);
+    const match = new RegExp(`--zuri-ff-${name}: light-dark\\((#[0-9a-f]{6}), (#[0-9a-f]{6})\\);`).exec(skin);
     assert.ok(match, name);
     return [parseFirefoxThemeColor(match[1]), parseFirefoxThemeColor(match[2])];
   };
@@ -93,33 +93,33 @@ test("the accent ink for links and focus rings reads on every sidebar", () => {
 
 test("the stylesheet declares the text tier shares the palette starts from", () => {
   const skin = firefoxSidebarCss();
-  const sources = { sidebar: ["--qz-ff-sidebar-text", "var\\(--qz-ff-sidebar\\)"], popup: ["--qz-ff-popup-text", "var\\(--qz-ff-popup\\)"], field: ["--qz-ff-field-text", "transparent"] };
+  const sources = { sidebar: ["--zuri-ff-sidebar-text", "var\\(--zuri-ff-sidebar\\)"], popup: ["--zuri-ff-popup-text", "var\\(--zuri-ff-popup\\)"], field: ["--zuri-ff-field-text", "transparent"] };
   for (const [property, source, share] of FIREFOX_TEXT_TIERS) {
     const [text, surface] = sources[source];
     const pattern = new RegExp(`${property}: color-mix\\(in srgb, var\\(${text}\\) ${Math.round(share * 100)}%, ${surface}\\);`);
     assert.match(skin, pattern, property);
   }
-  assert.match(skin, /--field-placeholder: var\(--qz-ff-field-placeholder\)/);
-  assert.match(skin, /#input::placeholder \{\n\s*color: var\(--qz-ff-field-placeholder\);/);
-  assert.match(skin, /\.qz-popover,\n\s*\.msg-user-edit-btn::before \{\n\s*--text-primary: var\(--qz-ff-popup-text\);\n\s*--text-secondary: var\(--qz-ff-popup-text-deemphasized\);\n\s*--text-muted: var\(--qz-ff-popup-text-muted\);/);
+  assert.match(skin, /--field-placeholder: var\(--zuri-ff-field-placeholder\)/);
+  assert.match(skin, /#input::placeholder \{\n\s*color: var\(--zuri-ff-field-placeholder\);/);
+  assert.match(skin, /\.zuri-popover,\n\s*\.msg-user-edit-btn::before \{\n\s*--text-primary: var\(--zuri-ff-popup-text\);\n\s*--text-secondary: var\(--zuri-ff-popup-text-deemphasized\);\n\s*--text-muted: var\(--zuri-ff-popup-text-muted\);/);
 });
 
 test("text tiers, secondary and disabled controls, and status colors keep 4.5:1 on every sidebar", () => {
   const skin = firefoxSidebarCss();
   const share = name => {
-    const match = new RegExp(`--qz-ff-${name}: color-mix\\(in srgb, var\\(--qz-ff-sidebar-text\\) (\\d+)%, transparent\\);`).exec(skin);
+    const match = new RegExp(`--zuri-ff-${name}: color-mix\\(in srgb, var\\(--zuri-ff-sidebar-text\\) (\\d+)%, transparent\\);`).exec(skin);
     assert.ok(match, name);
     return Number(match[1]) / 100;
   };
   const fills = { fill: share("fill"), hover: share("fill-hover"), active: share("fill-active"), row: share("row-hover"), selected: share("selected") };
   const tier = name => FIREFOX_TEXT_TIERS.find(([property]) => property === name);
-  const [, , deemphasizedShare, deemphasizedFill] = tier("--qz-ff-text-deemphasized");
-  const [, , mutedShare, mutedFill] = tier("--qz-ff-text-muted");
-  const [, , fieldShare, fieldFill] = tier("--qz-ff-field-text-deemphasized");
+  const [, , deemphasizedShare, deemphasizedFill] = tier("--zuri-ff-text-deemphasized");
+  const [, , mutedShare, mutedFill] = tier("--zuri-ff-text-muted");
+  const [, , fieldShare, fieldFill] = tier("--zuri-ff-field-text-deemphasized");
   assert.ok(deemphasizedFill >= fills.hover, "the deemphasized tier is checked on the darkest fill it sits on");
-  assert.match(skin, /\.qz-btn:disabled \{\n\s*--qz-control-color: var\(--qz-ff-text-deemphasized\);/);
-  assert.match(skin, /--send-standby-mark: var\(--qz-ff-field-text-deemphasized\)/);
-  const standby = /--send-standby-bg: color-mix\(in srgb, var\(--qz-ff-field-text\) (\d+)%, transparent\);/.exec(skin);
+  assert.match(skin, /\.zuri-btn:disabled \{\n\s*--zuri-control-color: var\(--zuri-ff-text-deemphasized\);/);
+  assert.match(skin, /--send-standby-mark: var\(--zuri-ff-field-text-deemphasized\)/);
+  const standby = /--send-standby-bg: color-mix\(in srgb, var\(--zuri-ff-field-text\) (\d+)%, transparent\);/.exec(skin);
   assert.ok(standby, "the send standby fill tints the field");
   assert.equal(Number(standby[1]) / 100, fieldFill, "the field tier is checked on the send standby fill");
   assert.match(skin, /--control-disabled-opacity: 1;/);
@@ -151,7 +151,7 @@ test("text tiers, secondary and disabled controls, and status colors keep 4.5:1 
     assert.ok(contrast(mix(text, fieldShare, field), mix(text, fieldFill, field)) >= 4.5, `${name} send standby stylesheet share`);
   }
   for (const status of ["success", "warning", "critical"]) {
-    const match = new RegExp(`--qz-ff-${status}: light-dark\\((#[0-9a-f]{6}), (#[0-9a-f]{6})\\);`).exec(skin);
+    const match = new RegExp(`--zuri-ff-${status}: light-dark\\((#[0-9a-f]{6}), (#[0-9a-f]{6})\\);`).exec(skin);
     assert.ok(match, status);
     for (const { name, sidebar } of SIDEBARS.slice(0, 4)) {
       const dark = luminance(sidebar) < 0.18;
@@ -166,7 +166,7 @@ test("text tiers, secondary and disabled controls, and status colors keep 4.5:1 
 
 function darkField(sidebar) {
   const skin = firefoxSidebarCss();
-  const match = /--qz-ff-field: light-dark\(var\(--qz-ff-sidebar\), color-mix\(in srgb, black (\d+)%, var\(--qz-ff-sidebar\)\)\);/.exec(skin);
+  const match = /--zuri-ff-field: light-dark\(var\(--zuri-ff-sidebar\), color-mix\(in srgb, black (\d+)%, var\(--zuri-ff-sidebar\)\)\);/.exec(skin);
   assert.ok(match, "the dark field darkens the sidebar");
   return luminance(sidebar) < 0.18 ? mix([0, 0, 0], Number(match[1]) / 100, sidebar) : sidebar;
 }

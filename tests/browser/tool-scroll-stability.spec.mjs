@@ -51,7 +51,7 @@ test.describe("completed tool card scroll stability", () => {
         ...legacyNotes,
         finalAssistant,
       ];
-      const metrics = await window.qingzhouConversationBenchmark.runSnapshotRender({
+      const metrics = await window.zuriConversationBenchmark.runSnapshotRender({
         sessionId: "snapshot_scroll_probe_session",
         title: "Canonical snapshot 滚动稳定性",
         transcript,
@@ -66,8 +66,8 @@ test.describe("completed tool card scroll stability", () => {
           type: "tool",
           toolCallId,
           runId: "completed_scroll_probe_run",
-          name: "qingzhou_skill_author__edit_skill_resource",
-          capabilityId: "qingzhou_skill_author__edit_skill_resource",
+          name: "zuri_skill_author__edit_skill_resource",
+          capabilityId: "zuri_skill_author__edit_skill_resource",
           title: "编辑技能资源",
           familyId: "plugin:meta",
           args: {
@@ -84,9 +84,9 @@ test.describe("completed tool card scroll stability", () => {
             type: "json",
             content,
             _plugin: {
-              id: "qingzhou-skill-author",
-              tool: "qingzhou_skill_author__edit_skill_resource",
-              capabilityId: "qingzhou_skill_author__edit_skill_resource",
+              id: "zuri-skill-author",
+              tool: "zuri_skill_author__edit_skill_resource",
+              capabilityId: "zuri_skill_author__edit_skill_resource",
               localName: "edit_skill_resource",
               title: "编辑技能资源",
               familyId: "plugin:meta",
@@ -132,7 +132,7 @@ test.describe("completed tool card scroll stability", () => {
     expect(before.max).toBeGreaterThan(20);
 
     await page.evaluate(() => {
-      window.qingzhouConversationBenchmark.dispatchBackgroundEvent({
+      window.zuriConversationBenchmark.dispatchBackgroundEvent({
         type: "messages",
         sessionId: "snapshot_scroll_probe_session",
         transcript: structuredClone(window.__scrollProbeCanonicalSnapshot),
@@ -164,7 +164,7 @@ test.describe("completed tool card scroll stability", () => {
   test("keeps a completed skill resource editor stable while a later turn streams", async ({ page }) => {
     await page.evaluate(() => {
       const toolContent = JSON.stringify({
-        format: "qingzhou.plugin",
+        format: "zuri.plugin",
         schemaVersion: 1,
         id: "scroll-probe",
         displayName: "滚动稳定性探针",
@@ -206,8 +206,8 @@ test.describe("completed tool card scroll stability", () => {
             _uiKey: "skill_resource_probe_tool",
             toolCallId: "skill_resource_probe_tool",
             runId: "completed_scroll_probe_run",
-            name: "qingzhou_skill_author__edit_skill_resource",
-            capabilityId: "qingzhou_skill_author__edit_skill_resource",
+            name: "zuri_skill_author__edit_skill_resource",
+            capabilityId: "zuri_skill_author__edit_skill_resource",
             title: "编辑技能资源",
             familyId: "plugin:meta",
             args: {
@@ -225,11 +225,11 @@ test.describe("completed tool card scroll stability", () => {
               type: "json",
               content: toolContent,
               _plugin: {
-                id: "qingzhou-skill-author",
+                id: "zuri-skill-author",
                 name: "技能工作台",
                 displayName: "技能工作台",
-                tool: "qingzhou_skill_author__edit_skill_resource",
-                capabilityId: "qingzhou_skill_author__edit_skill_resource",
+                tool: "zuri_skill_author__edit_skill_resource",
+                capabilityId: "zuri_skill_author__edit_skill_resource",
                 localName: "edit_skill_resource",
                 title: "编辑技能资源",
                 familyId: "plugin:meta",
@@ -272,7 +272,7 @@ test.describe("completed tool card scroll stability", () => {
           },
         ],
       };
-      window.__scrollProbeRun = window.qingzhouConversationBenchmark.runLiveReplay(fixture, {
+      window.__scrollProbeRun = window.zuriConversationBenchmark.runLiveReplay(fixture, {
         eventDelayMs: 36,
         framePerEvent: true,
       });
@@ -375,14 +375,14 @@ test.describe("completed tool card scroll stability", () => {
       // against wall-clock time on busy Linux/macOS workers.
       window.__advanceRunScriptTail = (finish = false) => {
         length = finish ? argsText.length : Math.min(argsText.length, length + 1000);
-        window.qingzhouConversationBenchmark.dispatchBackgroundEvent({ sessionId, runId, eventSeq: eventSeq++, ...update() });
-        if (finish) window.qingzhouConversationBenchmark.dispatchBackgroundEvent({
+        window.zuriConversationBenchmark.dispatchBackgroundEvent({ sessionId, runId, eventSeq: eventSeq++, ...update() });
+        if (finish) window.zuriConversationBenchmark.dispatchBackgroundEvent({
           sessionId, runId, eventSeq: eventSeq++, type: "tool_execution_start",
           toolCallId, spanId: `span-${toolCallId}`, toolName: "run_script",
           args: { target: "inner", timeout: 30, code },
         });
       };
-      await window.qingzhouConversationBenchmark.runLiveReplay({
+      await window.zuriConversationBenchmark.runLiveReplay({
         sessionId,
         baseTranscript: Array.from({ length: 8 }, (_, index) => ({
           type: "assistant",
@@ -472,7 +472,7 @@ test.describe("completed tool card scroll stability", () => {
     await page.evaluate(async () => {
       const code = Array.from({ length: 26 }, (_, index) => `const value${index} = ${index};`).join("\n");
       const rows = Array.from({ length: 18 }, (_, index) => ({ index, title: `record-${index}` }));
-      await window.qingzhouConversationBenchmark.runSnapshotRender({
+      await window.zuriConversationBenchmark.runSnapshotRender({
         sessionId: "goal_strip_scroll_probe",
         transcript: [
           { type: "user", text: "执行脚本并继续回答。", clientMessageId: "goal_strip_scroll_probe_user" },
@@ -489,8 +489,8 @@ test.describe("completed tool card scroll stability", () => {
           },
         ],
       });
-      window.qingzhouConversationBenchmark.configureVisualState({ running: true });
-      window.qingzhouConversationBenchmark.dispatchBackgroundEvent({
+      window.zuriConversationBenchmark.configureVisualState({ running: true });
+      window.zuriConversationBenchmark.dispatchBackgroundEvent({
         type: "goal_update",
         sessionId: "goal_strip_scroll_probe",
         runId: "benchmark-visual-run",
@@ -531,7 +531,7 @@ test.describe("completed tool card scroll stability", () => {
         if (window.__goalStripProbeSamples.length < 8) requestAnimationFrame(sample);
       };
       requestAnimationFrame(sample);
-      window.qingzhouConversationBenchmark.dispatchBackgroundEvent({
+      window.zuriConversationBenchmark.dispatchBackgroundEvent({
         type: "thinking_update",
         sessionId: "goal_strip_scroll_probe",
         runId: "benchmark-visual-run",
@@ -571,7 +571,7 @@ test.describe("completed tool card scroll stability", () => {
       const runId = "viewport_user_scroll_run";
       const code = Array.from({ length: 44 }, (_, index) => `const value${index} = ${index};`).join("\n");
       const rows = Array.from({ length: 30 }, (_, index) => ({ index, value: `row-${index}` }));
-      await window.qingzhouConversationBenchmark.runSnapshotRender({
+      await window.zuriConversationBenchmark.runSnapshotRender({
         sessionId,
         transcript: [
           { type: "user", text: "执行脚本并继续分析。", clientMessageId: "viewport_user_scroll_user" },
@@ -588,14 +588,14 @@ test.describe("completed tool card scroll stability", () => {
           },
         ],
       });
-      window.qingzhouConversationBenchmark.configureVisualState({ running: true });
+      window.zuriConversationBenchmark.configureVisualState({ running: true });
 
       const messages = document.querySelector("#messages");
       const summary = messages.querySelector(".msg-tool > .tool-summary");
       summary.click();
       await nextFrame();
       await nextFrame();
-      window.qingzhouConversationBenchmark.dispatchBackgroundEvent({
+      window.zuriConversationBenchmark.dispatchBackgroundEvent({
         type: "thinking_update",
         sessionId,
         runId,
@@ -662,7 +662,7 @@ test.describe("completed tool card scroll stability", () => {
       const nextFrame = () => new Promise(resolve => requestAnimationFrame(resolve));
       const code = Array.from({ length: 48 }, (_, index) => `const value${index} = ${index};`).join("\n");
       const rows = Array.from({ length: 32 }, (_, index) => ({ index, value: `row-${index}` }));
-      await window.qingzhouConversationBenchmark.runSnapshotRender({
+      await window.zuriConversationBenchmark.runSnapshotRender({
         sessionId: "viewport_search_navigation",
         transcript: [
           ...Array.from({ length: 12 }, (_, index) => ({
@@ -709,7 +709,7 @@ test.describe("completed tool card scroll stability", () => {
     const after = await page.locator("#messages").evaluate(messages => ({
       compensation: getComputedStyle(messages).getPropertyValue("--viewport-anchor-after-space").trim(),
       activeMatches: messages.querySelectorAll(".chat-search-active").length,
-      anchored: window.qingzhouConversationBenchmark.collectViewportAnchorState().active,
+      anchored: window.zuriConversationBenchmark.collectViewportAnchorState().active,
     }));
     expect(after, JSON.stringify({ setup, after }, null, 2)).toEqual({
       compensation: "0px",
@@ -730,7 +730,7 @@ test.describe("completed tool card scroll stability", () => {
         const sessionId = "viewport_stability_matrix";
         const runId = "viewport_stability_run";
         const toolCallId = "viewport_stability_tool";
-        await window.qingzhouConversationBenchmark.runSnapshotRender({
+        await window.zuriConversationBenchmark.runSnapshotRender({
           sessionId,
           transcript: [
             { type: "user", text: "执行脚本，然后持续分析结果。", clientMessageId: "viewport_stability_user" },
@@ -747,8 +747,8 @@ test.describe("completed tool card scroll stability", () => {
             },
           ],
         });
-        window.qingzhouConversationBenchmark.configureVisualState({ running: true });
-        window.qingzhouConversationBenchmark.dispatchBackgroundEvent({
+        window.zuriConversationBenchmark.configureVisualState({ running: true });
+        window.zuriConversationBenchmark.dispatchBackgroundEvent({
           type: "goal_update",
           sessionId,
           runId,
@@ -785,7 +785,7 @@ test.describe("completed tool card scroll stability", () => {
             scrollHeight: messages?.scrollHeight ?? null,
             beforeSpace: getComputedStyle(messages).getPropertyValue("--viewport-anchor-before-space").trim(),
             afterSpace: getComputedStyle(messages).getPropertyValue("--viewport-anchor-after-space").trim(),
-            anchor: window.qingzhouConversationBenchmark.collectViewportAnchorState?.() || null,
+            anchor: window.zuriConversationBenchmark.collectViewportAnchorState?.() || null,
             sameTool: liveTool === tool,
             sameDetails: liveTool?.querySelector(":scope > .tool-details") === details,
           });
@@ -795,7 +795,7 @@ test.describe("completed tool card scroll stability", () => {
 
         let eventSeq = 2;
         const dispatch = async event => {
-          window.qingzhouConversationBenchmark.dispatchBackgroundEvent({ sessionId, runId, eventSeq: eventSeq++, ...event });
+          window.zuriConversationBenchmark.dispatchBackgroundEvent({ sessionId, runId, eventSeq: eventSeq++, ...event });
           await nextFrames(3);
         };
         for (let index = 1; index <= 12; index += 1) {

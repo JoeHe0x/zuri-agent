@@ -97,7 +97,7 @@ test('trusted host bindings preserve their full contract across language snapsho
   const skills = new Map(['zh-CN', 'en'].map(locale => {
     const localized = locale === 'en' ? 'Inspect title' : '检查标题';
     const manifest = {
-      format: 'qingzhou.plugin', schemaVersion: 1, id: 'locale-host-fixture',
+      format: 'zuri.plugin', schemaVersion: 1, id: 'locale-host-fixture',
       tools: [{ name: 'inspect', runtime: 'host', script: 'scripts/inspect.js', args: { mode: 'read' },
         description: localized, parameters: { type: 'object', additionalProperties: false,
           properties: {
@@ -116,9 +116,9 @@ test('trusted host bindings preserve their full contract across language snapsho
   }));
   let registrations = 0;
   const execute = () => ({ ok: true });
-  const registry = createSkillHostRegistry([qz => {
+  const registry = createSkillHostRegistry([zuri => {
     registrations++;
-    qz.registerSkillHost({ skillName: 'locale-host-fixture', manifestId: 'locale-host-fixture', toolName: 'inspect', execute });
+    zuri.registerSkillHost({ skillName: 'locale-host-fixture', manifestId: 'locale-host-fixture', toolName: 'inspect', execute });
   }], [skills.get('zh-CN')], locale => [skills.get(locale)]);
   const plugins = new Map([...skills].map(([locale, skill]) => [locale,
     withLanguage(locale, () => parseSkillManifest(findSkillManifestResource(skill.resources).content, skill).plugin)]));
@@ -161,7 +161,7 @@ test('builtin host execution uses the explicit language with and without a run s
     for (const plugin of snapshot.plugins) for (const tool of plugin.tools.filter(tool => tool.runtime === 'host')) {
       assert.ok(resolveSkillHostBinding(plugin, tool, locale), `${locale}: ${tool.name}`);
     }
-    const toolName = 'qingzhou_skill_author__load_available_renderers';
+    const toolName = 'zuri_skill_author__load_available_renderers';
     for (const withSnapshot of [true, false]) {
       const result = await executeSkillTool(toolName, { timeout: 30 }, undefined,
         { language: locale, ...(withSnapshot ? { skillToolRegistrySnapshot: snapshot } : {}) },

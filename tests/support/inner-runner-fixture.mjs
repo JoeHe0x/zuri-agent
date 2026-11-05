@@ -51,6 +51,6 @@ export function sandboxFixture(compiled) {
   });
   return {
     workers, messages,
-    send(data, source = parent) { receive({ source, data: { source: 'qz-inner-runner-host', ...data } }); },
+    send(data, source = parent) { receive({ source, data: { source: 'zuri-inner-runner-host', ...data } }); },
   };
 }

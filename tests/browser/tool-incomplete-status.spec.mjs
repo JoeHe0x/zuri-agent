@@ -21,14 +21,14 @@ for (const colorScheme of ["light", "dark"]) {
           sessionId: "timeout-session",
           transcript: [{ type: "user", text: "打开页面并读取内容", clientMessageId: "timeout-user" }, ...tools],
         };
-        await window.qingzhouConversationBenchmark.runSnapshotRender(window.__timeoutFixture);
-        window.qingzhouConversationBenchmark.configureVisualState({ running: true });
+        await window.zuriConversationBenchmark.runSnapshotRender(window.__timeoutFixture);
+        window.zuriConversationBenchmark.configureVisualState({ running: true });
       }, count);
       const card = page.locator("#messages > .msg-tool");
       const dot = card.locator(":scope > .tool-summary .dot");
       await expect(dot).toHaveClass(/running/);
       await page.evaluate(({ count, result }) => {
-        window.qingzhouConversationBenchmark.dispatchBackgroundEvent({
+        window.zuriConversationBenchmark.dispatchBackgroundEvent({
           type: "tool_execution_end", sessionId: "timeout-session", runId: "timeout-run", eventSeq: 1,
           toolCallId: `open-${count - 1}`, toolName: "open_tab", result,
         });
@@ -47,7 +47,7 @@ for (const colorScheme of ["light", "dark"]) {
       await page.evaluate(async result => {
         const tool = window.__timeoutFixture.transcript.at(-1);
         Object.assign(tool, { phase: "done", isRunning: false, result });
-        await window.qingzhouConversationBenchmark.runSnapshotRender(window.__timeoutFixture);
+        await window.zuriConversationBenchmark.runSnapshotRender(window.__timeoutFixture);
       }, incompleteResult);
       await expectIncompleteDot(dot);
       // Updating the same rendered card with a complete result clears its tooltip and warning.

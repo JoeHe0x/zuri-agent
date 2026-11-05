@@ -8,8 +8,8 @@ const messages = defineMessages("documents-model", {
     en: "Save text content (plain text, JSON, CSV, HTML, Markdown, SVG, etc.) to the user's Downloads folder, returning downloadId, filename, mimeType, and size. Automatically generates a filename from content and MIME type when filename is omitted. When producing an HTML page for people to read (analysis, audit, comparison, dashboard), load the zuri-artifact skill first and build the page from its components; data, code, and plain text files do not need it.",
   },
   saveFilename: {
-    "zh-CN": "可选保存文件名（如 results.md、data.json、report.csv）；省略时自动生成 qingzhou-output-时间戳.*。",
-    en: "Optional filename (e.g. results.md, data.json, report.csv); defaults to qingzhou-output-<timestamp>.*.",
+    "zh-CN": "可选保存文件名（如 results.md、data.json、report.csv）；省略时自动生成 zuri-output-时间戳.*。",
+    en: "Optional filename (e.g. results.md, data.json, report.csv); defaults to zuri-output-<timestamp>.*.",
   },
   saveMimeType: {
     "zh-CN": "可选 MIME 类型；省略时按扩展名或内容自动推断。",
@@ -56,8 +56,8 @@ const messages = defineMessages("documents-model", {
     en: "Created docModelId. Read long documents in chunks. For format conversion, generate a new file directly from the docModel.",
   },
   documentFetch: {
-    "zh-CN": "将远程文档附件（docx/xlsx/pdf/html/csv/txt/md 及常见代码/配置/日志）拉取到当前任务文档库并返回 fileId，供后续 qingzhou_documents__document_parse 解析。仅需原样下载文件时请用 download_url。",
-    en: "Fetch a remote document attachment (docx/xlsx/pdf/html/csv/txt/md or code/config/log file) into the current task's document library and return fileId for qingzhou_documents__document_parse. Use download_url instead to download a file unchanged.",
+    "zh-CN": "将远程文档附件（docx/xlsx/pdf/html/csv/txt/md 及常见代码/配置/日志）拉取到当前任务文档库并返回 fileId，供后续 zuri_documents__document_parse 解析。仅需原样下载文件时请用 download_url。",
+    en: "Fetch a remote document attachment (docx/xlsx/pdf/html/csv/txt/md or code/config/log file) into the current task's document library and return fileId for zuri_documents__document_parse. Use download_url instead to download a file unchanged.",
   },
   documentUrl: {
     "zh-CN": "必填。远程文档 HTTP(S) URL。",
@@ -72,12 +72,12 @@ const messages = defineMessages("documents-model", {
     en: "Optional MIME type; inferred from response headers or filename if omitted.",
   },
   documentParse: {
-    "zh-CN": "将 fileId 对应的本地文件解析为结构化 docModel，返回 docModelId、目录、分块数与表格摘要。随后用 qingzhou_documents__document_read_chunk 按需分块读取，或用 qingzhou_documents__document_create 转换格式。",
-    en: "Parse a fetched local file (fileId) into a structured docModel, returning docModelId, outline, chunk count, and table summaries. Read chunks with qingzhou_documents__document_read_chunk or convert formats with qingzhou_documents__document_create.",
+    "zh-CN": "将 fileId 对应的本地文件解析为结构化 docModel，返回 docModelId、目录、分块数与表格摘要。随后用 zuri_documents__document_read_chunk 按需分块读取，或用 zuri_documents__document_create 转换格式。",
+    en: "Parse a fetched local file (fileId) into a structured docModel, returning docModelId, outline, chunk count, and table summaries. Read chunks with zuri_documents__document_read_chunk or convert formats with zuri_documents__document_create.",
   },
   documentFileId: {
-    "zh-CN": "必填。qingzhou_documents__document_fetch 返回的 fileId。",
-    en: "Required fileId returned by qingzhou_documents__document_fetch.",
+    "zh-CN": "必填。zuri_documents__document_fetch 返回的 fileId。",
+    en: "Required fileId returned by zuri_documents__document_fetch.",
   },
   documentChunkSize: {
     "zh-CN": "每个文本块的目标字符数，默认 6000。",
@@ -88,8 +88,8 @@ const messages = defineMessages("documents-model", {
     en: "Read a docModel by text chunk or table page: omit tableId/sheetName to read Markdown text by chunkIndex; pass tableId (or sheetName for Excel/CSV) with offset/limit to page through table rows. Follow next in the result to continue.",
   },
   documentModelId: {
-    "zh-CN": "必填。qingzhou_documents__document_parse 或 load_skill_resource 返回的 docModelId。",
-    en: "Required docModelId returned by qingzhou_documents__document_parse or load_skill_resource.",
+    "zh-CN": "必填。zuri_documents__document_parse 或 load_skill_resource 返回的 docModelId。",
+    en: "Required docModelId returned by zuri_documents__document_parse or load_skill_resource.",
   },
   documentChunkIndex: {
     "zh-CN": "正文块序号（0-based），默认 0。",
@@ -144,8 +144,8 @@ const messages = defineMessages("documents-model", {
     en: "Add a generated document artifact (artifactId) from the current task to browser downloads.",
   },
   documentArtifactId: {
-    "zh-CN": "必填。qingzhou_documents__document_create 或 document_list_artifacts 返回的 artifactId。",
-    en: "Required artifactId from qingzhou_documents__document_create or document_list_artifacts.",
+    "zh-CN": "必填。zuri_documents__document_create 或 document_list_artifacts 返回的 artifactId。",
+    en: "Required artifactId from zuri_documents__document_create or document_list_artifacts.",
   },
   documentDownloadFilename: {
     "zh-CN": "可选下载文件名。",

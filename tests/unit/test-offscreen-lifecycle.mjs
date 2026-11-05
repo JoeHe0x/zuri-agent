@@ -35,7 +35,7 @@ function fixture({ connect, sendMessage } = {}) {
   return { sent, posted, frames, timers,
     setTool: fn => { tool = fn; },
     send(message) { let ack; runtimeListener(message, { id: "fixture" }, value => { ack = value; }); return ack; },
-    sandbox(message, source = frame?.contentWindow) { messageListener({ source, data: { source: "qz-inner-runner-sandbox", ...message } }); },
+    sandbox(message, source = frame?.contentWindow) { messageListener({ source, data: { source: "zuri-inner-runner-sandbox", ...message } }); },
     expire(delay = 3000) { for (const [id, timer] of [...timers]) { if (timer.delay === delay) { timers.delete(id); timer.fn(); } } },
   };
 }

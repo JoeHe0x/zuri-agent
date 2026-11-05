@@ -34,7 +34,7 @@ test("help and plans do not build, launch children or read live credentials", as
     assert.equal(fixture.run(args).status, 0, args.join(" "));
   }
   assert.match(fixture.run(["live", "agent", "--help"]).stdout, /--provider <name>, --model <name>/);
-  assert.match(fixture.run(["live", "rate", "--help"]).stdout, /QINGZHOU_DEEPSEEK_MODEL/);
+  assert.match(fixture.run(["live", "rate", "--help"]).stdout, /ZURI_DEEPSEEK_MODEL/);
   assert.match(fixture.run(["live", "cli-mcp", "--help"]).stdout, /--duration-seconds 1800/);
   const soakPlan = fixture.run(["live", "cli-mcp", "--list"]);
   assert.equal(soakPlan.status, 0, soakPlan.stderr);
@@ -129,7 +129,7 @@ test("runner failures and coverage gate failures retain their exit codes", async
     [["unit", "--coverage"], "tests/coverage/check-critical.mjs"],
   ]) {
     await fixture.clear();
-    const result = fixture.run(args, { QZ_FIXTURE_FAILURE: path });
+    const result = fixture.run(args, { ZURI_FIXTURE_FAILURE: path });
     assert.equal(result.status, 7, result.stderr);
     if (path === "tests/unit/example.mjs") {
       assert.equal((await fixture.events()).some(event => event.path === "tests/coverage/check-critical.mjs"), false);
@@ -140,7 +140,7 @@ test("runner failures and coverage gate failures retain their exit codes", async
 const unattended = ["unit", "contracts", "services", "browser", "e2e", "release", "visual"];
 
 async function createFixture(t) {
-  const root = await mkdtemp(join(tmpdir(), "qingzhou-cli-contract-"));
+  const root = await mkdtemp(join(tmpdir(), "zuri-cli-contract-"));
   t.after(() => rm(root, { recursive: true, force: true }));
   const eventFile = join(root, "events.jsonl");
   await put("package.json", '{"type":"module"}');
@@ -161,7 +161,7 @@ async function createFixture(t) {
     }
   `);
   await put("tests/support/typescript-loader.mjs", "// Fixture descendants contain only plain JavaScript.\n");
-  await put("tests/support/extension-build.mjs", `import { appendFileSync } from 'node:fs'; export async function ensureTestExtension() { appendFileSync(process.env.QZ_FIXTURE_EVENTS, JSON.stringify({path:'build',args:[]})+'\\n'); return '/isolated-fixture'; }`);
+  await put("tests/support/extension-build.mjs", `import { appendFileSync } from 'node:fs'; export async function ensureTestExtension() { appendFileSync(process.env.ZURI_FIXTURE_EVENTS, JSON.stringify({path:'build',args:[]})+'\\n'); return '/isolated-fixture'; }`);
   await put("node_modules/playwright/package.json", '{"type":"module","exports":"./index.mjs"}');
   await put("node_modules/playwright/index.mjs", "export const chromium = { executablePath: () => '/locked-chromium' };");
   for (const path of [
@@ -176,13 +176,13 @@ async function createFixture(t) {
   await put("node_modules/c8/bin/c8.js", `
     import { appendFileSync } from 'node:fs'; import { spawnSync } from 'node:child_process';
     const args = process.argv.slice(2);
-    appendFileSync(process.env.QZ_FIXTURE_EVENTS, JSON.stringify({path:'c8',args})+'\\n');
+    appendFileSync(process.env.ZURI_FIXTURE_EVENTS, JSON.stringify({path:'c8',args})+'\\n');
     const result = spawnSync(args[2], args.slice(3), { stdio: 'inherit', env: process.env });
     process.exit(result.status ?? 1);
   `);
   return {
     run(args, env = {}) {
-      const environment = { ...process.env, PATH: [dirname(process.execPath), process.env.PATH].filter(Boolean).join(delimiter), QZ_FIXTURE_EVENTS: eventFile, ...env };
+      const environment = { ...process.env, PATH: [dirname(process.execPath), process.env.PATH].filter(Boolean).join(delimiter), ZURI_FIXTURE_EVENTS: eventFile, ...env };
       delete environment.NODE_OPTIONS;
       delete environment.NODE_TEST_CONTEXT;
       delete environment.NODE_V8_COVERAGE;
@@ -200,6 +200,6 @@ async function createFixture(t) {
 const recorder = `
   import { appendFileSync } from 'node:fs'; import { relative } from 'node:path';
   const path = relative(process.cwd(), process.argv[1]).replaceAll('\\\\', '/');
-  appendFileSync(process.env.QZ_FIXTURE_EVENTS, JSON.stringify({path, args:process.argv.slice(2)})+'\\n');
-  if (process.env.QZ_FIXTURE_FAILURE === path) process.exit(7);
+  appendFileSync(process.env.ZURI_FIXTURE_EVENTS, JSON.stringify({path, args:process.argv.slice(2)})+'\\n');
+  if (process.env.ZURI_FIXTURE_FAILURE === path) process.exit(7);
 `;

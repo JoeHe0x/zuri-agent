@@ -47,15 +47,15 @@ export function openImageGallery(items: unknown[] = [], startIndex = 0, options:
   overlay.className = "data-image-gallery-overlay";
   overlay.innerHTML = `
     <div class="data-image-gallery" role="dialog" aria-modal="true" aria-label="${escapeAttr(options.label || t("imagePreview"))}">
-      <button class="qz-icon-btn qz-icon-btn--sm data-image-gallery-close" type="button" title="${tHtml("close")}" aria-label="${tHtml("close")}">
+      <button class="zuri-icon-btn zuri-icon-btn--sm data-image-gallery-close" type="button" title="${tHtml("close")}" aria-label="${tHtml("close")}">
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
       </button>
       <div class="data-image-gallery-main">
-        <button class="qz-icon-btn qz-icon-btn--sm data-image-gallery-nav prev" type="button" title="${tHtml("previousImage")}" aria-label="${tHtml("previousImage")}">
+        <button class="zuri-icon-btn zuri-icon-btn--sm data-image-gallery-nav prev" type="button" title="${tHtml("previousImage")}" aria-label="${tHtml("previousImage")}">
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>
         <div class="data-image-gallery-stage"></div>
-        <button class="qz-icon-btn qz-icon-btn--sm data-image-gallery-nav next" type="button" title="${tHtml("nextImage")}" aria-label="${tHtml("nextImage")}">
+        <button class="zuri-icon-btn zuri-icon-btn--sm data-image-gallery-nav next" type="button" title="${tHtml("nextImage")}" aria-label="${tHtml("nextImage")}">
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>
       </div>
@@ -275,7 +275,7 @@ function openImageLightbox(src: string, alt = "image") {
   const overlay = document.createElement("div");
   overlay.className = "image-lightbox";
   overlay.innerHTML = `
-    <button class="qz-icon-btn qz-icon-btn--md image-lightbox-close" type="button" title="${tHtml("close")}" aria-label="${tHtml("close")}">
+    <button class="zuri-icon-btn zuri-icon-btn--md image-lightbox-close" type="button" title="${tHtml("close")}" aria-label="${tHtml("close")}">
       <svg width="18" height="18" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
     </button>
     <img src="${escapeAttr(src)}" alt="${escapeAttr(alt)}">

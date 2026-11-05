@@ -9,7 +9,7 @@ import { ensureTestExtension } from "../support/extension-build.mjs";
 /** Exercise the real MV3 worker and Chrome storage; no model or user profile is involved. */
 test("saving a language reloads the real extension panel and updates Background", async () => {
   const extension = await ensureTestExtension();
-  const profile = await mkdtemp(join(tmpdir(), "qingzhou-language-runtime-"));
+  const profile = await mkdtemp(join(tmpdir(), "zuri-language-runtime-"));
   let context;
   try {
     context = await chromium.launchPersistentContext(profile, {

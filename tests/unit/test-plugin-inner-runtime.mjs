@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import {
-  QINGZHOU_SKILL_FORMAT,
-  QINGZHOU_SKILL_SCHEMA_VERSION,
+  ZURI_SKILL_FORMAT,
+  ZURI_SKILL_SCHEMA_VERSION,
 } from "../../src/shared/skills/skill-utils.js";
 import {
   SKILL_MANIFEST_FORMAT,
@@ -52,8 +52,8 @@ commitSkillToolRegistryCandidate(prepareSkillToolRegistryFromSkills([{
   displayName: "Runtime Example Skill",
   description: "runtime contract",
   scope: "resident",
-  format: QINGZHOU_SKILL_FORMAT,
-  schemaVersion: QINGZHOU_SKILL_SCHEMA_VERSION,
+  format: ZURI_SKILL_FORMAT,
+  schemaVersion: ZURI_SKILL_SCHEMA_VERSION,
   resources: [
     { path: "plugin.json", type: "json", content: JSON.stringify(manifest) },
     { path: "scripts/runtime.js", type: "script", content: "async () => ({ ok: true })" },

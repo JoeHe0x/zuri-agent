@@ -219,7 +219,7 @@ test("valid commands and malformed syntax remain explicit", () => {
   for (const args of [["install"], ["connect"], ["status"], ["mcp"], ["stop"],
     ["skills", "tools"], ["tasks"], ["create", "Read this page"],
     ["show", "task"], ["cancel", "task"]]) assert.ok(parseCommand(args));
-  for (const args of [["unknown"], ["status", "extra"], ["install", "qz"], ["install", "something"], ["tools", "one", "two"],
+  for (const args of [["unknown"], ["status", "extra"], ["install", "zuri"], ["install", "something"], ["tools", "one", "two"],
     ["show"], ["show", "one", "two"], ["cancel", ""], ["tools", "--wat"], ["tools", "--session"]]) rejects(args);
   const argv = ["create", "Read this page", "--title", "Research"];
   const before = [...argv];

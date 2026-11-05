@@ -1,5 +1,5 @@
 /** Import-button labels shared by the export page and the extension bridge. */
-export const sessionImportLabelKeys = ["importQingzhou", "importing", "imported", "retryImport", "importFailedRetry"] as const;
+export const sessionImportLabelKeys = ["importZuri", "importing", "imported", "retryImport", "importFailedRetry"] as const;
 export type SessionImportLabelKey = typeof sessionImportLabelKeys[number];
 export type SessionImportLabels = Record<SessionImportLabelKey, string>;
 
@@ -20,5 +20,5 @@ export function sessionImportButtonText(state: { busy: boolean; imported: boolea
   if (state.busy) return labels.importing;
   if (state.imported) return labels.imported;
   if (state.titled) return labels.retryImport;
-  return labels.importQingzhou;
+  return labels.importZuri;
 }

@@ -54,7 +54,7 @@ export class BrowserRegistry {
     try { document = JSON.parse(await readFile(path, "utf8")); }
     catch (error) {
       if (error.code === "ENOENT" && await missingRegistry(path)) return new BrowserRegistry({ path });
-      throw pairingError("BRIDGE_REGISTRY_READ_FAILED", "Cannot read the browser registry. Restore its valid contents before restarting qz.");
+      throw pairingError("BRIDGE_REGISTRY_READ_FAILED", "Cannot read the browser registry. Restore its valid contents before restarting zuri.");
     }
     try {
       if (document.version !== 1 || !Array.isArray(document.browsers)) throw new Error();
@@ -65,7 +65,7 @@ export class BrowserRegistry {
         ids.add(entry.clientId); names.add(entry.name);
       }
       return new BrowserRegistry({ path, entries: document.browsers });
-    } catch { throw pairingError("BRIDGE_REGISTRY_READ_FAILED", "The browser registry is invalid. Restore its valid contents before restarting qz."); }
+    } catch { throw pairingError("BRIDGE_REGISTRY_READ_FAILED", "The browser registry is invalid. Restore its valid contents before restarting zuri."); }
   }
 
   list() { return [...this.entries.values()].map(({ clientId, name }) => ({ clientId, name })); }

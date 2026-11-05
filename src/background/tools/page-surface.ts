@@ -55,7 +55,7 @@ interface ReceiptBook { ops: Record<string, ReceiptOp> }
 interface ArmedFrame { frameId: number; documentId: string }
 interface ReceiptFrame { frameId: number; documentId: string; result: unknown }
 
-// The previous extension stored `__qzInputReceiptBound` and its own listeners.
+// The previous extension stored `__zuriInputReceiptBound` and its own listeners.
 // Reusing that flag skips installation, so every later count stays at zero.
 const armedFrames = new Map<string, ArmedFrame[]>();
 
@@ -141,14 +141,14 @@ async function receiptFrames(tabId: number, receiptId: string, arm: boolean): Pr
               setTimeout: (callback: () => void, delay: number) => number;
               clearTimeout: (timer: number) => void;
             } | null;
-            __qzInputReceiptsV2Bound?: boolean;
-            __qzInputReceiptsV2?: ReceiptBook;
+            __zuriInputReceiptsV2Bound?: boolean;
+            __zuriInputReceiptsV2?: ReceiptBook;
           };
-          __qzExtensionInputEvents?: { has?(value: object): boolean };
+          __zuriExtensionInputEvents?: { has?(value: object): boolean };
         };
         const doc = root.document;
         if (!doc?.defaultView) return null;
-        const ops = () => doc.__qzInputReceiptsV2?.ops;
+        const ops = () => doc.__zuriInputReceiptsV2?.ops;
         if (!shouldArm) {
           const book = ops();
           const op = book?.[opId];
@@ -161,12 +161,12 @@ async function receiptFrames(tabId: number, receiptId: string, arm: boolean): Pr
         }
         // executeScript can finish after the caller timed out or navigated away.
         if (Date.now() >= armDeadline) return null;
-        if (!doc.__qzInputReceiptsV2Bound) {
-          doc.__qzInputReceiptsV2Bound = true;
+        if (!doc.__zuriInputReceiptsV2Bound) {
+          doc.__zuriInputReceiptsV2Bound = true;
           const count = (event: { isTrusted: boolean }) => {
             if (!event.isTrusted) {
               if (!acceptExtensionEvents) return;
-              const marked = (globalThis as { __qzExtensionInputEvents?: { has?(value: object): boolean } }).__qzExtensionInputEvents;
+              const marked = (globalThis as { __zuriExtensionInputEvents?: { has?(value: object): boolean } }).__zuriExtensionInputEvents;
               if (marked?.has?.(event) !== true) return;
             }
             const open = ops();
@@ -178,7 +178,7 @@ async function receiptFrames(tabId: number, receiptId: string, arm: boolean): Pr
           // pointerdown preventDefault suppresses mousedown; the click still runs.
           for (const type of ["pointerdown", "mousedown", "touchstart", "click"]) root.addEventListener(type, count, true);
         }
-        const book = doc.__qzInputReceiptsV2 || (doc.__qzInputReceiptsV2 = { ops: {} });
+        const book = doc.__zuriInputReceiptsV2 || (doc.__zuriInputReceiptsV2 = { ops: {} });
         // A timed-out arm has no receipt id to read back. Expire it in the page.
         book.ops[opId] = {
           n: 0,

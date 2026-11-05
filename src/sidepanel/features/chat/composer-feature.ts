@@ -975,7 +975,7 @@ export function createComposerFeature(options: ComposerOptions) {
 
   async function safeDraftRequest(operation: () => Promise<PortMessage>) {
     try { return await operation(); } catch (error) {
-      console.warn("[轻舟] composer draft persistence failed", error);
+      console.warn("[Zuri] composer draft persistence failed", error);
       return null;
     }
   }
@@ -1126,11 +1126,11 @@ export function createComposerFeature(options: ComposerOptions) {
 
 function renderImageAttachment(image: DraftImage, index: number) {
   return `
-    <div class="input-attachment input-image-attachment qz:relative qz:size-(--input-attachment-size) qz:overflow-hidden">
+    <div class="input-attachment input-image-attachment zuri:relative zuri:size-(--input-attachment-size) zuri:overflow-hidden">
       ${image.error
-        ? `<span class="qz:block" role="img" title="${escapeHtml(image.error)}" aria-label="${escapeHtml(image.error)}">!</span>`
-        : `<img class="qz:block qz:size-full qz:object-cover" src="${escapeHtml(image.dataUrl)}" alt="${escapeHtml(image.name)}">`}
-      <button class="qz-icon-btn qz-icon-btn--xs" type="button" data-remove-image="${index}" title="${tHtml("remove")}" aria-label="${tHtml("removeImage")}">
+        ? `<span class="zuri:block" role="img" title="${escapeHtml(image.error)}" aria-label="${escapeHtml(image.error)}">!</span>`
+        : `<img class="zuri:block zuri:size-full zuri:object-cover" src="${escapeHtml(image.dataUrl)}" alt="${escapeHtml(image.name)}">`}
+      <button class="zuri-icon-btn zuri-icon-btn--xs" type="button" data-remove-image="${index}" title="${tHtml("remove")}" aria-label="${tHtml("removeImage")}">
         ${closeIcon()}
       </button>
     </div>
@@ -1145,13 +1145,13 @@ function renderDocumentAttachment(item: DraftDocument) {
       : t("parsing");
   const title = item.error ? `${item.filename}：${item.error}` : item.filename;
   return `
-    <div class="input-document-attachment document-attachment-card is-${escapeHtml(item.status)} qz:box-border qz:flex qz:h-13 qz:min-w-0 qz:items-stretch qz:overflow-hidden" title="${escapeHtml(title)}">
-      <span class="document-attachment-type qz:grid qz:flex-[0_0_44px] qz:place-items-center" aria-hidden="true">${escapeHtml(fileTypeLabel(item.filename))}</span>
-      <span class="document-attachment-body qz:flex qz:min-w-0 qz:flex-auto qz:flex-col qz:justify-center qz:px-2 qz:py-0">
-        <span class="document-attachment-name qz:block qz:min-w-0 qz:truncate">${escapeHtml(item.filename)}</span>
-        <span class="document-attachment-meta qz:block qz:min-w-0 qz:truncate">${escapeHtml(statusText)}</span>
+    <div class="input-document-attachment document-attachment-card is-${escapeHtml(item.status)} zuri:box-border zuri:flex zuri:h-13 zuri:min-w-0 zuri:items-stretch zuri:overflow-hidden" title="${escapeHtml(title)}">
+      <span class="document-attachment-type zuri:grid zuri:flex-[0_0_44px] zuri:place-items-center" aria-hidden="true">${escapeHtml(fileTypeLabel(item.filename))}</span>
+      <span class="document-attachment-body zuri:flex zuri:min-w-0 zuri:flex-auto zuri:flex-col zuri:justify-center zuri:px-2 zuri:py-0">
+        <span class="document-attachment-name zuri:block zuri:min-w-0 zuri:truncate">${escapeHtml(item.filename)}</span>
+        <span class="document-attachment-meta zuri:block zuri:min-w-0 zuri:truncate">${escapeHtml(statusText)}</span>
       </span>
-      <button class="qz-icon-btn qz-icon-btn--xs document-attachment-remove qz:mr-0.75 qz:flex-none qz:self-center" type="button" data-remove-document="${escapeHtml(item.attachmentId)}" title="${tHtml("remove")}" aria-label="${tHtml("removeFile")}">
+      <button class="zuri-icon-btn zuri-icon-btn--xs document-attachment-remove zuri:mr-0.75 zuri:flex-none zuri:self-center" type="button" data-remove-document="${escapeHtml(item.attachmentId)}" title="${tHtml("remove")}" aria-label="${tHtml("removeFile")}">
         ${closeIcon()}
       </button>
     </div>

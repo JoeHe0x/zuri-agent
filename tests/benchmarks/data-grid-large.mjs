@@ -53,7 +53,7 @@ try {
   const tabulatorJs = readFileSync(join(root, "node_modules/tabulator-tables/dist/js/tabulator.min.js"), "utf8");
   await page.setContent(`<!doctype html>
     <meta charset="utf-8">
-    <title>Qingzhou Data Grid Benchmark</title>
+    <title>Zuri Data Grid Benchmark</title>
     <style>${tabulatorCss}</style>
     <style>
       :root {
@@ -429,7 +429,7 @@ try {
       });
     }
 
-    window.qingzhouDataGridBench = {
+    window.zuriDataGridBench = {
       buildColumns() {
         state.columns = state.columnNames.map(name => ({ name }));
         return { columns: state.columnNames.length };
@@ -605,23 +605,23 @@ try {
     heap: await readHeap(),
   });
 
-  await runStep("columns-built", () => page.evaluate(() => qingzhouDataGridBench.buildColumns()));
-  await runStep("source-rows-built", () => page.evaluate(() => qingzhouDataGridBench.buildSourceRows()));
-  await runStep("table-rows-flattened", () => page.evaluate(() => qingzhouDataGridBench.flattenRows()));
-  await runStep("tabulator-created", () => page.evaluate(() => qingzhouDataGridBench.createTable()));
+  await runStep("columns-built", () => page.evaluate(() => zuriDataGridBench.buildColumns()));
+  await runStep("source-rows-built", () => page.evaluate(() => zuriDataGridBench.buildSourceRows()));
+  await runStep("table-rows-flattened", () => page.evaluate(() => zuriDataGridBench.flattenRows()));
+  await runStep("tabulator-created", () => page.evaluate(() => zuriDataGridBench.createTable()));
   await runStep("first-render", async () => {
-    const snapshot = await page.evaluate(() => qingzhouDataGridBench.waitFirstRender());
+    const snapshot = await page.evaluate(() => zuriDataGridBench.waitFirstRender());
     assertVirtualized(snapshot);
     return { ...snapshot, virtualized: ROWS <= 200 || snapshot.domRows < ROWS };
   });
-  await runStep("runtime-sync-manual", () => page.evaluate(() => qingzhouDataGridBench.runtimeSync()));
-  await runStep("scroll-vertical", () => page.evaluate(() => qingzhouDataGridBench.scrollVertical()));
-  await runStep("scroll-horizontal", () => page.evaluate(() => qingzhouDataGridBench.scrollHorizontal()));
-  await runStep("filter-number", () => page.evaluate(() => qingzhouDataGridBench.applyNumberFilter()));
-  await runStep("filter-clear", () => page.evaluate(() => qingzhouDataGridBench.clearFilter()));
-  await runStep("sort-number-desc", () => page.evaluate(() => qingzhouDataGridBench.sortNumberColumn()));
-  await runStep("update-one-cell", () => page.evaluate(() => qingzhouDataGridBench.updateOneCell()));
-  await runStep("destroy", () => page.evaluate(() => qingzhouDataGridBench.destroy()));
+  await runStep("runtime-sync-manual", () => page.evaluate(() => zuriDataGridBench.runtimeSync()));
+  await runStep("scroll-vertical", () => page.evaluate(() => zuriDataGridBench.scrollVertical()));
+  await runStep("scroll-horizontal", () => page.evaluate(() => zuriDataGridBench.scrollHorizontal()));
+  await runStep("filter-number", () => page.evaluate(() => zuriDataGridBench.applyNumberFilter()));
+  await runStep("filter-clear", () => page.evaluate(() => zuriDataGridBench.clearFilter()));
+  await runStep("sort-number-desc", () => page.evaluate(() => zuriDataGridBench.sortNumberColumn()));
+  await runStep("update-one-cell", () => page.evaluate(() => zuriDataGridBench.updateOneCell()));
+  await runStep("destroy", () => page.evaluate(() => zuriDataGridBench.destroy()));
 
   log("done", { ok: true, pageErrors: errors, heap: await readHeap() });
 } finally {

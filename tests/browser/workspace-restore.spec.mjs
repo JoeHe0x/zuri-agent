@@ -3,7 +3,7 @@ import { installBenchmarkChromeStub } from "./benchmark-chrome-stub.mjs";
 
 const SIDEPANEL_URL = "/extension/sidepanel/sidepanel.html";
 const WINDOW_ID = 7;
-const VIEW_KEY = `qingzhou:workspace-view:${WINDOW_ID}`;
+const VIEW_KEY = `zuri:workspace-view:${WINDOW_ID}`;
 
 // Build fixture records with the browser's emitted modules before navigating to the app.
 async function storedSessionFixture(page, input) {
@@ -30,7 +30,7 @@ test("restores the last stable workspace before the first visible frame", async 
 
   await page.goto(SIDEPANEL_URL, { waitUntil: "domcontentloaded" });
   await expect(page.locator("#app")).not.toHaveAttribute("data-workspace-booting");
-  expect(await page.evaluate(() => window.__qzFirstWorkspaceReveal)).toMatchObject({
+  expect(await page.evaluate(() => window.__zuriFirstWorkspaceReveal)).toMatchObject({
     tab: "sessions",
     visible: ["sessions-panel"],
     sessionsMode: "automation",
@@ -48,13 +48,13 @@ test("restores the last stable workspace before the first visible frame", async 
   await page.locator('.data-table-select[data-table="zeta_table"]').click();
   await expect(page.locator("#data-table-search")).toHaveValue("zeta_table");
   await page.waitForFunction(
-    ({ key }) => JSON.parse(localStorage.getItem(`__qz_test_chrome_session__:${key}`) || "null")?.state?.table === "zeta_table",
+    ({ key }) => JSON.parse(localStorage.getItem(`__zuri_test_chrome_session__:${key}`) || "null")?.state?.table === "zeta_table",
     { key: VIEW_KEY },
   );
 
   await page.reload({ waitUntil: "domcontentloaded" });
   await expect(page.locator("#app")).not.toHaveAttribute("data-workspace-booting");
-  expect(await page.evaluate(() => window.__qzFirstWorkspaceReveal)).toMatchObject({
+  expect(await page.evaluate(() => window.__zuriFirstWorkspaceReveal)).toMatchObject({
     tab: "data",
     visible: ["data-panel"],
     sessionsMode: "manual",
@@ -84,7 +84,7 @@ test("keeps the latest data table when an older query finishes later", async ({ 
   await page.locator('.tab-btn[data-tab="data"]').click();
   await expect(page.locator("#data-detail")).toBeVisible();
   await page.evaluate(() => {
-    globalThis.__qingzhouDataStorePerf.length = 0;
+    globalThis.__zuriDataStorePerf.length = 0;
     const picker = document.querySelector("#data-table-search");
     picker.click();
     document.querySelector('.data-table-select[data-table="slow_table"]')?.click();
@@ -92,7 +92,7 @@ test("keeps the latest data table when an older query finishes later", async ({ 
     document.querySelector('.data-table-select[data-table="fast_table"]')?.click();
   });
   await page.waitForFunction(() => {
-    const completed = globalThis.__qingzhouDataStorePerf
+    const completed = globalThis.__zuriDataStorePerf
       .filter(entry => entry.name === "query_rows")
       .map(entry => entry.meta?.table);
     return completed.includes("slow_table") && completed.includes("fast_table");
@@ -126,14 +126,14 @@ test("hydrates the restored chat session before revealing it", async ({ page }) 
 
   await page.goto(SIDEPANEL_URL, { waitUntil: "domcontentloaded" });
   await expect(page.locator("#app")).not.toHaveAttribute("data-workspace-booting");
-  expect(await page.evaluate(() => window.__qzFirstWorkspaceReveal)).toMatchObject({
+  expect(await page.evaluate(() => window.__zuriFirstWorkspaceReveal)).toMatchObject({
     tab: "chat",
     visible: ["messages"],
     sessionTitle: title,
     messageText: message,
   });
   expect(await page.evaluate(() => (
-    window.__qzPostedMessages.some(message => message.type === "activate_session_working_tab")
+    window.__zuriPostedMessages.some(message => message.type === "activate_session_working_tab")
   ))).toBe(false);
 });
 
@@ -165,14 +165,14 @@ for (const status of ["aborted", "interrupted"]) {
       for (let opening = 0; opening < 2; opening++) {
         await page.goto(SIDEPANEL_URL, { waitUntil: "domcontentloaded" });
         await expect(page.locator("#app")).not.toHaveAttribute("data-workspace-booting");
-        if (!stateFirst) await page.evaluate(event => window.__qzEmitPortMessage(event), stateResponse);
+        if (!stateFirst) await page.evaluate(event => window.__zuriEmitPortMessage(event), stateResponse);
         await expect(page.locator("#messages")).toContainText(transcript[0].text);
         await expect(page.locator("#messages")).toContainText(transcript[2].content);
         await expect(page.locator("#messages .msg-thinking-group")).toHaveCount(1);
         await expect(page.locator("#messages .thinking-group-summary-running")).toHaveCount(0);
         await expect(page.locator("#messages .msg-run-status")).toHaveCount(1);
         await expect(page.locator("#messages .msg-run-status")).toContainText(status === "aborted" ? "已取消" : "已中断");
-        expect(await page.evaluate(() => window.__qzPostedMessages.some(message => message.type === "prompt"))).toBe(false);
+        expect(await page.evaluate(() => window.__zuriPostedMessages.some(message => message.type === "prompt"))).toBe(false);
       }
     });
   }
@@ -203,7 +203,7 @@ test("a failed page restore returns to the empty Chat workspace", async ({ page,
   await expect(page.locator("#input")).toHaveValue("");
   await expect(page.locator("#session-title-bar")).toBeHidden();
   await expect.poll(() => page.evaluate(key => JSON.parse(
-    localStorage.getItem(`__qz_test_chrome_session__:${key}`) || "null",
+    localStorage.getItem(`__zuri_test_chrome_session__:${key}`) || "null",
   ), VIEW_KEY)).toEqual({ v: 2, page: "chat", state: { sessionId: null } });
   expect(browserDiagnostics.consoleErrors).toHaveLength(1);
   expect(browserDiagnostics.consoleErrors[0]).toContain("forced page restore failure");
@@ -240,11 +240,11 @@ test("leaving a slow restoring page preserves the user's newer navigation", asyn
   await page.evaluate(() => globalThis.__releaseStoredSessionRead());
   // Successful completion of startup persists the current view, not the cancelled restore.
   await expect.poll(() => page.evaluate(key => JSON.parse(
-    localStorage.getItem(`__qz_test_chrome_session__:${key}`) || "null",
+    localStorage.getItem(`__zuri_test_chrome_session__:${key}`) || "null",
   ), VIEW_KEY)).toMatchObject({ v: 2, page: "data" });
   await expect(page.locator('.tab-btn[data-tab="data"]')).toHaveClass(/active/);
   await expect(page.locator("#session-title-bar")).toBeHidden();
-  expect(await page.evaluate(() => window.__qzPostedMessages.some(message =>
+  expect(await page.evaluate(() => window.__zuriPostedMessages.some(message =>
     message.type === "restore_session" && message.sessionId === "cancelled-restoration"))).toBe(false);
 });
 
@@ -277,7 +277,7 @@ test("reveals the latest tail of a long restored chat before backfilling its his
 
   await page.goto(SIDEPANEL_URL, { waitUntil: "domcontentloaded" });
   await expect(page.locator("#app")).not.toHaveAttribute("data-workspace-booting");
-  const firstReveal = await page.evaluate(() => window.__qzFirstWorkspaceReveal);
+  const firstReveal = await page.evaluate(() => window.__zuriFirstWorkspaceReveal);
   expect(firstReveal).toMatchObject({
     tab: "chat",
     visible: ["messages"],
@@ -318,8 +318,8 @@ test("recovers a long restored chat when incremental history backfill fails", as
     await route.fulfill({
       response,
       body: body.replace(marker, `
-    if (!globalThis.__qzBackfillFailureInjected) {
-      globalThis.__qzBackfillFailureInjected = true;
+    if (!globalThis.__zuriBackfillFailureInjected) {
+      globalThis.__zuriBackfillFailureInjected = true;
       throw new Error("forced transcript backfill failure");
     }
     ${marker}`),
@@ -341,12 +341,12 @@ test("recovers a long restored chat when incremental history backfill fails", as
 
   await page.goto(SIDEPANEL_URL, { waitUntil: "domcontentloaded" });
   await expect(page.locator("#app")).not.toHaveAttribute("data-workspace-booting");
-  expect(await page.evaluate(() => window.__qzFirstWorkspaceReveal?.transcriptCount)).toBe(48);
+  expect(await page.evaluate(() => window.__zuriFirstWorkspaceReveal?.transcriptCount)).toBe(48);
   await expect.poll(
     () => page.locator("#messages > [data-transcript-key]").count(),
     { timeout: 10_000 },
   ).toBe(transcript.length);
-  expect(await page.evaluate(() => window.__qzBackfillFailureInjected)).toBe(true);
+  expect(await page.evaluate(() => window.__zuriBackfillFailureInjected)).toBe(true);
   await expect(page.locator("#messages")).toContainText("恢复消息 001");
   await expect(page.locator("#messages")).toContainText("恢复消息 110");
 });
@@ -379,7 +379,7 @@ test("lets an explicit notification replace the stored view before reveal", asyn
 
   await page.goto(SIDEPANEL_URL, { waitUntil: "domcontentloaded" });
   await expect(page.locator("#app")).not.toHaveAttribute("data-workspace-booting");
-  expect(await page.evaluate(() => window.__qzFirstWorkspaceReveal)).toMatchObject({
+  expect(await page.evaluate(() => window.__zuriFirstWorkspaceReveal)).toMatchObject({
     tab: "chat",
     visible: ["messages"],
     sessionTitle: title,
@@ -407,7 +407,7 @@ test("restores a Skill detail without flashing the Skill list", async ({ page })
           description: "测试恢复",
           content: "# 已恢复",
           scope: "global",
-          format: "qingzhou.skill",
+          format: "zuri.skill",
           schemaVersion: 2,
         },
       },
@@ -416,7 +416,7 @@ test("restores a Skill detail without flashing the Skill list", async ({ page })
 
   await page.goto(SIDEPANEL_URL, { waitUntil: "domcontentloaded" });
   await expect(page.locator("#app")).not.toHaveAttribute("data-workspace-booting");
-  expect(await page.evaluate(() => window.__qzFirstWorkspaceReveal)).toMatchObject({
+  expect(await page.evaluate(() => window.__zuriFirstWorkspaceReveal)).toMatchObject({
     tab: "skills",
     visible: ["skills-panel"],
     skillName: "工作区恢复示例",
@@ -439,7 +439,7 @@ test("restores the Logs tab only after its debug capability is known", async ({ 
 
   await page.goto(SIDEPANEL_URL, { waitUntil: "domcontentloaded" });
   await expect(page.locator("#app")).not.toHaveAttribute("data-workspace-booting");
-  expect(await page.evaluate(() => window.__qzFirstWorkspaceReveal)).toMatchObject({
+  expect(await page.evaluate(() => window.__zuriFirstWorkspaceReveal)).toMatchObject({
     tab: "logs",
     visible: ["logs-panel"],
   });
@@ -457,7 +457,7 @@ for (const colorScheme of ["light", "dark"]) {
     await page.goto(SIDEPANEL_URL, { waitUntil: "domcontentloaded" });
     await expect(page.locator("#app")).not.toHaveAttribute("data-workspace-booting");
     await expect(page.locator("#app")).toHaveAttribute("data-workspace-boot-fallback", "error");
-    await expect(page.locator("#workspace-boot-fallback")).toHaveText("轻舟启动失败，请重新打开侧边栏");
+    await expect(page.locator("#workspace-boot-fallback")).toHaveText("Zuri启动失败，请重新打开侧边栏");
     await expect(page.locator("#header")).toBeVisible();
     expect(browserDiagnostics.consoleErrors).toHaveLength(1);
     expect(browserDiagnostics.consoleErrors[0]).toContain("forced workspace startup failure");
@@ -480,7 +480,7 @@ test("surfaces an error thrown by the application startup sequence", async ({ pa
   await page.goto(SIDEPANEL_URL, { waitUntil: "domcontentloaded" });
   await expect(page.locator("#app")).not.toHaveAttribute("data-workspace-booting");
   await expect(page.locator("#app")).toHaveAttribute("data-workspace-boot-fallback", "error");
-  await expect(page.locator("#workspace-boot-fallback")).toHaveText("轻舟启动失败，请重新打开侧边栏");
+  await expect(page.locator("#workspace-boot-fallback")).toHaveText("Zuri启动失败，请重新打开侧边栏");
   expect(browserDiagnostics.consoleErrors.some(message => message.includes("forced internal startup failure"))).toBe(true);
   browserDiagnostics.consoleErrors.length = 0;
 });
@@ -499,7 +499,7 @@ test("reveals the current shell if workspace startup never settles", async ({ pa
   await page.clock.runFor(6000);
   await expect(page.locator("#app")).not.toHaveAttribute("data-workspace-booting");
   await expect(page.locator("#app")).toHaveAttribute("data-workspace-boot-fallback", "timeout");
-  await expect(page.locator("#workspace-boot-fallback")).toHaveText("轻舟仍在启动，请稍候或重新打开侧边栏");
+  await expect(page.locator("#workspace-boot-fallback")).toHaveText("Zuri仍在启动，请稍候或重新打开侧边栏");
   await expect(page.locator("#header")).toBeVisible();
 });
 
@@ -518,9 +518,9 @@ test("does not overwrite the stored workspace when bootstrap falls back after a 
   await expect(page.locator("#app")).not.toHaveAttribute("data-workspace-booting");
   await page.waitForTimeout(500);
   expect(await page.evaluate(key => (
-    JSON.parse(localStorage.getItem(`__qz_test_chrome_session__:${key}`) || "null")
+    JSON.parse(localStorage.getItem(`__zuri_test_chrome_session__:${key}`) || "null")
   ), VIEW_KEY)).toEqual(storedView);
-  expect(await page.evaluate(() => window.__qzSessionSetAttempts)).toBe(0);
+  expect(await page.evaluate(() => window.__zuriSessionSetAttempts)).toBe(0);
 });
 
 test("forgets a deleted Data target after restoring an empty workspace", async ({ page }) => {
@@ -538,13 +538,13 @@ test("forgets a deleted Data target after restoring an empty workspace", async (
   await page.goto(SIDEPANEL_URL, { waitUntil: "domcontentloaded" });
   await expect(page.locator("#data-empty")).toBeVisible();
   await page.waitForFunction(
-    ({ key }) => JSON.parse(localStorage.getItem(`__qz_test_chrome_session__:${key}`) || "null")?.state?.table === null,
+    ({ key }) => JSON.parse(localStorage.getItem(`__zuri_test_chrome_session__:${key}`) || "null")?.state?.table === null,
     { key: VIEW_KEY },
   );
 
   await page.reload({ waitUntil: "domcontentloaded" });
   await expect(page.locator("#app")).not.toHaveAttribute("data-workspace-booting");
-  expect(await page.evaluate(() => window.__qzFirstWorkspaceReveal)).toMatchObject({
+  expect(await page.evaluate(() => window.__zuriFirstWorkspaceReveal)).toMatchObject({
     tab: "data",
     dataTable: "",
   });
@@ -565,27 +565,27 @@ test("retries the same stable view after a transient workspace save failure", as
   await page.goto(SIDEPANEL_URL, { waitUntil: "domcontentloaded" });
   await expect(page.locator("#app")).not.toHaveAttribute("data-workspace-booting");
   await page.locator('.tab-btn[data-tab="chat"]').click();
-  await page.waitForFunction(() => window.__qzSessionSetAttempts === 1);
+  await page.waitForFunction(() => window.__zuriSessionSetAttempts === 1);
   expect(await page.evaluate(key => (
-    JSON.parse(localStorage.getItem(`__qz_test_chrome_session__:${key}`) || "null")?.page
+    JSON.parse(localStorage.getItem(`__zuri_test_chrome_session__:${key}`) || "null")?.page
   ), VIEW_KEY)).toBe("sessions");
 
   await page.locator("#btn-new").click();
   await page.waitForFunction(
-    ({ key }) => JSON.parse(localStorage.getItem(`__qz_test_chrome_session__:${key}`) || "null")?.page === "chat",
+    ({ key }) => JSON.parse(localStorage.getItem(`__zuri_test_chrome_session__:${key}`) || "null")?.page === "chat",
     { key: VIEW_KEY },
   );
-  expect(await page.evaluate(() => window.__qzSessionSetAttempts)).toBe(2);
+  expect(await page.evaluate(() => window.__zuriSessionSetAttempts)).toBe(2);
 });
 
 function installFirstWorkspaceRevealProbe() {
-  window.__qzFirstWorkspaceReveal = null;
+  window.__zuriFirstWorkspaceReveal = null;
   const startedAt = performance.now();
   document.addEventListener("DOMContentLoaded", () => {
     const app = document.querySelector("#app");
     if (!app) return;
     const capture = () => {
-      if (app.hasAttribute("data-workspace-booting") || window.__qzFirstWorkspaceReveal) return;
+      if (app.hasAttribute("data-workspace-booting") || window.__zuriFirstWorkspaceReveal) return;
       const visible = [
         ["messages", document.querySelector("#messages")],
         ["sessions-panel", document.querySelector("#sessions-panel")],
@@ -593,7 +593,7 @@ function installFirstWorkspaceRevealProbe() {
         ["skills-panel", document.querySelector("#skills-panel")],
         ["logs-panel", document.querySelector("#logs-panel")],
       ].filter(([, element]) => element && !element.classList.contains("hidden")).map(([name]) => name);
-      window.__qzFirstWorkspaceReveal = {
+      window.__zuriFirstWorkspaceReveal = {
         tab: document.querySelector(".tab-btn.active")?.dataset?.tab || "",
         visible,
         sessionsMode: document.querySelector(".sessions-mode-btn.active")?.dataset?.sessionsMode || "",

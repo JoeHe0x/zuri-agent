@@ -8,7 +8,7 @@ import { activeConversationKey } from "../../src/shared/session/session-store.js
 import { createMemoryStorage } from "../support/memory-storage.mjs";
 import { createTestAgentOptions, createTestAgentServices } from "../support/agent-services.mjs";
 
-const MARKER = "QZ_PENDING_SHOULD_NOT_RUN";
+const MARKER = "ZURI_PENDING_SHOULD_NOT_RUN";
 
 function deferred() {
   let resolve;

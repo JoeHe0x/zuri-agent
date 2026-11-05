@@ -6,7 +6,7 @@ import test from "node:test";
 import { buildExtension, EXTENSION_ENTRIES } from "../../scripts/build-extension.mjs";
 
 test("firefox production keeps boot imports that the service worker also bundles", async t => {
-  const work = await mkdtemp(join(tmpdir(), "qingzhou-firefox-boot-"));
+  const work = await mkdtemp(join(tmpdir(), "zuri-firefox-boot-"));
   t.after(() => rm(work, { recursive: true, force: true }));
   const sourceDir = join(work, "source");
   await mkdir(sourceDir);
@@ -34,7 +34,7 @@ test("firefox production keeps boot imports that the service worker also bundles
     "",
   ].join("\n"));
   await put(sourceDir, "shared/value.ts", "export const value: number = 42;\n");
-  await put(sourceDir, "shared/alarm.ts", 'export const ALARM = "qingzhou-mcp-bridge-reconnect";\n');
+  await put(sourceDir, "shared/alarm.ts", 'export const ALARM = "zuri-mcp-bridge-reconnect";\n');
   await put(sourceDir, "shared/worker-only.ts", "export const ONLY = 1;\n");
   await put(sourceDir, "offscreen.js", 'import { value } from "./shared/value.js";\nglobalThis.offscreenValue = value;\n');
   await rm(join(sourceDir, "content/content-script.js"));

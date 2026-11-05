@@ -63,13 +63,13 @@ export async function prepareResources({ environment, mcp, cli, outputDirectory 
         return Boolean(round % 2) !== inverse ? mcp(name, params, { expectedError }) : cli(args, { expectedError });
       };
       try {
-        const tables = await invoke(["data", "list"], "qingzhou_list_data_tables");
+        const tables = await invoke(["data", "list"], "zuri_list_data_tables");
         assert.ok(tables.tables.some(table => table.name === TABLE && table.count === ROWS));
-        const galleries = await invoke(["images", "list"], "qingzhou_list_image_collections");
+        const galleries = await invoke(["images", "list"], "zuri_list_image_collections");
         assert.ok(galleries.collections.some(item => item.name === GALLERY));
         assert.ok(galleries.collections.some(item => item.name === OTHER));
         for (const format of ["csv", "xlsx"]) {
-          const result = await invoke(["data", "export", TABLE, "--format", format], "qingzhou_export_data_table", { table: TABLE, format });
+          const result = await invoke(["data", "export", TABLE, "--format", format], "zuri_export_data_table", { table: TABLE, format });
           assert.equal(result.rows, ROWS);
           const item = await completed(result);
           const parsed = await parseDocument(page, item.bytes, result.filename);
@@ -77,17 +77,17 @@ export async function prepareResources({ environment, mcp, cli, outputDirectory 
           assert.equal(parsed.sheets[0].rows[0].title, TEXT);
           assert.equal(String(parsed.sheets[0].rows.at(-1).id), String(ROWS - 1));
           operations += 1;
-          const known = await mcp("qingzhou_list_downloads", { id: result.downloadId });
+          const known = await mcp("zuri_list_downloads", { id: result.downloadId });
           assert.equal(known.downloads[0].filepath, item.filename);
           assert.equal(known.downloads[0].state, "complete");
           report.exports.push({ kind: format, bytes: item.bytes.length });
         }
-        const empty = await completed(await invoke(["data", "export", EMPTY], "qingzhou_export_data_table", { table: EMPTY }));
+        const empty = await completed(await invoke(["data", "export", EMPTY], "zuri_export_data_table", { table: EMPTY }));
         const emptyModel = await parseDocument(page, empty.bytes, "empty.xlsx");
         assert.deepEqual(emptyModel.sheets[0].columns, ["name", "url"]);
         assert.deepEqual(emptyModel.sheets[0].rows, []);
 
-        const gallery = await invoke(["images", "export", GALLERY], "qingzhou_export_image_collection", { collection: GALLERY });
+        const gallery = await invoke(["images", "export", GALLERY], "zuri_export_image_collection", { collection: GALLERY });
         assert.equal(gallery.images, 2);
         assert.equal(gallery.missingImages, 1);
         const images = await completed(gallery);
@@ -98,48 +98,48 @@ export async function prepareResources({ environment, mcp, cli, outputDirectory 
         assert.deepEqual(archive.imageBytes, [seeded.imageBytes, seeded.imageBytes]);
         report.exports.push({ kind: "images-zip", bytes: images.bytes.length });
 
-        const list = await invoke(["skills", "list", "--query", SKILL], "qingzhou_list_skills", { query: SKILL });
+        const list = await invoke(["skills", "list", "--query", SKILL], "zuri_list_skills", { query: SKILL });
         assert.ok(list.items.some(item => item.name === SKILL));
-        const shown = await invoke(["skills", "show", SKILL], "qingzhou_get_skill", { name: SKILL, includeContent: true });
+        const shown = await invoke(["skills", "show", SKILL], "zuri_get_skill", { name: SKILL, includeContent: true });
         assert.ok(JSON.stringify(shown).includes("Synthetic soak export fixture"));
-        const resource = await invoke(["skills", "read", SKILL, "references/example.txt"], "qingzhou_get_skill_resource", { name: SKILL, path: "references/example.txt" });
+        const resource = await invoke(["skills", "read", SKILL, "references/example.txt"], "zuri_get_skill_resource", { name: SKILL, path: "references/example.txt" });
         assert.ok(JSON.stringify(resource).includes("Synthetic fixture bytes."));
-        const exportedSkill = await completed(await invoke(["skills", "export", SKILL], "qingzhou_export_skill", { name: SKILL }));
+        const exportedSkill = await completed(await invoke(["skills", "export", SKILL], "zuri_export_skill", { name: SKILL }));
         const skillArchive = await inspectArchive(page, exportedSkill.bytes);
         assert.ok(skillArchive.paths.includes(`${SKILL}/SKILL.md`));
         assert.equal(skillArchive.textFiles[`${SKILL}/references/example.txt`], RESOURCE);
         report.exports.push({ kind: "skill-zip", bytes: exportedSkill.bytes.length });
 
-        const settings = await invoke(["settings", "get"], "qingzhou_get_settings");
+        const settings = await invoke(["settings", "get"], "zuri_get_settings");
         assert.equal(Object.hasOwn(settings.config, "apiKey"), false);
         const raw = await page.evaluate(async () => (await chrome.storage.local.get("llmConfig")).llmConfig);
         if (raw?.apiKey) assert.equal(JSON.stringify(settings).includes(raw.apiKey), false);
         const previous = settings.config.debugMode;
         assert.equal(typeof previous, "boolean");
         try {
-          await invoke(["settings", "set", "debugMode", String(!previous)], "qingzhou_update_settings", { config: { debugMode: !previous } });
-          const changed = await invoke(["settings", "get", "debugMode"], "qingzhou_get_settings", { key: "debugMode" }, true);
+          await invoke(["settings", "set", "debugMode", String(!previous)], "zuri_update_settings", { config: { debugMode: !previous } });
+          const changed = await invoke(["settings", "get", "debugMode"], "zuri_get_settings", { key: "debugMode" }, true);
           assert.equal(changed.value, !previous);
         } finally {
-          await invoke(["settings", "set", "debugMode", String(previous)], "qingzhou_update_settings", { config: { debugMode: previous } });
+          await invoke(["settings", "set", "debugMode", String(previous)], "zuri_update_settings", { config: { debugMode: previous } });
         }
         assert.deepEqual(await page.evaluate(async () => (await chrome.storage.local.get("llmConfig")).llmConfig), raw);
         report.checks.push("settings-patch-preserves-model-and-redacts-credentials");
-        assert.ok(await invoke(["automations", "list"], "qingzhou_list_automations"));
-        assert.ok(await mcp("qingzhou_get_trace", {}));
+        assert.ok(await invoke(["automations", "list"], "zuri_list_automations"));
+        assert.ok(await mcp("zuri_get_trace", {}));
         operations += 1;
-        const recent = await mcp("qingzhou_list_downloads", {});
+        const recent = await mcp("zuri_list_downloads", {});
         assert.ok(recent.downloads.some(item => downloads.has(item.downloadId)));
 
         if (round % 3 === 0) {
-          const rejected = await invoke(["data", "delete", "Soak research row"], "qingzhou_delete_data_table", { table: "Soak research row" }, false, true);
+          const rejected = await invoke(["data", "delete", "Soak research row"], "zuri_delete_data_table", { table: "Soak research row" }, false, true);
           assert.equal(rejected.code, "RESOURCE_NOT_FOUND");
-          const deleted = await invoke(["data", "delete", TABLE], "qingzhou_delete_data_table", { table: TABLE });
+          const deleted = await invoke(["data", "delete", TABLE], "zuri_delete_data_table", { table: TABLE });
           assert.equal(deleted.deleted, ROWS);
-          const removed = await invoke(["images", "delete", GALLERY], "qingzhou_delete_image_collection", { collection: GALLERY });
+          const removed = await invoke(["images", "delete", GALLERY], "zuri_delete_image_collection", { collection: GALLERY });
           assert.equal(removed.deleted, 3);
           assert.equal(removed.retainedAssets, true);
-          const remaining = await invoke(["images", "list"], "qingzhou_list_image_collections", {}, true);
+          const remaining = await invoke(["images", "list"], "zuri_list_image_collections", {}, true);
           assert.ok(remaining.collections.some(item => item.name === OTHER));
           assert.equal(remaining.collections.some(item => item.name === GALLERY), false);
           const surviving = await page.evaluate(async assetId => {

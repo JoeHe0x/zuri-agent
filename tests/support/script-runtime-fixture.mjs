@@ -8,7 +8,7 @@ const hosts = new Map();
 
 export function compileScriptRuntime(mode = 'development') {
   if (!runtimes.has(mode)) runtimes.set(mode, compileEmbeddedScript({
-    sourceDir, entry: 'shared/script-runtime.ts', globalName: 'QZ_SCRIPT_RUNTIME', mode,
+    sourceDir, entry: 'shared/script-runtime.ts', globalName: 'ZURI_SCRIPT_RUNTIME', mode,
   }));
   return runtimes.get(mode);
 }
@@ -19,7 +19,7 @@ export function compileScriptToolHost(mode = 'development') {
     const result = await build({
       stdin: { contents: `export { createScriptTools } from './capabilities/script/tools.ts';
         export { ToolExecutionError } from './background/tools/arguments.ts';`, resolveDir: sourceDir },
-      bundle: true, write: false, format: 'iife', globalName: 'QZ_SCRIPT_TEST', target: 'chrome114',
+      bundle: true, write: false, format: 'iife', globalName: 'ZURI_SCRIPT_TEST', target: 'chrome114',
       minify: mode === 'production', define: { SCRIPT_RUNTIME_SOURCE: JSON.stringify(runtime) },
     });
     return result.outputFiles[0].text;

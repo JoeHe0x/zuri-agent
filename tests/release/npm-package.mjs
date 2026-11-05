@@ -45,7 +45,7 @@ async function npmEntry() {
 }
 
 const npm = await npmEntry();
-const work = await mkdtemp(join(tmpdir(), "qz-npm-smoke-"));
+const work = await mkdtemp(join(tmpdir(), "zuri-npm-smoke-"));
 const controller = new AbortController();
 const interrupt = () => controller.abort(new Error("The npm package smoke test was interrupted."));
 process.once("SIGINT", interrupt);
@@ -59,7 +59,7 @@ const env = Object.fromEntries(Object.entries(process.env).filter(([key]) =>
 env.PATH = [dirname(process.execPath), env.PATH || env.Path || ""].join(delimiter);
 delete env.Path;
 Object.assign(env, {
-  QZ_STATE_DIR: join(work, "state"),
+  ZURI_STATE_DIR: join(work, "state"),
   npm_config_userconfig: join(work, "user.npmrc"), npm_config_globalconfig: join(work, "global.npmrc"),
   npm_config_cache: join(work, "cache"), npm_config_registry: "https://registry.npmjs.org/",
   npm_config_ignore_scripts: "true", npm_config_audit: "false", npm_config_fund: "false",
@@ -79,7 +79,7 @@ async function runNpm(args, cwd) {
 }
 
 async function cli(directory, args) {
-  return runNpm(["exec", "--offline", "--", "qz", ...args], directory);
+  return runNpm(["exec", "--offline", "--", "zuri", ...args], directory);
 }
 
 async function result(directory, args) {
@@ -120,19 +120,19 @@ try {
     await mkdir(directory);
     await writeFile(join(directory, "package.json"), JSON.stringify({ private: true }));
     await runNpm(["install", "--ignore-scripts", "--no-audit", "--no-fund", "--package-lock=false", tarball], directory);
-    await access(join(directory, "node_modules/.bin", process.platform === "win32" ? "qz.cmd" : "qz"));
+    await access(join(directory, "node_modules/.bin", process.platform === "win32" ? "zuri.cmd" : "zuri"));
   }
   const metadata = JSON.parse(await readFile(join(packages[0], "package.json"), "utf8"));
   assert.equal(metadata.name, "zuri-agent-extension");
-  assert.match(await cli(installs[0], ["--help"]), /qz/);
-  assert.ok((await cli(installs[0], ["--version"])).split(/\s+/).includes(metadata.version), "Installed qz must report its package version.");
+  assert.match(await cli(installs[0], ["--help"]), /zuri/);
+  assert.ok((await cli(installs[0], ["--version"])).split(/\s+/).includes(metadata.version), "Installed zuri must report its package version.");
   assert.deepEqual(await result(installs[0], ["status"]), { running: false, connected: false });
 
   const [first, second] = await Promise.all(packages.map(directory => import(pathToFileURL(join(directory, "src/daemon.mjs")))));
   assert.deepEqual(first.buildIdentity(), second.buildIdentity(), "The same package must keep its identity across installation/cache paths.");
   console.error("Checking the installed CLI and MCP service on an isolated dynamic port…");
   const running = await first.ensureDaemon({
-    stateDir: env.QZ_STATE_DIR, preferredPort: 0,
+    stateDir: env.ZURI_STATE_DIR, preferredPort: 0,
     spawnProcess(command, args, settings) {
       assert.equal(daemonChild, undefined, "Only one daemon may be created.");
       daemonChild = spawn(command, args, { ...settings, detached: false, env });
@@ -142,7 +142,7 @@ try {
   assert.equal(running.processId, daemonChild.pid);
   assert.notEqual(new URL(running.endpoint).port, "0");
   const fromSecond = await second.ensureDaemon({
-    stateDir: env.QZ_STATE_DIR, preferredPort: 0,
+    stateDir: env.ZURI_STATE_DIR, preferredPort: 0,
     spawnProcess() { assert.fail("A second installation must reuse the running service."); },
   });
   assert.equal(fromSecond.instanceId, running.instanceId);
@@ -160,14 +160,14 @@ try {
   const { Client } = await import(pathToFileURL(requireInstalled.resolve("@modelcontextprotocol/sdk/client/index.js")));
   const { StreamableHTTPClientTransport } = await import(pathToFileURL(requireInstalled.resolve("@modelcontextprotocol/sdk/client/streamableHttp.js")));
   const { localFetch, resultValue } = await import(pathToFileURL(join(packages[0], "src/client.mjs")));
-  const client = new Client({ name: "qz-package-smoke", version: "1.0.0" });
+  const client = new Client({ name: "zuri-package-smoke", version: "1.0.0" });
   const transport = new StreamableHTTPClientTransport(new URL(mcp.url), { fetch: localFetch });
   try {
     await client.connect(transport, { timeout: 10_000, signal: controller.signal });
     assert.equal(client.getServerVersion().version, metadata.version);
     const catalog = await client.listTools({}, { timeout: 10_000, signal: controller.signal });
-    assert.ok(catalog.tools.some(tool => tool.name === "qingzhou_bridge_status"));
-    const called = await client.callTool({ name: "qingzhou_bridge_status", arguments: {} }, undefined,
+    assert.ok(catalog.tools.some(tool => tool.name === "zuri_bridge_status"));
+    const called = await client.callTool({ name: "zuri_bridge_status", arguments: {} }, undefined,
       { timeout: 10_000, signal: controller.signal });
     assert.notEqual(called.isError, true);
     assert.equal(resultValue(called).connected, false);

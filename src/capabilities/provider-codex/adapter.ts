@@ -464,7 +464,7 @@ function convertOpenAiMessagesToCodex(messages: ModelMessage[] = [], config: Run
       if (text.trim()) {
         input.push({
           type: "message",
-          id: `msg_qz_${messageIndex}`,
+          id: `msg_zuri_${messageIndex}`,
           role: "assistant",
           status: "completed",
           content: [{ type: "output_text", text, annotations: [] }],
@@ -472,7 +472,7 @@ function convertOpenAiMessagesToCodex(messages: ModelMessage[] = [], config: Run
         messageIndex++;
       }
       for (const toolCall of msg.tool_calls || []) {
-        const callId = normalizeCodexToolCallId(toolCall.id || `call_qz_${messageIndex}_${input.length}`);
+        const callId = normalizeCodexToolCallId(toolCall.id || `call_zuri_${messageIndex}_${input.length}`);
         input.push({
           type: "function_call",
           id: makeCodexFunctionCallItemId(callId),
@@ -742,7 +742,7 @@ function ensureCodexToolRecord(state: ToolState, event: CodexEvent = {}, item: C
   }
 
   const index = state.records.length;
-  const callId = normalizeCodexToolCallId(item.call_id || event.call_id || `call_qz_${Date.now()}_${index}`);
+  const callId = normalizeCodexToolCallId(item.call_id || event.call_id || `call_zuri_${Date.now()}_${index}`);
   const record = {
     index,
     toolCall: {
@@ -799,7 +799,7 @@ function traceCodexStreamEvent(type = "", event: CodexEvent = {}) {
 
 function normalizeCodexToolCallId(id: unknown) {
   const normalized = String(id || "").replace(/[^a-zA-Z0-9_-]/g, "_").replace(/^_+|_+$/g, "");
-  return normalized || `call_qz_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+  return normalized || `call_zuri_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
 }
 
 function makeCodexFunctionCallItemId(callId: unknown) {
@@ -809,7 +809,7 @@ function makeCodexFunctionCallItemId(callId: unknown) {
 
 function clampCodexPromptCacheKey(sessionId: unknown) {
   const normalized = normalizeHeaderToken(sessionId);
-  return normalized ? `qingzhou-${normalized}`.slice(0, 64) : "";
+  return normalized ? `zuri-${normalized}`.slice(0, 64) : "";
 }
 
 async function* readCodexSseEvents(reader: ReadableStreamDefaultReader<Uint8Array>, idleTimeoutMs: number, signal: AbortSignal, options: {trace?: TraceTiming} = {}): AsyncGenerator<CodexEvent> {

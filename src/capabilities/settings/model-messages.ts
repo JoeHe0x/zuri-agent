@@ -8,8 +8,8 @@ const messages = defineMessages("settings-model", {
     en: "Send a local browser notification to alert the user of important progress or a blocker. Does not replace ask_user or wait_for_user (still call wait_for_user for sign-in, CAPTCHA, authorization, or payment). Globally rate-limited and deduplicated; repeated alerts return suppressed:true.",
   },
   notificationTitle: {
-    "zh-CN": "简短通知标题（最多 80 字符），默认“轻舟提醒”。",
-    en: "Short notification title (up to 80 chars). Default: “qz”.",
+    "zh-CN": "简短通知标题（最多 80 字符），默认“Zuri提醒”。",
+    en: "Short notification title (up to 80 chars). Default: “zuri”.",
   },
   notificationMessage: {
     "zh-CN": "必填。通知正文（最多 600 字符），说明需要用户关注或处理的事项。",
@@ -32,8 +32,8 @@ const messages = defineMessages("settings-model", {
     en: "Manage Agent's models, providers, model request parameters, presets, advanced runtime settings, Skill settings, and access guardrails through conversation. Load when the user asks to configure or switch models, adjust thinking or reasoning effort, set an API key, change context or image capabilities, address model API 429/rate limits, read or update Skill settings, or configure site allow/block rules, URL patterns, or navigation rate limits.",
   },
   manageSettings: {
-    "zh-CN": "读取和修改 Agent 模型与运行设置（访问规则与站点流控请用 qingzhou_management__manage_guardrails，Skill 自带配置请用 qingzhou_management__manage_skill_settings）。先 get 查看当前 provider/model 和 presets；已有匹配预设时优先 apply_preset；查询可用模型用 list_models；缺少 API Key 时先请用户提供或调用 wait_for_user/ask_user。update_config 接收增量补丁（未传字段保持不变）：切换到新 provider/model 时省略 contextWindow 和 vision 以自动匹配新模型默认值（不要复制旧模型值）；若返回 MODEL_CAPABILITIES_REQUIRED，向用户确认 contextWindow 后显式传入重试。处理模型接口 429/rate limit 时只传 requestRateLimit:true 开启 RPM/TPM 排队（余额或总配额耗尽不适用）。",
-    en: "Read and update Agent model and runtime settings (use qingzhou_management__manage_guardrails for access rules/rate limits, and qingzhou_management__manage_skill_settings for Skill-defined settings). Call get first to inspect the current provider/model and presets; prefer apply_preset when a matching preset exists; use list_models to list models; if an API key is needed, ask the user via wait_for_user/ask_user first. update_config applies a partial patch (omitted fields stay unchanged): when switching provider/model, omit contextWindow and vision to use the new model's detected defaults (never copy the old model's values); if MODEL_CAPABILITIES_REQUIRED is returned, ask the user for contextWindow and retry. To mitigate model API 429/rate limits (not exhausted quota/balance), pass requestRateLimit:true.",
+    "zh-CN": "读取和修改 Agent 模型与运行设置（访问规则与站点流控请用 zuri_management__manage_guardrails，Skill 自带配置请用 zuri_management__manage_skill_settings）。先 get 查看当前 provider/model 和 presets；已有匹配预设时优先 apply_preset；查询可用模型用 list_models；缺少 API Key 时先请用户提供或调用 wait_for_user/ask_user。update_config 接收增量补丁（未传字段保持不变）：切换到新 provider/model 时省略 contextWindow 和 vision 以自动匹配新模型默认值（不要复制旧模型值）；若返回 MODEL_CAPABILITIES_REQUIRED，向用户确认 contextWindow 后显式传入重试。处理模型接口 429/rate limit 时只传 requestRateLimit:true 开启 RPM/TPM 排队（余额或总配额耗尽不适用）。",
+    en: "Read and update Agent model and runtime settings (use zuri_management__manage_guardrails for access rules/rate limits, and zuri_management__manage_skill_settings for Skill-defined settings). Call get first to inspect the current provider/model and presets; prefer apply_preset when a matching preset exists; use list_models to list models; if an API key is needed, ask the user via wait_for_user/ask_user first. update_config applies a partial patch (omitted fields stay unchanged): when switching provider/model, omit contextWindow and vision to use the new model's detected defaults (never copy the old model's values); if MODEL_CAPABILITIES_REQUIRED is returned, ask the user for contextWindow and retry. To mitigate model API 429/rate limits (not exhausted quota/balance), pass requestRateLimit:true.",
   },
   settingsAction: {
     "zh-CN": "操作类型。必填项：apply_preset/delete_preset 需 presetId；update_config 至少传一个配置字段。",
@@ -184,7 +184,7 @@ const messages = defineMessages("settings-model", {
 
 ## 模型与预设
 
-- 使用 \`qingzhou_management__manage_settings\`。先执行 \`action:"get"\`，查看当前 provider/model、可用 provider 摘要和已有预设。服务商使用返回的 id，接口以其 endpoint 为准，不另猜服务商 ID 或接口地址。
+- 使用 \`zuri_management__manage_settings\`。先执行 \`action:"get"\`，查看当前 provider/model、可用 provider 摘要和已有预设。服务商使用返回的 id，接口以其 endpoint 为准，不另猜服务商 ID 或接口地址。
 - 已有目标预设时优先 \`apply_preset\`。不要把预设拆成字段再手工保存；预设内部保存的凭证由系统解析，能力字段保留该预设保存的值及用户覆盖。
 - 需要确认 provider 支持哪些模型时使用 \`list_models\`。
 - 没有合适预设时使用 \`update_config\`。它接收字段补丁：修改当前配置时只传本次要改变的字段，未传字段沿用 \`get\` 返回的当前值，并按设置页保存语义 upsert provider/model 预设。
@@ -205,7 +205,7 @@ const messages = defineMessages("settings-model", {
 
 ## 安全护栏
 
-- 使用 \`qingzhou_management__manage_guardrails\`。修改前先执行 \`action:"get"\`，读取当前规则与顺序。
+- 使用 \`zuri_management__manage_guardrails\`。修改前先执行 \`action:"get"\`，读取当前规则与顺序。
 - 整站规则使用 \`targetType:"domain"\`；路径级或通配 URL 使用 \`targetType:"pattern"\`。
 - \`ruleAction:"block"\` 表示禁止访问；\`ruleAction:"allow"\` 用于从更宽的禁止规则中反向加白。普通访问不需要配置 allow。
 - 访问规则按顺序第一条命中生效；需要改变优先级时使用 \`reorder\`，不要删除后重建来碰运气。
@@ -214,7 +214,7 @@ const messages = defineMessages("settings-model", {
 
 ## Skill 配置
 
-- 读、改 Skill 自带配置统一使用 \`qingzhou_management__manage_skill_settings\`，不要操作设置页 DOM，也不要直接读写 storage。
+- 读、改 Skill 自带配置统一使用 \`zuri_management__manage_skill_settings\`，不要操作设置页 DOM，也不要直接读写 storage。
 - 先执行 \`action:"list"\` 找到目标 Skill 的稳定 \`settingId\`，再用 \`action:"get"\` 查看字段定义与当前值。
 - 修改时使用 \`action:"update"\`，传入 \`settingId\` 和只包含本次改动字段的 \`values\`。未传字段会保持不变。
 - Skill 配置是全局配置，对之后启动的该 Skill 工具调用生效，不把它当作当前 session 的临时状态。
@@ -239,7 +239,7 @@ Users can read and change Agent's models, providers, presets, advanced settings,
 
 ## Models and presets
 
-- Use \`qingzhou_management__manage_settings\`. Begin with \`action:"get"\` to inspect the current provider/model, available provider summaries, and existing presets. Use the returned provider IDs and endpoint values instead of guessing IDs or API URLs.
+- Use \`zuri_management__manage_settings\`. Begin with \`action:"get"\` to inspect the current provider/model, available provider summaries, and existing presets. Use the returned provider IDs and endpoint values instead of guessing IDs or API URLs.
 - Prefer \`apply_preset\` when the target preset exists. Do not split a preset into fields and save them manually; the system resolves its saved credentials and restores its saved capabilities, including user overrides.
 - Use \`list_models\` to discover models supported by a provider.
 - If no preset fits, use \`update_config\`. It accepts a field patch: supply only the changes, preserve omitted values returned by \`get\`, and upsert the provider/model preset with the same semantics as Settings.
@@ -260,7 +260,7 @@ These key/value choices share the same source as the Settings dropdowns. Preserv
 
 ## Access guardrails
 
-- Use \`qingzhou_management__manage_guardrails\`. Before changing anything, run \`action:"get"\` to read the current rules and their order.
+- Use \`zuri_management__manage_guardrails\`. Before changing anything, run \`action:"get"\` to read the current rules and their order.
 - Use \`targetType:"domain"\` for an entire site and \`targetType:"pattern"\` for paths or URL wildcards.
 - \`ruleAction:"block"\` denies access. \`ruleAction:"allow"\` creates an exception to a broader block rule. Ordinary access does not require an allow rule.
 - The first matching access rule takes effect. Use \`reorder\` to change precedence; do not delete and recreate rules hoping to change priority.
@@ -269,7 +269,7 @@ These key/value choices share the same source as the Settings dropdowns. Preserv
 
 ## Skill settings
 
-- Always use \`qingzhou_management__manage_skill_settings\` to read or update settings declared by a Skill. Do not manipulate the Settings page DOM or read/write storage directly.
+- Always use \`zuri_management__manage_skill_settings\` to read or update settings declared by a Skill. Do not manipulate the Settings page DOM or read/write storage directly.
 - First use \`action:"list"\` to find the target Skill's stable \`settingId\`, then \`action:"get"\` to inspect field definitions and current values.
 - Use \`action:"update"\` with \`settingId\` and a \`values\` object containing only fields to change. Omitted fields remain unchanged.
 - Skill settings are global and apply to subsequent tool invocations. Do not treat them as temporary session state.

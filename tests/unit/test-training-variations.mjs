@@ -22,7 +22,7 @@ import {
 import { sha256, writeJsonlAtomic } from "../benchmarks/article-extraction/training-variation-pack-integrity.mjs";
 
 function fixture() {
-  const root = mkdtempSync(join(tmpdir(), "qz-training-zip-"));
+  const root = mkdtempSync(join(tmpdir(), "zuri-training-zip-"));
   test.after(() => rmSync(root, { recursive: true, force: true }));
   return root;
 }
@@ -74,7 +74,7 @@ test("critic is bound to the full-page request and cannot accept with hidden err
   const packet = criticPacket("core-critic", teacher, { pageText: "完整页面", pageHtml: "<main>完整页面</main>" });
   assert.equal(packet.pageEvidence.pageText, "完整页面");
   const result = {
-    schema: "qingzhou.web-extraction-variation-critic.v2",
+    schema: "zuri.web-extraction-variation-critic.v2",
     sampleId: "core-critic",
     requestSha256: packet.requestSha256,
     teacherResultSha256: packet.teacherResultSha256,
@@ -292,7 +292,7 @@ test("ZIP is built from the exact artifact allowlist, tested, and accompanied by
     path: "README.md", bytes: Buffer.byteLength(readme), sha256: sha256(readme),
   }]);
   writeFileSync(join(pack, "manifest.json"), `${JSON.stringify({
-    schema: "qingzhou.web-extraction-training-pack.v1",
+    schema: "zuri.web-extraction-training-pack.v1",
     complete: true,
     artifacts: {
       files: 1,

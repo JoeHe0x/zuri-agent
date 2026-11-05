@@ -46,7 +46,7 @@ globalThis.chrome = {
   },
   runtime: {
     getURL(path) {
-      return `chrome-extension://qingzhou/${path}`;
+      return `chrome-extension://zuri/${path}`;
     },
     lastError: null,
   },
@@ -121,7 +121,7 @@ async function testSendsNotification() {
   assert.equal(notifications[0].options.message, "登录页面需要你确认。");
   assert.equal(notifications[0].options.priority, 1);
   assert.match(notifications[0].options.iconUrl, /icons\/icon128\.png$/);
-  assert.match(result.notificationId, /^qz_alert_session_session42_/, "alerts should retain their source Session across service-worker restarts");
+  assert.match(result.notificationId, /^zuri_alert_session_session42_/, "alerts should retain their source Session across service-worker restarts");
 }
 
 async function testDuplicateSuppression() {

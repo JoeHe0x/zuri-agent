@@ -41,8 +41,8 @@ def load_module(name: str, path: Path):
 
 BOUNDED_PATH = HERE / "study-tree-dp-bounded-actions.py"
 BOUNDARY_PATH = HERE / "study-tree-dp-readability-boundaries.py"
-BOUNDED = load_module("qingzhou_rich_boundary_bounded", BOUNDED_PATH)
-BOUNDARY = load_module("qingzhou_rich_boundary_local", BOUNDARY_PATH)
+BOUNDED = load_module("zuri_rich_boundary_bounded", BOUNDED_PATH)
+BOUNDARY = load_module("zuri_rich_boundary_local", BOUNDARY_PATH)
 
 DISTILL = BOUNDED.DISTILL
 GLOBAL_DISTILL = BOUNDED.GLOBAL_DISTILL
@@ -484,7 +484,7 @@ def main():
             }
 
     report = {
-        "schema": "qingzhou.tree-dp-rich-boundary-action-study.v1",
+        "schema": "zuri.tree-dp-rich-boundary-action-study.v1",
         "protocol": {
             "trainingSplits": ["base", "train"],
             "grouping": "siteFamily GroupKFold",

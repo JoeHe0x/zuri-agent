@@ -22,7 +22,7 @@ assert.ok(Number.isFinite(duration) && duration >= 300 && duration <= 3600);
 const stamp = new Date().toISOString().replace(/[:.]/g, "-");
 const output = join(PROJECT_ROOT, "tests/results/multi-browser", stamp);
 await mkdir(output, { recursive: true });
-const directory = await mkdtemp(join(tmpdir(), "qz-three-browsers-"));
+const directory = await mkdtemp(join(tmpdir(), "zuri-three-browsers-"));
 const registryPath = join(directory, "browsers.json");
 const report = { ok: false, startedAt: new Date().toISOString(), requestedDuration: duration, profiles: [],
   fixture: "Three real independent Chrome processes; real extension Agent, CLI and MCP. Local deterministic model and pages; no external provider or user sessions.",
@@ -38,7 +38,7 @@ async function persist() {
 async function startService(port = 0) {
   bridge = await startBridge({ port, registryPath, requestTimeoutSeconds: 30 });
   bridge.server.on("request", (request, response) => {
-    if (!request.url.startsWith("/v1/qingzhou/")) return;
+    if (!request.url.startsWith("/v1/zuri/")) return;
     const event = { at: Date.now(), path: request.url };
     report.trace.push(event);
     let body = "";
@@ -119,25 +119,25 @@ async function cli(browser, args) {
 // are normalized by the same codec used on Worker restoration; object key order is irrelevant.
 function transcript(snapshot) { return createSessionRecord([], snapshot.transcript || []).transcript; }
 async function round(browser, number) {
-  const marker = `QZ_MULTI_${browser.name.toUpperCase()}_${number}_BROWSE`;
+  const marker = `ZURI_MULTI_${browser.name.toUpperCase()}_${number}_BROWSE`;
   const created = await cli(browser, ["create", `Read the test page and summarize it. [${marker}]`, "--title", marker, "--wait"]);
   const id = created.sessionId || created.session?.id;
   assert.ok(id); browser.sessions.add(id);
   assert.equal(created.snapshot.status, "completed", JSON.stringify(created.snapshot));
   assert.ok(JSON.stringify(transcript(created.snapshot)).includes(marker));
-  const followed = await mcp(browser, "qingzhou_send_message", { sessionId: id, text: `[${marker.replace("BROWSE", "FOLLOW")}] Summarize in one line.`, wait: true });
+  const followed = await mcp(browser, "zuri_send_message", { sessionId: id, text: `[${marker.replace("BROWSE", "FOLLOW")}] Summarize in one line.`, wait: true });
   assert.equal(followed.snapshot.status, "completed");
   const content = JSON.stringify(transcript(followed.snapshot));
   assert.ok(content.includes(marker.replace("BROWSE", "FOLLOW")));
   for (const other of browsers.filter(item => item !== browser)) {
-    assert.ok(!content.includes(`QZ_MULTI_${other.name.toUpperCase()}_`), "cross-profile transcript contamination");
+    assert.ok(!content.includes(`ZURI_MULTI_${other.name.toUpperCase()}_`), "cross-profile transcript contamination");
   }
-  const tabs = await mcp(browser, "qingzhou_execute_tool", { sessionId: id, name: "list_tabs", args: {}, wait: true });
+  const tabs = await mcp(browser, "zuri_execute_tool", { sessionId: id, name: "list_tabs", args: {}, wait: true });
   const list = Array.isArray(tabs.result) ? tabs.result : tabs.result?.tabs || [];
   for (const tab of list.filter(item => item.url?.startsWith(fixture.endpoint))) {
-    await mcp(browser, "qingzhou_execute_tool", { sessionId: id, name: "close_tab", args: { tabId: tab.id }, wait: true });
+    await mcp(browser, "zuri_execute_tool", { sessionId: id, name: "close_tab", args: { tabId: tab.id }, wait: true });
   }
-  browser.histories.set(id, transcript(await mcp(browser, "qingzhou_get_session_snapshot", { sessionId: id, compact: false, tail: false, includeArtifacts: false })));
+  browser.histories.set(id, transcript(await mcp(browser, "zuri_get_session_snapshot", { sessionId: id, compact: false, tail: false, includeArtifacts: false })));
 }
 async function scenario(name, work) {
   const at = Date.now(); progress(name);
@@ -171,14 +171,14 @@ try {
       assert.equal(again.result.connected, true);
       await browser.closeExtensionPages(); await browser.detach();
     } else await connect(browser);
-    browser.initialSessions = new Set((await mcp(browser, "qingzhou_list_sessions", { limit: 500 })).sessions.map(session => session.id));
+    browser.initialSessions = new Set((await mcp(browser, "zuri_list_sessions", { limit: 500 })).sessions.map(session => session.id));
     await screenshotSettings(browser);
     report.profiles.push({ name, uuid: browser.uuid, version: browser.version });
   }
   assert.equal(new Set(browsers.map(browser => browser.uuid)).size, 3);
   assert.equal((await readHealth(bridge.endpoint)).status.clientCount, 3);
   assert.ok(!JSON.stringify(await readHealth(bridge.endpoint)).includes("pairingToken"));
-  await assert.rejects(callTool(bridge.endpoint, "qingzhou_list_sessions", {}), /select|multiple|client|browser/i);
+  await assert.rejects(callTool(bridge.endpoint, "zuri_list_sessions", {}), /select|multiple|client|browser/i);
   startTime = Date.now();
   heartbeat = setInterval(() => progress("heartbeat", { operations: report.operations.length }), 30000);
   await scenario("concurrent-tasks-and-followups", () => Promise.all(browsers.map(browser => round(browser, 0))));
@@ -187,7 +187,7 @@ try {
     assert.equal((await settings(browser, "mcp_connection_disconnect")).ok, true);
     await browser.closeExtensionPages(); await browser.detach();
     const disconnectedAt = Date.now();
-    await assert.rejects(callTool(bridge.endpoint, "qingzhou_list_sessions", { clientId: browser.uuid }), /offline|disconnected|not.*connect/i);
+    await assert.rejects(callTool(bridge.endpoint, "zuri_list_sessions", { clientId: browser.uuid }), /offline|disconnected|not.*connect/i);
     await Promise.all([round(browsers[0], 1), round(browsers[2], 1)]);
     assert.equal(report.trace.filter(event => event.at > disconnectedAt && event.clientId === browser.uuid && /poll|pair/.test(event.path)).length, 0);
     await connect(browser);
@@ -224,18 +224,18 @@ try {
   await scenario("inventory-over-default-limit-and-history-integrity", async () => {
     const browser = browsers[0];
     while (browser.sessions.size < 105) {
-      const created = await mcp(browser, "qingzhou_create_session", { title: `inventory-${browser.sessions.size}` });
+      const created = await mcp(browser, "zuri_create_session", { title: `inventory-${browser.sessions.size}` });
       browser.sessions.add(created.session.id);
     }
     for (const browser of browsers) {
       // list_sessions has a documented 500 cap and defaults to 100; this fixture remains below the cap.
       assert.ok(browser.sessions.size < 500);
-      const inventory = await mcp(browser, "qingzhou_list_sessions", { limit: 500 });
+      const inventory = await mcp(browser, "zuri_list_sessions", { limit: 500 });
       const expected = [...new Set([...browser.initialSessions, ...browser.sessions])].sort();
       const actual = inventory.sessions.map(session => session.id).sort();
       assert.deepEqual(actual, expected);
       for (const [sessionId, expectedHistory] of browser.histories) {
-        const snapshot = await mcp(browser, "qingzhou_get_session_snapshot", { sessionId, compact: false, tail: false, includeArtifacts: false });
+        const snapshot = await mcp(browser, "zuri_get_session_snapshot", { sessionId, compact: false, tail: false, includeArtifacts: false });
         assert.deepEqual(transcript(snapshot), expectedHistory, `${browser.name} ${sessionId} history must survive reconnection`);
       }
     }

@@ -17,12 +17,12 @@ import { normalizeModernSkill } from "../../src/shared/skills/skill-utils.js";
 import { readCheckpointRecord } from "../../src/shared/session/session-recovery.js";
 
 const root = dirname(dirname(dirname(fileURLToPath(import.meta.url))));
-const akFile = String(process.env.QINGZHOU_DEEPSEEK_AK_FILE || "").trim();
-const model = String(process.env.QINGZHOU_DEEPSEEK_MODEL || "deepseek-v4-flash").trim();
+const akFile = String(process.env.ZURI_DEEPSEEK_AK_FILE || "").trim();
+const model = String(process.env.ZURI_DEEPSEEK_MODEL || "deepseek-v4-flash").trim();
 
 const apiKey = readTestApiKey("deepseek", { keyFile: akFile, required: false });
 if (!apiKey) {
-  console.log("deepseek extension live e2e skipped: set DEEPSEEK_API_KEY in .env.local or QINGZHOU_DEEPSEEK_AK_FILE");
+  console.log("deepseek extension live e2e skipped: set DEEPSEEK_API_KEY in .env.local or ZURI_DEEPSEEK_AK_FILE");
   process.exit(0);
 }
 const extensionPath = await ensureTestExtension();
@@ -31,7 +31,7 @@ const { chromium } = await import("playwright");
 const executablePath = findChromeExecutable(chromium.executablePath());
 if (!executablePath) throw new Error("Chrome executable not found");
 
-const profile = mkdtempSync(join(tmpdir(), "qingzhou-deepseek-live-"));
+const profile = mkdtempSync(join(tmpdir(), "zuri-deepseek-live-"));
 let context, page;
 const diagnostics = [];
 const externalDiagnostics = [];
@@ -39,7 +39,7 @@ const report = { ok: false, provider: "deepseek", model, scenarios: {} };
 let currentCase = "setup";
 
 async function runSelected(name, operation) {
-  const selected = String(process.env.QINGZHOU_LIVE_CASES || "").split(",").filter(Boolean);
+  const selected = String(process.env.ZURI_LIVE_CASES || "").split(",").filter(Boolean);
   if (selected.length && !selected.includes(name)) return { skipped: true };
   currentCase = name;
   const result = await operation();
@@ -51,7 +51,7 @@ async function runSelected(name, operation) {
 try {
   context = await chromium.launchPersistentContext(profile, {
     locale: "zh-CN",
-    headless: process.env.QINGZHOU_LIVE_HEADLESS === "1",
+    headless: process.env.ZURI_LIVE_HEADLESS === "1",
     executablePath,
     ignoreDefaultArgs: ["--disable-extensions"],
     viewport: { width: 980, height: 860 },
@@ -91,9 +91,9 @@ try {
   await installHarness(page);
 
   await saveDeepSeekConfig(page, apiKey, model);
-  if (process.env.QINGZHOU_LIVE_SESSION_MANAGEMENT === "1") {
+  if (process.env.ZURI_LIVE_SESSION_MANAGEMENT === "1") {
     currentCase = "sessionManagement";
-    const result = await runSessionManagementCases({ extended: process.env.QINGZHOU_LIVE_SESSION_MANAGEMENT_EXTENDED === "1", page, createSession, deleteSession, runPrompt, eventCount, eventsSince, waitEvent, requestWithoutId, send, historyMessages, messageText });
+    const result = await runSessionManagementCases({ extended: process.env.ZURI_LIVE_SESSION_MANAGEMENT_EXTENDED === "1", page, createSession, deleteSession, runPrompt, eventCount, eventsSince, waitEvent, requestWithoutId, send, historyMessages, messageText });
     report.sessionManagement = result;
     console.log(JSON.stringify({ ok: true, provider: "deepseek", model, sessionManagement: result }, null, 2));
   } else {
@@ -120,33 +120,33 @@ try {
 
     const userWait = await runSelected("userWait", () => assertUserWaitLifecycle(page));
 
-    const skillSelection = String(process.env.QINGZHOU_LIVE_CASES || "").split(",").includes("skillSelection")
+    const skillSelection = String(process.env.ZURI_LIVE_CASES || "").split(",").includes("skillSelection")
       ? await runSelected("skillSelection", () => assertSkillSelection(page)) : { skipped: true };
 
     const editRerun = await runSelected("editRerun", () => assertEditAndRerun(page));
-    const pageBatch = String(process.env.QINGZHOU_LIVE_CASES || "").split(",").includes("pageBatch")
+    const pageBatch = String(process.env.ZURI_LIVE_CASES || "").split(",").includes("pageBatch")
       ? await runSelected("pageBatch", () => runPageBatchCase({ page, createSession, deleteSession, runPrompt, historyMessages,
         recordEvidence: evidence => { report.scenarios.pageBatch = evidence; } })) : { skipped: true };
 
-    const streamUi = String(process.env.QINGZHOU_LIVE_CASES || "").split(",").includes("streamUi")
+    const streamUi = String(process.env.ZURI_LIVE_CASES || "").split(",").includes("streamUi")
       ? await runSelected("streamUi", () => runStreamUiJourneys({ page, createSession, deleteSession, runPrompt, historyMessages,
-        output: dirname(resolve(process.env.QINGZHOU_LIVE_REPORT || "tests/results/live-ui/report.json")),
+        output: dirname(resolve(process.env.ZURI_LIVE_REPORT || "tests/results/live-ui/report.json")),
         recordEvidence: evidence => { report.scenarios.streamUi = evidence; } })) : { skipped: true };
 
-    if (String(process.env.QINGZHOU_LIVE_CASES || "").split(",").includes("tableReveal")) {
+    if (String(process.env.ZURI_LIVE_CASES || "").split(",").includes("tableReveal")) {
       await runSelected("tableReveal", () => runTableRevealJourneys({ page, createSession, deleteSession, runPrompt, historyMessages,
-        output: dirname(resolve(process.env.QINGZHOU_LIVE_REPORT || "tests/results/live-table-reveal/report.json")),
+        output: dirname(resolve(process.env.ZURI_LIVE_REPORT || "tests/results/live-table-reveal/report.json")),
         recordEvidence: evidence => { report.scenarios.tableReveal = evidence; } }));
     }
 
-    const tabReferences = String(process.env.QINGZHOU_LIVE_CASES || "").split(",").includes("tabReferences")
+    const tabReferences = String(process.env.ZURI_LIVE_CASES || "").split(",").includes("tabReferences")
       ? await runSelected("tabReferences", () => runTabReferenceJourneys({ page, createSession, deleteSession, runPrompt, historyMessages,
-        output: dirname(resolve(process.env.QINGZHOU_LIVE_REPORT || "tests/results/live-tabref/report.json")),
+        output: dirname(resolve(process.env.ZURI_LIVE_REPORT || "tests/results/live-tabref/report.json")),
         recordEvidence: evidence => { report.scenarios.tabReferences = evidence; } })) : { skipped: true };
 
-    const tabReferencesDiverse = String(process.env.QINGZHOU_LIVE_CASES || "").split(",").includes("tabReferencesDiverse")
+    const tabReferencesDiverse = String(process.env.ZURI_LIVE_CASES || "").split(",").includes("tabReferencesDiverse")
       ? await runSelected("tabReferencesDiverse", () => runDiverseTabReferenceJourneys({ page, createSession, deleteSession, runPrompt, historyMessages,
-        output: dirname(resolve(process.env.QINGZHOU_LIVE_REPORT || "tests/results/live-tabref-diverse/report.json")),
+        output: dirname(resolve(process.env.ZURI_LIVE_REPORT || "tests/results/live-tabref-diverse/report.json")),
         recordEvidence: evidence => { report.scenarios.tabReferencesDiverse = evidence; } })) : { skipped: true };
 
 
@@ -182,13 +182,13 @@ try {
   report.failedCase = currentCase;
   report.error = redact(error?.stack || error?.message || String(error), apiKey);
   report.diagnostics = diagnostics;
-  report.recentEvents = await page?.evaluate(() => window.__qzLiveHarness?.eventsSince(0).slice(-80)).catch(() => []);
+  report.recentEvents = await page?.evaluate(() => window.__zuriLiveHarness?.eventsSince(0).slice(-80)).catch(() => []);
   console.error(report.error);
   process.exitCode = 1;
 } finally {
   await context?.close().catch(() => undefined);
   rmSync(profile, { recursive: true, force: true });
-  if (process.env.QINGZHOU_LIVE_REPORT) writeFileSync(process.env.QINGZHOU_LIVE_REPORT, redact(JSON.stringify(report, null, 2), apiKey));
+  if (process.env.ZURI_LIVE_REPORT) writeFileSync(process.env.ZURI_LIVE_REPORT, redact(JSON.stringify(report, null, 2), apiKey));
 }
 
 async function saveDeepSeekConfig(page, key, selectedModel) {
@@ -223,7 +223,7 @@ async function assertInvalidKeyFailureAndRecovery(page, selectedModel) {
   try {
     await saveDeepSeekConfig(page, "invalid-test-key", selectedModel);
     const after = await eventCount(page);
-    await send(page, "prompt", { sessionId, text: "不要调用工具。只回复 QZ_INVALID_KEY_BAD。", clientMessageId: id("invalid-key") });
+    await send(page, "prompt", { sessionId, text: "不要调用工具。只回复 ZURI_INVALID_KEY_BAD。", clientMessageId: id("invalid-key") });
     const error = await waitEvent(page, { type: "error", sessionId }, after, 90_000);
     assert.equal(error.kind, "auth");
     assert.equal(error.status, 401);
@@ -232,8 +232,8 @@ async function assertInvalidKeyFailureAndRecovery(page, selectedModel) {
     assert.equal(failed.status, "error");
     assert.equal((await eventsSince(page, after)).filter(event => event.type === "llm_retry" && event.sessionId === sessionId).length, 0, "invalid credentials must not retry");
     await saveDeepSeekConfig(page, apiKey, selectedModel);
-    const recovered = await runPrompt(page, sessionId, "不要调用工具。只回复 QZ_KEY_RECOVERED_OK。");
-    assert.match(recovered.assistantText, /QZ_KEY_RECOVERED_OK/);
+    const recovered = await runPrompt(page, sessionId, "不要调用工具。只回复 ZURI_KEY_RECOVERED_OK。");
+    assert.match(recovered.assistantText, /ZURI_KEY_RECOVERED_OK/);
     const state = await requestWithoutId(page, "get_state", { sessionId }, "state", 20_000, { sessionId });
     assert.equal(state.status, "completed");
     return { emptyKeyPreservedConfig: true, invalidKeyStatus: error.status, invalidKeyKind: error.kind, recovered: true };
@@ -245,8 +245,8 @@ async function assertInvalidKeyFailureAndRecovery(page, selectedModel) {
 
 async function assertBasicStreaming(page) {
   const sessionId = await createSession(page, "DeepSeek live basic");
-  const result = await runPrompt(page, sessionId, "不要调用工具。只回复精确文本 QZ_DEEPSEEK_OK。", { timeoutMs: 90_000 });
-  assert.match(result.assistantText, /QZ_DEEPSEEK_OK/);
+  const result = await runPrompt(page, sessionId, "不要调用工具。只回复精确文本 ZURI_DEEPSEEK_OK。", { timeoutMs: 90_000 });
+  assert.match(result.assistantText, /ZURI_DEEPSEEK_OK/);
   assert.ok(result.updateCount > 0, "real provider response should arrive through message_update events");
   await deleteSession(page, sessionId);
   return { updateCount: result.updateCount, assistantChars: result.assistantText.length };
@@ -257,7 +257,7 @@ async function assertToolRoundTrip(page) {
   const after = await eventCount(page);
   await send(page, "prompt", {
     sessionId,
-    text: "必须调用 list_tabs 工具一次，不要调用其他工具。拿到结果后只回复 QZ_TOOL_OK 和标签页数量。",
+    text: "必须调用 list_tabs 工具一次，不要调用其他工具。拿到结果后只回复 ZURI_TOOL_OK 和标签页数量。",
     clientMessageId: id("tool-user"),
   });
   const started = await waitEvent(page, { type: "tool_execution_start", sessionId, toolName: "list_tabs" }, after, 90_000);
@@ -265,7 +265,7 @@ async function assertToolRoundTrip(page) {
   assert.equal(ended.isError, false);
   await waitEvent(page, { type: "agent_end", sessionId }, after, 90_000);
   const assistantText = await latestAssistantText(page, sessionId);
-  assert.match(assistantText, /QZ_TOOL_OK/);
+  assert.match(assistantText, /ZURI_TOOL_OK/);
   await deleteSession(page, sessionId);
   return { toolName: started.toolName, assistantChars: assistantText.length };
 }
@@ -277,8 +277,8 @@ async function assertConcurrentSessions(page) {
   ]);
   const after = await eventCount(page);
   await Promise.all([
-    send(page, "prompt", { sessionId: left, text: "不要调用工具，只回复 QZ_PARALLEL_A。", clientMessageId: id("parallel-a") }),
-    send(page, "prompt", { sessionId: right, text: "不要调用工具，只回复 QZ_PARALLEL_B。", clientMessageId: id("parallel-b") }),
+    send(page, "prompt", { sessionId: left, text: "不要调用工具，只回复 ZURI_PARALLEL_A。", clientMessageId: id("parallel-a") }),
+    send(page, "prompt", { sessionId: right, text: "不要调用工具，只回复 ZURI_PARALLEL_B。", clientMessageId: id("parallel-b") }),
   ]);
   await Promise.all([
     waitEvent(page, { type: "agent_end", sessionId: left }, after, 90_000),
@@ -288,8 +288,8 @@ async function assertConcurrentSessions(page) {
     latestAssistantText(page, left),
     latestAssistantText(page, right),
   ]);
-  assert.match(leftText, /QZ_PARALLEL_A/);
-  assert.match(rightText, /QZ_PARALLEL_B/);
+  assert.match(leftText, /ZURI_PARALLEL_A/);
+  assert.match(rightText, /ZURI_PARALLEL_B/);
   const [leftState, rightState] = await Promise.all([
     requestWithoutId(page, "get_state", { sessionId: left }, "state", 20_000, { sessionId: left }),
     requestWithoutId(page, "get_state", { sessionId: right }, "state", 20_000, { sessionId: right }),
@@ -327,7 +327,7 @@ async function assertPendingStartStop(page) {
   try {
     await send(page, "prompt", {
       sessionId,
-      text: "不要调用工具，只回复 QZ_PENDING_SHOULD_NOT_RUN。",
+      text: "不要调用工具，只回复 ZURI_PENDING_SHOULD_NOT_RUN。",
       clientMessageId: id("pending-stop"),
     });
     const pending = await waitForRuntimeStatus(page, sessionId, "pending", 20_000);
@@ -337,7 +337,7 @@ async function assertPendingStartStop(page) {
     await page.waitForTimeout(1_000);
     const events = await eventsSince(page, after);
     assert.equal(events.some(event => event.type === "agent_start" && event.sessionId === sessionId), false);
-    assert.equal(JSON.stringify(await readActiveConversation(page, sessionId)).includes("QZ_PENDING_SHOULD_NOT_RUN"), false);
+    assert.equal(JSON.stringify(await readActiveConversation(page, sessionId)).includes("ZURI_PENDING_SHOULD_NOT_RUN"), false);
   } finally {
     await setDynamicContextDelay(page, 0);
   }
@@ -386,7 +386,7 @@ async function assertStopRestartHandoff(page) {
     type: "prompt",
     payload: {
       sessionId,
-      text: "不要调用工具，只回复精确文本 QZ_AFTER_STOP_OK。",
+      text: "不要调用工具，只回复精确文本 ZURI_AFTER_STOP_OK。",
       clientMessageId: id("handoff-new"),
     },
   });
@@ -394,7 +394,7 @@ async function assertStopRestartHandoff(page) {
   const newStart = await waitEventExcludingRun(page, { type: "agent_start", sessionId }, oldStart.runId, raceAfter, 90_000);
   await waitEvent(page, { type: "agent_end", sessionId, runId: newStart.runId }, raceAfter, 90_000);
   assert.notEqual(newStart.runId, oldStart.runId);
-  assert.match(await latestAssistantText(page, sessionId), /QZ_AFTER_STOP_OK/);
+  assert.match(await latestAssistantText(page, sessionId), /ZURI_AFTER_STOP_OK/);
   await page.waitForTimeout(1_000);
   const lateEvents = (await eventsSince(page, stopBoundary.eventIndex))
     .filter(event => event.sessionId === sessionId && event.runId === oldStart.runId && event.type === "message_update");
@@ -402,7 +402,7 @@ async function assertStopRestartHandoff(page) {
   const persistedRuntime = await readRuntimeCheckpoint(page, sessionId);
   assert.equal(persistedRuntime.status, "completed");
   assert.equal(persistedRuntime.runId, newStart.runId);
-  assert.equal(JSON.stringify(await readActiveConversation(page, sessionId)).includes("QZ_AFTER_STOP_OK"), true);
+  assert.equal(JSON.stringify(await readActiveConversation(page, sessionId)).includes("ZURI_AFTER_STOP_OK"), true);
   await deleteSession(page, sessionId);
   return { oldRunRevoked: true, newRunCompleted: true, lateUpdates: 0 };
 }
@@ -432,7 +432,7 @@ async function assertDeleteRunningSession(page) {
   assert.equal(persisted.checkpoint, undefined);
   const rejected = await requestEither(page, "prompt", {
     sessionId,
-    text: "不要调用工具，只回复 QZ_DELETED_BAD。",
+    text: "不要调用工具，只回复 ZURI_DELETED_BAD。",
     clientMessageId: id("deleted-rejected"),
   }, ["error", "request_failed", "transport_error"], 20_000);
   assert.match(rejected.message || "", /session not found|任务不存在/i);
@@ -441,8 +441,8 @@ async function assertDeleteRunningSession(page) {
 
 async function assertServiceWorkerRestart(browserContext, extensionId) {
   const sessionId = await createSession(page, "DeepSeek worker restart");
-  const memoryMarker = id("QZ_TRIP_MEMORY");
-  const completedMarker = id("QZ_NEW_FACT_SAVED");
+  const memoryMarker = id("ZURI_TRIP_MEMORY");
+  const completedMarker = id("ZURI_NEW_FACT_SAVED");
   const thirdMessageId = id("worker-restart-checkpoint");
   const noticeText = "运行已中断，已恢复保存的对话。发送消息可继续。";
   const evidence = { sessionId, turns: [], requests: [], screenshots: [] };
@@ -470,7 +470,7 @@ async function assertServiceWorkerRestart(browserContext, extensionId) {
     }, completedMarker), true, "the notice must follow the recovered third-turn answer");
   };
   const screenshot = async name => {
-    const directory = dirname(resolve(process.env.QINGZHOU_LIVE_REPORT || "tests/results/deepseek-recovery/report.json"));
+    const directory = dirname(resolve(process.env.ZURI_LIVE_REPORT || "tests/results/deepseek-recovery/report.json"));
     mkdirSync(directory, { recursive: true });
     const path = join(directory, `worker-restart-${name}.png`);
     await page.screenshot({ path });
@@ -570,11 +570,11 @@ async function assertServiceWorkerRestart(browserContext, extensionId) {
     evidence.requestsAfterRecovery = evidence.requests.length;
     assert.equal(evidence.requestsAfterRecovery, evidence.requestsBeforeRestart, "reopening, reload and session switches must not resend model requests");
 
-    const finalPrompt = "继续本对话，不调用任何工具。请从此前对话回忆：第一轮的目的地、预算、唯一记忆标签；第二轮计划共几天；第三轮新增的饮食限制和返店时限。简短列出以上信息，以 QZ_AFTER_WORKER_RESTART_OK 开头。";
+    const finalPrompt = "继续本对话，不调用任何工具。请从此前对话回忆：第一轮的目的地、预算、唯一记忆标签；第二轮计划共几天；第三轮新增的饮食限制和返店时限。简短列出以上信息，以 ZURI_AFTER_WORKER_RESTART_OK 开头。";
     const continuation = await runPrompt(page, sessionId, finalPrompt);
     evidence.turns.push({ user: finalPrompt, assistant: continuation.assistantText, runId: continuation.runId });
     assert.ok(evidence.requests.length > evidence.requestsAfterRecovery, "continuation must reach the real provider");
-    for (const text of ["QZ_AFTER_WORKER_RESTART_OK", "京都", "8000", memoryMarker, "花生"]) assert.ok(continuation.assistantText.includes(text), `continuation must recall ${text}`);
+    for (const text of ["ZURI_AFTER_WORKER_RESTART_OK", "京都", "8000", memoryMarker, "花生"]) assert.ok(continuation.assistantText.includes(text), `continuation must recall ${text}`);
     assert.match(continuation.assistantText, /三[日天]|3\s*[日天]/u);
     assert.match(continuation.assistantText, /17[:：]00|17\s*点|下午\s*[5五]\s*点/u);
     const finalRuntime = await readRuntimeCheckpoint(page, sessionId);
@@ -620,13 +620,13 @@ async function assertFollowUpHandoff(page) {
   const after = await eventCount(page);
   await send(page, "prompt", {
     sessionId,
-    text: "不要调用工具。先只回复 QZ_QUEUE_FIRST。",
+    text: "不要调用工具。先只回复 ZURI_QUEUE_FIRST。",
     clientMessageId: id("queue-first"),
   });
   const firstStart = await waitEvent(page, { type: "agent_start", sessionId }, after, 90_000);
   await send(page, "follow_up", {
     sessionId,
-    text: "不要调用工具。只回复 QZ_QUEUE_SECOND。",
+    text: "不要调用工具。只回复 ZURI_QUEUE_SECOND。",
     clientMessageId: id("queue-second"),
   });
   const firstEnd = await waitEvent(page, { type: "agent_end", sessionId, runId: firstStart.runId }, after, 90_000);
@@ -634,8 +634,8 @@ async function assertFollowUpHandoff(page) {
   await waitEvent(page, { type: "agent_end", sessionId, runId: secondStart.runId }, after, 90_000);
   const history = await historyMessages(page, sessionId);
   const assistantText = history.filter(message => message.role === "assistant").map(messageText).join("\n");
-  assert.match(assistantText, /QZ_QUEUE_FIRST/);
-  assert.match(assistantText, /QZ_QUEUE_SECOND/);
+  assert.match(assistantText, /ZURI_QUEUE_FIRST/);
+  assert.match(assistantText, /ZURI_QUEUE_SECOND/);
   assert.notEqual(firstStart.runId, secondStart.runId);
   await deleteSession(page, sessionId);
   return { runs: 2 };
@@ -646,7 +646,7 @@ async function assertUserWaitLifecycle(page) {
   const after = await eventCount(page);
   await send(page, "prompt", {
     sessionId,
-    text: "必须调用 wait_for_user 一次，message 写 QZ_WAIT_FOR_USER。用户继续后，只回复精确文本 QZ_WAIT_RESUMED_OK。",
+    text: "必须调用 wait_for_user 一次，message 写 ZURI_WAIT_FOR_USER。用户继续后，只回复精确文本 ZURI_WAIT_RESUMED_OK。",
     clientMessageId: id("wait-user"),
   });
   const waiting = await waitEvent(page, { type: "waiting_for_user", sessionId }, after, 90_000);
@@ -665,7 +665,7 @@ async function assertUserWaitLifecycle(page) {
     waitId: waiting.waitId,
   }, after, 20_000);
   await waitEvent(page, { type: "agent_end", sessionId }, after, 90_000);
-  assert.match(await latestAssistantText(page, sessionId), /QZ_WAIT_RESUMED_OK/);
+  assert.match(await latestAssistantText(page, sessionId), /ZURI_WAIT_RESUMED_OK/);
   const finalState = await requestWithoutId(page, "get_state", { sessionId }, "state", 20_000, { sessionId });
   assert.equal(finalState.status, "completed");
   assert.equal(finalState.runtime?.waitId || "", "");
@@ -679,25 +679,25 @@ async function assertEditAndRerun(page) {
   const firstAfter = await eventCount(page);
   await send(page, "prompt", {
     sessionId,
-    text: "不要调用工具，只回复精确文本 QZ_EDIT_OLD。",
+    text: "不要调用工具，只回复精确文本 ZURI_EDIT_OLD。",
     clientMessageId,
   });
   await waitEvent(page, { type: "agent_end", sessionId }, firstAfter, 90_000);
-  assert.match(await latestAssistantText(page, sessionId), /QZ_EDIT_OLD/);
+  assert.match(await latestAssistantText(page, sessionId), /ZURI_EDIT_OLD/);
 
   const rerunAfter = await eventCount(page);
   await send(page, "resend_prompt", {
     sessionId,
     clientMessageId,
-    text: "不要调用工具，只回复精确文本 QZ_EDIT_NEW。",
+    text: "不要调用工具，只回复精确文本 ZURI_EDIT_NEW。",
     images: [],
   });
   await waitEvent(page, { type: "transcript_replace", sessionId }, rerunAfter, 20_000);
   await waitEvent(page, { type: "agent_end", sessionId }, rerunAfter, 90_000);
   const history = await historyMessages(page, sessionId);
   const text = history.map(messageText).join("\n");
-  assert.match(text, /QZ_EDIT_NEW/);
-  assert.doesNotMatch(text, /QZ_EDIT_OLD/, "edit-and-rerun must replace the old branch instead of appending a second branch");
+  assert.match(text, /ZURI_EDIT_NEW/);
+  assert.doesNotMatch(text, /ZURI_EDIT_OLD/, "edit-and-rerun must replace the old branch instead of appending a second branch");
   const runtime = await readRuntimeCheckpoint(page, sessionId);
   assert.equal(runtime.status, "completed");
   await deleteSession(page, sessionId);
@@ -741,11 +741,11 @@ async function assertSkillSelection(page) {
     assert.deepEqual(waiting.form.fields[0].options.map(option => option.value), ["northstar-backend", ...selectedIds]);
     const card = page.locator(`.waiting-active[data-wait-id="${waiting.waitId}"]`);
     await card.waitFor();
-    assert.equal(await card.locator(".qz-choice-card").count(), 3);
+    assert.equal(await card.locator(".zuri-choice-card").count(), 3);
     const callsBeforeSelection = providerRequests.length;
     for (const value of selectedIds) await card.locator(`input[value="${value}"]`).check();
     assert.equal(providerRequests.length, callsBeforeSelection, "choosing cards stays local until submission");
-    const screenshotDirectory = process.env.QINGZHOU_LIVE_REPORT ? dirname(resolve(process.env.QINGZHOU_LIVE_REPORT)) : "";
+    const screenshotDirectory = process.env.ZURI_LIVE_REPORT ? dirname(resolve(process.env.ZURI_LIVE_REPORT)) : "";
     const screenshots = [];
     if (screenshotDirectory) {
       const screenshot = join(screenshotDirectory, "selection-live-waiting.png");
@@ -924,7 +924,7 @@ async function installHarness(page) {
       const message = await pending;
       return { message, eventIndex: events.length };
     };
-    window.__qzLiveHarness = {
+    window.__zuriLiveHarness = {
       send,
       wait,
       request,
@@ -942,19 +942,19 @@ async function installHarness(page) {
 
 function request(page, type, payload, responseType, timeoutMs = 30_000) {
   return page.evaluate(({ type, payload, responseType, timeoutMs }) => (
-    window.__qzLiveHarness.request(type, payload, responseType, timeoutMs)
+    window.__zuriLiveHarness.request(type, payload, responseType, timeoutMs)
   ), { type, payload, responseType, timeoutMs });
 }
 
 function requestEither(page, type, payload, responseTypes, timeoutMs = 30_000) {
   return page.evaluate(({ type, payload, responseTypes, timeoutMs }) => (
-    window.__qzLiveHarness.request(type, payload, responseTypes[0], timeoutMs, responseTypes)
+    window.__zuriLiveHarness.request(type, payload, responseTypes[0], timeoutMs, responseTypes)
   ), { type, payload, responseTypes, timeoutMs });
 }
 
 function requestThenSend(page, requestInput, nextInput) {
   return page.evaluate(({ requestInput, nextInput }) => (
-    window.__qzLiveHarness.requestThenSend(requestInput, nextInput)
+    window.__zuriLiveHarness.requestThenSend(requestInput, nextInput)
   ), { requestInput, nextInput });
 }
 
@@ -965,12 +965,12 @@ async function requestWithoutId(page, type, payload, responseType, timeoutMs = 3
 }
 
 function send(page, type, payload = {}) {
-  return page.evaluate(({ type, payload }) => window.__qzLiveHarness.send(type, payload), { type, payload });
+  return page.evaluate(({ type, payload }) => window.__zuriLiveHarness.send(type, payload), { type, payload });
 }
 
 function waitForRunOutput(page, sessionId, runId, after = 0, timeoutMs = 90_000) {
   return page.evaluate(({ sessionId, runId, after, timeoutMs }) => (
-    window.__qzLiveHarness.wait({}, after, timeoutMs, message => (
+    window.__zuriLiveHarness.wait({}, after, timeoutMs, message => (
       message?.sessionId === sessionId
       && message?.runId === runId
       && (message.type === "thinking_update" || message.type === "message_update")
@@ -979,7 +979,7 @@ function waitForRunOutput(page, sessionId, runId, after = 0, timeoutMs = 90_000)
 }
 
 function waitEvent(page, expected, after = 0, timeoutMs = 30_000) {
-  return page.evaluate(({ expected, after, timeoutMs }) => window.__qzLiveHarness.wait(expected, after, timeoutMs), {
+  return page.evaluate(({ expected, after, timeoutMs }) => window.__zuriLiveHarness.wait(expected, after, timeoutMs), {
     expected,
     after,
     timeoutMs,
@@ -988,7 +988,7 @@ function waitEvent(page, expected, after = 0, timeoutMs = 30_000) {
 
 function waitEventExcludingRun(page, expected, excludedRunId, after = 0, timeoutMs = 30_000) {
   return page.evaluate(({ expected, excludedRunId, after, timeoutMs }) => (
-    window.__qzLiveHarness.wait({}, after, timeoutMs, message => (
+    window.__zuriLiveHarness.wait({}, after, timeoutMs, message => (
       Object.entries(expected).every(([key, value]) => message?.[key] === value)
       && message?.runId !== excludedRunId
     ))
@@ -996,19 +996,19 @@ function waitEventExcludingRun(page, expected, excludedRunId, after = 0, timeout
 }
 
 function eventCount(page) {
-  return page.evaluate(() => window.__qzLiveHarness.count());
+  return page.evaluate(() => window.__zuriLiveHarness.count());
 }
 
 function eventsSince(page, index) {
-  return page.evaluate(index => window.__qzLiveHarness.eventsSince(index), index);
+  return page.evaluate(index => window.__zuriLiveHarness.eventsSince(index), index);
 }
 
 function matchingEventCount(page, expected, after = 0) {
-  return page.evaluate(({ expected, after }) => window.__qzLiveHarness.matchingCount(expected, after), { expected, after });
+  return page.evaluate(({ expected, after }) => window.__zuriLiveHarness.matchingCount(expected, after), { expected, after });
 }
 
 function setDynamicContextDelay(page, delayMs) {
-  return page.evaluate(delayMs => window.__qzLiveHarness.setDynamicContextDelay(delayMs), delayMs);
+  return page.evaluate(delayMs => window.__zuriLiveHarness.setDynamicContextDelay(delayMs), delayMs);
 }
 
 async function waitForRuntimeStatus(page, sessionId, expectedStatus, timeoutMs = 20_000) {

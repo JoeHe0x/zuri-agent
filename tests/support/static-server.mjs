@@ -74,7 +74,7 @@ const server = createServer((request, response) => {
 });
 
 server.listen(port, "127.0.0.1", () => {
-  console.log(`Qingzhou test server listening on http://127.0.0.1:${server.address().port}`);
+  console.log(`Zuri test server listening on http://127.0.0.1:${server.address().port}`);
 });
 
 for (const signal of ["SIGINT", "SIGTERM"]) {
@@ -97,7 +97,7 @@ function shutdown() {
 function readPort(args) {
   const inline = args.find(arg => arg.startsWith("--port="));
   const index = args.indexOf("--port");
-  const value = inline ? inline.slice("--port=".length) : index >= 0 ? args[index + 1] : process.env.QINGZHOU_TEST_PORT;
+  const value = inline ? inline.slice("--port=".length) : index >= 0 ? args[index + 1] : process.env.ZURI_TEST_PORT;
   const number = Number(value || 4173);
   if (!Number.isInteger(number) || number < 0 || number > 65535) throw new Error(`Invalid port: ${value}`);
   return number;

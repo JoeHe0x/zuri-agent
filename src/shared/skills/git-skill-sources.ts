@@ -2,7 +2,7 @@ import { PRODUCT_GIT_PLATFORMS } from "../product/git-platforms.js";
 import {
   normalizeModernSkill,
   normalizeSkillMetadata,
-  QINGZHOU_SKILL_METADATA_KEY,
+  ZURI_SKILL_METADATA_KEY,
 } from "./skill-utils.js";
 
 export const GIT_SKILL_SOURCE_STATE_KEY = "_gitSkillSources";
@@ -223,10 +223,10 @@ export function normalizeGitSkillSource(input: unknown = {}, fallbackId = "") {
 export function withGitSkillOrigin(skill: unknown = {}, source: Partial<GitSkillSource> = {}, options: { skillName?: string; importedAt?: string } = {}) {
   const normalized = normalizeModernSkill(skill);
   const metadata = normalizeSkillMetadata(normalized.metadata);
-  const qingzhou = {
-    ...(metadata[QINGZHOU_SKILL_METADATA_KEY] || {}),
+  const zuri = {
+    ...(metadata[ZURI_SKILL_METADATA_KEY] || {}),
   };
-  qingzhou.origin = {
+  zuri.origin = {
     type: GIT_SKILL_ORIGIN_TYPE,
     sourceId: String(source?.id || "").trim(),
     repositoryUrl: normalizeGitRepositoryUrl(source?.repositoryUrl),
@@ -238,14 +238,14 @@ export function withGitSkillOrigin(skill: unknown = {}, source: Partial<GitSkill
     skillName: String(options.skillName || normalized.name).trim(),
     importedAt: String(options.importedAt || source?.importedAt || "").trim(),
   };
-  metadata[QINGZHOU_SKILL_METADATA_KEY] = qingzhou;
+  metadata[ZURI_SKILL_METADATA_KEY] = zuri;
   return normalizeModernSkill({ ...normalized, metadata });
 }
 
 export function getGitSkillOrigin(input: unknown = {}) {
   const skill = objectInput(input);
   const metadata = normalizeSkillMetadata(skill?.metadata);
-  const origin = objectInput(metadata[QINGZHOU_SKILL_METADATA_KEY]?.origin);
+  const origin = objectInput(metadata[ZURI_SKILL_METADATA_KEY]?.origin);
   if (!origin || typeof origin !== "object" || String(origin.type || "").trim() !== GIT_SKILL_ORIGIN_TYPE) return null;
   const sourceId = String(origin.sourceId || "").trim();
   const repositoryUrl = normalizeGitRepositoryUrl(origin.repositoryUrl);
@@ -267,12 +267,12 @@ export function getGitSkillOrigin(input: unknown = {}) {
 export function withoutGitSkillOrigin(skill: unknown = {}, sourceId = "") {
   const normalized = normalizeModernSkill(skill);
   const metadata = normalizeSkillMetadata(normalized.metadata);
-  const qingzhou = { ...(metadata[QINGZHOU_SKILL_METADATA_KEY] || {}) };
+  const zuri = { ...(metadata[ZURI_SKILL_METADATA_KEY] || {}) };
   const origin = getGitSkillOrigin(normalized);
   if (!origin || (sourceId && origin.sourceId !== String(sourceId).trim())) return normalized;
-  delete qingzhou.origin;
-  if (Object.keys(qingzhou).length) metadata[QINGZHOU_SKILL_METADATA_KEY] = qingzhou;
-  else delete metadata[QINGZHOU_SKILL_METADATA_KEY];
+  delete zuri.origin;
+  if (Object.keys(zuri).length) metadata[ZURI_SKILL_METADATA_KEY] = zuri;
+  else delete metadata[ZURI_SKILL_METADATA_KEY];
   return normalizeModernSkill({ ...normalized, metadata });
 }
 

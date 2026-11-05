@@ -34,7 +34,7 @@ from sklearn.model_selection import GroupKFold
 HERE = Path(__file__).resolve().parent
 ACTION_PATH = HERE / "study-tree-dp-action-ranker.py"
 SPEC = importlib.util.spec_from_file_location(
-    "qingzhou_relative_action_base", ACTION_PATH
+    "zuri_relative_action_base", ACTION_PATH
 )
 if SPEC is None or SPEC.loader is None:
     raise RuntimeError(f"cannot load {ACTION_PATH}")
@@ -487,7 +487,7 @@ def main():
         print(json.dumps({"fold": fold, "summary": summary}, ensure_ascii=False), flush=True)
     summary = GLOBAL_DISTILL.summary(rows)
     report = {
-        "schema": "qingzhou.tree-dp-relative-action-study.v1",
+        "schema": "zuri.tree-dp-relative-action-study.v1",
         "protocol": {
             "trainingSplits": ["base", "train"],
             "grouping": "siteFamily",

@@ -9,7 +9,7 @@ assert.deepEqual(countLines(""), { physicalLines: 0, nonBlankLines: 0 });
 assert.deepEqual(countLines("// comment\r\n\r\nconst x = 1;"), { physicalLines: 3, nonBlankLines: 2 });
 assert.deepEqual(countLines("\n"), { physicalLines: 1, nonBlankLines: 0 });
 
-const root = mkdtempSync(path.join(os.tmpdir(), "qingzhou-source-inventory-"));
+const root = mkdtempSync(path.join(os.tmpdir(), "zuri-source-inventory-"));
 const git = (...args) => execFileSync("git", args, { cwd: root, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] }).trim();
 const write = (filename, content) => {
   const absolute = path.join(root, filename);

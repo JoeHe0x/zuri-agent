@@ -34,7 +34,7 @@ async function request(page, type, fields = {}) {
 
 test("a real offline MV3 panel discovers, configures and restores models.dev providers", async ({}, testInfo) => {
   test.setTimeout(90_000);
-  const directory = await mkdtemp(join(tmpdir(), "qingzhou-models-offline-"));
+  const directory = await mkdtemp(join(tmpdir(), "zuri-models-offline-"));
   const output = resolve("tests/results/models-dev-offline");
   const evidence = { pageErrors: [], requests: [], failedRequests: [] };
   const selectedModel = snapshot.openrouter.models["openai/gpt-4.1"];

@@ -209,15 +209,15 @@
 }
 
 .image-lightbox-close {
-  --qz-control-size: 34px;
-  --qz-control-border: var(--lightbox-border);
-  --qz-control-border-hover: var(--lightbox-border);
-  --qz-control-border-focus: var(--lightbox-border);
-  --qz-control-bg: var(--lightbox-control-surface);
-  --qz-control-bg-hover: var(--lightbox-control-surface-hover);
-  --qz-control-bg-pressed: var(--lightbox-control-surface-hover);
-  --qz-control-color: var(--lightbox-control-text);
-  --qz-control-color-hover: var(--lightbox-control-text);
+  --zuri-control-size: 34px;
+  --zuri-control-border: var(--lightbox-border);
+  --zuri-control-border-hover: var(--lightbox-border);
+  --zuri-control-border-focus: var(--lightbox-border);
+  --zuri-control-bg: var(--lightbox-control-surface);
+  --zuri-control-bg-hover: var(--lightbox-control-surface-hover);
+  --zuri-control-bg-pressed: var(--lightbox-control-surface-hover);
+  --zuri-control-color: var(--lightbox-control-text);
+  --zuri-control-color-hover: var(--lightbox-control-text);
   position: fixed;
   top: 14px;
   right: 14px;

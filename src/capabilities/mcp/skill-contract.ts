@@ -1,6 +1,6 @@
 import { modelT } from "./model-messages.js";
-export const QINGZHOU_MCP_SKILL_ID = "qingzhou-mcp";
-export const QINGZHOU_MCP_RUNTIME_PREFIX = "qingzhou_mcp";
+export const ZURI_MCP_SKILL_ID = "zuri-mcp";
+export const ZURI_MCP_RUNTIME_PREFIX = "zuri_mcp";
 
 export const MCP_TOOL_CORE_NAMES = Object.freeze([
   "mcp_inspect_server",
@@ -14,10 +14,10 @@ const MCP_TOOL_CORE_NAME_SET = new Set(MCP_TOOL_CORE_NAMES);
 export function getMcpSkillToolName(coreName = "") {
   const name = String(coreName || "").trim();
   if (!MCP_TOOL_CORE_NAME_SET.has(name)) return "";
-  return `${QINGZHOU_MCP_RUNTIME_PREFIX}__${name}`;
+  return `${ZURI_MCP_RUNTIME_PREFIX}__${name}`;
 }
 
-export const QINGZHOU_MCP_TOOL_SPECS = Object.freeze({
+export const ZURI_MCP_TOOL_SPECS = Object.freeze({
   mcp_inspect_server: Object.freeze({
     get description() { return modelT("mcpInspectServer"); },
     parameters: {

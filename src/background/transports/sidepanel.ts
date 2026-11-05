@@ -311,7 +311,7 @@ export function createSidepanelTransport(api: BackgroundApi, {
         sessionId: message.sessionId,
       });
     } catch (error) {
-      console.warn(`[轻舟] composer draft ${action} failed`, error);
+      console.warn(`[Zuri] composer draft ${action} failed`, error);
       traceMessageDelivery(message, `draft.${action}_failed`, {
         window: windowId,
         code: object(error).code || object(error).name || "ERROR",

@@ -8,6 +8,6 @@
   "browser-permissions.name.history": "история браузера",
   "browser-permissions.name.desktopCapture": "запись экрана",
   "browser-permissions.name.downloads.open": "открытие скачанных файлов",
-  "browser-permissions.required": "Предоставьте разрешение «{permission}» в боковой панели qz и повторите попытку.",
+  "browser-permissions.required": "Предоставьте разрешение «{permission}» в боковой панели zuri и повторите попытку.",
   "browser-permissions.denied": "Разрешение «{permission}» не предоставлено. Действие отменено. Повторите попытку, чтобы разрешить доступ."
 }

@@ -427,7 +427,7 @@ export function auditDiversity({ manifestPaths = [], configPaths = [], policy = 
   const manifests = manifestPaths.map(readJson);
   const configs = configPaths.map(readJson);
   const report = {
-    schema: "qingzhou.article-extraction-diversity-audit.v1",
+    schema: "zuri.article-extraction-diversity-audit.v1",
     generatedAt: new Date().toISOString(),
     sources: { manifests: manifests.map(item => item.path), configs: configs.map(item => item.path) },
     ...(configs.length ? { plan: auditPlan(configs) } : {}),

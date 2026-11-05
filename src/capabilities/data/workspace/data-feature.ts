@@ -268,10 +268,10 @@ export function createDataFeature(options: DataFeatureOptions = {}) {
   btnDataTableActions?.addEventListener("click", () => {
     const open = dataTableActionsMenu?.classList.contains("hidden");
     setDataTableActionsMenuOpen(open, { restoreFocus: false });
-    if (open) requestAnimationFrame(() => dataTableActionsMenu?.querySelector<HTMLElement>(".qz-menu-item")?.focus({ preventScroll: true }));
+    if (open) requestAnimationFrame(() => dataTableActionsMenu?.querySelector<HTMLElement>(".zuri-menu-item")?.focus({ preventScroll: true }));
   }, { signal: lifecycleSignal });
   dataTableActionsMenu?.addEventListener("click", (event) => {
-    if ((event.target instanceof Element ? event.target : null)?.closest(".qz-menu-item")) setDataTableActionsMenuOpen(false, { restoreFocus: false });
+    if ((event.target instanceof Element ? event.target : null)?.closest(".zuri-menu-item")) setDataTableActionsMenuOpen(false, { restoreFocus: false });
   }, { signal: lifecycleSignal });
   dataTableActionsMenu?.addEventListener("keydown", (event) => {
     if (event.key !== "Escape") return;
@@ -609,7 +609,7 @@ export function createDataFeature(options: DataFeatureOptions = {}) {
     setTimeout(() => {
       if (!isActive() || dataTablesLoadPromise) return;
       loadDataTables({ force: true }).catch(err => {
-        console.warn("[轻舟数据] background refresh failed", err);
+        console.warn("[Zuri数据] background refresh failed", err);
       });
     }, 0);
   }
@@ -630,12 +630,12 @@ export function createDataFeature(options: DataFeatureOptions = {}) {
     }
 
     dataTablesList.innerHTML = filteredTables.map(table => `
-      <div class="qz-menu-item data-table-item ${table.name === currentDataTable ? "active" : ""} ${isImageCollectionTable(table) ? "image-collection" : ""}" data-table="${escapeHtmlAttribute(table.name)}" title="${escapeHtmlAttribute(table.name)}">
+      <div class="zuri-menu-item data-table-item ${table.name === currentDataTable ? "active" : ""} ${isImageCollectionTable(table) ? "image-collection" : ""}" data-table="${escapeHtmlAttribute(table.name)}" title="${escapeHtmlAttribute(table.name)}">
         <button class="data-table-select" data-table="${escapeHtmlAttribute(table.name)}" title="${escapeHtmlAttribute(table.name)}">
           <span class="data-table-name" title="${escapeHtmlAttribute(table.name)}">${escapeHtml(table.name)}</span>
           <span class="data-table-meta">${isImageCollectionTable(table) ? t("imageCollection") : ""}${escapeHtml(t(isImageCollectionTable(table) ? "imageCount" : "rowCount", { count: Number(table.count || 0) }))} · ${escapeHtml(formatDataTableDate(table.createdAt))}</span>
         </button>
-        <button class="qz-icon-btn qz-icon-btn--xs qz-icon-btn--danger data-table-delete" data-table="${escapeHtmlAttribute(table.name)}" title="${escapeHtmlAttribute(t("deleteTable"))}">
+        <button class="zuri-icon-btn zuri-icon-btn--xs zuri-icon-btn--danger data-table-delete" data-table="${escapeHtmlAttribute(table.name)}" title="${escapeHtmlAttribute(t("deleteTable"))}">
           <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
         </button>
       </div>
@@ -791,7 +791,7 @@ export function createDataFeature(options: DataFeatureOptions = {}) {
     const shownRows = isImageCollection ? rows.slice(0, DATA_PREVIEW_RENDER_LIMIT) : rows;
     const metaText = t("total", { count: String(total), unit: String(unit), loaded: String(loaded), filtered: String(filtered), action: String(isImageCollection ? t("preview") : t("show")), shown: String(shownRows.length) });
     dataPreview.classList.toggle("grid-mode", !isImageCollection);
-    dataPreview.classList.toggle("qz-scroll--native", !isImageCollection);
+    dataPreview.classList.toggle("zuri-scroll--native", !isImageCollection);
     if (isImageCollection) {
       dataGridAdapter.destroy();
       dataImageCollection.renderInto(shownRows);

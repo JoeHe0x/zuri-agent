@@ -120,7 +120,7 @@ test("XLSX defaults to its first sheet, supports legacy sheetName, and ignores m
     title: "Workbook",
     sheets: [
       { name: "Apps", columns: ["name"], rows: [{ name: "A" }, { name: "B" }] },
-      { name: "Owners", columns: ["owner"], rows: [{ owner: "Qingzhou" }] },
+      { name: "Owners", columns: ["owner"], rows: [{ owner: "Zuri" }] },
     ],
     blocks: [
       { type: "heading", level: 2, text: "Apps" },
@@ -135,7 +135,7 @@ test("XLSX defaults to its first sheet, supports legacy sheetName, and ignores m
 
   const owners = projectDocumentRead(model, { sheetName: "owners" });
   assert.equal(owners.tableId, "sheet:1");
-  assert.deepEqual(owners.rows, [{ owner: "Qingzhou" }]);
+  assert.deepEqual(owners.rows, [{ owner: "Zuri" }]);
 });
 
 test("table pages shrink to the result budget without losing the continuation cursor", () => {

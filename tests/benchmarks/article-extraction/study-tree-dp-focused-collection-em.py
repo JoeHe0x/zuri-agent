@@ -60,11 +60,11 @@ def load_module(name: str, path: Path):
 
 
 DISTILL = load_module(
-    "qingzhou_focused_collection_distill",
+    "zuri_focused_collection_distill",
     HERE / "study-tree-dp-candidate-distillation.py",
 )
 SINGLE = load_module(
-    "qingzhou_focused_collection_readability_proposal",
+    "zuri_focused_collection_readability_proposal",
     HERE / "study-tree-dp-single-root-structured.py",
 )
 
@@ -185,7 +185,7 @@ def load_pages(directory: Path) -> list[ModePage]:
     if not report_path.exists():
         raise ValueError(f"missing export report: {report_path}")
     report = json.loads(report_path.read_text(encoding="utf8"))
-    if report.get("schema") != "qingzhou.article-extraction-tree-dp-training-export.v2":
+    if report.get("schema") != "zuri.article-extraction-tree-dp-training-export.v2":
         raise ValueError(f"unsupported export schema: {report.get('schema')}")
     if set(report.get("requestedSplits", [])) - {"base", "train"}:
         raise ValueError("refusing an export that opened validation/test")
@@ -987,7 +987,7 @@ def main() -> int:
         args.focused_mechanism, args.gate,
     )
     report = {
-        "schema": "qingzhou.tree-dp-focused-collection-em-study.v1",
+        "schema": "zuri.tree-dp-focused-collection-em-study.v1",
         "protocol": {
             "splits": ["base", "train"],
             "validationOpened": False,

@@ -28,7 +28,7 @@ JavaScript inputs. CSS minification is unchanged.
 | Zod 4.4.3 | [`zod.mjs`](../scripts/vendor/zod.mjs) removes the optional Function-alias probe, JIT object parser and `Doc.compile` implementation. Objects use Zod's own interpreter. |
 
 The PDF legacy script construction was a core-js `Object.create(null)` compatibility fallback for
-old IE/ActiveX. Chrome does not need it. qz imports `WorkerMessageHandler` statically and reads PDF
+old IE/ActiveX. Chrome does not need it. zuri imports `WorkerMessageHandler` statically and reads PDF
 text through its loopback transport. Modern PDF's `Promise.withResolvers` calls use a small local
 capability helper, retaining Chrome 114 support without core-js. PostScript functions use PDF.js's
 interpreter. JPEG2000 **pixel rendering** is excluded; text extraction, including text on pages with

@@ -3,7 +3,7 @@ type Fields = Record<string, unknown>;
 interface BridgePort { describe?(): unknown; getConfig?(): unknown; saveConfig?(config: unknown): unknown }
 import { resolveBackgroundApiMethod } from "../background-api.js";
 
-export const QINGZHOU_MCP_METHODS = Object.freeze([
+export const ZURI_MCP_METHODS = Object.freeze([
   "ping",
   "capabilities",
   "get_bridge_config",
@@ -68,7 +68,7 @@ export function createMcpTransport(api: BackgroundApi, { bridge = {} }: { bridge
 
     switch (method) {
       case "ping": return call("system.ping");
-      case "capabilities": return bridge.describe?.() || { protocolVersion: 1, methods: QINGZHOU_MCP_METHODS };
+      case "capabilities": return bridge.describe?.() || { protocolVersion: 1, methods: ZURI_MCP_METHODS };
       case "get_bridge_config": return bridge.getConfig?.() || {};
       case "save_bridge_config": return bridge.saveConfig?.(params.config || params);
       case "runtime_message": return call("system.runtimeMessage", params.message || {}, params, signal);
@@ -119,11 +119,11 @@ export function createMcpTransport(api: BackgroundApi, { bridge = {} }: { bridge
         return { cleared: true };
       default:
         // Older MCP bridge clients use this prefix to detect unsupported methods.
-        throw transportError("METHOD_NOT_FOUND", `Unknown Qingzhou MCP bridge method: ${method || "(empty)"}`);
+        throw transportError("METHOD_NOT_FOUND", `Unknown Zuri MCP bridge method: ${method || "(empty)"}`);
     }
   }
 
-  return Object.freeze({ dispatch, methods: QINGZHOU_MCP_METHODS });
+  return Object.freeze({ dispatch, methods: ZURI_MCP_METHODS });
 }
 
 function isPlainObject(value: unknown): value is Fields {

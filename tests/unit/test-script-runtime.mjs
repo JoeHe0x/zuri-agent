@@ -22,7 +22,7 @@ async function fixture(mode) {
   runInContext('globalThis.window = globalThis; globalThis.document = {};', context);
   runInContext(await compileScriptToolHost(mode), context);
   const definitions = new Map();
-  const { createScriptTools, ToolExecutionError } = context.QZ_SCRIPT_TEST;
+  const { createScriptTools, ToolExecutionError } = context.ZURI_SCRIPT_TEST;
   createScriptTools({ registerTool: definition => definitions.set(definition.name, definition), ToolExecutionError,
     skills: { loadScript: async () => null }, scriptTimeoutProperty: { type: 'number' }, evaluateCdpScript: async (_tab, { expression }) => {
       return { result: { type: 'object', value: await runInContext(expression, context) } };
@@ -84,30 +84,30 @@ for (const mode of ['development', 'production']) {
     }`);
     assert.equal(envelope.ok, true, envelope.error);
     const value = structuredClone(envelope.result);
-    assert.deepEqual(value.fn, { __qz_uncloneable: 'function', name: 'named' });
-    assert.deepEqual(value.symbol, { __qz_uncloneable: 'symbol', description: 'Symbol(sample)' });
+    assert.deepEqual(value.fn, { __zuri_uncloneable: 'function', name: 'named' });
+    assert.deepEqual(value.symbol, { __zuri_uncloneable: 'symbol', description: 'Symbol(sample)' });
     assert.equal(value.bigint, '9007199254740993');
     assert.equal(value.infinity, 'Infinity'); assert.equal(value.nan, 'NaN');
     assert.ok(Object.hasOwn(value, 'missing')); assert.equal(value.missing, undefined);
     assert.equal(value.date, '2026-07-09T00:00:00.000Z'); assert.equal(value.invalidDate, '');
     assert.equal(value.regexp, '/sample/gi'); assert.equal(value.url, 'https://example.test/a');
-    assert.deepEqual(value.cycle.self, { __qz_circular: true });
+    assert.deepEqual(value.cycle.self, { __zuri_circular: true });
     let deepest = value.deep; for (let depth = 1; depth < 8; depth++) deepest = deepest.next;
-    assert.deepEqual(deepest, { __qz_truncated: true, type: 'Object' });
+    assert.deepEqual(deepest, { __zuri_truncated: true, type: 'Object' });
     assert.equal(value.error.name, 'TypeError'); assert.equal(value.error.message, 'invalid sample');
     assert.equal(value.error.code, 'SAMPLE'); assert.deepEqual(value.error.details, { count: 3 });
     assert.deepEqual(value.error.diagnostic, { retry: false }); assert.match(value.error.stack, /TypeError: invalid sample/);
-    assert.deepEqual(value.getter.denied, { __qz_uncloneable: 'property', error: 'getter denied' });
-    assert.deepEqual(value.proxy, { __qz_uncloneable: 'object', type: 'Object', error: 'keys denied' });
-    assert.deepEqual(value.map, { __qz_type: 'Map', entries: [['key', { value: 5 }], [{ value: 5 }, { __qz_type: 'Set', values: [1, 2] }]] });
-    assert.deepEqual(value.set, { __qz_type: 'Set', values: ['a', 'b'] });
+    assert.deepEqual(value.getter.denied, { __zuri_uncloneable: 'property', error: 'getter denied' });
+    assert.deepEqual(value.proxy, { __zuri_uncloneable: 'object', type: 'Object', error: 'keys denied' });
+    assert.deepEqual(value.map, { __zuri_type: 'Map', entries: [['key', { value: 5 }], [{ value: 5 }, { __zuri_type: 'Set', values: [1, 2] }]] });
+    assert.deepEqual(value.set, { __zuri_type: 'Set', values: ['a', 'b'] });
     assert.deepEqual(value.repeated, [{ value: 5 }, { value: 5 }]);
-    assert.deepEqual(value.bytes, { __qz_type: 'Uint8Array', length: 40, sample: Array.from({ length: 32 }, (_, i) => i) });
-    assert.deepEqual(value.bigints, { __qz_type: 'BigInt64Array', length: 2, sample: [1, 2] });
-    assert.deepEqual(value.view, { __qz_type: 'DataView', length: 4, sample: [] });
-    assert.deepEqual(value.buffer, { __qz_type: 'ArrayBuffer', byteLength: 9 });
-    assert.deepEqual(value.global, { __qz_uncloneable: 'global' });
-    assert.deepEqual(value.document, { __qz_uncloneable: 'global' });
+    assert.deepEqual(value.bytes, { __zuri_type: 'Uint8Array', length: 40, sample: Array.from({ length: 32 }, (_, i) => i) });
+    assert.deepEqual(value.bigints, { __zuri_type: 'BigInt64Array', length: 2, sample: [1, 2] });
+    assert.deepEqual(value.view, { __zuri_type: 'DataView', length: 4, sample: [] });
+    assert.deepEqual(value.buffer, { __zuri_type: 'ArrayBuffer', byteLength: 9 });
+    assert.deepEqual(value.global, { __zuri_uncloneable: 'global' });
+    assert.deepEqual(value.document, { __zuri_uncloneable: 'global' });
     f.restored();
   });
 
@@ -171,8 +171,8 @@ test('shared runtime preserves page and inner compatibility differences', async 
     assert.deepEqual(safeValueForMessage(bytes, 'inner').sample, [1, 2, 3], 'inner reads typed indices independently of an overridden slice');
     const getter = { get denied() { throw { message: 'plain failure' }; } };
     for (const world of ['page', 'inner']) {
-      assert.deepEqual(safeValueForMessage(getter, world), { denied: { __qz_uncloneable: 'property', error: 'plain failure' } });
-      assert.deepEqual(safeValueForMessage(globalThis, world), { __qz_uncloneable: 'global' });
+      assert.deepEqual(safeValueForMessage(getter, world), { denied: { __zuri_uncloneable: 'property', error: 'plain failure' } });
+      assert.deepEqual(safeValueForMessage(globalThis, world), { __zuri_uncloneable: 'global' });
     }
     const originalOpen = XMLHttpRequest.prototype.open;
     const originalBeacon = navigator.sendBeacon;

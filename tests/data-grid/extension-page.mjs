@@ -15,7 +15,7 @@ const playwright = await loadPlaywright();
 const chromeExecutable = findChromeExecutable(playwright.chromium.executablePath());
 if (!chromeExecutable) throw new Error("Chrome executable not found");
 
-const userDataDir = mkdtempSync(join(tmpdir(), "qingzhou-data-grid-extension-"));
+const userDataDir = mkdtempSync(join(tmpdir(), "zuri-data-grid-extension-"));
 let context;
 
 try {
@@ -94,31 +94,31 @@ try {
   await selectedCell.click();
   assert.equal(await selectedCell.locator("input").count(), 0, "single click should select a cell without entering edit mode");
   await page.evaluate(() => {
-    window.__qingzhouCopiedCellText = "";
-    window.__qingzhouCopiedCellHtml = "";
+    window.__zuriCopiedCellText = "";
+    window.__zuriCopiedCellHtml = "";
     document.addEventListener("copy", (event) => {
-      window.__qingzhouCopiedCellText = event.clipboardData?.getData("text/plain") || "";
-      window.__qingzhouCopiedCellHtml = event.clipboardData?.getData("text/html") || "";
+      window.__zuriCopiedCellText = event.clipboardData?.getData("text/plain") || "";
+      window.__zuriCopiedCellHtml = event.clipboardData?.getData("text/html") || "";
     }, { once: true });
   });
   await page.keyboard.press(process.platform === "darwin" ? "Meta+C" : "Control+C");
-  await page.waitForFunction(() => Boolean(window.__qingzhouCopiedCellText));
-  assert.equal(await page.evaluate(() => window.__qingzhouCopiedCellText.trim()), selectedText, "Ctrl/Cmd-C should copy the selected cell");
-  assert.equal(await page.evaluate(() => window.__qingzhouCopiedCellHtml), "", "cell copy should not publish an HTML table payload");
+  await page.waitForFunction(() => Boolean(window.__zuriCopiedCellText));
+  assert.equal(await page.evaluate(() => window.__zuriCopiedCellText.trim()), selectedText, "Ctrl/Cmd-C should copy the selected cell");
+  assert.equal(await page.evaluate(() => window.__zuriCopiedCellHtml), "", "cell copy should not publish an HTML table payload");
 
   await dragDataRange(page, "name", 0, "city", 1);
   await page.evaluate(() => {
-    window.__qingzhouCopiedRangeText = "";
-    window.__qingzhouCopiedRangeHtml = "";
+    window.__zuriCopiedRangeText = "";
+    window.__zuriCopiedRangeHtml = "";
     document.addEventListener("copy", (event) => {
-      window.__qingzhouCopiedRangeText = event.clipboardData?.getData("text/plain") || "";
-      window.__qingzhouCopiedRangeHtml = event.clipboardData?.getData("text/html") || "";
+      window.__zuriCopiedRangeText = event.clipboardData?.getData("text/plain") || "";
+      window.__zuriCopiedRangeHtml = event.clipboardData?.getData("text/html") || "";
     }, { once: true });
   });
   await page.keyboard.press(process.platform === "darwin" ? "Meta+C" : "Control+C");
-  await page.waitForFunction(() => Boolean(window.__qingzhouCopiedRangeText));
-  assert.equal((await page.evaluate(() => window.__qingzhouCopiedRangeText)).split(/\r?\n/)[0], "name\tcity", "multi-cell range copy should include column headers");
-  assert.equal(await page.evaluate(() => window.__qingzhouCopiedRangeHtml), "", "range copy should remain plain text rather than HTML table data");
+  await page.waitForFunction(() => Boolean(window.__zuriCopiedRangeText));
+  assert.equal((await page.evaluate(() => window.__zuriCopiedRangeText)).split(/\r?\n/)[0], "name\tcity", "multi-cell range copy should include column headers");
+  assert.equal(await page.evaluate(() => window.__zuriCopiedRangeHtml), "", "range copy should remain plain text rather than HTML table data");
 
   await page.locator('.data-grid-column-filter-btn[data-filter-field="city"]').click({ force: true });
   await page.waitForSelector("[data-data-grid-filter-popover]:not(.hidden)");
@@ -300,18 +300,18 @@ async function openDataColumnsMenu(page) {
 }
 
 async function submitDecisionText(page, value) {
-  const dialog = page.locator("#qz-decision-dialog[open]");
+  const dialog = page.locator("#zuri-decision-dialog[open]");
   await dialog.waitFor();
-  await dialog.locator("[data-qz-decision-input]").fill(value);
-  await dialog.locator("[data-qz-decision-confirm]").click();
-  await page.waitForFunction(() => !document.querySelector("#qz-decision-dialog")?.open);
+  await dialog.locator("[data-zuri-decision-input]").fill(value);
+  await dialog.locator("[data-zuri-decision-confirm]").click();
+  await page.waitForFunction(() => !document.querySelector("#zuri-decision-dialog")?.open);
 }
 
 async function acceptDecision(page) {
-  const dialog = page.locator("#qz-decision-dialog[open]");
+  const dialog = page.locator("#zuri-decision-dialog[open]");
   await dialog.waitFor();
-  await dialog.locator("[data-qz-decision-confirm]").click();
-  await page.waitForFunction(() => !document.querySelector("#qz-decision-dialog")?.open);
+  await dialog.locator("[data-zuri-decision-confirm]").click();
+  await page.waitForFunction(() => !document.querySelector("#zuri-decision-dialog")?.open);
 }
 
 async function dispatchGridPaste(page, text) {

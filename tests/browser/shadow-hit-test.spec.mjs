@@ -90,7 +90,7 @@ const html = `<!doctype html><meta charset="utf-8"><title>Shadow hit</title>
 async function createHarness() {
   const server = createServer((_req, res) => { res.writeHead(200, { "Content-Type": "text/html" }); res.end(html); });
   await new Promise(resolve => server.listen(0, "127.0.0.1", resolve));
-  const directory = await mkdtemp(join(tmpdir(), "qingzhou-shadow-hit-"));
+  const directory = await mkdtemp(join(tmpdir(), "zuri-shadow-hit-"));
   let browser;
   const close = async () => {
     await browser?.close();

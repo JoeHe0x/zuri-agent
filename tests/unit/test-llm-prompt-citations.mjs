@@ -18,7 +18,7 @@ import { formatDynamicContext } from "../../src/background/agent/context.js";
 
 const citationSection = sectionBetween(SYSTEM_PROMPT, "## 9. 引用、搜索与事实协议", "## 10. 安全、确认与暂停协议");
 
-assert.doesNotMatch(SYSTEM_PROMPT, /qingzhou-documents|qingzhou-management|qingzhou-mcp|skill-workbench|site-skill-author/,
+assert.doesNotMatch(SYSTEM_PROMPT, /zuri-documents|zuri-management|zuri-mcp|skill-workbench|site-skill-author/,
   "kernel should select capabilities from available Skills instead of requiring bundled package names");
 
 assert.match(citationSection, /关键 claim 默认引用已读取或验证过的原始网页 URL/, "citation prompt should keep the lightweight verified-source rule");

@@ -1,5 +1,5 @@
 [project]
-name = "qingzhou-tests"
+name = "zuri-tests"
 version = "0.0.0"
 requires-python = ">=3.11"
 dependencies = [

@@ -116,7 +116,7 @@ function buildReport(indexValue, planValue, commandResults, cli) {
     };
   });
   return {
-    schema: "qingzhou.behavior_evidence.v1",
+    schema: "zuri.behavior_evidence.v1",
     createdAt: new Date().toISOString(),
     index: relativeIndexPath(indexValue.indexPath),
     filters: {

@@ -1,18 +1,18 @@
 [
   {
-    "name": "qingzhou_bridge_status",
-    "description": "查看本地 bridge 和当前在线的轻舟扩展客户端。",
+    "name": "zuri_bridge_status",
+    "description": "查看本地 bridge 和当前在线的Zuri扩展客户端。",
     "inputSchema": {
       "properties": {
         "clientId": {"default": "", "title": "Clientid", "type": "string", "description": "Browser name or UUID. Required when multiple browsers are online. Offline or unknown selections never fall back to another browser."}
       },
-      "title": "qingzhou_bridge_statusArguments",
+      "title": "zuri_bridge_statusArguments",
       "type": "object"
     }
   },
   {
-    "name": "qingzhou_forget_browser",
-    "description": "Forget an offline browser registration, freeing its name for explicit pairing. Read qingzhou_bridge_status first and disconnect online browsers in their extension settings.",
+    "name": "zuri_forget_browser",
+    "description": "Forget an offline browser registration, freeing its name for explicit pairing. Read zuri_bridge_status first and disconnect online browsers in their extension settings.",
     "inputSchema": {
       "properties": {"clientId": {"type": "string", "minLength": 1, "description": "Registered browser name or UUID."}},
       "required": ["clientId"],
@@ -20,7 +20,7 @@
     }
   },
   {
-    "name": "qingzhou_call",
+    "name": "zuri_call",
     "description": "调用扩展端原始 bridge method，用于调试未包装的新接口。",
     "inputSchema": {
       "properties": {
@@ -30,25 +30,25 @@
         "clientId": {"default": "", "title": "Clientid", "type": "string", "description": "Browser name or UUID. Required when multiple browsers are online. Offline or unknown selections never fall back to another browser."}
       },
       "required": ["method"],
-      "title": "qingzhou_callArguments",
+      "title": "zuri_callArguments",
       "type": "object"
     }
   },
   {
-    "name": "qingzhou_list_capabilities",
-    "description": "列出扩展端 qz-browser-agent-mcp-bridge 当前暴露的方法。",
+    "name": "zuri_list_capabilities",
+    "description": "列出扩展端 zuri-agent-mcp-bridge 当前暴露的方法。",
     "inputSchema": {
       "properties": {
         "timeoutSeconds": {"anyOf": [{"type": "number"}, {"type": "null"}], "default": null, "title": "Timeoutseconds"},
         "clientId": {"default": "", "title": "Clientid", "type": "string", "description": "Browser name or UUID. Required when multiple browsers are online. Offline or unknown selections never fall back to another browser."}
       },
-      "title": "qingzhou_list_capabilitiesArguments",
+      "title": "zuri_list_capabilitiesArguments",
       "type": "object"
     }
   },
   {
-    "name": "qingzhou_list_sessions",
-    "description": "列出轻舟会话及运行态。",
+    "name": "zuri_list_sessions",
+    "description": "列出Zuri会话及运行态。",
     "inputSchema": {
       "properties": {
         "limit": {"anyOf": [{"type": "number"}, {"type": "null"}], "default": null, "title": "Limit"},
@@ -56,12 +56,12 @@
         "timeoutSeconds": {"anyOf": [{"type": "number"}, {"type": "null"}], "default": null, "title": "Timeoutseconds"},
         "clientId": {"default": "", "title": "Clientid", "type": "string", "description": "Browser name or UUID. Required when multiple browsers are online. Offline or unknown selections never fall back to another browser."}
       },
-      "title": "qingzhou_list_sessionsArguments",
+      "title": "zuri_list_sessionsArguments",
       "type": "object"
     }
   },
   {
-    "name": "qingzhou_create_session",
+    "name": "zuri_create_session",
     "description": "Create a task with an optional first message. Set wait=true to follow the same task across runs until its current work and accepted follow-ups and steering messages have completed and its queues are empty. stream=true adds progress events. User-input waits keep observation open. Task failure or stopping ends observation. Timeout or cancellation ends observation while the browser task continues; use the returned watch recovery call without resubmitting.",
     "inputSchema": {
       "properties": {
@@ -74,12 +74,12 @@
         "timeoutSeconds": {"anyOf": [{"type": "number", "exclusiveMinimum": 0, "maximum": 86400}, {"type": "null"}], "default": null, "title": "Timeoutseconds"},
         "clientId": {"default": "", "title": "Clientid", "type": "string", "description": "Browser name or UUID. Required when multiple browsers are online. Offline or unknown selections never fall back to another browser."}
       },
-      "title": "qingzhou_create_sessionArguments",
+      "title": "zuri_create_sessionArguments",
       "type": "object"
     }
   },
   {
-    "name": "qingzhou_send_message",
+    "name": "zuri_send_message",
     "description": "Send a message to the specified task. By default, a busy task queues a follow-up for its next run. Set steer=true to guide its current run at the next safe boundary. An idle task starts with either mode. Returns deliveryMode, disposition, and clientMessageId to confirm acceptance. Set wait=true to follow the same task across runs until its work completes and its follow-up and steering queues are empty. A queued message removed before execution no longer blocks completion. stream=true emits text from the submitted message onward through MCP progress notifications. Timeout or cancellation ends observation; use the returned watch recovery call without resubmitting.",
     "inputSchema": {
       "properties": {
@@ -96,13 +96,13 @@
         "clientId": {"default": "", "title": "Clientid", "type": "string", "description": "Browser name or UUID. Required when multiple browsers are online. Offline or unknown selections never fall back to another browser."}
       },
       "required": ["text"],
-      "title": "qingzhou_send_messageArguments",
+      "title": "zuri_send_messageArguments",
       "type": "object"
     }
   },
   {
-    "name": "qingzhou_follow_up",
-    "description": "向轻舟会话追加 follow-up 消息；如果会话正在运行，会在当前 run 完全停下后排队处理。",
+    "name": "zuri_follow_up",
+    "description": "向Zuri会话追加 follow-up 消息；如果会话正在运行，会在当前 run 完全停下后排队处理。",
     "inputSchema": {
       "properties": {
         "text": {"title": "Text", "type": "string"},
@@ -113,13 +113,13 @@
         "clientId": {"default": "", "title": "Clientid", "type": "string", "description": "Browser name or UUID. Required when multiple browsers are online. Offline or unknown selections never fall back to another browser."}
       },
       "required": ["text"],
-      "title": "qingzhou_follow_upArguments",
+      "title": "zuri_follow_upArguments",
       "type": "object"
     }
   },
   {
-    "name": "qingzhou_abort_session",
-    "description": "中止轻舟会话当前运行；语义化 abort 封装，底层调用扩展端 stop_session。",
+    "name": "zuri_abort_session",
+    "description": "中止Zuri会话当前运行；语义化 abort 封装，底层调用扩展端 stop_session。",
     "inputSchema": {
       "properties": {
         "sessionId": {"title": "Sessionid", "type": "string"},
@@ -128,13 +128,13 @@
         "clientId": {"default": "", "title": "Clientid", "type": "string", "description": "Browser name or UUID. Required when multiple browsers are online. Offline or unknown selections never fall back to another browser."}
       },
       "required": ["sessionId"],
-      "title": "qingzhou_abort_sessionArguments",
+      "title": "zuri_abort_sessionArguments",
       "type": "object"
     }
   },
   {
-    "name": "qingzhou_get_user_input",
-    "description": "Read a task's pending question, full form fields and option values, or consent notice. Returns waitId, kind, actions, instructions, and responseTemplate for qingzhou_respond_to_user_input. Fill template placeholders with the user's answers. Native Chrome permissions return requiresUserAction and side-panel instructions. Task snapshots also include this input.",
+    "name": "zuri_get_user_input",
+    "description": "Read a task's pending question, full form fields and option values, or consent notice. Returns waitId, kind, actions, instructions, and responseTemplate for zuri_respond_to_user_input. Fill template placeholders with the user's answers. Native Chrome permissions return requiresUserAction and side-panel instructions. Task snapshots also include this input.",
     "inputSchema": {
       "properties": {
         "sessionId": {"type": "string", "minLength": 1},
@@ -146,8 +146,8 @@
     }
   },
   {
-    "name": "qingzhou_respond_to_user_input",
-    "description": "Respond using the pending input's responseTemplate: fill answers keyed by field IDs with option values for choices (arrays for multi_choice), then submit; approve a completed action or application consent, or reject. Show location disclosures and obtain explicit user consent before approving with consentVersion. Native Chrome permissions require the user's click in qz. Invalid or stale replies return the current input for correction and keep the request pending.",
+    "name": "zuri_respond_to_user_input",
+    "description": "Respond using the pending input's responseTemplate: fill answers keyed by field IDs with option values for choices (arrays for multi_choice), then submit; approve a completed action or application consent, or reject. Show location disclosures and obtain explicit user consent before approving with consentVersion. Native Chrome permissions require the user's click in zuri. Invalid or stale replies return the current input for correction and keep the request pending.",
     "inputSchema": {
       "properties": {
         "wait": {"type": "boolean", "default": false, "description": "Follow the same task across runs until its work completes and its accepted follow-up and steering queues are empty. User-input waits keep observation open; task failure or stopping ends it."},
@@ -166,8 +166,8 @@
     }
   },
   {
-    "name": "qingzhou_continue_task",
-    "description": "Continue a pending confirmation after the user completes the requested action. Supply the sessionId and waitId from the current input. Use qingzhou_respond_to_user_input for forms and versioned application consent.",
+    "name": "zuri_continue_task",
+    "description": "Continue a pending confirmation after the user completes the requested action. Supply the sessionId and waitId from the current input. Use zuri_respond_to_user_input for forms and versioned application consent.",
     "inputSchema": {
       "properties": {
         "sessionId": {"title": "Sessionid", "type": "string"},
@@ -177,12 +177,12 @@
         "clientId": {"default": "", "title": "Clientid", "type": "string", "description": "Browser name or UUID. Required when multiple browsers are online. Offline or unknown selections never fall back to another browser."}
       },
       "required": ["sessionId", "waitId"],
-      "title": "qingzhou_continue_taskArguments",
+      "title": "zuri_continue_taskArguments",
       "type": "object"
     }
   },
   {
-    "name": "qingzhou_submit_wait_form",
+    "name": "zuri_submit_wait_form",
     "description": "Submit form answers keyed by field IDs, using option values for choices. Supply sessionId, waitId, and answers from the current input's responseTemplate. Invalid or stale replies include the current input for correction.",
     "inputSchema": {
       "properties": {
@@ -194,13 +194,13 @@
         "clientId": {"default": "", "title": "Clientid", "type": "string", "description": "Browser name or UUID. Required when multiple browsers are online. Offline or unknown selections never fall back to another browser."}
       },
       "required": ["sessionId", "answers", "waitId"],
-      "title": "qingzhou_submit_wait_formArguments",
+      "title": "zuri_submit_wait_formArguments",
       "type": "object"
     }
   },
   {
-    "name": "qingzhou_cancel_wait",
-    "description": "Decline the pending request identified by sessionId and waitId from the current input. The agent can continue after the rejection. Use qingzhou_abort_session to stop the whole task.",
+    "name": "zuri_cancel_wait",
+    "description": "Decline the pending request identified by sessionId and waitId from the current input. The agent can continue after the rejection. Use zuri_abort_session to stop the whole task.",
     "inputSchema": {
       "properties": {
         "sessionId": {"title": "Sessionid", "type": "string"},
@@ -209,12 +209,12 @@
         "clientId": {"default": "", "title": "Clientid", "type": "string", "description": "Browser name or UUID. Required when multiple browsers are online. Offline or unknown selections never fall back to another browser."}
       },
       "required": ["sessionId", "waitId"],
-      "title": "qingzhou_cancel_waitArguments",
+      "title": "zuri_cancel_waitArguments",
       "type": "object"
     }
   },
   {
-    "name": "qingzhou_get_session_state",
+    "name": "zuri_get_session_state",
     "description": "Read task runtime state and the current input, including complete fields, choices, instructions, and a responseTemplate when waiting for a response.",
     "inputSchema": {
       "properties": {
@@ -222,12 +222,12 @@
         "timeoutSeconds": {"anyOf": [{"type": "number"}, {"type": "null"}], "default": null, "title": "Timeoutseconds"},
         "clientId": {"default": "", "title": "Clientid", "type": "string", "description": "Browser name or UUID. Required when multiple browsers are online. Offline or unknown selections never fall back to another browser."}
       },
-      "title": "qingzhou_get_session_stateArguments",
+      "title": "zuri_get_session_stateArguments",
       "type": "object"
     }
   },
   {
-    "name": "qingzhou_get_session_snapshot",
+    "name": "zuri_get_session_snapshot",
     "description": "Read a task snapshot: session, runtime, current input, transcript, recent messages, artifacts, and optional trace/tools. Pending input includes field IDs, option values, instructions, and responseTemplate for answering directly. Tool transcript argsState/argsGenerating distinguish generating arguments from final empty arguments.",
     "inputSchema": {
       "properties": {
@@ -242,13 +242,13 @@
         "timeoutSeconds": {"anyOf": [{"type": "number"}, {"type": "null"}], "default": null, "title": "Timeoutseconds"},
         "clientId": {"default": "", "title": "Clientid", "type": "string", "description": "Browser name or UUID. Required when multiple browsers are online. Offline or unknown selections never fall back to another browser."}
       },
-      "title": "qingzhou_get_session_snapshotArguments",
+      "title": "zuri_get_session_snapshotArguments",
       "type": "object"
     }
   },
   {
-    "name": "qingzhou_get_messages",
-    "description": "读取轻舟会话消息；compact/tail 可返回较短尾部摘要。",
+    "name": "zuri_get_messages",
+    "description": "读取Zuri会话消息；compact/tail 可返回较短尾部摘要。",
     "inputSchema": {
       "properties": {
         "sessionId": {"default": "default", "title": "Sessionid", "type": "string"},
@@ -258,13 +258,13 @@
         "timeoutSeconds": {"anyOf": [{"type": "number"}, {"type": "null"}], "default": null, "title": "Timeoutseconds"},
         "clientId": {"default": "", "title": "Clientid", "type": "string", "description": "Browser name or UUID. Required when multiple browsers are online. Offline or unknown selections never fall back to another browser."}
       },
-      "title": "qingzhou_get_messagesArguments",
+      "title": "zuri_get_messagesArguments",
       "type": "object"
     }
   },
   {
-    "name": "qingzhou_stop_session",
-    "description": "停止轻舟会话运行。",
+    "name": "zuri_stop_session",
+    "description": "停止Zuri会话运行。",
     "inputSchema": {
       "properties": {
         "sessionId": {"title": "Sessionid", "type": "string"},
@@ -273,26 +273,26 @@
         "clientId": {"default": "", "title": "Clientid", "type": "string", "description": "Browser name or UUID. Required when multiple browsers are online. Offline or unknown selections never fall back to another browser."}
       },
       "required": ["sessionId"],
-      "title": "qingzhou_stop_sessionArguments",
+      "title": "zuri_stop_sessionArguments",
       "type": "object"
     }
   },
   {
-    "name": "qingzhou_list_tools",
-    "description": "列出当前 session 可用的轻舟内置工具和插件工具 schema。",
+    "name": "zuri_list_tools",
+    "description": "列出当前 session 可用的Zuri内置工具和插件工具 schema。",
     "inputSchema": {
       "properties": {
         "sessionId": {"default": "default", "title": "Sessionid", "type": "string"},
         "timeoutSeconds": {"anyOf": [{"type": "number"}, {"type": "null"}], "default": null, "title": "Timeoutseconds"},
         "clientId": {"default": "", "title": "Clientid", "type": "string", "description": "Browser name or UUID. Required when multiple browsers are online. Offline or unknown selections never fall back to another browser."}
       },
-      "title": "qingzhou_list_toolsArguments",
+      "title": "zuri_list_toolsArguments",
       "type": "object"
     }
   },
   {
-    "name": "qingzhou_list_skills",
-    "description": "列出轻舟 skill 目录；只返回摘要和资源清单，不返回正文与资源内容。",
+    "name": "zuri_list_skills",
+    "description": "列出Zuri skill 目录；只返回摘要和资源清单，不返回正文与资源内容。",
     "inputSchema": {
       "properties": {
         "scope": {"default": "all", "title": "Scope", "type": "string"},
@@ -300,13 +300,13 @@
         "timeoutSeconds": {"anyOf": [{"type": "number"}, {"type": "null"}], "default": null, "title": "Timeoutseconds"},
         "clientId": {"default": "", "title": "Clientid", "type": "string", "description": "Browser name or UUID. Required when multiple browsers are online. Offline or unknown selections never fall back to another browser."}
       },
-      "title": "qingzhou_list_skillsArguments",
+      "title": "zuri_list_skillsArguments",
       "type": "object"
     }
   },
   {
-    "name": "qingzhou_get_skill",
-    "description": "读取轻舟 skill 正文和资源清单；默认不内联资源内容，按需再调用 qingzhou_get_skill_resource。",
+    "name": "zuri_get_skill",
+    "description": "读取Zuri skill 正文和资源清单；默认不内联资源内容，按需再调用 zuri_get_skill_resource。",
     "inputSchema": {
       "properties": {
         "name": {"title": "Name", "type": "string"},
@@ -316,13 +316,13 @@
         "clientId": {"default": "", "title": "Clientid", "type": "string", "description": "Browser name or UUID. Required when multiple browsers are online. Offline or unknown selections never fall back to another browser."}
       },
       "required": ["name"],
-      "title": "qingzhou_get_skillArguments",
+      "title": "zuri_get_skillArguments",
       "type": "object"
     }
   },
   {
-    "name": "qingzhou_get_skill_resource",
-    "description": "读取轻舟 skill 包内单个资源文件内容，支持 start/maxChars 分块。",
+    "name": "zuri_get_skill_resource",
+    "description": "读取Zuri skill 包内单个资源文件内容，支持 start/maxChars 分块。",
     "inputSchema": {
       "properties": {
         "name": {"title": "Name", "type": "string"},
@@ -333,13 +333,13 @@
         "clientId": {"default": "", "title": "Clientid", "type": "string", "description": "Browser name or UUID. Required when multiple browsers are online. Offline or unknown selections never fall back to another browser."}
       },
       "required": ["name", "path"],
-      "title": "qingzhou_get_skill_resourceArguments",
+      "title": "zuri_get_skill_resourceArguments",
       "type": "object"
     }
   },
   {
-    "name": "qingzhou_execute_tool",
-    "description": "直接执行轻舟工具，用于系统 skill/plugin 调试。依赖 Agent 生命周期的页面工具请传当前 runId；wait=false 时后台执行并立即返回 jobId。",
+    "name": "zuri_execute_tool",
+    "description": "直接执行Zuri工具，用于系统 skill/plugin 调试。依赖 Agent 生命周期的页面工具请传当前 runId；wait=false 时后台执行并立即返回 jobId。",
     "inputSchema": {
       "properties": {
         "name": {"title": "Name", "type": "string"},
@@ -351,12 +351,12 @@
         "clientId": {"default": "", "title": "Clientid", "type": "string", "description": "Browser name or UUID. Required when multiple browsers are online. Offline or unknown selections never fall back to another browser."}
       },
       "required": ["name"],
-      "title": "qingzhou_execute_toolArguments",
+      "title": "zuri_execute_toolArguments",
       "type": "object"
     }
   },
   {
-    "name": "qingzhou_watch_task",
+    "name": "zuri_watch_task",
     "description": "Observe an existing task across runs until its current work and accepted follow-ups and steering messages have completed and its queues are empty, without resubmitting anything. Questions and Chrome permission requests keep observation open; MCP progress notifications include their full input and responseTemplate. stream=true includes text updates. Task failure or stopping ends observation. Timeout or cancellation ends observation while the browser task continues; resume with the returned recovery call using the same sessionId and clientId.",
     "inputSchema": {
       "type": "object",
@@ -371,7 +371,7 @@
     }
   },
   {
-    "name": "qingzhou_get_tool",
+    "name": "zuri_get_tool",
     "description": "Read one browser tool's description and input schema by exact name in the selected task's context.",
     "inputSchema": {
       "type": "object",
@@ -385,33 +385,33 @@
     }
   },
   {
-    "name": "qingzhou_get_tool_job",
-    "description": "读取 qingzhou_execute_tool(wait=false) 后台 job 的状态和结果。",
+    "name": "zuri_get_tool_job",
+    "description": "读取 zuri_execute_tool(wait=false) 后台 job 的状态和结果。",
     "inputSchema": {
       "properties": {
         "jobId": {"title": "Jobid", "type": "string"},
         "includeResult": {"default": true, "title": "Includeresult", "type": "boolean"}
       },
       "required": ["jobId"],
-      "title": "qingzhou_get_tool_jobArguments",
+      "title": "zuri_get_tool_jobArguments",
       "type": "object"
     }
   },
   {
-    "name": "qingzhou_get_config",
-    "description": "读取轻舟模型、安全策略等配置。",
+    "name": "zuri_get_config",
+    "description": "读取Zuri模型、安全策略等配置。",
     "inputSchema": {
       "properties": {
         "timeoutSeconds": {"anyOf": [{"type": "number"}, {"type": "null"}], "default": null, "title": "Timeoutseconds"},
         "clientId": {"default": "", "title": "Clientid", "type": "string", "description": "Browser name or UUID. Required when multiple browsers are online. Offline or unknown selections never fall back to another browser."}
       },
-      "title": "qingzhou_get_configArguments",
+      "title": "zuri_get_configArguments",
       "type": "object"
     }
   },
   {
-    "name": "qingzhou_save_config",
-    "description": "保存轻舟配置。",
+    "name": "zuri_save_config",
+    "description": "保存Zuri配置。",
     "inputSchema": {
       "properties": {
         "config": {"additionalProperties": true, "title": "Config", "type": "object"},
@@ -419,12 +419,12 @@
         "clientId": {"default": "", "title": "Clientid", "type": "string", "description": "Browser name or UUID. Required when multiple browsers are online. Offline or unknown selections never fall back to another browser."}
       },
       "required": ["config"],
-      "title": "qingzhou_save_configArguments",
+      "title": "zuri_save_configArguments",
       "type": "object"
     }
   },
   {
-    "name": "qingzhou_list_plugins",
+    "name": "zuri_list_plugins",
     "description": "列出当前页面/session 上下文下的插件贡献。",
     "inputSchema": {
       "properties": {
@@ -432,13 +432,13 @@
         "timeoutSeconds": {"anyOf": [{"type": "number"}, {"type": "null"}], "default": null, "title": "Timeoutseconds"},
         "clientId": {"default": "", "title": "Clientid", "type": "string", "description": "Browser name or UUID. Required when multiple browsers are online. Offline or unknown selections never fall back to another browser."}
       },
-      "title": "qingzhou_list_pluginsArguments",
+      "title": "zuri_list_pluginsArguments",
       "type": "object"
     }
   },
   {
-    "name": "qingzhou_list_automations",
-    "description": "列出轻舟定时任务。",
+    "name": "zuri_list_automations",
+    "description": "列出Zuri定时任务。",
     "inputSchema": {
       "properties": {
         "limit": {"anyOf": [{"type": "number"}, {"type": "null"}], "default": null, "title": "Limit"},
@@ -446,24 +446,24 @@
         "timeoutSeconds": {"anyOf": [{"type": "number"}, {"type": "null"}], "default": null, "title": "Timeoutseconds"},
         "clientId": {"default": "", "title": "Clientid", "type": "string", "description": "Browser name or UUID. Required when multiple browsers are online. Offline or unknown selections never fall back to another browser."}
       },
-      "title": "qingzhou_list_automationsArguments",
+      "title": "zuri_list_automationsArguments",
       "type": "object"
     }
   },
   {
-    "name": "qingzhou_get_trace",
-    "description": "读取轻舟 LLM/工具 trace 日志。",
+    "name": "zuri_get_trace",
+    "description": "读取Zuri LLM/工具 trace 日志。",
     "inputSchema": {
       "properties": {
         "timeoutSeconds": {"anyOf": [{"type": "number"}, {"type": "null"}], "default": null, "title": "Timeoutseconds"},
         "clientId": {"default": "", "title": "Clientid", "type": "string", "description": "Browser name or UUID. Required when multiple browsers are online. Offline or unknown selections never fall back to another browser."}
       },
-      "title": "qingzhou_get_traceArguments",
+      "title": "zuri_get_traceArguments",
       "type": "object"
     }
   },
   {
-    "name": "qingzhou_list_data_tables",
+    "name": "zuri_list_data_tables",
     "description": "List local data tables with names, kinds, columns, and row counts. Use the exact table name to export or delete.",
     "inputSchema": {
       "type": "object",
@@ -488,7 +488,7 @@
     }
   },
   {
-    "name": "qingzhou_delete_data_table",
+    "name": "zuri_delete_data_table",
     "description": "Delete one local data table and all its rows by exact table name.",
     "inputSchema": {
       "type": "object",
@@ -520,7 +520,7 @@
     }
   },
   {
-    "name": "qingzhou_export_data_table",
+    "name": "zuri_export_data_table",
     "description": "Export all rows of a local data table as Excel (.xlsx) or CSV. Returns the Chrome download ID, filename, state, and file path when available.",
     "inputSchema": {
       "type": "object",
@@ -564,7 +564,7 @@
     }
   },
   {
-    "name": "qingzhou_list_image_collections",
+    "name": "zuri_list_image_collections",
     "description": "List local image collections with their exact names and image counts. Use the name to export or delete.",
     "inputSchema": {
       "type": "object",
@@ -589,7 +589,7 @@
     }
   },
   {
-    "name": "qingzhou_delete_image_collection",
+    "name": "zuri_delete_image_collection",
     "description": "Delete one image collection and its rows by exact collection name. Shared asset files are retained.",
     "inputSchema": {
       "type": "object",
@@ -621,7 +621,7 @@
     }
   },
   {
-    "name": "qingzhou_export_image_collection",
+    "name": "zuri_export_image_collection",
     "description": "Export an image collection as a ZIP of its stored images. Returns the Chrome download ID, filename, state, and file path when available.",
     "inputSchema": {
       "type": "object",
@@ -657,7 +657,7 @@
     }
   },
   {
-    "name": "qingzhou_export_skill",
+    "name": "zuri_export_skill",
     "description": "Export one user-installed Skill as a ZIP containing SKILL.md and its resources. Built-in Skills that require packaged host code cannot be exported independently.",
     "inputSchema": {
       "type": "object",
@@ -693,7 +693,7 @@
     }
   },
   {
-    "name": "qingzhou_get_settings",
+    "name": "zuri_get_settings",
     "description": "Read current model and language settings, editable fields, providers, and protocols. Credentials are redacted. Supply key to read one setting.",
     "inputSchema": {
       "type": "object",
@@ -722,7 +722,7 @@
     }
   },
   {
-    "name": "qingzhou_update_settings",
+    "name": "zuri_update_settings",
     "description": "Update the supplied model or language settings. Get settings first to discover supported keys and provider IDs. API keys are write-only; results redact credentials.",
     "inputSchema": {
       "type": "object",
@@ -755,7 +755,7 @@
     }
   },
   {
-    "name": "qingzhou_run_automation",
+    "name": "zuri_run_automation",
     "description": "Run a saved automation once by its automationId. Returns its created task/run information.",
     "inputSchema": {
       "type": "object",
@@ -787,7 +787,7 @@
     }
   },
   {
-    "name": "qingzhou_clear_trace",
+    "name": "zuri_clear_trace",
     "description": "Clear local diagnostic trace logs.",
     "inputSchema": {
       "type": "object",
@@ -812,7 +812,7 @@
     }
   },
   {
-    "name": "qingzhou_list_downloads",
+    "name": "zuri_list_downloads",
     "description": "Read a download by ID, or list recent Chrome downloads. Returns state and real filepath/fileUrl when available. Use the ID from an export result to check completion without exporting again.",
     "inputSchema": {
       "type": "object",

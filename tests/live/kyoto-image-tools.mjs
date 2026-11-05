@@ -49,7 +49,7 @@ try {
   // Install the same timer/primitive instrumentation in the real sidebar realm.
   await writeFile(join(extensionDir, "sidepanel/kyoto-lag-probe.js"), `(${installLagProbe.toString()})("sidebar");`);
   await driver.evaluate("sidebar", `const s=view.document.createElement('script');s.type='module';s.src=view.chrome.runtime.getURL('sidepanel/kyoto-lag-probe.js');view.document.documentElement.appendChild(s);return true;`);
-  await poll(() => driver.evaluate("sidebar", "return !!view.__qzLagProbe;"));
+  await poll(() => driver.evaluate("sidebar", "return !!view.__zuriLagProbe;"));
   const take = () => {
     const sample = rssSample(browser, driver.rootPid, 0); report.samples.push(sample);
     if (Object.values(sample.buckets).reduce((sum, value) => sum + value, 0) > Number(values.rssCapMiB) * 1024) rssCapReached = true;
@@ -78,8 +78,8 @@ try {
   }
   report.elapsedMs = Date.now() - start;
   if (!report.state?.done) { report.freeze = true; report.stopReason = "deadline_or_unresponsive_background"; }
-  report.sidebar = await driver.evaluate("sidebar", "return view.__qzLagProbe.snapshot();").catch(error => ({ error: String(error) }));
-  report.background = await driver.evaluate("background", "return view.__qzLagProbe.snapshot();").catch(error => ({ error: String(error) }));
+  report.sidebar = await driver.evaluate("sidebar", "return view.__zuriLagProbe.snapshot();").catch(error => ({ error: String(error) }));
+  report.background = await driver.evaluate("background", "return view.__zuriLagProbe.snapshot();").catch(error => ({ error: String(error) }));
   report.pages = await driver.evaluate("background", "return await view.kyotoToolProbe.pageMetrics();").catch(error => ({ error: String(error) }));
   const activeLag = metrics => metrics?.workerHeartbeat?.available ? metrics.workerHeartbeat.maxDeliveryLagMs : metrics?.maxLagMs || 0;
   if (Math.max(activeLag(report.background), activeLag(report.sidebar), ...(Array.isArray(report.pages) ? report.pages.flatMap(page => (page.result || []).map(frame => frame.result?.workerHeartbeat?.maxDeliveryLagMs || 0)) : [0])) >= 5000) report.freeze = true;
@@ -107,7 +107,7 @@ function installToolProbe({ mcpRuntime, sessionCommands, sessionAgentHost, sessi
   async function call(child, name, args) {
     child.stage = name;
     const start = performance.now(), toolCallId = crypto.randomUUID();
-    performance.mark(`qz-probe:${child.index}:${name}:start`);
+    performance.mark(`zuri-probe:${child.index}:${name}:start`);
     let result;
     try {
       result = (await mcpRuntime.executeTool({ sessionId: child.id, runId: child.runId, name, args }, controller.signal)).result;
@@ -125,7 +125,7 @@ function installToolProbe({ mcpRuntime, sessionCommands, sessionAgentHost, sessi
     } catch (error) {
       state.events.push({ child: child.index, name, start, toolMs: performance.now() - start, error: String(error), code: error?.code });
       return { error: String(error), code: error?.code };
-    } finally { performance.mark(`qz-probe:${child.index}:${name}:end`); }
+    } finally { performance.mark(`zuri-probe:${child.index}:${name}:end`); }
   }
   globalThis.kyotoToolProbe = {
     async initialize() {
@@ -189,14 +189,14 @@ function installToolProbe({ mcpRuntime, sessionCommands, sessionAgentHost, sessi
   };
   async function readPageMetrics(child) {
     try { return { child: child.index, tabId: child.tabId,
-      result: await chrome.scripting.executeScript({ target: { tabId: child.tabId }, world: "MAIN", func: () => globalThis.__qzLagProbe?.snapshot() }),
-      isolated: await chrome.scripting.executeScript({ target: { tabId: child.tabId }, world: "ISOLATED", func: () => globalThis.__qzLagProbe?.snapshot() }),
+      result: await chrome.scripting.executeScript({ target: { tabId: child.tabId }, world: "MAIN", func: () => globalThis.__zuriLagProbe?.snapshot() }),
+      isolated: await chrome.scripting.executeScript({ target: { tabId: child.tabId }, world: "ISOLATED", func: () => globalThis.__zuriLagProbe?.snapshot() }),
     }; } catch (error) { return { child: child.index, error: String(error) }; }
   }
 }
 
 function installLagProbe(realm) {
-  if (globalThis.__qzLagProbe) return;
+  if (globalThis.__zuriLagProbe) return;
   const state = { realm, maxLagMs: 0, samples: 0, stalls: [], primitives: {}, longTasks: [], visibility: typeof document === "undefined" ? "worker" : document.visibilityState };
   // Delivery delay measures the main event queue without treating background-tab
   // timer throttling as a long task. Worker timestamps are generated at send time.
@@ -238,7 +238,7 @@ function installLagProbe(realm) {
   wrap(globalThis.OffscreenCanvasRenderingContext2D?.prototype, "drawImage", "drawImage");
   wrap(globalThis.HTMLCanvasElement?.prototype, "toDataURL", "toDataURL");
   wrap(globalThis.CanvasRenderingContext2D?.prototype, "getImageData", "getImageData");
-  globalThis.__qzLagProbe = { snapshot: () => state };
+  globalThis.__zuriLagProbe = { snapshot: () => state };
 }
 
 function stressPng(seed) {

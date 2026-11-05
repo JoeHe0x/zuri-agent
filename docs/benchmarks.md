@@ -42,7 +42,7 @@ The baseline compiles the AX tool/messages from Git commit `cbac588`; the protot
 worktree. It uses a minimal tool loop, not the full extension Agent lifecycle or CLI/MCP. Production
 Content handlers execute actions and scrolling; DOM state checks answers and side effects.
 `tests/results/viewport-ax/live/` contains transcripts, provider usage and pass/fail results.
-`QZ_AX_OUTPUT` selects another evidence directory. No user profile or stored settings are changed.
+`ZURI_AX_OUTPUT` selects another evidence directory. No user profile or stored settings are changed.
 
 For the public-site matrix, use the same isolated AX/Content harness:
 

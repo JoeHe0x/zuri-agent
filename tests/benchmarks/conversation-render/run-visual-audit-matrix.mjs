@@ -8,7 +8,7 @@ const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
 const args = parseArgs(process.argv.slice(2));
 const fixture = resolve(args.fixture || args._[0] || join(ROOT, "tests/benchmarks/conversation-render/fixtures/smoke.json"));
 const profiles = selectProfiles(args.profiles);
-const outputDir = resolve(args.outputDir || join("/tmp/qingzhou-conversation-visual-audit-matrix", timestampSlug()));
+const outputDir = resolve(args.outputDir || join("/tmp/zuri-conversation-visual-audit-matrix", timestampSlug()));
 mkdirSync(outputDir, { recursive: true });
 
 const results = [];
@@ -125,7 +125,7 @@ function renderMatrixHtml(summary) {
       </article>
     `;
   }).join("");
-  return `<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>轻舟 Chat 视觉审计矩阵</title><style>
+  return `<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Zuri Chat 视觉审计矩阵</title><style>
     :root{color-scheme:light dark;--bg:#f7f8f8;--panel:#fff;--line:#e3e7e5;--text:#202423;--muted:#7b8380;--ok:#2f8f70;--bad:#b94b4b}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}main{width:min(1120px,100%);margin:auto;padding:32px}h1{font-size:24px;margin:0}main>p{color:var(--muted);margin:5px 0 22px}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.profile{background:var(--panel);border:1px solid var(--line);padding:16px}.profile header{display:flex;align-items:center;gap:8px}.profile header span:last-child{margin-left:auto;color:var(--muted)}.dot{width:7px;height:7px;border-radius:50%;background:var(--ok)}.fail .dot,.skipped .dot{background:var(--bad)}.profile p{color:var(--muted)}dl{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--line);margin:14px 0}dl div{padding:9px;border-right:1px solid var(--line)}dl div:last-child{border:0}dt{font-size:11px;color:var(--muted)}dd{margin:2px 0 0;font-weight:600}.profile a{color:inherit;text-underline-offset:3px}.error{color:var(--bad)}@media(max-width:700px){main{padding:18px}.grid{grid-template-columns:1fr}dl{grid-template-columns:repeat(2,1fr)}dl div:nth-child(2){border-right:0}}@media(prefers-color-scheme:dark){:root{--bg:#141716;--panel:#1b1f1e;--line:#303533;--text:#edf0ef;--muted:#9ba3a0;--ok:#65b99a;--bad:#e57a7a}}
   </style></head><body><main><h1>Chat 视觉审计矩阵</h1><p>同一套真实交互在不同视口和配色下逐项执行。任一控件未覆盖、点击失败或视觉健康检查失败，矩阵即失败。</p><section class="grid">${cards}</section></main></body></html>`;
 }

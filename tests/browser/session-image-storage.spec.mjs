@@ -29,7 +29,7 @@ test("native asset DB upgrade, GC and reload preserve inline history and offline
   const stored = await page.evaluate(async () => {
     // Upgrade an existing gallery DB without replacing its assets.
     await new Promise((resolve, reject) => {
-      const request = indexedDB.open("qz-browser-agent-assets", 1);
+      const request = indexedDB.open("zuri-agent-assets", 1);
       request.onupgradeneeded = () => {
         const store = request.result.createObjectStore("image_assets", { keyPath: "assetId" });
         for (const key of ["sha256", "updatedAt", "lastAccessedAt"]) store.createIndex(key, key, { unique: key === "sha256" });
@@ -54,7 +54,7 @@ test("native asset DB upgrade, GC and reload preserve inline history and offline
     localStorage.setItem("snapshot", JSON.stringify(snapshot));
     localStorage.setItem("image", image);
     const count = await new Promise((resolve, reject) => {
-      const request = indexedDB.open("qz-browser-agent-assets", 2);
+      const request = indexedDB.open("zuri-agent-assets", 2);
       request.onsuccess = () => {
         const db = request.result;
         const tx = db.transaction("history_images");
@@ -90,7 +90,7 @@ test("native asset DB upgrade, GC and reload preserve inline history and offline
       html: buildSessionExportHtml(session, payload, { chatHtml: container.innerHTML }) };
   });
   expect(restored.replay).toBe(restored.image);
-  expect(restored.html).not.toContain("qz-history-image:");
+  expect(restored.html).not.toContain("zuri-history-image:");
   await expect(page.locator("img")).toHaveCount(2);
   const offline = await context.newPage();
   await context.setOffline(true);

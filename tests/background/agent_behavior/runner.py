@@ -14,7 +14,7 @@ from typing import Any
 from .acceptance import map_wait_answers, safe_int, validate_case
 from .capture import CaseCapture
 from .cases import CaseSpec, build_cases, materialize_runtime_case
-from .client import ClientSession, QingzhouMcpClient, streamablehttp_client
+from .client import ClientSession, ZuriMcpClient, streamablehttp_client
 from .fixtures import fixture_server
 from .localized_cases import localize_case
 from .reporting import (
@@ -27,12 +27,12 @@ from .reporting import (
 
 
 DEFAULT_BRIDGE_URL = "http://127.0.0.1:18765/mcp"
-DEFAULT_REPORT = "/tmp/qingzhou-agent-behavior-regression.json"
+DEFAULT_REPORT = "/tmp/zuri-agent-behavior-regression.json"
 POLL_INTERVAL_SECONDS = 2.0
 
 
 async def start_case_session(
-    client: QingzhouMcpClient,
+    client: ZuriMcpClient,
     case: CaseSpec,
 ) -> tuple[str, list[str], dict[str, Any]]:
     if not case.expected.get("environmentSetup"):
@@ -67,7 +67,7 @@ async def start_case_session(
         raise
 
 
-async def run_case(client: QingzhouMcpClient, case: CaseSpec, run_tag: str, capture: CaseCapture | None = None) -> dict[str, Any]:
+async def run_case(client: ZuriMcpClient, case: CaseSpec, run_tag: str, capture: CaseCapture | None = None) -> dict[str, Any]:
     case = materialize_runtime_case(case)
     started = time.monotonic()
     session_id = ""
@@ -179,7 +179,7 @@ async def run_case_with_new_client(
     ) as (read, write, _):
         async with ClientSession(read, write) as session:
             await session.initialize()
-            client = QingzhouMcpClient(session)
+            client = ZuriMcpClient(session)
             return await run_case(client, case, run_tag, capture)
 
 
@@ -228,7 +228,7 @@ async def run_cases(
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Run Qingzhou Agent behavior regression cases through an isolated MCP E2E environment.")
+    parser = argparse.ArgumentParser(description="Run Zuri Agent behavior regression cases through an isolated MCP E2E environment.")
     parser.add_argument("--bridge-url", default=DEFAULT_BRIDGE_URL, help="MCP streamable HTTP URL.")
     parser.add_argument(
         "--suite",
@@ -286,10 +286,10 @@ async def amain() -> int:
         async with streamablehttp_client(args.bridge_url, timeout=args.bridge_timeout, sse_read_timeout=max(300, args.bridge_timeout)) as (read, write, _):
             async with ClientSession(read, write) as session:
                 await session.initialize()
-                client = QingzhouMcpClient(session)
-                status = await client.call("qingzhou_bridge_status", {})
+                client = ZuriMcpClient(session)
+                status = await client.call("zuri_bridge_status", {})
                 if int(status.get("clientCount") or 0) <= 0:
-                    raise SystemExit("No Qingzhou extension client is connected to the MCP bridge.")
+                    raise SystemExit("No Zuri extension client is connected to the MCP bridge.")
         results = await run_cases(
             cases=cases,
             bridge_url=args.bridge_url,
@@ -300,7 +300,7 @@ async def amain() -> int:
         )
 
     report = {
-        "schema": "qingzhou.agent_behavior_regression.v2",
+        "schema": "zuri.agent_behavior_regression.v2",
         "createdAt": datetime.now().isoformat(timespec="seconds"),
         "bridgeUrl": args.bridge_url,
         "suite": args.suite,

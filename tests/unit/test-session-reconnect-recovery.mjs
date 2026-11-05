@@ -306,7 +306,7 @@ async function repeatedTargetClickKeepsItsHydrationOwner() {
   assert.equal(switchEpoch, 1, "a repeated click must not cancel the in-flight hydration for its own target");
   resolveRecord({
     _session_b: {
-      type: "qz-browser-agent-session",
+      type: "zuri-agent-session",
       version: 4,
       conversation: { type: "conversation", version: 1, entries: [] },
       transcript: [{ type: "assistant", content: "restored" }],

@@ -185,8 +185,8 @@ chatWorkspaceFeature.start();
 if (benchmarkHarness) {
   await workspaceComposition.start();
   btnPickElement?.classList.remove("hidden");
-  if (!globalThis.__QZ_INSTALL_CONVERSATION_BENCHMARK__) throw new Error("Conversation benchmark test hook is missing");
-  globalThis.__QZ_INSTALL_CONVERSATION_BENCHMARK__({
+  if (!globalThis.__ZURI_INSTALL_CONVERSATION_BENCHMARK__) throw new Error("Conversation benchmark test hook is missing");
+  globalThis.__ZURI_INSTALL_CONVERSATION_BENCHMARK__({
     root: document, workspace: workspaceComposition, chat: chatWorkspaceFeature, sessionState,
     perf: perfTraceFeature, getCurrentSessionId: () => currentSessionId, nowTimestamp,
     resetNavigation: () => { currentSessionId = null; currentTab = UI_TABS.CHAT; },

@@ -36,11 +36,11 @@ import {
 import { buildRunProfile as createRunProfile } from "./agent/run-profile.js";
 import { getCurrentRuntimeConfig, getCurrentRuntimeConfigVersion, setCurrentRuntimeConfig } from "./runtime-config.js";
 import {
-  getQingzhouMcpBridgeConfig,
-  getQingzhouMcpConnectionStatus,
-  qingzhouMcpBridgeStorageKey,
-  saveQingzhouMcpBridgeConfig,
-  startQingzhouMcpBridge,
+  getZuriMcpBridgeConfig,
+  getZuriMcpConnectionStatus,
+  zuriMcpBridgeStorageKey,
+  saveZuriMcpBridgeConfig,
+  startZuriMcpBridge,
 } from "./mcp/mcp-bridge.js";
 import { createMcpConnectPage, assertMcpSettingsSender } from "./mcp/connect-page.js";
 import type { CliConnectionInput } from "../shared/mcp-connection.js";
@@ -141,7 +141,7 @@ import {
   createAutomationRuntime,
   isAutomationSessionFamily as isAutomationSessionTree,
 } from "./automation/runtime.js";
-import { ensureQingzhouTabGroupForWindow } from "../shared/tab-groups.js";
+import { ensureZuriTabGroupForWindow } from "../shared/tab-groups.js";
 import { buildFollowUpMessages, buildPageSuggestionMessages, buildSessionTitleMessages } from "./agent/prompts.js";
 import { createPageSuggestions } from "./services/page-suggestions.js";
 import { nowBeijingDateTime } from "../shared/time-utils.js";
@@ -158,7 +158,7 @@ import {
   appendSessionResourceArtifacts,
 } from "../shared/session/session-resource-ledger.js";
 
-console.log("[轻舟] Service Worker started");
+console.log("[Zuri] Service Worker started");
 
 const dataConsent = createDataConsentService(chrome.storage.local);
 
@@ -297,7 +297,7 @@ function revealNotificationSession(sessionId: string) {
 
   if (!openOptions || !chrome.sidePanel?.open) {
     return routeReveal().then(delivered => {
-      if (!delivered) console.debug("[轻舟] notification reveal has no available side panel target:", id);
+      if (!delivered) console.debug("[Zuri] notification reveal has no available side panel target:", id);
       return delivered;
     });
   }
@@ -309,7 +309,7 @@ function revealNotificationSession(sessionId: string) {
   } catch (error) {
     cancelled = true;
     sidepanelChannel.clearPending(pendingKey);
-    console.debug("[轻舟] notification side panel open failed:", error instanceof Error ? error.message : error);
+    console.debug("[Zuri] notification side panel open failed:", error instanceof Error ? error.message : error);
     return false;
   }
   const routeAttempt = routeReveal({ remember: true });
@@ -318,7 +318,7 @@ function revealNotificationSession(sessionId: string) {
     (error) => {
       cancelled = true;
       sidepanelChannel.clearPending(pendingKey);
-      console.debug("[轻舟] notification side panel open failed:", error instanceof Error ? error.message : error);
+      console.debug("[Zuri] notification side panel open failed:", error instanceof Error ? error.message : error);
       return false;
     },
   );
@@ -329,25 +329,25 @@ const offscreenKeepalive = createOffscreenKeepalive({
 });
 chrome.runtime.onStartup?.addListener(() => {
   refreshSkillToolRegistry({ reason: "runtime_startup" }).catch((err) => {
-    console.debug("[轻舟] Skill tool registry startup failed:", err instanceof Error ? err.message : err);
+    console.debug("[Zuri] Skill tool registry startup failed:", err instanceof Error ? err.message : err);
   });
   offscreenKeepalive.ensure().catch((err) => {
-    console.debug("[轻舟] offscreen startup failed:", err instanceof Error ? err.message : err);
+    console.debug("[Zuri] offscreen startup failed:", err instanceof Error ? err.message : err);
   });
   automationRuntime.start().catch((err) => {
-    console.debug("[轻舟] automation scheduler startup failed:", err instanceof Error ? err.message : err);
+    console.debug("[Zuri] automation scheduler startup failed:", err instanceof Error ? err.message : err);
   });
 });
 
 chrome.runtime.onInstalled?.addListener(() => {
   refreshSkillToolRegistry({ reason: "runtime_installed" }).catch((err) => {
-    console.debug("[轻舟] Skill tool registry install failed:", err instanceof Error ? err.message : err);
+    console.debug("[Zuri] Skill tool registry install failed:", err instanceof Error ? err.message : err);
   });
   offscreenKeepalive.ensure().catch((err) => {
-    console.debug("[轻舟] offscreen install failed:", err instanceof Error ? err.message : err);
+    console.debug("[Zuri] offscreen install failed:", err instanceof Error ? err.message : err);
   });
   automationRuntime.start().catch((err) => {
-    console.debug("[轻舟] automation scheduler install failed:", err instanceof Error ? err.message : err);
+    console.debug("[Zuri] automation scheduler install failed:", err instanceof Error ? err.message : err);
   });
 });
 
@@ -378,14 +378,14 @@ const productRuntime = createProductRuntime({
 });
 setModelChangeObserver(productRuntime.onModelChange);
 const agentLlm = productRuntime.llm;
-dataConsent.whenAccepted.then(() => productRuntime.start()).catch(err => console.debug("[轻舟] product runtime start failed:", err instanceof Error ? err.message : err));
+dataConsent.whenAccepted.then(() => productRuntime.start()).catch(err => console.debug("[Zuri] product runtime start failed:", err instanceof Error ? err.message : err));
 const collectRunScriptToolArtifacts = createRunScriptArtifactCollector({ getToolIdentity });
 const releaseAgentRunResources = async ({ sessionId, runId, eventType }: { sessionId: string; runId: string; eventType?: string }) => {
   try { return await releaseRunCdp(sessionId, runId); }
   finally { if (eventType === "delete_session") await releaseSessionCdp(sessionId); }
 };
 const lifecycle = createLifecycleObservers([...productRuntime.observers, ...observerCapabilities.flat()], {
-  onDiagnostic: diagnostic => console.debug("[轻舟] lifecycle observer:", diagnostic),
+  onDiagnostic: diagnostic => console.debug("[Zuri] lifecycle observer:", diagnostic),
 });
 const agentServices = Object.freeze({
   getRuntimeConfig: getCurrentRuntimeConfig,
@@ -483,7 +483,7 @@ const sessionTabs = createSessionTabs({
   persistRuntime: sessionRuntimeState.persist,
   broadcast,
   now: nowBeijingDateTime,
-  ensureTabGroupForWindow: ensureQingzhouTabGroupForWindow,
+  ensureTabGroupForWindow: ensureZuriTabGroupForWindow,
   annotateGuardrailTab: annotateSecurityGuardrailTab,
   normalizeSessionId,
   rootSessionId: ROOT_SESSION_ID,
@@ -588,7 +588,7 @@ automationRuntime = createAutomationRuntime({
       const text = String(prompt || "").trim();
       if (!text) return false;
       const task = await sessionCommands.startSessionPromptTask({ sessionId, text, swallowErrors: true }, signal);
-      void task.promise?.catch(error => console.warn("[轻舟] launch automation prompt failed:", error));
+      void task.promise?.catch(error => console.warn("[Zuri] launch automation prompt failed:", error));
       return !task.cancelled;
     },
     remove: sessionCommands.deleteSessionRuntime,
@@ -629,7 +629,7 @@ skillSettings = createSkillSettingsService({
   listSkillManifests: () => getSkillToolRegistrySnapshot().plugins,
 });
 startSkillToolRegistryInitialization("service_worker_init").catch((err) => {
-  console.debug("[轻舟] Skill tool registry init failed:", err instanceof Error ? err.message : err);
+  console.debug("[Zuri] Skill tool registry init failed:", err instanceof Error ? err.message : err);
 });
 const skillNetwork = createSkillNetworkService({
   fetch: globalThis.fetch.bind(globalThis),
@@ -645,7 +645,7 @@ const pageSuggestions = createPageSuggestions({
 });
 const platformCommands = createPlatformCommands({
   sessionSupervisor,
-  getBridgeConfig: getQingzhouMcpBridgeConfig,
+  getBridgeConfig: getZuriMcpBridgeConfig,
   tabs: chrome.tabs,
   sendToContent,
   ensureSkillToolRegistryReady: ensureSkillToolRegistryReady,
@@ -685,19 +685,19 @@ const pageSkillImporter = createPageSkillImportService({
 });
 const skillDocumentResources = createSkillDocumentResourceService();
 offscreenKeepalive.ensure().catch((err) => {
-  console.debug("[轻舟] offscreen keepalive unavailable:", err instanceof Error ? err.message : err);
+  console.debug("[Zuri] offscreen keepalive unavailable:", err instanceof Error ? err.message : err);
 });
 sessionTabs.cleanupLegacyGroups().catch((err) => {
-  console.debug("[轻舟] cleanup legacy tab groups failed:", err instanceof Error ? err.message : err);
+  console.debug("[Zuri] cleanup legacy tab groups failed:", err instanceof Error ? err.message : err);
 });
 sessionRuntimeReady.then(() => sessionTabs.syncGroup("startup")).catch((err) => {
-  console.debug("[轻舟] startup tab group sync failed:", err instanceof Error ? err.message : err);
+  console.debug("[Zuri] startup tab group sync failed:", err instanceof Error ? err.message : err);
 });
 Promise.all([sessionRuntimeReady, dataConsent.whenAccepted]).then(() => sessionRuntimeState.queueFollowUpResume("startup")).catch((err) => {
-  console.debug("[轻舟] startup follow-up resume failed:", err instanceof Error ? err.message : err);
+  console.debug("[Zuri] startup follow-up resume failed:", err instanceof Error ? err.message : err);
 });
 automationRuntime.start().catch((err) => {
-  console.debug("[轻舟] automation scheduler unavailable:", err instanceof Error ? err.message : err);
+  console.debug("[Zuri] automation scheduler unavailable:", err instanceof Error ? err.message : err);
 });
 
 const handleToolRuntimeEvent = createToolEventRouter({
@@ -830,7 +830,7 @@ const mcpRuntime = createMcpRuntime({
     locationConsent: locationService,
   },
   dispatchSidepanel: (message, port) => sidepanelTransport.dispatch(message, port),
-  storageKey: qingzhouMcpBridgeStorageKey,
+  storageKey: zuriMcpBridgeStorageKey,
 });
 
 const mcpResources = createMcpResourceRuntime();
@@ -841,7 +841,7 @@ const mcpManagement = createMcpManagementRuntime({
   language: { get: readLanguagePreference, save: saveLanguagePreference, list: getAvailableLanguages },
 });
 
-let mcpBridge: ReturnType<typeof startQingzhouMcpBridge> | undefined;
+let mcpBridge: ReturnType<typeof startZuriMcpBridge> | undefined;
 const connectMcp = createMcpConnectPage({
   extensionId: chrome.runtime.id,
   assertConsent: dataConsent.assertAccepted,
@@ -854,7 +854,7 @@ const backgroundApi = createBackgroundApi({
     connectMcp,
     mcpConnectionStatus: (sender: chrome.runtime.MessageSender) => {
       assertMcpSettingsSender(sender, chrome.runtime.id);
-      return mcpBridge?.status() || getQingzhouMcpConnectionStatus();
+      return mcpBridge?.status() || getZuriMcpConnectionStatus();
     },
     connectMcpFromSettings: (sender: chrome.runtime.MessageSender, input: CliConnectionInput) => {
       assertMcpSettingsSender(sender, chrome.runtime.id);
@@ -1022,8 +1022,8 @@ const backgroundApi = createBackgroundApi({
 const mcpTransport = createMcpTransport(backgroundApi, {
   bridge: {
     describe: mcpRuntime.describe,
-    getConfig: getQingzhouMcpBridgeConfig,
-    saveConfig: saveQingzhouMcpBridgeConfig,
+    getConfig: getZuriMcpBridgeConfig,
+    saveConfig: saveZuriMcpBridgeConfig,
   },
 });
 
@@ -1038,7 +1038,7 @@ runtimeMessageTransport.register(chrome.runtime);
 
 subscribeSkillToolRegistry(broadcast);
 function getMcpBridge() {
-  return mcpBridge ??= startQingzhouMcpBridge({
+  return mcpBridge ??= startZuriMcpBridge({
     dispatch: mcpTransport.dispatch,
     describe: mcpRuntime.describe,
     assertConsent: dataConsent.assertAccepted,
@@ -1046,18 +1046,18 @@ function getMcpBridge() {
     trace: llmTrace,
   });
 }
-dataConsent.whenAccepted.then(getMcpBridge).catch(error => console.debug("[qz] MCP bridge startup failed:", error));
+dataConsent.whenAccepted.then(getMcpBridge).catch(error => console.debug("[zuri] MCP bridge startup failed:", error));
 
 chrome.tabs.onRemoved.addListener((tabId) => {
   void releaseTabCdp(tabId);
   sessionTabs.handleTabRemoved(tabId).catch((error) => {
-    console.warn("[轻舟] persist tab removal failed:", error);
+    console.warn("[Zuri] persist tab removal failed:", error);
   });
 });
 
 chrome.notifications?.onClicked?.addListener((notificationId) => {
   sessionCompletionNotifier.handleClick(notificationId).catch((err) => {
-    console.debug("[轻舟] activate notification tab failed:", err instanceof Error ? err.message : err);
+    console.debug("[Zuri] activate notification tab failed:", err instanceof Error ? err.message : err);
   });
 });
 
@@ -1076,7 +1076,7 @@ chrome.commands?.onCommand?.addListener((command, tab) => {
     revealSwitcher({ remember: opened === true });
   }, (error) => {
     revealSwitcher();
-    console.debug("[轻舟] model preset shortcut could not open side panel:", error instanceof Error ? error.message : error);
+    console.debug("[Zuri] model preset shortcut could not open side panel:", error instanceof Error ? error.message : error);
   });
 });
 
@@ -1085,14 +1085,14 @@ chrome.commands?.onCommand?.addListener((command, tab) => {
 // ---------------------------------------------------------------------------
 
 chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true })
-  .then(() => console.log("[轻舟] setPanelBehavior OK"))
+  .then(() => console.log("[Zuri] setPanelBehavior OK"))
   .catch((e) => {
-    console.warn("[轻舟] setPanelBehavior failed, using fallback:", e);
+    console.warn("[Zuri] setPanelBehavior failed, using fallback:", e);
     chrome.action.onClicked.addListener(async (tab) => {
       try {
         await sessionExchangeBridge.openSidePanel(tab.windowId);
       } catch (err) {
-        console.error("[轻舟] sidePanel.open failed:", err);
+        console.error("[Zuri] sidePanel.open failed:", err);
       }
     });
   });
@@ -1100,9 +1100,9 @@ chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true })
 /** Firefox end-to-end checks call page tools in this background page. */
 export function installFirefoxPageToolHarness(): void {
   if (!firefoxExtension()) return;
-  const root = globalThis as typeof globalThis & { __qzFirefoxPageTools?: ReturnType<typeof createToolRuntime> };
-  if (root.__qzFirefoxPageTools) return;
-  root.__qzFirefoxPageTools = createToolRuntime({
+  const root = globalThis as typeof globalThis & { __zuriFirefoxPageTools?: ReturnType<typeof createToolRuntime> };
+  if (root.__zuriFirefoxPageTools) return;
+  root.__zuriFirefoxPageTools = createToolRuntime({
     sessions: {
       isRunCurrent: () => true,
       async resolveTargetTab({ tabId }) {

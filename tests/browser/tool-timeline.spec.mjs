@@ -8,7 +8,7 @@ const viewports = {
 test.describe("read_article Markdown presentation", () => {
   test.use({ viewport: { width: 980, height: 900 } });
 
-  test("renders one safe QZ Markdown surface without a format branch", async ({ page }) => {
+  test("renders one safe ZURI Markdown surface without a format branch", async ({ page }) => {
     await page.goto("/tests/tool-timeline/visual-test.html", { waitUntil: "networkidle" });
     await page.waitForFunction(() => window.visualTimelineTest?.renderConversationFlow);
     await page.evaluate(() => {
@@ -316,8 +316,8 @@ test.describe("skill document resource presentation", () => {
             size: 2048,
             sheetName: "Apps",
             columns: ["name", "status"],
-            rows: [{ name: "Qingzhou", status: "ready" }],
-            content: "name\tstatus\nQingzhou\tready",
+            rows: [{ name: "Zuri", status: "ready" }],
+            content: "name\tstatus\nZuri\tready",
             truncated: true,
             document: { docModelId: "model_skill_apps", format: "xlsx" },
           },
@@ -329,7 +329,7 @@ test.describe("skill document resource presentation", () => {
     const workbookDetails = page.locator(".msg-tool .tool-details");
     await expect(workbookDetails.locator(".tool-data-table-title")).toHaveText("Apps");
     await expect(workbookDetails.locator(".tool-data-table th")).toContainText(["#", "name", "status"]);
-    await expect(workbookDetails.locator(".tool-data-table tbody")).toContainText("Qingzhou");
+    await expect(workbookDetails.locator(".tool-data-table tbody")).toContainText("Zuri");
     await expect(workbookDetails).toContainText("model_skill_apps");
     await expect(workbookDetails.locator(".tool-skill-resource-code")).toHaveCount(0);
 
@@ -374,7 +374,7 @@ test.describe("skill document resource presentation", () => {
         entries: [{
           type: "tool",
           id: "document-content-projection",
-          name: "qingzhou_documents__document_read_chunk",
+          name: "zuri_documents__document_read_chunk",
           args: { docModelId: "model_guide", chunkIndex: 0 },
           result: {
             docModelId: "model_guide",
@@ -447,7 +447,7 @@ for (const colorScheme of ["light", "dark"]) {
             type: "tool",
             id: "screen-action-projection",
             name: "act_on_screen",
-            args: { action: "type", text: "轻舟", returnScreenshot: true, x: 80, y: 135 },
+            args: { action: "type", text: "Zuri", returnScreenshot: true, x: 80, y: 135 },
             result: {
               status: "completed",
               feedbackAvailable: true,
@@ -688,7 +688,7 @@ for (const colorScheme of ["light", "dark"]) {
             beforeSrc: output.querySelector(".tool-image-action-before")?.getAttribute("src") || "",
             afterSrc: output.querySelector(".tool-image-action-after")?.getAttribute("src") || "",
             fullSrc: output.querySelector(".tool-image-action-after")?.getAttribute("data-full-src") || "",
-            exchangeHasSourceFrame: output.querySelector("#qingzhou-session-exchange")?.textContent?.includes("beforeImage") === true,
+            exchangeHasSourceFrame: output.querySelector("#zuri-session-exchange")?.textContent?.includes("beforeImage") === true,
           };
         } finally {
           feature.dispose();

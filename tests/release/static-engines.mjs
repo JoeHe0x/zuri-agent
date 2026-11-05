@@ -55,7 +55,7 @@ $$\begin{bmatrix}1&2\\3&4\end{bmatrix}$$`;
   await page.locator(".input-document-attachment.is-ready").filter({ hasText: "store-review.pdf" }).waitFor({ timeout: 30000 });
   const models = await worker.evaluate(async () => {
     const database = await new Promise((resolve, reject) => {
-      const request = indexedDB.open("qz-browser-agent-documents");
+      const request = indexedDB.open("zuri-agent-documents");
       request.onsuccess = () => resolve(request.result);
       request.onerror = () => reject(request.error);
     });

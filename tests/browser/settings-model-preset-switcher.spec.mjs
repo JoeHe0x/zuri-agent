@@ -40,10 +40,10 @@ for (const colorScheme of ["light", "dark"]) {
       await page.evaluate(() => {
         const dialog = document.querySelector("#model-preset-switcher");
         const composer = document.querySelector("#input");
-        window.__qzPresetFocusOrder = [];
-        dialog.addEventListener("close", () => window.__qzPresetFocusOrder.push("dialog-close"), { once: true });
+        window.__zuriPresetFocusOrder = [];
+        dialog.addEventListener("close", () => window.__zuriPresetFocusOrder.push("dialog-close"), { once: true });
         composer.addEventListener("focus", () => {
-          window.__qzPresetFocusOrder.push(`composer-focus:${dialog.open}`);
+          window.__zuriPresetFocusOrder.push(`composer-focus:${dialog.open}`);
         }, { once: true });
       });
       await emitShortcut(page);
@@ -66,20 +66,20 @@ for (const colorScheme of ["light", "dark"]) {
       await expect(items.first().locator(".model-preset-switcher-meta")).toHaveText(modelSnapshot["kimi-code-plan-cn"].name);
 
       await input.press("Enter");
-      await page.waitForFunction(() => window.__qzPostedMessages.some(message => message.type === "apply_model_preset"));
+      await page.waitForFunction(() => window.__zuriPostedMessages.some(message => message.type === "apply_model_preset"));
       await expect(input).toBeFocused();
       await expect(input).toBeEnabled();
       await expect(input).toHaveJSProperty("readOnly", false);
       await expect(dialog).toHaveAttribute("aria-busy", "true");
       await input.press("Enter");
-      expect(await page.evaluate(() => window.__qzPostedMessages
+      expect(await page.evaluate(() => window.__zuriPostedMessages
         .filter(message => message.type === "apply_model_preset").length)).toBe(1);
       const request = await page.evaluate(() => {
-        return window.__qzPostedMessages.filter(message => message.type === "apply_model_preset").at(-1);
+        return window.__zuriPostedMessages.filter(message => message.type === "apply_model_preset").at(-1);
       });
       expect(request.presetId).toBe("preset-kimi");
       await page.evaluate(({ requestId, config }) => {
-        window.__qzEmitPortMessage({ type: "config", requestId, config });
+        window.__zuriEmitPortMessage({ type: "config", requestId, config });
       }, {
         requestId: request.requestId,
         config: configForPreset(PRESETS[1]),
@@ -88,7 +88,7 @@ for (const colorScheme of ["light", "dark"]) {
       await expect(dialog).toBeHidden();
       await expect(page.locator("#current-model-indicator .model-menu-trigger")).toHaveText("kimi-k3");
       await expect(page.locator("#input")).toBeFocused();
-      expect(await page.evaluate(() => window.__qzPresetFocusOrder)).toEqual([
+      expect(await page.evaluate(() => window.__zuriPresetFocusOrder)).toEqual([
         "dialog-close",
         "composer-focus:false",
       ]);
@@ -164,13 +164,13 @@ test("uses learned transitions for a one-keystroke preset switch", async ({ page
   await expect(items.first()).toHaveAttribute("aria-selected", "true");
   await page.locator("#model-preset-switcher-input").press("Enter");
 
-  await page.waitForFunction(() => window.__qzPostedMessages.some(message => message.type === "apply_model_preset"));
+  await page.waitForFunction(() => window.__zuriPostedMessages.some(message => message.type === "apply_model_preset"));
   const request = await page.evaluate(() => {
-    return window.__qzPostedMessages.findLast(message => message.type === "apply_model_preset");
+    return window.__zuriPostedMessages.findLast(message => message.type === "apply_model_preset");
   });
   expect(request.presetId).toBe("preset-kimi");
   await page.evaluate(({ requestId, config }) => {
-    window.__qzEmitPortMessage({ type: "config", requestId, config });
+    window.__zuriEmitPortMessage({ type: "config", requestId, config });
   }, {
     requestId: request.requestId,
     config: {
@@ -203,7 +203,7 @@ test("treats selecting the current preset as a no-op and respects IME compositio
     }
   });
   await expect(dialog).toBeVisible();
-  expect(await page.evaluate(() => window.__qzPostedMessages
+  expect(await page.evaluate(() => window.__zuriPostedMessages
     .filter(message => message.type === "apply_model_preset").length)).toBe(0);
 
   await input.evaluate(element => {
@@ -212,7 +212,7 @@ test("treats selecting the current preset as a no-op and respects IME compositio
   await input.press("Enter");
   await expect(dialog).toBeHidden();
   await expect(page.locator("#input")).toBeFocused();
-  expect(await page.evaluate(() => window.__qzPostedMessages
+  expect(await page.evaluate(() => window.__zuriPostedMessages
     .filter(message => message.type === "apply_model_preset").length)).toBe(0);
 });
 
@@ -323,22 +323,22 @@ test("renders a compact Spotlight-style surface for a long preset list", async (
 test("defers shortcut focus until the Side Panel document reports real focus", async ({ page }) => {
   await openSidepanel(page, configForPreset(PRESETS[0]));
   await installPresetFocusProbe(page);
-  await page.evaluate(() => { window.__qzDocumentFocused = false; });
+  await page.evaluate(() => { window.__zuriDocumentFocused = false; });
   await emitShortcut(page);
   await expect(page.locator("#model-preset-switcher")).toBeVisible();
-  await expect.poll(() => page.evaluate(() => window.__qzPresetExplicitFocus)).toEqual({ focus: 0, select: 0 });
+  await expect.poll(() => page.evaluate(() => window.__zuriPresetExplicitFocus)).toEqual({ focus: 0, select: 0 });
 
   await page.evaluate(() => {
-    window.__qzDocumentFocused = true;
+    window.__zuriDocumentFocused = true;
     window.dispatchEvent(new FocusEvent("focus"));
   });
-  await expect.poll(() => page.evaluate(() => window.__qzPresetExplicitFocus)).toEqual({ focus: 1, select: 1 });
+  await expect.poll(() => page.evaluate(() => window.__zuriPresetExplicitFocus)).toEqual({ focus: 1, select: 1 });
   await expect(page.locator("#model-preset-switcher-input")).toBeFocused();
   await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
   await expect(page.locator("#model-preset-switcher-input")).toBeFocused();
 
   await page.evaluate(() => {
-    window.__qzDocumentFocused = false;
+    window.__zuriDocumentFocused = false;
     document.querySelector("#model-preset-switcher-input").dispatchEvent(new KeyboardEvent("keydown", {
       key: "Escape",
       bubbles: true,
@@ -347,11 +347,11 @@ test("defers shortcut focus until the Side Panel document reports real focus", a
   });
   await expect(page.locator("#model-preset-switcher")).toBeHidden();
   await page.evaluate(() => {
-    window.__qzDocumentFocused = true;
+    window.__zuriDocumentFocused = true;
     window.dispatchEvent(new FocusEvent("focus"));
   });
   await expect(page.locator("#input")).toBeFocused();
-  expect(await page.evaluate(() => window.__qzPresetExplicitFocus)).toEqual({ focus: 1, select: 1 });
+  expect(await page.evaluate(() => window.__zuriPresetExplicitFocus)).toEqual({ focus: 1, select: 1 });
 });
 
 test("restores a failed preset search after focus returns without selecting its query", async ({ page }) => {
@@ -361,29 +361,29 @@ test("restores a failed preset search after focus returns without selecting its 
   const input = page.locator("#model-preset-switcher-input");
   await input.fill("kimi");
   await input.press("Enter");
-  await page.waitForFunction(() => window.__qzPostedMessages.some(message => message.type === "apply_model_preset"));
+  await page.waitForFunction(() => window.__zuriPostedMessages.some(message => message.type === "apply_model_preset"));
   const requestId = await page.evaluate(() => {
-    return window.__qzPostedMessages.findLast(message => message.type === "apply_model_preset")?.requestId;
+    return window.__zuriPostedMessages.findLast(message => message.type === "apply_model_preset")?.requestId;
   });
-  const callsBeforeError = await page.evaluate(() => ({ ...window.__qzPresetExplicitFocus }));
+  const callsBeforeError = await page.evaluate(() => ({ ...window.__zuriPresetExplicitFocus }));
   await page.evaluate((id) => {
-    window.__qzDocumentFocused = false;
-    window.__qzEmitPortMessage({
+    window.__zuriDocumentFocused = false;
+    window.__zuriEmitPortMessage({
       type: "error",
       requestId: id,
       message: "模型服务暂时不可用",
     });
   }, requestId);
   await expect(page.locator("#model-preset-switcher-status")).toHaveText("模型服务暂时不可用");
-  expect(await page.evaluate(() => window.__qzPresetExplicitFocus)).toEqual(callsBeforeError);
+  expect(await page.evaluate(() => window.__zuriPresetExplicitFocus)).toEqual(callsBeforeError);
 
   await page.evaluate(() => {
-    window.__qzDocumentFocused = true;
+    window.__zuriDocumentFocused = true;
     window.dispatchEvent(new FocusEvent("focus"));
   });
-  await expect.poll(() => page.evaluate(() => window.__qzPresetExplicitFocus.focus))
+  await expect.poll(() => page.evaluate(() => window.__zuriPresetExplicitFocus.focus))
     .toBe(callsBeforeError.focus + 1);
-  expect(await page.evaluate(() => window.__qzPresetExplicitFocus.select)).toBe(callsBeforeError.select);
+  expect(await page.evaluate(() => window.__zuriPresetExplicitFocus.select)).toBe(callsBeforeError.select);
   await expect(input).toBeFocused();
   await expect(input).toHaveValue("kimi");
   await input.press("Escape");
@@ -394,19 +394,19 @@ test("focuses the Composer when Chrome reveals an already-focused Side Panel doc
   await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
   await page.locator("#btn-settings").focus();
   await expect(page.locator("#btn-settings")).toBeFocused();
-  await page.evaluate(() => window.__qzEmitSidePanelOpened({ windowId: 1 }));
+  await page.evaluate(() => window.__zuriEmitSidePanelOpened({ windowId: 1 }));
   await expect(page.locator("#input")).toBeFocused();
 });
 
 async function openSidepanel(page, config) {
   await page.addInitScript(installBenchmarkChromeStub, { config });
   await page.goto("/extension/sidepanel/sidepanel.html", { waitUntil: "domcontentloaded" });
-  await page.waitForFunction(() => Boolean(window.qingzhouConversationBenchmark));
+  await page.waitForFunction(() => Boolean(window.zuriConversationBenchmark));
   await page.locator("#input").focus();
 }
 
 async function emitShortcut(page) {
-  await page.evaluate(() => window.qingzhouConversationBenchmark.dispatchBackgroundEvent({
+  await page.evaluate(() => window.zuriConversationBenchmark.dispatchBackgroundEvent({
     type: "model_preset_switcher_requested",
     source: "shortcut",
   }));
@@ -417,18 +417,18 @@ async function installPresetFocusProbe(page) {
     const input = document.querySelector("#model-preset-switcher-input");
     const nativeFocus = input.focus.bind(input);
     const nativeSelect = input.select.bind(input);
-    window.__qzPresetExplicitFocus = { focus: 0, select: 0 };
-    window.__qzDocumentFocused = true;
+    window.__zuriPresetExplicitFocus = { focus: 0, select: 0 };
+    window.__zuriDocumentFocused = true;
     Object.defineProperty(document, "hasFocus", {
       configurable: true,
-      value: () => window.__qzDocumentFocused,
+      value: () => window.__zuriDocumentFocused,
     });
     input.focus = (options) => {
-      window.__qzPresetExplicitFocus.focus += 1;
+      window.__zuriPresetExplicitFocus.focus += 1;
       nativeFocus(options);
     };
     input.select = () => {
-      window.__qzPresetExplicitFocus.select += 1;
+      window.__zuriPresetExplicitFocus.select += 1;
       nativeSelect();
     };
   });

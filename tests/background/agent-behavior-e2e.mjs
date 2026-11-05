@@ -12,17 +12,17 @@ import {
 import { readTestApiKey } from "../support/local-credentials.mjs";
 
 const options = parseAgentArgs(process.argv.slice(2));
-const provider = options.provider || String(process.env.QINGZHOU_LLM_PROVIDER || "deepseek").trim();
+const provider = options.provider || String(process.env.ZURI_LLM_PROVIDER || "deepseek").trim();
 const akFile = options.akFile
-  || String(process.env.QINGZHOU_LLM_AK_FILE || "").trim()
-  || (provider === "deepseek" ? String(process.env.QINGZHOU_DEEPSEEK_AK_FILE || "").trim() : "");
+  || String(process.env.ZURI_LLM_AK_FILE || "").trim()
+  || (provider === "deepseek" ? String(process.env.ZURI_DEEPSEEK_AK_FILE || "").trim() : "");
 const apiKey = readTestApiKey(provider, { keyFile: akFile });
 
 const model = options.model
-  || String(process.env.QINGZHOU_LLM_MODEL || "").trim()
-  || String(process.env.QINGZHOU_DEEPSEEK_MODEL || "").trim()
+  || String(process.env.ZURI_LLM_MODEL || "").trim()
+  || String(process.env.ZURI_DEEPSEEK_MODEL || "").trim()
   || (provider === "deepseek" ? "deepseek-v4-flash" : "");
-if (!model) throw new Error("isolated Agent E2E requires --model or QINGZHOU_LLM_MODEL for non-DeepSeek providers");
+if (!model) throw new Error("isolated Agent E2E requires --model or ZURI_LLM_MODEL for non-DeepSeek providers");
 const reportDir = join(PROJECT_ROOT, "tests", "results", "agent");
 mkdirSync(reportDir, { recursive: true });
 const report = options.report || join(reportDir, `behavior-${options.suite}.json`);
@@ -31,8 +31,8 @@ let environment = null;
 
 try {
   environment = await launchIsolatedExtensionMcp({
-    profilePrefix: `qingzhou-agent-${provider.replace(/[^a-z0-9_-]+/gi, "-")}-${options.suite}-e2e-`,
-    headless: process.env.QINGZHOU_AGENT_E2E_HEADLESS !== "0",
+    profilePrefix: `zuri-agent-${provider.replace(/[^a-z0-9_-]+/gi, "-")}-${options.suite}-e2e-`,
+    headless: process.env.ZURI_AGENT_E2E_HEADLESS !== "0",
     requestTimeoutSeconds: 600,
   });
   const saved = await saveExtensionLlmConfig(environment.page, {
@@ -69,7 +69,7 @@ try {
   let regressionError = null;
   try {
     await runBridgePython(fileURLToPath(new URL("./agent-behavior-regression.py", import.meta.url)), pythonArgs, { env: {
-      ...(options.captureDir ? { QINGZHOU_CAPTURE_API_KEY: apiKey } : {}),
+      ...(options.captureDir ? { ZURI_CAPTURE_API_KEY: apiKey } : {}),
     } });
   } catch (error) {
     regressionError = error;
@@ -150,7 +150,7 @@ async function installNewTabWindowProbe(page, { useAlternateWindow = false } = {
         windowId: Number(tab?.windowId),
       });
     });
-    globalThis.__qingzhouNewTabWindowProbe = {
+    globalThis.__zuriNewTabWindowProbe = {
       originWindowId: Number(originWindow?.id),
       expectedWindowId: Number(targetWindow?.id),
       expectedWindowType: String(targetWindow?.type || ""),
@@ -161,7 +161,7 @@ async function installNewTabWindowProbe(page, { useAlternateWindow = false } = {
 
 async function readNewTabWindowProbe(page) {
   const result = await page.evaluate(() => {
-    const probe = globalThis.__qingzhouNewTabWindowProbe || {};
+    const probe = globalThis.__zuriNewTabWindowProbe || {};
     return {
       originWindowId: probe.originWindowId,
       expectedWindowId: probe.expectedWindowId,

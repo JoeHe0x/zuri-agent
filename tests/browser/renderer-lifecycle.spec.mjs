@@ -454,7 +454,7 @@ for (const colorScheme of ["light", "dark"]) {
       const { renderToolEvent } = await import("/extension/sidepanel/tools/tool-renderer.js");
       const { formatTab } = await import("/extension/shared/tab-utils.js");
       const prefix = "\u200b\u202c\ufeff\u200c\u200d\u2061\u2062\u2063 ".repeat(30);
-      const titles = ["普通标题", "「轻舟」使用技巧分享", "「Demo Playground」玩法攻略", "می\u200cروم", "👩\u200d💻 开发笔记", "\u200fالعربية"];
+      const titles = ["普通标题", "「Zuri」使用技巧分享", "「Demo Playground」玩法攻略", "می\u200cروم", "👩\u200d💻 开发笔记", "\u200fالعربية"];
       const tool = { name: "list_tabs", result: { tabs: titles.map((title, index) => ({
         id: index + 1, title: index === 1 || index === 2 ? prefix + title : title, url: `https://example.test/${index}`,
       })) } };

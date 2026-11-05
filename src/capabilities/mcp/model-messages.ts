@@ -98,7 +98,7 @@ const messages = defineMessages("mcp-model", {
   builtinContent: {
     "zh-CN": `# MCP 接入
 
-用于发现、探测和试调用 MCP。轻舟只支持远程 HTTP MCP，不支持本地 stdio。
+用于发现、探测和试调用 MCP。Zuri只支持远程 HTTP MCP，不支持本地 stdio。
 
 ## 先判断对象
 
@@ -125,7 +125,7 @@ const messages = defineMessages("mcp-model", {
 
 1. 先通过 \`{INSPECT}\` 和必要的 \`{CALL}\` 确认 server 可用、目标工具名称和参数契约。
 2. 只绑定用户任务真正需要的工具，不默认包装 server 的全部工具。
-3. 根据最小试调用的真实返回结构选择轻舟标准 renderer；加载 \`skill-workbench\` 后先读取可用渲染器，再把 renderer 与返回 shape 一起设计。不要把原本只有自然语言的 MCP 文本臆测成表格。
+3. 根据最小试调用的真实返回结构选择Zuri标准 renderer；加载 \`skill-workbench\` 后先读取可用渲染器，再把 renderer 与返回 shape 一起设计。不要把原本只有自然语言的 MCP 文本臆测成表格。
 4. 在目标 skill 的 \`plugin.json.mcpServers\` 声明 server，并在 \`tools[]\` 中配置 \`runtime:"mcp"\`、\`mcp:{ server, tool }\` 和匹配返回结构的 \`renderer\`。未声明 renderer 时只使用结构化数据或文本兜底。
 5. 写入后重新 \`load_skill\`，再用 \`{SEARCH}\` 或 \`{LIST}\` 验证 registry 中出现 \`pluginTool.name\`，最后通过该 Skill 工具做正式调用并确认结果 UI。
 
@@ -134,7 +134,7 @@ const messages = defineMessages("mcp-model", {
 - 最终说明使用的是已注册 Skill 入口还是一次性 URL 调用，并给出 server/tool 名称、结果摘要和必要限制；不要复制大段 MCP 原始响应。`,
     en: `# MCP integration
 
-Discover, inspect, and test MCP tools. qz supports remote HTTP MCP only, not local stdio.
+Discover, inspect, and test MCP tools. zuri supports remote HTTP MCP only, not local stdio.
 
 ## Identify the target
 
@@ -161,7 +161,7 @@ Discover, inspect, and test MCP tools. qz supports remote HTTP MCP only, not loc
 
 1. Use \`{INSPECT}\` and, if needed, \`{CALL}\` to verify server availability, the target tool names, and their argument contracts.
 2. Bind only tools the user's task needs; do not wrap every tool by default.
-3. Choose a standard qz renderer from the actual minimal test response. After loading \`skill-workbench\`, inspect available renderers and design the renderer together with the result shape. Do not assume natural-language MCP text is a table.
+3. Choose a standard zuri renderer from the actual minimal test response. After loading \`skill-workbench\`, inspect available renderers and design the renderer together with the result shape. Do not assume natural-language MCP text is a table.
 4. Declare the server in the target Skill's \`plugin.json.mcpServers\`. In \`tools[]\`, set \`runtime:"mcp"\`, \`mcp:{ server, tool }\`, and a \`renderer\` matching the response shape. If no renderer is declared, structured-data or text fallback is used.
 5. After writing, call \`load_skill\` again. Use \`{SEARCH}\` or \`{LIST}\` to verify that \`pluginTool.name\` appears in the registry, then invoke that Skill tool and inspect its result UI.
 

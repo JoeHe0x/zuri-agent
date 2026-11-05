@@ -246,7 +246,7 @@ export function createSessionTabs({
     });
     const owner = findOwner(workingTab.id);
     if (owner && owner.sessionId !== id) {
-      logger.warn?.("[轻舟] refused to assign foreign tab as session working tab", {
+      logger.warn?.("[Zuri] refused to assign foreign tab as session working tab", {
         sessionId: id,
         ownerSessionId: owner.sessionId,
         tabId: workingTab.id,
@@ -497,7 +497,7 @@ export function createSessionTabs({
     try {
       guardrails = await loadSecurityGuardrails();
     } catch (error) {
-      logger.debug?.("[轻舟] load guardrails for imported tabs failed:", errorMessage(error));
+      logger.debug?.("[Zuri] load guardrails for imported tabs failed:", errorMessage(error));
       return {
         restored: false,
         code: errorCode(error, "SESSION_OWNED_TABS_RESTORE_FAILED"),
@@ -629,7 +629,7 @@ export function createSessionTabs({
         });
       }
       await Promise.all(opened.map(result => closeImportedTab(result.tab.id)));
-      logger.debug?.("[轻舟] restore imported owned tabs failed:", errorMessage(error));
+      logger.debug?.("[Zuri] restore imported owned tabs failed:", errorMessage(error));
       return {
         restored: false,
         code: errorCode(error, "SESSION_OWNED_TABS_RESTORE_FAILED"),
@@ -893,7 +893,7 @@ export function createSessionTabs({
     const timer = setTimeout(() => {
       groupSyncTimers.delete(id);
       syncGroup(sessionId).catch((error) => {
-        logger.debug?.("[轻舟] sync agent tab group failed:", errorMessage(error));
+        logger.debug?.("[Zuri] sync agent tab group failed:", errorMessage(error));
       });
     }, 350);
     groupSyncTimers.set(id, timer);
@@ -991,7 +991,7 @@ export function createSessionTabs({
       });
       return group ? { groupId: group.groupId, tabIds: desiredTabIds } : null;
     } catch (error) {
-      logger.debug?.("[轻舟] reconcile session tab group failed:", errorMessage(error));
+      logger.debug?.("[Zuri] reconcile session tab group failed:", errorMessage(error));
       if (existingGroupId != null) await cleanupManagedGroupWindow(previousWindow, desiredTabIds);
       return null;
     }

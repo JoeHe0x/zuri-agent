@@ -2,11 +2,11 @@
 export const ISOLATED_CONTENT_PROBE = `(() => {
             let extensionId = "";
             try { extensionId = globalThis.chrome?.runtime?.id || ""; } catch {}
-            return { extensionId, bridge: typeof globalThis.__qzInvoke === "function" };
+            return { extensionId, bridge: typeof globalThis.__zuriInvoke === "function" };
           })()`;
 
 /** Runtime.callFunctionOn declaration that enters the content-script bridge. */
-export const ISOLATED_CONTENT_INVOKE = "function(payload){return globalThis.__qzInvoke(this,payload)}";
+export const ISOLATED_CONTENT_INVOKE = "function(payload){return globalThis.__zuriInvoke(this,payload)}";
 
 export function compactIsolatedSource(source: string) {
   return String(source || "").replace(/\s+/g, "");

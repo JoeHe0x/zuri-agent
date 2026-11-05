@@ -3,10 +3,10 @@ import type { ResultChoiceOptions } from "../../sdk/sidepanel/dom.js";
 /** Stateless choice card. Native input events bubble to the owning form. */
 export function renderResultChoice(document: Document, options: ResultChoiceOptions): HTMLElement {
   const card = document.createElement("div");
-  card.className = "qz-choice-card";
+  card.className = "zuri-choice-card";
 
   const label = document.createElement("label");
-  label.className = "qz-choice-card-label";
+  label.className = "zuri-choice-card-label";
   label.htmlFor = options.id;
 
   const input = document.createElement("input");
@@ -14,14 +14,14 @@ export function renderResultChoice(document: Document, options: ResultChoiceOpti
   input.name = options.name;
   input.value = options.value;
   input.type = options.multiple ? "checkbox" : "radio";
-  input.className = options.multiple ? "qz-checkbox" : "qz-radio";
+  input.className = options.multiple ? "zuri-checkbox" : "zuri-radio";
   input.checked = input.defaultChecked = options.checked;
   input.disabled = Boolean(options.disabled);
 
   const content = document.createElement("span");
-  content.className = "qz-choice-card-content";
+  content.className = "zuri-choice-card-content";
   const title = document.createElement("strong");
-  title.className = "qz-choice-card-title";
+  title.className = "zuri-choice-card-title";
   title.id = `${options.id}-label`;
   title.dir = "auto";
   title.textContent = options.label;
@@ -30,7 +30,7 @@ export function renderResultChoice(document: Document, options: ResultChoiceOpti
 
   if (options.description) {
     const description = document.createElement("span");
-    description.className = "qz-choice-card-description";
+    description.className = "zuri-choice-card-description";
     description.id = `${options.id}-description`;
     description.dir = "auto";
     description.textContent = options.description;
@@ -41,10 +41,10 @@ export function renderResultChoice(document: Document, options: ResultChoiceOpti
   const values = options.meta?.filter(value => value.trim());
   if (values?.length) {
     const meta = document.createElement("span");
-    meta.className = "qz-choice-card-meta";
+    meta.className = "zuri-choice-card-meta";
     for (const value of values) {
       const item = document.createElement("span");
-      item.className = "qz-choice-card-tag";
+      item.className = "zuri-choice-card-tag";
       item.dir = "auto";
       item.textContent = value;
       meta.append(item);
@@ -56,7 +56,7 @@ export function renderResultChoice(document: Document, options: ResultChoiceOpti
   const imageUrl = webUrl(options.imageUrl);
   if (imageUrl) {
     const image = document.createElement("img");
-    image.className = "qz-choice-card-image";
+    image.className = "zuri-choice-card-image";
     image.src = imageUrl.href;
     image.alt = "";
     image.loading = "lazy";
@@ -69,9 +69,9 @@ export function renderResultChoice(document: Document, options: ResultChoiceOpti
   const sourceUrl = webUrl(options.url);
   if (sourceUrl) {
     const footer = document.createElement("div");
-    footer.className = "qz-choice-card-footer";
+    footer.className = "zuri-choice-card-footer";
     const source = document.createElement("a");
-    source.className = "qz-choice-card-source";
+    source.className = "zuri-choice-card-source";
     source.href = sourceUrl.href;
     source.target = "_blank";
     source.rel = "noopener noreferrer";

@@ -74,9 +74,9 @@ for (const skin of ["sidepanel.css"]) {
             headerContained: header.scrollWidth <= header.clientWidth,
             actionsMenuContained: actionsMenu.getBoundingClientRect().left >= header.getBoundingClientRect().left
               && actionsMenu.getBoundingClientRect().right <= header.getBoundingClientRect().right,
-            actionsUseSharedMenu: actionsMenu.classList.contains("qz-popover")
-              && actionsMenu.classList.contains("qz-menu")
-              && actionsMenu.querySelectorAll(".qz-menu-item").length === 3,
+            actionsUseSharedMenu: actionsMenu.classList.contains("zuri-popover")
+              && actionsMenu.classList.contains("zuri-menu")
+              && actionsMenu.querySelectorAll(".zuri-menu-item").length === 3,
             messageWidth: message.getBoundingClientRect().width,
             sheetWidth: sheet.getBoundingClientRect().width,
             surfaceOpaque: sheetStyle.backgroundImage !== "none" || sheetStyle.backgroundColor !== "rgba(0, 0, 0, 0)",

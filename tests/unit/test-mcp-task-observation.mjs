@@ -41,7 +41,7 @@ test("create streams task text and actionable input, remains waiting, and binds 
     return answered ? snapshot("completed", [assistant("Done")])
       : snapshot("waiting_user", [assistant("Choose a city")], input);
   });
-  const result = await executeMcpTool(state, "qingzhou_create_session", { firstMessage: "Plan a trip", stream: true }, {
+  const result = await executeMcpTool(state, "zuri_create_session", { firstMessage: "Plan a trip", stream: true }, {
     onTaskUpdate: event => { events.push(event); if (event.type === "input") answered = true; },
   });
   assert.equal(result.snapshot.status, "completed");
@@ -64,7 +64,7 @@ test("send waits for its tracked steer response and never streams earlier same-r
       { type: "user", runId: "run", clientMessageId: "message-2", content: "Change direction" },
       { ...assistant("New answer"), id: "new-answer" }]);
   });
-  const result = await executeMcpTool(state, "qingzhou_send_message", {
+  const result = await executeMcpTool(state, "zuri_send_message", {
     sessionId: "task", text: "Change direction", steer: true, stream: true,
   }, { onTaskUpdate: event => events.push(event) });
   assert.equal(result.snapshot.status, "completed");
@@ -84,7 +84,7 @@ test("MCP send waits for the current run after its queued steering message was r
     assert.ok(++reads <= 2);
     return snapshot(reads === 1 ? "running" : "completed", [assistant("Earlier answer")]);
   });
-  const result = await executeMcpTool(state, "qingzhou_send_message", {
+  const result = await executeMcpTool(state, "zuri_send_message", {
     sessionId: "task", text: "Removed steer", steer: true, stream: true,
   }, { onTaskUpdate: event => events.push(event) });
   assert.equal(result.accepted, true);
@@ -109,7 +109,7 @@ test("native permission input remains actionable while responding waits for the 
       instructions: "Click Allow in Chrome.",
     });
   });
-  const result = await executeMcpTool(state, "qingzhou_respond_to_user_input", {
+  const result = await executeMcpTool(state, "zuri_respond_to_user_input", {
     sessionId: "task", waitId: "chrome-wait", action: "approve", consentVersion: 2, wait: true,
   }, { onTaskUpdate: event => { events.push(event); if (event.type === "input") humanApproved = true; } });
   assert.equal(result.snapshot.status, "completed");
@@ -124,10 +124,10 @@ test("invalid observation arguments and ambiguous browser selection cannot submi
   const state = await connectedState(t, () => assert.fail("invalid requests must not reach the extension"));
   for (const input of [{ stream: "yes" }, ...["timeoutSeconds", "waitTimeoutSeconds"].flatMap(key =>
     [0, -1, Infinity, 1e100, 86400.1].map(value => ({ [key]: value })))]) {
-    await assert.rejects(executeMcpTool(state, "qingzhou_create_session", { firstMessage: "Task", ...input }), { code: "invalid_arguments" });
+    await assert.rejects(executeMcpTool(state, "zuri_create_session", { firstMessage: "Task", ...input }), { code: "invalid_arguments" });
   }
   await pairBrowser(state, { id: "browser-b" });
-  await assert.rejects(executeMcpTool(state, "qingzhou_create_session", { firstMessage: "Task", wait: true }), { code: "BRIDGE_CLIENT_REQUIRED" });
+  await assert.rejects(executeMcpTool(state, "zuri_create_session", { firstMessage: "Task", wait: true }), { code: "BRIDGE_CLIENT_REQUIRED" });
 });
 
 test("watch cancellation revokes its pending read without stopping or resubmitting the task", async t => {
@@ -135,10 +135,10 @@ test("watch cancellation revokes its pending read without stopping or resubmitti
   await pairBrowser(state, { id: "browser-a" });
   t.after(() => state.close());
   const controller = new AbortController();
-  const waiting = executeMcpTool(state, "qingzhou_watch_task", { sessionId: "task" }, { signal: controller.signal });
+  const waiting = executeMcpTool(state, "zuri_watch_task", { sessionId: "task" }, { signal: controller.signal });
   const rejected = assert.rejects(waiting, error => {
     assert.equal(error.code, "interrupted");
-    assert.equal(error.details.recovery.tool, "qingzhou_watch_task");
+    assert.equal(error.details.recovery.tool, "zuri_watch_task");
     assert.deepEqual(error.details.recovery.arguments, { sessionId: "task", clientId: browserId(state, "browser-a") });
     return true;
   });
@@ -166,13 +166,13 @@ test("timeout recovery watches the original task through later runs without repl
       assistant("Later answer"),
     ]) };
   });
-  await assert.rejects(executeMcpTool(state, "qingzhou_send_message", {
+  await assert.rejects(executeMcpTool(state, "zuri_send_message", {
     sessionId: "task", text: "Hello", wait: true, waitTimeoutSeconds: 0.01,
   }), error => {
     assert.equal(error.code, "timeout");
     recovery = error.details.recovery;
     assert.deepEqual(recovery, {
-      tool: "qingzhou_watch_task", arguments: { sessionId: "task", clientId: browserId(state, "browser-a") },
+      tool: "zuri_watch_task", arguments: { sessionId: "task", clientId: browserId(state, "browser-a") },
     });
     return true;
   });
@@ -186,10 +186,10 @@ test("timeout recovery watches the original task through later runs without repl
 
 test("all MCP observation entry points follow queued work across run boundaries", async t => {
   for (const [name, args, accepted] of [
-    ["qingzhou_watch_task", { sessionId: "task", stream: true }, null],
-    ["qingzhou_create_session", { firstMessage: "Start", wait: true }, { session: { id: "task" } }],
-    ["qingzhou_send_message", { sessionId: "task", text: "Follow up", stream: true }, { accepted: true, clientMessageId: "target" }],
-    ["qingzhou_respond_to_user_input", { sessionId: "task", waitId: "old-wait", action: "approve", wait: true }, { accepted: true, runId: "run" }],
+    ["zuri_watch_task", { sessionId: "task", stream: true }, null],
+    ["zuri_create_session", { firstMessage: "Start", wait: true }, { session: { id: "task" } }],
+    ["zuri_send_message", { sessionId: "task", text: "Follow up", stream: true }, { accepted: true, clientMessageId: "target" }],
+    ["zuri_respond_to_user_input", { sessionId: "task", waitId: "old-wait", action: "approve", wait: true }, { accepted: true, runId: "run" }],
   ]) {
     let reads = 0, mutations = 0;
     const transcript = [{ type: "user", runId: "run", clientMessageId: "target" }, assistant("First answer")];
@@ -218,7 +218,7 @@ test("an accepted MCP message without a tracking ID can recover by watching with
     return method === "send_message" ? { accepted: true } : snapshot("completed");
   });
   let recovery;
-  await assert.rejects(executeMcpTool(state, "qingzhou_send_message", { sessionId: "task", text: "Hello", wait: true }), error => {
+  await assert.rejects(executeMcpTool(state, "zuri_send_message", { sessionId: "task", text: "Hello", wait: true }), error => {
     assert.equal(error.code, "invalid_response");
     recovery = error.details.recovery;
     return true;
@@ -236,17 +236,17 @@ test("MCP missing-task recovery lists the selected browser's tasks while snapsho
     assert.equal(method, "get_session_snapshot");
     return missing;
   });
-  await assert.rejects(executeMcpTool(state, "qingzhou_watch_task", { sessionId: "task" }), error => {
+  await assert.rejects(executeMcpTool(state, "zuri_watch_task", { sessionId: "task" }), error => {
     assert.equal(error.code, "task_deleted");
     assert.match(error.message, /not found in the selected browser/);
     assert.doesNotMatch(error.message, /was deleted/);
     assert.equal(error.details.sessionId, "task");
     assert.deepEqual(error.details.recovery, {
-      tool: "qingzhou_list_sessions", arguments: { clientId: browserId(state, "browser-a") },
+      tool: "zuri_list_sessions", arguments: { clientId: browserId(state, "browser-a") },
     });
     return true;
   });
-  assert.deepEqual(await executeMcpTool(state, "qingzhou_get_session_snapshot", { sessionId: "task" }),
+  assert.deepEqual(await executeMcpTool(state, "zuri_get_session_snapshot", { sessionId: "task" }),
     { ...missing, clientId: browserId(state, "browser-a") });
   assert.deepEqual(calls.map(call => call.method), ["get_session_snapshot", "get_session_snapshot"]);
 });
@@ -263,19 +263,19 @@ test("MCP wrong-browser recovery keeps the resolved UUID and never searches anot
       : snapshot("completed", [assistant("Owner's answer")]);
   });
   await pairBrowser(state, { id: "browser-b" });
-  await assert.rejects(executeMcpTool(state, "qingzhou_watch_task", { sessionId: "task", clientId: "browser-b" }), error => {
+  await assert.rejects(executeMcpTool(state, "zuri_watch_task", { sessionId: "task", clientId: "browser-b" }), error => {
     assert.equal(error.code, "task_deleted");
     assert.equal(error.details.clientId, browserId(state, "browser-b"));
     recovery = error.details.recovery;
     assert.deepEqual(recovery, {
-      tool: "qingzhou_list_sessions", arguments: { clientId: browserId(state, "browser-b") },
+      tool: "zuri_list_sessions", arguments: { clientId: browserId(state, "browser-b") },
     });
     return true;
   });
   const listed = await executeMcpTool(state, recovery.tool, recovery.arguments);
   assert.deepEqual(listed, { sessions: [], clientId: browserId(state, "browser-b") });
   assert.deepEqual(calls.map(call => call.clientId), [browserId(state, "browser-b"), browserId(state, "browser-b")]);
-  const owning = await executeMcpTool(state, "qingzhou_watch_task", { sessionId: "task", clientId: "browser-a" });
+  const owning = await executeMcpTool(state, "zuri_watch_task", { sessionId: "task", clientId: "browser-a" });
   assert.equal(owning.snapshot.status, "completed");
   assert.equal(owning.snapshot.transcript[0].content, "Owner's answer");
   assert.equal(owning.clientId, browserId(state, "browser-a"));
@@ -298,7 +298,7 @@ for (const scenario of [
     readReady.resolve({ params, options });
     return new Promise(() => {});
   });
-  const pending = executeMcpTool(state, "qingzhou_send_message", {
+  const pending = executeMcpTool(state, "zuri_send_message", {
     sessionId: "task", text: "Keep working", wait: true,
     timeoutSeconds: scenario.request, waitTimeoutSeconds: scenario.total,
   }, { signal: controller.signal }).catch(error => error);
@@ -315,7 +315,7 @@ for (const scenario of [
   else if (scenario.code === "timeout") assert.equal(error.cause.name, "TimeoutError");
   else assert.equal(error.cause.code, "request_timeout");
   assert.deepEqual(error.details.recovery, {
-    tool: "qingzhou_watch_task", arguments: { sessionId: "task", clientId: browserId(state, "browser-a") },
+    tool: "zuri_watch_task", arguments: { sessionId: "task", clientId: browserId(state, "browser-a") },
   });
   assert.deepEqual(calls, ["send_message", "get_session_snapshot"],
     "ending observation must neither stop the browser task nor replay its accepted message");
@@ -329,8 +329,8 @@ test("tool lookup uses task context and returns the exact schema or a useful mis
     assert.equal(options.clientId, browserId(state, "browser-a"));
     return { tools: [tool] };
   });
-  assert.deepEqual(await executeMcpTool(state, "qingzhou_get_tool", { sessionId: "task", name: "read_article", clientId: "browser-a" }), tool);
-  await assert.rejects(executeMcpTool(state, "qingzhou_get_tool", { sessionId: "task", name: "missing", clientId: "browser-a" }), { code: "tool_not_found" });
+  assert.deepEqual(await executeMcpTool(state, "zuri_get_tool", { sessionId: "task", name: "read_article", clientId: "browser-a" }), tool);
+  await assert.rejects(executeMcpTool(state, "zuri_get_tool", { sessionId: "task", name: "missing", clientId: "browser-a" }), { code: "tool_not_found" });
 });
 
 test("async browser-tool admission pins its profile and returns task and job identities", async t => {
@@ -346,7 +346,7 @@ test("async browser-tool admission pins its profile and returns task and job ide
     additionalBrowser = pairBrowser(state, { id: "browser-b" });
     return start(...args);
   };
-  const accepted = await executeMcpTool(state, "qingzhou_execute_tool", { sessionId: "task", name: "read_article", wait: false });
+  const accepted = await executeMcpTool(state, "zuri_execute_tool", { sessionId: "task", name: "read_article", wait: false });
   await additionalBrowser;
   assert.equal(accepted.sessionId, "task");
   assert.equal(accepted.clientId, browserId(state, "browser-a"));
@@ -354,7 +354,7 @@ test("async browser-tool admission pins its profile and returns task and job ide
   assert.equal(accepted.done, false);
   await new Promise(resolve => setImmediate(resolve));
   assert.deepEqual(state.getJob(accepted.jobId).result, { value: "Done" });
-  await assert.rejects(executeMcpTool(state, "qingzhou_execute_tool", { sessionId: "task", name: "read_article", wait: false }), { code: "BRIDGE_CLIENT_REQUIRED" });
+  await assert.rejects(executeMcpTool(state, "zuri_execute_tool", { sessionId: "task", name: "read_article", wait: false }), { code: "BRIDGE_CLIENT_REQUIRED" });
   assert.equal(state.jobs.size, 1);
 });
 
@@ -367,12 +367,12 @@ test("MCP progress transports canonical task events and streaming without a toke
   await client.connect(new StreamableHTTPClientTransport(new URL(`${bridge.endpoint}/mcp`)));
   t.after(() => client.close());
   const events = [];
-  const result = await client.callTool({ name: "qingzhou_watch_task", arguments: { sessionId: "task", stream: true } }, undefined, {
+  const result = await client.callTool({ name: "zuri_watch_task", arguments: { sessionId: "task", stream: true } }, undefined, {
     onprogress: event => events.push(event),
   });
   assert.equal(JSON.parse(result.content[0].text).snapshot.status, "completed");
   assert.deepEqual(events.map(event => event.progress), [1, 2]);
-  assert.equal(events[1]._meta["qz/task-event"].text, "Result");
-  const noToken = await client.callTool({ name: "qingzhou_watch_task", arguments: { sessionId: "task", stream: true } });
+  assert.equal(events[1]._meta["zuri/task-event"].text, "Result");
+  const noToken = await client.callTool({ name: "zuri_watch_task", arguments: { sessionId: "task", stream: true } });
   assert.equal(JSON.parse(noToken.content[0].text).snapshot.status, "completed");
 });

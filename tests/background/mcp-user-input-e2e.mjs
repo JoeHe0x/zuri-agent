@@ -26,7 +26,7 @@ let clientId;
 const cliProcesses = new Set();
 const toolCalls = [];
 try {
-  environment = await launchIsolatedExtensionMcp({ profilePrefix: "qz-user-input-e2e-", requestTimeoutSeconds: 40 });
+  environment = await launchIsolatedExtensionMcp({ profilePrefix: "zuri-user-input-e2e-", requestTimeoutSeconds: 40 });
   clientId = environment.bridgeStatus.clients[0].clientId;
   const observedCall = (...args) => {
     toolCalls.push(args[1]);
@@ -37,7 +37,7 @@ try {
     callTool: observedCall,
   };
   command = async (args, extra = {}) => (await runCli([...args, "--client", clientId, "--timeout", "30"], { ...dependencies, ...extra })).result;
-  respond = args => observedCall(environment.bridge.endpoint, "qingzhou_respond_to_user_input", { clientId, ...args });
+  respond = args => observedCall(environment.bridge.endpoint, "zuri_respond_to_user_input", { clientId, ...args });
   await saveExtensionLlmConfig(environment.page, {
     provider: "custom", customProtocol: "openai", customEndpoint: fixture.endpoint,
     apiKey: "synthetic-user-input-key", model: "deterministic-model", contextWindow: 128000,
@@ -204,7 +204,7 @@ async function unchangedWait(sessionId, waitId, marker, requestsBefore) {
 }
 
 async function formsRoundTrip() {
-  const marker = "QZ_INPUT_FORMS";
+  const marker = "ZURI_INPUT_FORMS";
   const watching = startCliProcess(["create", marker, "--title", marker, "--stream", "--json"]);
   await waitUntil(() => {
     assert.equal(watching.settled, false, `create --stream exited before its form: ${watching.stdout}`);
@@ -228,7 +228,7 @@ async function formsRoundTrip() {
   await switchToSession(sessionId);
   const card = environment.page.locator(`.waiting-active[data-wait-id="${input.waitId}"]`);
   await card.waitFor();
-  assert.equal(await card.locator(".qz-choice-card").count(), 2);
+  assert.equal(await card.locator(".zuri-choice-card").count(), 2);
   const count = fixture.count(marker);
   const valid = { name: "Ada", notes: "Remote\nTwo days per week", route: "local", roles: ["harbor"] };
   for (const answers of [{}, { ...valid, route: "missing" }, { ...valid, roles: ["missing"] }]) {
@@ -293,7 +293,7 @@ async function formsRoundTrip() {
 }
 
 async function selfContainedRecovery() {
-  const marker = "QZ_INPUT_SELF_CONTAINED";
+  const marker = "ZURI_INPUT_SELF_CONTAINED";
   const firstCall = toolCalls.length;
   const created = await command(["create", marker, "--title", marker]);
   const sessionId = created.session.id;
@@ -324,13 +324,13 @@ async function selfContainedRecovery() {
   const watched = await command(["watch", sessionId]);
   assert.equal(watched.snapshot.status, "completed");
   assert.deepEqual(fixture.toolResult(marker, 1).answers, { project_scope: "browser-only", run_mode: "local", output_formats: ["csv"] });
-  assert.equal(toolCalls.slice(firstCall).filter(name => name === "qingzhou_get_user_input").length, 0,
+  assert.equal(toolCalls.slice(firstCall).filter(name => name === "zuri_get_user_input").length, 0,
     "snapshot and rejected-response input must eliminate a separate input discovery call");
   report.cases.push({ name: "snapshot-and-rejected-reply-self-contained-recovery", ok: true, sessionId, inputDiscoveryCalls: 0 });
 }
 
 async function submitAndWait() {
-  const marker = "QZ_INPUT_WAIT";
+  const marker = "ZURI_INPUT_WAIT";
   const watching = startCliProcess(["create", marker, "--title", marker, "--wait", "--json"]);
   await waitUntil(() => {
     assert.equal(watching.settled, false, `create --wait exited before its form: ${watching.stdout}`);
@@ -342,7 +342,7 @@ async function submitAndWait() {
   const submitted = await command(["submit", sessionId, "-", "--wait"], { readStdin: async () => JSON.stringify({ note: "Completed through stdin" }) });
   assert.equal(submitted.accepted, true);
   assert.equal(submitted.snapshot.status, "completed");
-  assert.match(assistantText(submitted.snapshot), /QZ_INPUT_WAIT: answers received/);
+  assert.match(assistantText(submitted.snapshot), /ZURI_INPUT_WAIT: answers received/);
   assert.equal(fixture.toolResult(marker, 1).answers.note, "Completed through stdin");
   const watched = await watching.finish();
   assert.equal(watched.snapshot.status, "completed");
@@ -350,9 +350,9 @@ async function submitAndWait() {
 }
 
 async function mcpStreamingParity() {
-  const marker = "QZ_INPUT_MCP_FORMS";
-  const followup = "QZ_INPUT_MCP_FOLLOWUP";
-  const client = new Client({ name: "qz-parity-e2e", version: "1.0.0" });
+  const marker = "ZURI_INPUT_MCP_FORMS";
+  const followup = "ZURI_INPUT_MCP_FOLLOWUP";
+  const client = new Client({ name: "zuri-parity-e2e", version: "1.0.0" });
   const transport = new StreamableHTTPClientTransport(new URL("/mcp", environment.bridge.endpoint), { fetch: localFetch });
   const controller = new AbortController();
   const pending = [];
@@ -360,7 +360,7 @@ async function mcpStreamingParity() {
     const tracked = { settled: false, updates: [] };
     tracked.done = client.callTool({ name, arguments: { clientId, timeoutSeconds: 10, waitTimeoutSeconds: 30, stream: true, ...args } }, undefined, {
       signal: controller.signal, timeout: 40_000,
-      onprogress: progress => { if (progress._meta?.["qz/task-event"]) tracked.updates.push(progress._meta["qz/task-event"]); },
+      onprogress: progress => { if (progress._meta?.["zuri/task-event"]) tracked.updates.push(progress._meta["zuri/task-event"]); },
     }).then(result => { tracked.value = resultValue(result); tracked.isError = result.isError; }, error => { tracked.error = error; })
       .finally(() => { tracked.settled = true; });
     pending.push(tracked.done);
@@ -378,7 +378,7 @@ async function mcpStreamingParity() {
   }, "MCP did not stream its actionable input");
   try {
     await client.connect(transport);
-    const creation = stream("qingzhou_create_session", { title: marker, firstMessage: marker });
+    const creation = stream("zuri_create_session", { title: marker, firstMessage: marker });
     const first = await inputEvent(creation);
     const sessionId = first.sessionId;
     assert.equal(first.clientId, clientId);
@@ -387,12 +387,12 @@ async function mcpStreamingParity() {
     assert.deepEqual(first.form.fields.map(field => field.id), ["name", "notes", "route", "roles"]);
     await assertStillWaiting(creation, "MCP create must keep waiting at the form");
     const answers = { name: "Ada", notes: "MCP and CLI", route: "local", roles: ["harbor"] };
-    const submission = stream("qingzhou_respond_to_user_input", { ...first.responseTemplate, answers });
+    const submission = stream("zuri_respond_to_user_input", { ...first.responseTemplate, answers });
     const second = await inputEvent(submission, first.waitId);
     assert.equal(second.sessionId, sessionId);
     assert.equal(second.responseTemplate.waitId, second.waitId);
     await assertStillWaiting(submission, "MCP response must keep waiting at the next form");
-    const watching = stream("qingzhou_watch_task", { sessionId });
+    const watching = stream("zuri_watch_task", { sessionId });
     const watchedInput = await inputEvent(watching);
     assert.equal(watchedInput.waitId, second.waitId);
     const queued = await command(["send", sessionId, followup]);
@@ -433,7 +433,7 @@ async function mcpStreamingParity() {
 
 async function confirmations() {
   for (const action of ["approve", "reject"]) {
-    const marker = `QZ_INPUT_${action.toUpperCase()}`;
+    const marker = `ZURI_INPUT_${action.toUpperCase()}`;
     const { sessionId, input } = await createWaiting(marker, "confirmation");
     assert.deepEqual(input.actions, ["approve", "reject"]);
     assert.deepEqual(input.responseTemplate, { sessionId, waitId: input.waitId, action: "approve", clientId });
@@ -452,9 +452,9 @@ async function confirmations() {
 }
 
 async function queuedFollowupStream() {
-  const marker = "QZ_INPUT_SEND_WAIT";
-  const followup = "QZ_INPUT_SEND_FOLLOWUP";
-  const nextFollowup = "QZ_INPUT_SEND_NEXT_FOLLOWUP";
+  const marker = "ZURI_INPUT_SEND_WAIT";
+  const followup = "ZURI_INPUT_SEND_FOLLOWUP";
+  const nextFollowup = "ZURI_INPUT_SEND_NEXT_FOLLOWUP";
   const creating = startCliProcess(["create", marker, "--client", clientId, "--stream", "--json"]);
   await waitUntil(() => {
     assert.equal(creating.settled, false, `Creation ended before its form: ${creating.stdout}`);
@@ -527,7 +527,7 @@ async function queuedFollowupStream() {
 }
 
 async function permissionGuidance() {
-  const marker = "QZ_INPUT_PERMISSION";
+  const marker = "ZURI_INPUT_PERMISSION";
   const worker = environment.context.serviceWorkers().find(item => item.url().startsWith(`chrome-extension://${environment.extensionId}/`));
   assert.ok(worker);
   // Only the Chrome permission/native-history boundary is mocked. Access begins false and
@@ -573,7 +573,7 @@ async function permissionGuidance() {
   await assertStillWaiting(pendingApproval, "approve --wait must stay alive while Chrome permission awaits a click");
   await unchangedWait(sessionId, input.waitId, marker, 1);
   assert.equal(await environment.page.evaluate(() => window.__historyPermissionRequests), 0);
-  const bypass = await callTool(environment.bridge.endpoint, "qingzhou_continue_task", { sessionId, waitId: input.waitId });
+  const bypass = await callTool(environment.bridge.endpoint, "zuri_continue_task", { sessionId, waitId: input.waitId });
   assert.equal(bypass.accepted, false, "the legacy continue endpoint cannot bypass permission approval");
   await unchangedWait(sessionId, input.waitId, marker, 1);
   await switchToSession(sessionId);
@@ -599,11 +599,11 @@ async function permissionGuidance() {
 }
 
 async function steerCurrentRun() {
-  const marker = "QZ_INPUT_STEER_WAIT";
-  const redirected = "QZ_INPUT_STEER_RESULT";
-  const followup = "QZ_INPUT_STEER_FOLLOWUP";
+  const marker = "ZURI_INPUT_STEER_WAIT";
+  const redirected = "ZURI_INPUT_STEER_RESULT";
+  const followup = "ZURI_INPUT_STEER_FOLLOWUP";
   const { sessionId, input } = await createWaiting(marker, "form");
-  const other = await createWaiting("QZ_INPUT_STEER_UNRELATED", "form");
+  const other = await createWaiting("ZURI_INPUT_STEER_UNRELATED", "form");
   await switchToSession(other.sessionId);
   const sending = startCliProcess(["send", sessionId, redirected, "--steer", "--client", clientId, "--stream", "--json"]);
   await waitUntil(() => {
@@ -612,7 +612,7 @@ async function steerCurrentRun() {
   }, "Steering must retain the target task's form");
   await assertStillWaiting(sending, "steering cannot answer or bypass a pending form");
   await unchangedWait(sessionId, input.waitId, marker, 1);
-  await unchangedWait(other.sessionId, other.input.waitId, "QZ_INPUT_STEER_UNRELATED", 1);
+  await unchangedWait(other.sessionId, other.input.waitId, "ZURI_INPUT_STEER_UNRELATED", 1);
   assert.equal(fixture.count(redirected), 0);
   assert.equal(sending.updates.some(event => event.type === "text" || event.type === "replace"), false,
     "steering must not stream earlier assistant text from the same run");
@@ -641,7 +641,7 @@ async function steerCurrentRun() {
   assert.equal(fixture.count(marker), 1, "the existing run adopts steering at its next model call");
   assert.equal(fixture.count(redirected), 1);
   assert.equal(fixture.count(followup), 1);
-  await unchangedWait(other.sessionId, other.input.waitId, "QZ_INPUT_STEER_UNRELATED", 1);
+  await unchangedWait(other.sessionId, other.input.waitId, "ZURI_INPUT_STEER_UNRELATED", 1);
   assert.equal((await command(["show", other.sessionId])).transcript.some(entry => entry.clientMessageId === result.clientMessageId), false);
   await command(["cancel", other.sessionId]);
   report.cases.push({ name: "steer-current-run-and-followup-target-isolation-form-preserved-own-stream", ok: true, sessionId,
@@ -649,8 +649,8 @@ async function steerCurrentRun() {
 }
 
 async function timeoutRecovery() {
-  const marker = "QZ_INPUT_TIMEOUT";
-  const followup = "QZ_INPUT_TIMEOUT_FOLLOWUP";
+  const marker = "ZURI_INPUT_TIMEOUT";
+  const followup = "ZURI_INPUT_TIMEOUT_FOLLOWUP";
   const created = await command(["create", marker]);
   const sessionId = created.session.id;
   await waitUntil(() => fixture.count(marker) === 1, "The timeout task did not reach its provider gate");
@@ -661,7 +661,7 @@ async function timeoutRecovery() {
   assert.equal(timedOut.error.code, "timeout");
   assert.equal(timedOut.error.sessionId, sessionId);
   assert.equal(timedOut.error.clientId, clientId);
-  assert.equal(timedOut.error.command, `qz watch ${sessionId} --client ${clientId} --stream`);
+  assert.equal(timedOut.error.command, `zuri watch ${sessionId} --client ${clientId} --stream`);
   const running = await command(["show", sessionId]);
   assert.equal(running.status, "running", "ending observation leaves the browser task running");
   const accepted = await command(["send", sessionId, followup]);
@@ -692,24 +692,24 @@ async function timeoutRecovery() {
 
 async function locationConsent() {
   await environment.page.evaluate(async () => {
-    await chrome.storage.local.remove("qz_location_consent");
+    await chrome.storage.local.remove("zuri_location_consent");
     window.__locationReads = 0;
     Object.defineProperty(navigator.geolocation, "getCurrentPosition", { configurable: true, value(success) {
       window.__locationReads++;
       success({ coords: { latitude: 30.25, longitude: 120.15, accuracy: 10 }, timestamp: Date.now() });
     } });
   });
-  const denied = await createWaiting("QZ_INPUT_LOCATION_REJECT", "location_consent");
+  const denied = await createWaiting("ZURI_INPUT_LOCATION_REJECT", "location_consent");
   await command(["reject", denied.sessionId, "--wait-id", denied.input.waitId]);
   assert.equal((await command(["watch", denied.sessionId])).snapshot.status, "completed");
-  assert.equal(await environment.page.evaluate(async () => (await chrome.storage.local.get("qz_location_consent")).qz_location_consent), undefined);
+  assert.equal(await environment.page.evaluate(async () => (await chrome.storage.local.get("zuri_location_consent")).zuri_location_consent), undefined);
   assert.equal(await environment.page.evaluate(() => window.__locationReads), 0);
-  const marker = "QZ_INPUT_LOCATION";
+  const marker = "ZURI_INPUT_LOCATION";
   const { sessionId, input } = await createWaiting(marker, "location_consent");
   assert.ok(Number.isInteger(input.consentVersion) && input.consentVersion > 0);
   assert.ok(input.message.length > 20, "MCP exposes the disclosure before consent");
   assert.deepEqual(input.responseTemplate, { sessionId, waitId: input.waitId, action: "approve", consentVersion: input.consentVersion, clientId });
-  const bypass = await callTool(environment.bridge.endpoint, "qingzhou_continue_task", { sessionId, waitId: input.waitId });
+  const bypass = await callTool(environment.bridge.endpoint, "zuri_continue_task", { sessionId, waitId: input.waitId });
   assert.equal(bypass.accepted, false);
   const wrongVersion = await respond({ sessionId, waitId: input.waitId, action: "approve", consentVersion: input.consentVersion + 1 });
   assert.equal(wrongVersion.accepted, false);
@@ -722,7 +722,7 @@ async function locationConsent() {
   assert.equal(disclosures.length, 1);
   assert.equal(disclosures[0].message, input.message);
   assert.equal(await environment.page.evaluate(() => window.__locationReads), 1);
-  const stored = await environment.page.evaluate(async () => (await chrome.storage.local.get("qz_location_consent")).qz_location_consent);
+  const stored = await environment.page.evaluate(async () => (await chrome.storage.local.get("zuri_location_consent")).zuri_location_consent);
   assert.equal(stored.version, input.consentVersion);
   assert.equal(fixture.toolResult(marker, 1).latitude, 30.25);
   report.cases.push({ name: "location-reject-version-check-explicit-cli-consent", ok: true, sessionId });
@@ -750,8 +750,8 @@ async function startFixture() {
   const requests = [];
   const finished = new Set();
   const gates = new Map([
-    "QZ_INPUT_SEND_FOLLOWUP", "QZ_INPUT_SEND_NEXT_FOLLOWUP", "QZ_INPUT_STEER_FOLLOWUP",
-    "QZ_INPUT_TIMEOUT", "QZ_INPUT_TIMEOUT_FOLLOWUP", "QZ_INPUT_MCP_FOLLOWUP",
+    "ZURI_INPUT_SEND_FOLLOWUP", "ZURI_INPUT_SEND_NEXT_FOLLOWUP", "ZURI_INPUT_STEER_FOLLOWUP",
+    "ZURI_INPUT_TIMEOUT", "ZURI_INPUT_TIMEOUT_FOLLOWUP", "ZURI_INPUT_MCP_FOLLOWUP",
   ].map(marker => [marker, Promise.withResolvers()]));
   let baseUrl;
   const server = createServer(async (request, response) => {
@@ -768,7 +768,7 @@ async function startFixture() {
       for await (const chunk of request) raw += chunk;
       const body = JSON.parse(raw);
       const marker = body.messages.filter(message => message.role === "user")
-        .map(message => textContent(message.content).match(/QZ_INPUT_[A-Z_]+/)?.[0]).filter(Boolean).at(-1) || "validation";
+        .map(message => textContent(message.content).match(/ZURI_INPUT_[A-Z_]+/)?.[0]).filter(Boolean).at(-1) || "validation";
       const results = body.messages.filter(message => message.role === "tool").map(message => ({ id: message.tool_call_id, content: textContent(message.content) }));
       requests.push({ marker, stream: body.stream === true, results });
       if (!body.stream) {
@@ -782,15 +782,15 @@ async function startFixture() {
       const send = (delta, finish_reason = null) => response.write(`data: ${JSON.stringify({ id: marker, object: "chat.completion.chunk", choices: [{ index: 0, delta, finish_reason }] })}\n\n`);
       if (step) {
         const index = plan.indexOf(step);
-        if (marker === "QZ_INPUT_STEER_WAIT") send({ role: "assistant", content: "Prior context before steering." });
+        if (marker === "ZURI_INPUT_STEER_WAIT") send({ role: "assistant", content: "Prior context before steering." });
         send({ role: "assistant", tool_calls: [{ index: 0, id: `${marker}_${index + 1}`, type: "function", function: { name: step.name, arguments: JSON.stringify(step.args) } }] });
         send({}, "tool_calls");
       } else {
         if (gates.has(marker)) await gates.get(marker).promise;
         send({ role: "assistant", content: `${marker}: ` });
-        if (["QZ_INPUT_FORMS", "QZ_INPUT_MCP_FORMS", "QZ_INPUT_SEND_FOLLOWUP", "QZ_INPUT_STEER_RESULT"].includes(marker)) await delay(1200);
+        if (["ZURI_INPUT_FORMS", "ZURI_INPUT_MCP_FORMS", "ZURI_INPUT_SEND_FOLLOWUP", "ZURI_INPUT_STEER_RESULT"].includes(marker)) await delay(1200);
         send({ content: "answers received." });
-        if (marker === "QZ_INPUT_FORMS") await delay(1200);
+        if (marker === "ZURI_INPUT_FORMS") await delay(1200);
         finished.add(marker);
         send({}, "stop");
       }
@@ -821,7 +821,7 @@ async function startFixture() {
 
 function scenario(marker, baseUrl) {
   const ask = fields => ({ name: "ask_user", args: { title: "Choose the next step", message: "Use these synthetic options to continue.", fields } });
-  if (["QZ_INPUT_FORMS", "QZ_INPUT_MCP_FORMS"].includes(marker)) return [ask([
+  if (["ZURI_INPUT_FORMS", "ZURI_INPUT_MCP_FORMS"].includes(marker)) return [ask([
     { id: "name", label: "Name", type: "text", required: true },
     { id: "notes", label: "Notes", type: "textarea", required: true },
     { id: "route", label: "Route", type: "single_choice", options: [{ label: "Local", value: "local" }, { label: "Remote", value: "remote" }] },
@@ -833,7 +833,7 @@ function scenario(marker, baseUrl) {
     { id: "choice", label: "Output", type: "single_choice", presentation: "cards", options: [{ label: "Report", value: "report" }, { label: "Summary", value: "summary" }] },
     { id: "formats", label: "Formats", type: "multi_choice", options: [{ label: "HTML", value: "html" }, { label: "CSV", value: "csv" }] },
   ])];
-  if (marker === "QZ_INPUT_SELF_CONTAINED") return [ask([
+  if (marker === "ZURI_INPUT_SELF_CONTAINED") return [ask([
     { id: "project_scope", label: "Project scope", type: "text", defaultValue: "browser-only", required: true },
     { id: "run_mode", label: "Execution mode", type: "single_choice", options: [
       { label: "Local research", value: "local" }, { label: "Remote analysis", value: "remote" },
@@ -842,10 +842,10 @@ function scenario(marker, baseUrl) {
       { label: "Web report", value: "html" }, { label: "Spreadsheet", value: "csv" },
     ] },
   ])];
-  if (["QZ_INPUT_WAIT", "QZ_INPUT_SEND_WAIT", "QZ_INPUT_STEER_WAIT", "QZ_INPUT_STEER_UNRELATED"].includes(marker)) return [ask([{ id: "note", label: "Note", type: "text", required: true }])];
-  if (["QZ_INPUT_SEND_FOLLOWUP", "QZ_INPUT_SEND_NEXT_FOLLOWUP", "QZ_INPUT_STEER_RESULT", "QZ_INPUT_STEER_FOLLOWUP",
-    "QZ_INPUT_TIMEOUT", "QZ_INPUT_TIMEOUT_FOLLOWUP", "QZ_INPUT_MCP_FOLLOWUP"].includes(marker)) return [];
-  if (marker === "QZ_INPUT_PERMISSION") return [{ name: "browse_history", args: { action: "recent", limit: 1 } }];
-  if (marker.startsWith("QZ_INPUT_LOCATION")) return [{ name: "get_location", args: {} }];
+  if (["ZURI_INPUT_WAIT", "ZURI_INPUT_SEND_WAIT", "ZURI_INPUT_STEER_WAIT", "ZURI_INPUT_STEER_UNRELATED"].includes(marker)) return [ask([{ id: "note", label: "Note", type: "text", required: true }])];
+  if (["ZURI_INPUT_SEND_FOLLOWUP", "ZURI_INPUT_SEND_NEXT_FOLLOWUP", "ZURI_INPUT_STEER_RESULT", "ZURI_INPUT_STEER_FOLLOWUP",
+    "ZURI_INPUT_TIMEOUT", "ZURI_INPUT_TIMEOUT_FOLLOWUP", "ZURI_INPUT_MCP_FOLLOWUP"].includes(marker)) return [];
+  if (marker === "ZURI_INPUT_PERMISSION") return [{ name: "browse_history", args: { action: "recent", limit: 1 } }];
+  if (marker.startsWith("ZURI_INPUT_LOCATION")) return [{ name: "get_location", args: {} }];
   return [{ name: "wait_for_user", args: { message: "Confirm the synthetic action before continuing." } }];
 }

@@ -72,14 +72,14 @@ test('external Skill documentation remains authored content, with localized host
   assert.match(tool.parameters.properties.timeout.description, /seconds/);
   assert.equal(english.aliases['技能工作台'], 'skill-workbench');
   assert.equal(chinese.aliases['Skill workbench'], 'skill-workbench');
-  assert.equal(english.aliases['文档处理'], 'qingzhou-documents');
+  assert.equal(english.aliases['文档处理'], 'zuri-documents');
   assert.deepEqual(english.aliases, chinese.aliases);
   assert.ok(Object.values(english.aliases).every(Boolean), 'all historical and translated display aliases still resolve');
 });
 
 test('embedded aliases are registration-only, immutable and collision checked', () => {
   const definition = { name: 'sample-guide', displayName: 'Example', aliases: ['示例指南'], description: 'Guide', content: '# Guide' };
-  const registry = createEmbeddedSkillRegistry([qz => qz.registerSkill(definition)]);
+  const registry = createEmbeddedSkillRegistry([zuri => zuri.registerSkill(definition)]);
   definition.aliases[0] = 'changed';
   const result = registry.get('示例指南');
   assert.equal(result.name, 'sample-guide');
@@ -91,10 +91,10 @@ test('embedded aliases are registration-only, immutable and collision checked', 
   assert.equal(registry.get('changed'), null);
   assert.equal(registry.get(''), null);
   assert.equal(registry.get(' -_ '), null);
-  assert.throws(() => createEmbeddedSkillRegistry([qz => {
-    qz.registerSkill(definition);
-    qz.registerSkill({ ...definition, name: 'second-guide', displayName: 'Second', aliases: ['EX_AM PLE'] });
+  assert.throws(() => createEmbeddedSkillRegistry([zuri => {
+    zuri.registerSkill(definition);
+    zuri.registerSkill({ ...definition, name: 'second-guide', displayName: 'Second', aliases: ['EX_AM PLE'] });
   }]), /Duplicate embedded Skill/);
-  assert.throws(() => createEmbeddedSkillRegistry([qz => qz.registerSkill({ ...definition, aliases: [''] })]), /Invalid embedded Skill aliases/);
-  assert.throws(() => createEmbeddedSkillRegistry([qz => qz.registerSkill({ ...definition, aliases: [' -_ '] })]), /Invalid embedded Skill aliases/);
+  assert.throws(() => createEmbeddedSkillRegistry([zuri => zuri.registerSkill({ ...definition, aliases: [''] })]), /Invalid embedded Skill aliases/);
+  assert.throws(() => createEmbeddedSkillRegistry([zuri => zuri.registerSkill({ ...definition, aliases: [' -_ '] })]), /Invalid embedded Skill aliases/);
 });

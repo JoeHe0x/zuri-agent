@@ -237,9 +237,9 @@ function renderMetadata(skill: SkillRecord) {
   delete rawMetadata["gaoshou-browser-agent"];
   delete rawMetadata.summary;
   delete rawMetadata.priority;
-  if (rawMetadata.qingzhou?.displayName) {
-    delete rawMetadata.qingzhou.displayName;
-    if (!Object.keys(rawMetadata.qingzhou).length) delete rawMetadata.qingzhou;
+  if (rawMetadata.zuri?.displayName) {
+    delete rawMetadata.zuri.displayName;
+    if (!Object.keys(rawMetadata.zuri).length) delete rawMetadata.zuri;
   }
 
   const metadata: Data = {};

@@ -26,7 +26,7 @@ import { getEffectiveTabUrl } from "../../shared/tab-utils.js";
 import { getLanguage } from "../../shared/i18n/index.js";
 import { t } from "./messages.js";
 
-const OBJECT_GROUP = "qz-uid";
+const OBJECT_GROUP = "zuri-uid";
 // One table per tab while its debugger connection is alive. A same-process frame
 // is keyed by its CDP frame id. A cross-process frame is keyed by session id plus
 // frame id. Detach of a child session drops that session's keys and unique ids.

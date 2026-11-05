@@ -12,17 +12,17 @@ function installConfigurationBackend() {
     const post = port.postMessage;
     port.postMessage = message => {
       if (message.type !== "get_config" && message.type !== "list_models") return post(message);
-      window.__qzPostedMessages.push(structuredClone(message));
+      window.__zuriPostedMessages.push(structuredClone(message));
       void (async () => {
         if (message.type === "list_models") {
-          window.__qzEmitPortMessage({ type: "models", requestId: message.requestId, models: [] });
+          window.__zuriEmitPortMessage({ type: "models", requestId: message.requestId, models: [] });
           return;
         }
         // Use the shipped config reader and language runtime, not a fixture's chosen provider.
         const { initializeLanguage } = await import("/extension/shared/i18n/index.js");
         await initializeLanguage();
         const { getConfig } = await import("/extension/background/llm/config.js");
-        window.__qzEmitPortMessage({ type: "config", requestId: message.requestId, config: await getConfig() });
+        window.__zuriEmitPortMessage({ type: "config", requestId: message.requestId, config: await getConfig() });
       })().catch(error => console.error(error));
     };
     return port;
@@ -38,7 +38,7 @@ async function boot(page, { browserLanguage, preference, config }) {
     await route.fulfill({ contentType: "application/json", body: "{}" });
   });
   const localStorage = {
-    ...(preference ? { qingzhou_language: { v: 1, language: preference } } : {}),
+    ...(preference ? { zuri_language: { v: 1, language: preference } } : {}),
     ...(config ? { llmConfig: config } : {}),
   };
   // Install in a single script so the real config reader replaces the canned response before boot.
@@ -52,7 +52,7 @@ async function boot(page, { browserLanguage, preference, config }) {
 
 async function expectConfigUnchanged(page, initialConfig) {
   expect(await page.evaluate(async () => (await chrome.storage.local.get("llmConfig")).llmConfig)).toEqual(initialConfig);
-  expect(await page.evaluate(() => window.__qzPostedMessages.filter(message => message.type === "save_config"))).toEqual([]);
+  expect(await page.evaluate(() => window.__zuriPostedMessages.filter(message => message.type === "save_config"))).toEqual([]);
 }
 
 const languages = [

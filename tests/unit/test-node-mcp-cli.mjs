@@ -13,12 +13,12 @@ import { setTimeout as delay } from "node:timers/promises";
 import test from "node:test";
 import { runCli, main } from "../../services/mcp-bridge/src/cli.mjs";
 import { buildIdentity, daemonPaths, ensureDaemon, findDaemon, startManagedBridge, stopDaemon } from "../../services/mcp-bridge/src/daemon.mjs";
-import { GUIDE_URL, INSTALL_URL, QzError, callTool, localFetch, localUrl, readHealth } from "../../services/mcp-bridge/src/client.mjs";
+import { GUIDE_URL, INSTALL_URL, ZuriError, callTool, localFetch, localUrl, readHealth } from "../../services/mcp-bridge/src/client.mjs";
 import { openBrowser } from "../../services/mcp-bridge/src/open-browser.mjs";
 import { startBridge } from "../../services/mcp-bridge/src/server.mjs";
 
 const endpoint = "http://127.0.0.1:23456";
-const health = { service: "qz-browser-agent", protocolVersion: 1, features: { browserPairing: 1 }, instanceId: "test", processId: process.pid,
+const health = { service: "zuri-agent", protocolVersion: 1, features: { browserPairing: 1 }, instanceId: "test", processId: process.pid,
   scopeId: "test", status: { connected: true, clients: [{ clientId: "browser-1" }] } };
 const running = { endpoint, instanceId: "test", health };
 
@@ -37,10 +37,10 @@ test("CLI maps task commands to current MCP methods", async () => {
   const dependencies = { findDaemon: async () => running,
     callTool: async (...values) => { calls.push(values); return { sessionId: "task-1" }; } };
   for (const [args, method, parameters] of [
-    [["tasks"], "qingzhou_list_sessions", {}],
-    [["create", "Read this page", "--title", "A"], "qingzhou_create_session", { title: "A", firstMessage: "Read this page" }],
-    [["show", "task-1"], "qingzhou_get_session_snapshot", { sessionId: "task-1" }],
-    [["cancel", "task-1"], "qingzhou_stop_session", { sessionId: "task-1" }],
+    [["tasks"], "zuri_list_sessions", {}],
+    [["create", "Read this page", "--title", "A"], "zuri_create_session", { title: "A", firstMessage: "Read this page" }],
+    [["show", "task-1"], "zuri_get_session_snapshot", { sessionId: "task-1" }],
+    [["cancel", "task-1"], "zuri_stop_session", { sessionId: "task-1" }],
   ]) {
     await runCli([...args, "--client", "browser-1"], dependencies);
     assert.equal(calls.at(-1)[1], method);
@@ -64,7 +64,7 @@ test("invalid arguments cannot open a connection or execute a tool", async () =>
   const error = JSON.parse(output).error;
   assert.equal(error.code, "invalid_arguments");
   assert.match(error.message, /prompt/i);
-  assert.match(error.hint, /npm run qz --/);
+  assert.match(error.hint, /npm run zuri --/);
   assert.equal(Object.hasOwn(error, "install"), false);
   assert.equal(Object.hasOwn(error, "guide"), false);
 });
@@ -73,9 +73,9 @@ test("connect starts once and opens a browser only when needed; stop owns the sh
   let starts = 0, opens = 0, stops = 0;
   const dependencies = {
     ensureDaemon: async () => { starts += 1; return { ...running, health: { ...health, status: { connected: false } } }; },
-    openBrowser: async url => { opens += 1; assert.equal(url, `${endpoint}/qz-connect`); },
+    openBrowser: async url => { opens += 1; assert.equal(url, `${endpoint}/zuri-connect`); },
     readHealth: async () => health,
-    callTool: async (_endpoint, name, args) => { assert.equal(name, "qingzhou_call"); assert.equal(args.method, "ping"); },
+    callTool: async (_endpoint, name, args) => { assert.equal(name, "zuri_call"); assert.equal(args.method, "ping"); },
     stopDaemon: async () => { stops += 1; return { stopped: true }; },
   };
   assert.equal((await runCli(["connect"], dependencies)).result.connected, true);
@@ -93,12 +93,12 @@ test("connect verifies browser replies, recovers an idle poller, and respects an
   const dependencies = {
     ensureDaemon: async () => running,
     readHealth: async () => health,
-    openBrowser: async url => { assert.equal(url, `${endpoint}/qz-connect`); opened = true; },
+    openBrowser: async url => { assert.equal(url, `${endpoint}/zuri-connect`); opened = true; },
     callTool: async (_endpoint, name, args) => {
-      assert.equal(name, "qingzhou_call");
+      assert.equal(name, "zuri_call");
       assert.equal(args.method, "ping");
       probes.push(args.clientId);
-      if (!opened) throw new QzError("BRIDGE_REQUEST_TIMEOUT", "The browser lease remains, but its poller is idle");
+      if (!opened) throw new ZuriError("BRIDGE_REQUEST_TIMEOUT", "The browser lease remains, but its poller is idle");
     },
   };
   await assert.rejects(runCli(["connect", "--client", "browser-1"], dependencies), error => error.code === "client_offline");
@@ -122,7 +122,7 @@ test("connect never reports a stale lease as success and abort does not open a p
   const dependencies = {
     ensureDaemon: async () => running, readHealth: async () => health,
     openBrowser: async () => { opens++; },
-    callTool: async () => { throw new QzError("BRIDGE_REQUEST_TIMEOUT", "browser did not reply"); },
+    callTool: async () => { throw new ZuriError("BRIDGE_REQUEST_TIMEOUT", "browser did not reply"); },
   };
   await assert.rejects(runCli(["connect", "--timeout", "0.05"], dependencies), error => error.code === "connection_pending");
   assert.equal(opens, 1);
@@ -161,8 +161,8 @@ test("install opens the Chrome Web Store and failures always include URL and set
   const error = JSON.parse(output).error;
   assert.equal(error.url, INSTALL_URL);
   assert.equal(error.guide, GUIDE_URL);
-  assert.match(error.hint, /qz install/);
-  assert.doesNotMatch(error.hint, /qz install qz/);
+  assert.match(error.hint, /zuri install/);
+  assert.doesNotMatch(error.hint, /zuri install zuri/);
 });
 
 test("browser launcher uses argument arrays and reports spawn failures", async () => {
@@ -308,7 +308,7 @@ for (const caller of ["CLI", "MCP"]) test(`${caller} executes timeout recovery t
   });
   const sending = (caller === "CLI"
     ? runCli(["send", sessionId, "Continue", "--client", client.id, "--wait", "--timeout", "1"], dependencies)
-    : callTool(server.endpoint, "qingzhou_send_message", {
+    : callTool(server.endpoint, "zuri_send_message", {
       sessionId, text: "Continue", clientId: client.id, wait: true, timeoutSeconds: 5, waitTimeoutSeconds: 1,
     }))
     .then(() => assert.fail("The held task must time out"), error => error);
@@ -326,11 +326,11 @@ for (const caller of ["CLI", "MCP"]) test(`${caller} executes timeout recovery t
   await server.state.poll(unrelated, { timeoutMs: 1 });
   let recovery;
   if (caller === "CLI") {
-    assert.equal(failure.details.command, `qz watch ${sessionId} --client ${client.id} --stream`);
+    assert.equal(failure.details.command, `zuri watch ${sessionId} --client ${client.id} --stream`);
     recovery = runCli(failure.details.command.split(" ").slice(1), dependencies).then(value => value.result);
   } else {
     assert.deepEqual(failure.details.recovery, {
-      tool: "qingzhou_watch_task", arguments: { sessionId, clientId: client.id },
+      tool: "zuri_watch_task", arguments: { sessionId, clientId: client.id },
     });
     const { tool, arguments: args } = failure.details.recovery;
     recovery = callTool(server.endpoint, tool, args);
@@ -419,14 +419,14 @@ test("real MCP preserves location consent versions and rejects malformed wait re
     { sessionId: "task", waitId: "wait", action: "approve", consentVersion: 1.5 },
     { sessionId: "task", waitId: "wait", action: "submit", answers: [] },
   ]) {
-    await assert.rejects(callTool(server.endpoint, "qingzhou_respond_to_user_input", args), error => /Invalid arguments/.test(error.message));
+    await assert.rejects(callTool(server.endpoint, "zuri_respond_to_user_input", args), error => /Invalid arguments/.test(error.message));
   }
   assert.equal(server.state.pending.size, 0);
   assert.deepEqual(await server.state.poll(client, { timeoutMs: 10 }), []);
 });
 
 test("managed service falls back from an occupied port and removes only its own state", async t => {
-  const directory = await mkdtemp(join(tmpdir(), "qz-managed-test-"));
+  const directory = await mkdtemp(join(tmpdir(), "zuri-managed-test-"));
   t.after(() => rm(directory, { recursive: true, force: true }));
   const occupied = createServer((_req, res) => { res.end("another application"); });
   await new Promise(resolve => occupied.listen(0, "127.0.0.1", resolve));
@@ -444,7 +444,7 @@ test("managed service falls back from an occupied port and removes only its own 
 });
 
 test("concurrent starts reuse one scoped process; stale lock and wrong identities are safe", async t => {
-  const stateDir = await mkdtemp(join(tmpdir(), "qz-daemon-test-"));
+  const stateDir = await mkdtemp(join(tmpdir(), "zuri-daemon-test-"));
   const options = { stateDir, scopeId: `test-${randomUUID()}`, buildId: "original-build", preferredPort: 0 };
   t.after(async () => { await stopDaemon(options); await rm(stateDir, { recursive: true, force: true }); });
   const paths = daemonPaths(options);
@@ -453,10 +453,10 @@ test("concurrent starts reuse one scoped process; stale lock and wrong identitie
   assert.equal(first.processId, second.processId);
   assert.equal(first.instanceId, second.instanceId);
   assert.equal((await findDaemon(options)).instanceId, first.instanceId);
-  const browser = await localFetch(`${first.endpoint}/v1/qingzhou/pair`, { method: "POST", headers: { "content-type": "application/json" },
+  const browser = await localFetch(`${first.endpoint}/v1/zuri/pair`, { method: "POST", headers: { "content-type": "application/json" },
     body: JSON.stringify({ clientId: randomUUID(), connectionId: randomUUID(), instanceId: first.instanceId, name: "existing-browser" }) }).then(response => response.json());
   assert.equal(browser.ok, true);
-  await localFetch(`${first.endpoint}/v1/qingzhou/poll`, { method: "POST", headers: { "content-type": "application/json" },
+  await localFetch(`${first.endpoint}/v1/zuri/poll`, { method: "POST", headers: { "content-type": "application/json" },
     body: JSON.stringify({ client: { ...browser, id: browser.clientId, pairingVersion: 1, pollTimeoutMs: 1 } }) }).then(response => response.json());
   const nextBuild = { ...options, buildId: "new-build" };
   assert.equal((await findDaemon(nextBuild)).instanceId, first.instanceId, "status and stop can find the running build");
@@ -484,7 +484,7 @@ test("concurrent starts reuse one scoped process; stale lock and wrong identitie
 });
 
 test("three independent CLI connect processes share one daemon and leave it running", async t => {
-  const stateDir = await mkdtemp(join(tmpdir(), "qz-concurrent-cli-"));
+  const stateDir = await mkdtemp(join(tmpdir(), "zuri-concurrent-cli-"));
   const options = { stateDir, scopeId: `cli-${randomUUID()}`, preferredPort: 0 };
   const children = [];
   t.after(async () => {
@@ -527,14 +527,14 @@ test("three independent CLI connect processes share one daemon and leave it runn
 });
 
 test("package identity survives npx cache changes while development checkouts stay isolated", async t => {
-  const directory = await mkdtemp(join(tmpdir(), "qz-package-identity-"));
+  const directory = await mkdtemp(join(tmpdir(), "zuri-package-identity-"));
   t.after(() => rm(directory, { recursive: true, force: true }));
-  const first = join(directory, "cache-one", "node_modules", "qz-browser-agent");
-  const second = join(directory, "cache-two", "node_modules", "qz-browser-agent");
+  const first = join(directory, "cache-one", "node_modules", "zuri-agent");
+  const second = join(directory, "cache-two", "node_modules", "zuri-agent");
   const dev = join(directory, "checkout", "services", "mcp-bridge");
   for (const path of [first, second, dev]) {
     await mkdir(join(path, "src"), { recursive: true });
-    await writeFile(join(path, "package.json"), JSON.stringify({ name: "qz-browser-agent", version: "0.1.0" }));
+    await writeFile(join(path, "package.json"), JSON.stringify({ name: "zuri-agent", version: "0.1.0" }));
     await writeFile(join(path, "src", "daemon.mjs"), "export const version = 1;\n");
   }
   const identity = buildIdentity(first);
@@ -546,7 +546,7 @@ test("package identity survives npx cache changes while development checkouts st
 });
 
 test("missing state recovers a verified same-scope service without restarting its older build", async t => {
-  const stateDir = await mkdtemp(join(tmpdir(), "qz-state-recovery-"));
+  const stateDir = await mkdtemp(join(tmpdir(), "zuri-state-recovery-"));
   const options = { stateDir, scopeId: `recovery-${randomUUID()}`, buildId: "next-build" };
   const paths = daemonPaths(options);
   const managed = await startManagedBridge({ stateFile: paths.state, scopeId: options.scopeId, buildId: "loaded-build", port: 0 });
@@ -561,7 +561,7 @@ test("missing state recovers a verified same-scope service without restarting it
 });
 
 test("failed startup releases its lock and active lock owners are never displaced", async t => {
-  const stateDir = await mkdtemp(join(tmpdir(), "qz-lock-recovery-"));
+  const stateDir = await mkdtemp(join(tmpdir(), "zuri-lock-recovery-"));
   const options = { stateDir, scopeId: `lock-${randomUUID()}`, buildId: "lock-test", preferredPort: 0 };
   const paths = daemonPaths(options);
   t.after(async () => { await stopDaemon(options); await rm(stateDir, { recursive: true, force: true }); });
@@ -593,7 +593,7 @@ function mockLockFilesystem(t, methods, platform = "win32") {
 }
 
 test("Windows lock publication recovers EPERM when the competing directory disappears", async t => {
-  const stateDir = await mkdtemp(join(tmpdir(), "qz-lock-windows-race-"));
+  const stateDir = await mkdtemp(join(tmpdir(), "zuri-lock-windows-race-"));
   t.after(() => rm(stateDir, { recursive: true, force: true }));
   const options = { stateDir, scopeId: randomUUID(), buildId: "windows-lock-test" };
   const paths = daemonPaths(options), rename = fs.rename;
@@ -626,7 +626,7 @@ for (const { platform, code, attempts } of [
   { platform: "linux", code: "EPERM", attempts: 1 },
 ]) {
   test(`${platform} lock publication preserves a persistent ${code} failure`, async t => {
-    const stateDir = await mkdtemp(join(tmpdir(), "qz-lock-permission-"));
+    const stateDir = await mkdtemp(join(tmpdir(), "zuri-lock-permission-"));
     t.after(() => rm(stateDir, { recursive: true, force: true }));
     const options = { stateDir, scopeId: randomUUID(), buildId: "permission-test" };
     const failure = Object.assign(new Error("fixture filesystem permission denial"), { code });
@@ -640,7 +640,7 @@ for (const { platform, code, attempts } of [
 }
 
 test("Windows EPERM contention preserves a live lock owner", async t => {
-  const stateDir = await mkdtemp(join(tmpdir(), "qz-lock-windows-owner-"));
+  const stateDir = await mkdtemp(join(tmpdir(), "zuri-lock-windows-owner-"));
   t.after(() => rm(stateDir, { recursive: true, force: true }));
   const options = { stateDir, scopeId: randomUUID(), buildId: "owner-test", timeoutMs: 1 };
   const paths = daemonPaths(options), owner = { processId: process.pid, id: randomUUID() };
@@ -655,7 +655,7 @@ test("Windows EPERM contention preserves a live lock owner", async t => {
 });
 
 test("a lock stat permission failure is surfaced without touching its owner", async t => {
-  const stateDir = await mkdtemp(join(tmpdir(), "qz-lock-stat-denied-"));
+  const stateDir = await mkdtemp(join(tmpdir(), "zuri-lock-stat-denied-"));
   t.after(() => rm(stateDir, { recursive: true, force: true }));
   const options = { stateDir, scopeId: randomUUID(), buildId: "stat-test" };
   const paths = daemonPaths(options), stat = fs.stat;
@@ -675,7 +675,7 @@ test("a lock stat permission failure is surfaced without touching its owner", as
 });
 
 test("an unreadable lock owner is never treated as an empty or stale lock", async t => {
-  const stateDir = await mkdtemp(join(tmpdir(), "qz-lock-owner-denied-"));
+  const stateDir = await mkdtemp(join(tmpdir(), "zuri-lock-owner-denied-"));
   t.after(() => rm(stateDir, { recursive: true, force: true }));
   const options = { stateDir, scopeId: randomUUID(), buildId: "unreadable-owner-test" };
   const paths = daemonPaths(options), read = fs.readFile;
@@ -692,7 +692,7 @@ test("an unreadable lock owner is never treated as an empty or stale lock", asyn
 });
 
 test("timed-out startup stops its delayed child before a retry can create another service", { timeout: 15000 }, async t => {
-  const stateDir = await mkdtemp(join(tmpdir(), "qz-slow-start-"));
+  const stateDir = await mkdtemp(join(tmpdir(), "zuri-slow-start-"));
   const options = { stateDir, scopeId: `slow-${randomUUID()}`, buildId: "slow-test", preferredPort: 0 };
   const paths = daemonPaths(options);
   let child;
@@ -716,7 +716,7 @@ test("timed-out startup stops its delayed child before a retry can create anothe
 });
 
 test("failed startup can force-stop its own unresponsive child and removes only its matching state", { timeout: 15000 }, async t => {
-  const stateDir = await mkdtemp(join(tmpdir(), "qz-owned-startup-"));
+  const stateDir = await mkdtemp(join(tmpdir(), "zuri-owned-startup-"));
   const options = { stateDir, scopeId: `owned-${randomUUID()}`, buildId: "owned-test", preferredPort: 0 };
   const paths = daemonPaths(options);
   let child;
@@ -744,7 +744,7 @@ test("failed startup can force-stop its own unresponsive child and removes only 
 });
 
 test("startup cleanup preserves a different live service and its state record", { timeout: 15000 }, async t => {
-  const stateDir = await mkdtemp(join(tmpdir(), "qz-startup-owner-"));
+  const stateDir = await mkdtemp(join(tmpdir(), "zuri-startup-owner-"));
   const options = { stateDir, scopeId: `different-${randomUUID()}`, buildId: "owner-test", preferredPort: 0 };
   const paths = daemonPaths(options);
   const managed = await startManagedBridge({ stateFile: paths.state, scopeId: options.scopeId, buildId: options.buildId, port: 0 });
@@ -777,7 +777,7 @@ test("npm package includes the runtime catalog and excludes development runtimes
 });
 
 test("a transient health failure preserves the running service and cannot start a duplicate", async t => {
-  const stateDir = await mkdtemp(join(tmpdir(), "qz-health-recovery-"));
+  const stateDir = await mkdtemp(join(tmpdir(), "zuri-health-recovery-"));
   const options = { stateDir, scopeId: `health-${randomUUID()}`, buildId: "health-test", preferredPort: 0 };
   const paths = daemonPaths(options);
   const managed = await startManagedBridge({ stateFile: paths.state, scopeId: options.scopeId, buildId: options.buildId, port: 0 });
@@ -799,7 +799,7 @@ test("a transient health failure preserves the running service and cannot start 
 });
 
 test("the service survives launcher shutdown and reconnect recovers a crashed process", { timeout: 15000 }, async t => {
-  const stateDir = await mkdtemp(join(tmpdir(), "qz-launcher-lifecycle-"));
+  const stateDir = await mkdtemp(join(tmpdir(), "zuri-launcher-lifecycle-"));
   const options = { stateDir, scopeId: `launcher-${randomUUID()}`, buildId: "launcher-test", preferredPort: 0 };
   const moduleUrl = new URL("../../services/mcp-bridge/src/daemon.mjs", import.meta.url).href;
   const code = `import { ensureDaemon } from ${JSON.stringify(moduleUrl)}; console.log(JSON.stringify(await ensureDaemon(${JSON.stringify(options)}))); setInterval(() => {}, 1000);`;

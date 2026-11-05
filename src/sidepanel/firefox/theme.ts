@@ -14,10 +14,10 @@
 
 /** The source properties a window theme writes on the sidebar root. */
 export const FIREFOX_THEME_PROPERTIES = [
-  "--qz-ff-sidebar", "--qz-ff-sidebar-text", "--qz-ff-sidebar-border",
-  "--qz-ff-accent", "--qz-ff-accent-text", "--qz-ff-focus",
-  "--qz-ff-field", "--qz-ff-field-text", "--qz-ff-field-border",
-  "--qz-ff-popup", "--qz-ff-popup-text", "--qz-ff-popup-border",
+  "--zuri-ff-sidebar", "--zuri-ff-sidebar-text", "--zuri-ff-sidebar-border",
+  "--zuri-ff-accent", "--zuri-ff-accent-text", "--zuri-ff-focus",
+  "--zuri-ff-field", "--zuri-ff-field-text", "--zuri-ff-field-border",
+  "--zuri-ff-popup", "--zuri-ff-popup-text", "--zuri-ff-popup-border",
 ] as const;
 
 export type FirefoxThemeProperty = (typeof FIREFOX_THEME_PROPERTIES)[number];
@@ -238,12 +238,12 @@ type TierSource = "sidebar" | "popup" | "field";
  * the text in the darkest fill the tier sits on. The stylesheet declares the same shares.
  */
 export const FIREFOX_TEXT_TIERS: readonly (readonly [string, TierSource, number, number])[] = [
-  ["--qz-ff-text-deemphasized", "sidebar", 0.72, 0.14],
-  ["--qz-ff-text-muted", "sidebar", 0.6, 0.12],
-  ["--qz-ff-popup-text-deemphasized", "popup", 0.72, 0.06],
-  ["--qz-ff-popup-text-muted", "popup", 0.6, 0.06],
-  ["--qz-ff-field-text-deemphasized", "field", 0.72, 0.14],
-  ["--qz-ff-field-placeholder", "field", 0.6, 0],
+  ["--zuri-ff-text-deemphasized", "sidebar", 0.72, 0.14],
+  ["--zuri-ff-text-muted", "sidebar", 0.6, 0.12],
+  ["--zuri-ff-popup-text-deemphasized", "popup", 0.72, 0.06],
+  ["--zuri-ff-popup-text-muted", "popup", 0.6, 0.06],
+  ["--zuri-ff-field-text-deemphasized", "field", 0.72, 0.14],
+  ["--zuri-ff-field-placeholder", "field", 0.6, 0],
 ];
 
 /** The smallest share of `text` at or above `share` that reads on the surface and on its fill. */
@@ -257,14 +257,14 @@ export function firefoxTextTier(text: Rgba, surface: Rgba, share: number, fillSh
 }
 
 /** Status inks the stylesheet fixes per scheme; the palette keeps them readable on a themed surface. */
-const STATUS_PROPERTIES = ["--qz-ff-success", "--qz-ff-warning", "--qz-ff-critical"] as const;
+const STATUS_PROPERTIES = ["--zuri-ff-success", "--zuri-ff-warning", "--zuri-ff-critical"] as const;
 const PALETTE_SOURCES = [
-  "--qz-ff-accent", "--qz-ff-accent-text", "--qz-ff-sidebar", "--qz-ff-sidebar-text",
-  "--qz-ff-popup", "--qz-ff-popup-text", "--qz-ff-field", "--qz-ff-field-text",
+  "--zuri-ff-accent", "--zuri-ff-accent-text", "--zuri-ff-sidebar", "--zuri-ff-sidebar-text",
+  "--zuri-ff-popup", "--zuri-ff-popup-text", "--zuri-ff-field", "--zuri-ff-field-text",
   ...STATUS_PROPERTIES,
 ] as const;
 const PALETTE_PROPERTIES = [
-  "--qz-ff-primary", "--qz-ff-primary-hover", "--qz-ff-primary-active", "--qz-ff-primary-text", "--qz-ff-accent-ink",
+  "--zuri-ff-primary", "--zuri-ff-primary-hover", "--zuri-ff-primary-active", "--zuri-ff-primary-text", "--zuri-ff-accent-ink",
   ...FIREFOX_TEXT_TIERS.map(([property]) => property),
   ...STATUS_PROPERTIES,
 ];
@@ -283,7 +283,7 @@ export function applyFirefoxPalette(root: AccentRoot): boolean {
   const view = document?.defaultView;
   if (!document || !view || typeof view.getComputedStyle !== "function" || typeof root.appendChild !== "function") return false;
   for (const property of PALETTE_PROPERTIES) root.style.removeProperty(property);
-  if (!view.getComputedStyle(root).getPropertyValue("--qz-ff-accent").trim()) return false;
+  if (!view.getComputedStyle(root).getPropertyValue("--zuri-ff-accent").trim()) return false;
   const probe = document.createElement("span");
   probe.style.cssText = "position:absolute;visibility:hidden";
   root.appendChild(probe);
@@ -293,22 +293,22 @@ export function applyFirefoxPalette(root: AccentRoot): boolean {
     colors[name] = parseFirefoxThemeColor(view.getComputedStyle(probe).color);
   }
   probe.remove();
-  const accent = colors["--qz-ff-accent"];
-  const sidebarColor = colors["--qz-ff-sidebar"];
-  const sidebarText = colors["--qz-ff-sidebar-text"];
+  const accent = colors["--zuri-ff-accent"];
+  const sidebarColor = colors["--zuri-ff-sidebar"];
+  const sidebarText = colors["--zuri-ff-sidebar-text"];
   if (!accent || !sidebarColor || !sidebarText) return false;
   const sidebar: Rgba = [sidebarColor[0], sidebarColor[1], sidebarColor[2], 1];
-  const palette = firefoxPrimaryPalette(accent, colors["--qz-ff-accent-text"]);
-  root.style.setProperty("--qz-ff-primary", rgb(palette.fill));
-  root.style.setProperty("--qz-ff-primary-hover", rgb(palette.hover));
-  root.style.setProperty("--qz-ff-primary-active", rgb(palette.active));
-  root.style.setProperty("--qz-ff-primary-text", rgb(palette.ink));
-  root.style.setProperty("--qz-ff-accent-ink", rgb(firefoxAccentInk(accent, [sidebar, mix(sidebarText, 0.05, sidebar)])));
+  const palette = firefoxPrimaryPalette(accent, colors["--zuri-ff-accent-text"]);
+  root.style.setProperty("--zuri-ff-primary", rgb(palette.fill));
+  root.style.setProperty("--zuri-ff-primary-hover", rgb(palette.hover));
+  root.style.setProperty("--zuri-ff-primary-active", rgb(palette.active));
+  root.style.setProperty("--zuri-ff-primary-text", rgb(palette.ink));
+  root.style.setProperty("--zuri-ff-accent-ink", rgb(firefoxAccentInk(accent, [sidebar, mix(sidebarText, 0.05, sidebar)])));
   const over = (color: Rgba | undefined) => (color ? mix(color, color[3], sidebar) : undefined);
   const pairs: Record<TierSource, [Rgba | undefined, Rgba | undefined]> = {
     sidebar: [sidebarText, sidebar],
-    popup: [colors["--qz-ff-popup-text"], over(colors["--qz-ff-popup"])],
-    field: [colors["--qz-ff-field-text"], over(colors["--qz-ff-field"])],
+    popup: [colors["--zuri-ff-popup-text"], over(colors["--zuri-ff-popup"])],
+    field: [colors["--zuri-ff-field-text"], over(colors["--zuri-ff-field"])],
   };
   for (const [property, source, share, fillShare] of FIREFOX_TEXT_TIERS) {
     const [text, surface] = pairs[source];
@@ -401,23 +401,23 @@ function paintedVariant(colors: ThemeColors, themeDark: boolean): FirefoxSidebar
   const layered = (color: Rgba | undefined) => (color ? over(color, ground) : undefined);
   const surface = opaque(colors.sidebar) ?? layered(colors.toolbar) ?? layered(colors.tab_selected) ?? frame ?? fallback;
   const properties: FirefoxSidebarTheme["properties"] = {
-    "--qz-ff-sidebar": rgb(surface),
-    "--qz-ff-sidebar-text": rgb(readable(firstInk(colors) ?? legibleInk(surface), surface, TEXT_TARGET)),
+    "--zuri-ff-sidebar": rgb(surface),
+    "--zuri-ff-sidebar-text": rgb(readable(firstInk(colors) ?? legibleInk(surface), surface, TEXT_TARGET)),
   };
-  if (colors.sidebar_border) properties["--qz-ff-sidebar-border"] = css(colors.sidebar_border);
+  if (colors.sidebar_border) properties["--zuri-ff-sidebar-border"] = css(colors.sidebar_border);
   writeAccent(properties, colors, surface);
   if (colors.toolbar_field) {
     const field = over(colors.toolbar_field, surface);
-    properties["--qz-ff-field"] = css(colors.toolbar_field);
-    properties["--qz-ff-field-text"] = rgb(readable(colors.toolbar_field_text ?? legibleInk(field), field, TEXT_TARGET));
+    properties["--zuri-ff-field"] = css(colors.toolbar_field);
+    properties["--zuri-ff-field-text"] = rgb(readable(colors.toolbar_field_text ?? legibleInk(field), field, TEXT_TARGET));
   }
-  if (colors.toolbar_field_border) properties["--qz-ff-field-border"] = css(colors.toolbar_field_border);
+  if (colors.toolbar_field_border) properties["--zuri-ff-field-border"] = css(colors.toolbar_field_border);
   if (colors.popup) {
     const popup = opaque(colors.popup);
-    properties["--qz-ff-popup"] = rgb(popup);
-    properties["--qz-ff-popup-text"] = rgb(readable(colors.popup_text ?? legibleInk(popup), popup, TEXT_TARGET));
+    properties["--zuri-ff-popup"] = rgb(popup);
+    properties["--zuri-ff-popup-text"] = rgb(readable(colors.popup_text ?? legibleInk(popup), popup, TEXT_TARGET));
   }
-  if (colors.popup_border) properties["--qz-ff-popup-border"] = css(colors.popup_border);
+  if (colors.popup_border) properties["--zuri-ff-popup-border"] = css(colors.popup_border);
   return { scheme: perceivedDark(surface) ? "dark" : "light", derived: false, properties };
 }
 
@@ -432,8 +432,8 @@ function darkVariant(colors: ThemeColors): FirefoxSidebarTheme {
   const ground = opaque(colors.frame) ?? opaque(colors.sidebar) ?? opaque(colors.tab_selected) ?? opaque(colors.toolbar_field);
   const text = ground ? shadeUntil(ground, -1, color => relativeLuminance(color) >= LIGHT_TEXT_LUMINANCE) : LIGHT_INK;
   const properties: FirefoxSidebarTheme["properties"] = {
-    "--qz-ff-sidebar": rgb(surface),
-    "--qz-ff-sidebar-text": rgb(readable(text, surface, TEXT_TARGET)),
+    "--zuri-ff-sidebar": rgb(surface),
+    "--zuri-ff-sidebar-text": rgb(readable(text, surface, TEXT_TARGET)),
   };
   writeAccent(properties, colors, surface);
   return { scheme: "dark", derived: true, properties };
@@ -443,10 +443,10 @@ function darkVariant(colors: ThemeColors): FirefoxSidebarTheme {
 function writeAccent(properties: FirefoxSidebarTheme["properties"], colors: ThemeColors, surface: Rgba): void {
   if (colors.sidebar_highlight) {
     const accent = over(colors.sidebar_highlight, surface);
-    properties["--qz-ff-accent"] = rgb(accent);
-    properties["--qz-ff-accent-text"] = rgb(colors.sidebar_highlight_text ? opaque(colors.sidebar_highlight_text) : legibleInk(accent));
+    properties["--zuri-ff-accent"] = rgb(accent);
+    properties["--zuri-ff-accent-text"] = rgb(colors.sidebar_highlight_text ? opaque(colors.sidebar_highlight_text) : legibleInk(accent));
   }
-  if (colors.focus_outline) properties["--qz-ff-focus"] = rgb(readable(colors.focus_outline, surface, RING_TARGET));
+  if (colors.focus_outline) properties["--zuri-ff-focus"] = rgb(readable(colors.focus_outline, surface, RING_TARGET));
 }
 
 function themeColors(theme: unknown): Record<string, unknown> | undefined {

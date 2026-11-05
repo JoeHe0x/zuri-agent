@@ -568,7 +568,7 @@ def main():
     ready = readiness(curve, stability, train, linear=curve_model == "ridge")
 
     report = {
-        "schema": "qingzhou.article-extraction-conservative-reranker.v2",
+        "schema": "zuri.article-extraction-conservative-reranker.v2",
         "dataset": str(Path(args.dataset).resolve()),
         "model": {"kinds": list(models), "alpha": args.alpha,
                   "features": list(FEATURES), "pairFeatures": list(PAIR_FEATURES),

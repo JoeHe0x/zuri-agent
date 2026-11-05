@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import { existsSync, readFileSync } from "node:fs";
 import {
-  QINGZHOU_SKILL_FORMAT,
-  QINGZHOU_SKILL_SCHEMA_VERSION,
+  ZURI_SKILL_FORMAT,
+  ZURI_SKILL_SCHEMA_VERSION,
   toAgentSkillName,
 } from "../../src/shared/skills/skill-utils.js";
 import {
@@ -66,8 +66,8 @@ const storage = {
       name: "小红书增强",
       description: "小红书站点技能",
       scope: "site",
-      format: QINGZHOU_SKILL_FORMAT,
-      schemaVersion: QINGZHOU_SKILL_SCHEMA_VERSION,
+      format: ZURI_SKILL_FORMAT,
+      schemaVersion: ZURI_SKILL_SCHEMA_VERSION,
       domains: ["xiaohongshu.com"],
       urlPatterns: ["*://*.xiaohongshu.com/*"],
       resources: [
@@ -99,8 +99,8 @@ const storage = {
       name: "普通脚本资源技能",
       description: "没有 plugin.json 的脚本资源不应被工具化",
       scope: "global",
-      format: QINGZHOU_SKILL_FORMAT,
-      schemaVersion: QINGZHOU_SKILL_SCHEMA_VERSION,
+      format: ZURI_SKILL_FORMAT,
+      schemaVersion: ZURI_SKILL_SCHEMA_VERSION,
       resources: [
         {
           path: "scripts/local-helper.js",
@@ -183,7 +183,7 @@ const sidepanelHtml = readSource("../../src/capabilities/skills/ui.html");
 
 assert.doesNotMatch(
   agentSource,
-  /agent_load_skill|skillMutationResultMayAffectPluginRegistry|qingzhou_skill_author__/,
+  /agent_load_skill|skillMutationResultMayAffectPluginRegistry|zuri_skill_author__/,
   "Agent consumes trusted runtime effects instead of inferring authority from tool names or result fields",
 );
 assert.match(
@@ -364,16 +364,16 @@ const inactiveSiteSchemas = runtime.getActiveSkillToolSchemasSync({
 });
 const inactiveSiteSchemaNames = inactiveSiteSchemas.map(schema => schema.function.name);
 assert.equal(inactiveSiteSchemaNames.includes("xhs_booster__collect_notes"), false);
-assert.equal(inactiveSiteSchemaNames.includes("qingzhou_skill_author__create_skill"), false);
-assert.equal(inactiveSiteSchemaNames.includes("qingzhou_skill_author__edit_skill_resource"), false);
+assert.equal(inactiveSiteSchemaNames.includes("zuri_skill_author__create_skill"), false);
+assert.equal(inactiveSiteSchemaNames.includes("zuri_skill_author__edit_skill_resource"), false);
 
 const activeSchemas = runtime.getActiveSkillToolSchemasSync({
   dynamicContext: { taskSiteTabs: [{ url: "https://www.xiaohongshu.com/explore/abc" }] },
 });
 const activeSchemaNames = activeSchemas.map(schema => schema.function.name);
 assert.equal(activeSchemaNames.includes("xhs_booster__collect_notes"), true);
-assert.equal(activeSchemaNames.includes("qingzhou_skill_author__create_skill"), false);
-assert.equal(activeSchemaNames.includes("qingzhou_skill_author__edit_skill_resource"), false);
+assert.equal(activeSchemaNames.includes("zuri_skill_author__create_skill"), false);
+assert.equal(activeSchemaNames.includes("zuri_skill_author__edit_skill_resource"), false);
 const activeXhsToolSchema = activeSchemas.find(schema => schema.function.name === "xhs_booster__collect_notes");
 assert.equal(activeXhsToolSchema.function.parameters.properties.timeout.type, "number");
 assert.deepEqual(activeXhsToolSchema.function.parameters.required, ["timeout"]);
@@ -405,8 +405,8 @@ const loadedSkillWorkbenchSchemas = runtime.getActiveSkillToolSchemasSync({
   dynamicContext: { pageUrl: "https://www.baidu.com/" },
   loadedPluginSkillNames: loadedSkillWorkbenchNames,
 });
-const skillAuthorCreateSchema = loadedSkillWorkbenchSchemas.find(schema => schema.function.name === "qingzhou_skill_author__create_skill");
-const skillAuthorEditResourceSchema = loadedSkillWorkbenchSchemas.find(schema => schema.function.name === "qingzhou_skill_author__edit_skill_resource");
+const skillAuthorCreateSchema = loadedSkillWorkbenchSchemas.find(schema => schema.function.name === "zuri_skill_author__create_skill");
+const skillAuthorEditResourceSchema = loadedSkillWorkbenchSchemas.find(schema => schema.function.name === "zuri_skill_author__edit_skill_resource");
 assert.equal(Boolean(skillAuthorCreateSchema), true);
 assert.equal(Boolean(skillAuthorEditResourceSchema), true);
 assert.equal(Object.prototype.hasOwnProperty.call(skillAuthorCreateSchema.function.parameters.properties, "tabId"), false);
@@ -439,8 +439,8 @@ storage._skills["全局插件技能"] = {
   name: "全局插件技能",
   description: "全局按需加载插件技能",
   scope: "global",
-  format: QINGZHOU_SKILL_FORMAT,
-  schemaVersion: QINGZHOU_SKILL_SCHEMA_VERSION,
+  format: ZURI_SKILL_FORMAT,
+  schemaVersion: ZURI_SKILL_SCHEMA_VERSION,
   resources: [
     { path: "plugin.json", type: "json", content: JSON.stringify(globalManifest) },
     { path: "scripts/lookup.js", type: "script", content: "async () => ({ ok: true });" },
@@ -450,8 +450,8 @@ storage._skills["常驻插件技能"] = {
   name: "常驻插件技能",
   description: "常驻插件技能",
   scope: "resident",
-  format: QINGZHOU_SKILL_FORMAT,
-  schemaVersion: QINGZHOU_SKILL_SCHEMA_VERSION,
+  format: ZURI_SKILL_FORMAT,
+  schemaVersion: ZURI_SKILL_SCHEMA_VERSION,
   resources: [
     { path: "plugin.json", type: "json", content: JSON.stringify(residentManifest) },
     { path: "scripts/ping.js", type: "script", content: "async () => ({ ok: true });" },
@@ -465,20 +465,20 @@ const scopedInactiveNames = scopedInactiveSchemas.map(schema => schema.function.
 assert.equal(scopedInactiveNames.includes("global_helper__lookup"), false);
 assert.equal(scopedInactiveNames.includes("xhs_booster__collect_notes"), false);
 assert.equal(scopedInactiveNames.includes("resident_helper__ping"), true);
-assert.equal(scopedInactiveNames.includes("qingzhou_skill_author__create_skill"), false);
-assert.equal(scopedInactiveNames.includes("qingzhou_skill_author__edit_skill_resource"), false);
+assert.equal(scopedInactiveNames.includes("zuri_skill_author__create_skill"), false);
+assert.equal(scopedInactiveNames.includes("zuri_skill_author__edit_skill_resource"), false);
 
 const loadedGlobalSchemas = runtime.getActiveSkillToolSchemasSync({
   dynamicContext: { pageUrl: "https://www.baidu.com/" },
   loadedPluginSkillNames: ["全局插件技能"],
 });
 assert.equal(loadedGlobalSchemas.some(schema => schema.function.name === "global_helper__lookup"), true);
-assert.equal(loadedGlobalSchemas.some(schema => schema.function.name === "qingzhou_skill_author__create_skill"), false);
+assert.equal(loadedGlobalSchemas.some(schema => schema.function.name === "zuri_skill_author__create_skill"), false);
 const loadedBuiltinGlobalSchemas = runtime.getActiveSkillToolSchemasSync({
   dynamicContext: { pageUrl: "https://www.baidu.com/" },
   loadedPluginSkillNames: loadedSkillWorkbenchNames,
 });
-assert.equal(loadedBuiltinGlobalSchemas.some(schema => schema.function.name === "qingzhou_skill_author__create_skill"), true);
+assert.equal(loadedBuiltinGlobalSchemas.some(schema => schema.function.name === "zuri_skill_author__create_skill"), true);
 assert.equal(loadedBuiltinGlobalSchemas.some(schema => schema.function.name === "global_helper__lookup"), false);
 const loadedGlobalContextSchemas = runtime.getActiveSkillToolSchemasSync({
   context: { pageUrl: "https://www.baidu.com/", loadedPluginSkillNames: ["全局插件技能"] },
@@ -510,12 +510,12 @@ assert.equal(registryEvents.length, 1);
 assert.equal(registryEvents[0].type, "plugin_registry_update");
 assert.equal(registryEvents[0].reason, "test_live_refresh");
 assert.equal(registryEvents[0].snapshot.plugins.some(plugin => plugin.id === "xhs-booster"), true);
-assert.equal(registryEvents[0].snapshot.plugins.some(plugin => plugin.id === "qingzhou-skill-author"), true);
+assert.equal(registryEvents[0].snapshot.plugins.some(plugin => plugin.id === "zuri-skill-author"), true);
 unsubscribeRegistry();
 
 let contributions = await runtime.listSkillContributions({ pageUrl: "https://www.xiaohongshu.com/explore/abc" });
 const xhsContribution = contributions.plugins.find(plugin => plugin.id === "xhs-booster");
-const skillAuthorContribution = contributions.plugins.find(plugin => plugin.id === "qingzhou-skill-author");
+const skillAuthorContribution = contributions.plugins.find(plugin => plugin.id === "zuri-skill-author");
 assert.equal(Boolean(xhsContribution), true);
 assert.equal(Boolean(skillAuthorContribution), true);
 assert.equal(xhsContribution.active, true);
@@ -617,8 +617,8 @@ storage._skills["MCP 文档"] = {
   name: "MCP 文档",
   description: "MCP 测试技能",
   scope: "global",
-  format: QINGZHOU_SKILL_FORMAT,
-  schemaVersion: QINGZHOU_SKILL_SCHEMA_VERSION,
+  format: ZURI_SKILL_FORMAT,
+  schemaVersion: ZURI_SKILL_SCHEMA_VERSION,
   resources: [
     { path: "plugin.json", type: "json", content: JSON.stringify(mcpManifest) },
   ],
@@ -723,7 +723,7 @@ try {
   assert.equal(listedMcpTools.tools[0].name, "resolve-library-id");
   assert.equal(listedMcpTools.tools[0].pluginTool.name, "mcp_docs__query_docs");
   assert.equal(listedMcpTools.tools[0].renderer.type, "text");
-  const metadataCache = storage._qingzhou_mcp_metadata_cache_v1;
+  const metadataCache = storage._zuri_mcp_metadata_cache_v1;
   assert.equal(metadataCache.version, 1);
   const metadataEntries = Object.values(metadataCache.entries || {});
   assert.equal(metadataEntries.length, 1);
@@ -838,7 +838,7 @@ try {
   assert.equal(savedValidMcpSkill.description, "保存时校验 MCP");
   assert.equal(savedValidMcpSkill.resources.some(resource => resource.path === "plugin.json"), true);
   const createdMcpToolResult = await runtime.executeSkillTool(
-    "qingzhou_skill_author__create_skill",
+    "zuri_skill_author__create_skill",
     {
       timeout: 30,
       name: "MCP 工具摘要",
@@ -852,7 +852,7 @@ try {
   assert.equal(createdMcpToolResult.saved, true);
   assert.equal(skillRegistryCommitCount, 1, "one Skill mutation should commit the registry exactly once");
   const savedMcpToolResult = await runtime.executeSkillTool(
-    "qingzhou_skill_author__edit_skill_resource",
+    "zuri_skill_author__edit_skill_resource",
     {
       timeout: 30,
       name: "MCP 工具摘要",
@@ -955,8 +955,8 @@ const noRendererManifest = {
 replacePluginRegistryFromSkills([
   {
     name: "普通脚本插件",
-    format: QINGZHOU_SKILL_FORMAT,
-    schemaVersion: QINGZHOU_SKILL_SCHEMA_VERSION,
+    format: ZURI_SKILL_FORMAT,
+    schemaVersion: ZURI_SKILL_SCHEMA_VERSION,
     resources: [{ path: "plugin.json", type: "json", content: JSON.stringify(noRendererManifest) }],
   },
 ]);
@@ -1007,14 +1007,14 @@ const collisionManifestB = {
 const collisionSnapshot = replacePluginRegistryFromSkills([
   {
     name: "插件 A",
-    format: QINGZHOU_SKILL_FORMAT,
-    schemaVersion: QINGZHOU_SKILL_SCHEMA_VERSION,
+    format: ZURI_SKILL_FORMAT,
+    schemaVersion: ZURI_SKILL_SCHEMA_VERSION,
     resources: [{ path: "plugin.json", type: "json", content: JSON.stringify(collisionManifestA) }],
   },
   {
     name: "插件 B",
-    format: QINGZHOU_SKILL_FORMAT,
-    schemaVersion: QINGZHOU_SKILL_SCHEMA_VERSION,
+    format: ZURI_SKILL_FORMAT,
+    schemaVersion: ZURI_SKILL_SCHEMA_VERSION,
     resources: [{ path: "plugin.json", type: "json", content: JSON.stringify(collisionManifestB) }],
   },
 ]);
@@ -1029,8 +1029,8 @@ assert.equal(collisionSnapshot.diagnostics.some(item => item.toolName === "same_
 const layoutSnapshot = replacePluginRegistryFromSkills([
   {
     name: "组合渲染插件",
-    format: QINGZHOU_SKILL_FORMAT,
-    schemaVersion: QINGZHOU_SKILL_SCHEMA_VERSION,
+    format: ZURI_SKILL_FORMAT,
+    schemaVersion: ZURI_SKILL_SCHEMA_VERSION,
     resources: [{
       path: "plugin.json",
       type: "json",
@@ -1084,8 +1084,8 @@ assert.equal(availableRendererTypes.includes("diff"), true);
 const invalidRendererSnapshot = replacePluginRegistryFromSkills([
   {
     name: "非法渲染插件",
-    format: QINGZHOU_SKILL_FORMAT,
-    schemaVersion: QINGZHOU_SKILL_SCHEMA_VERSION,
+    format: ZURI_SKILL_FORMAT,
+    schemaVersion: ZURI_SKILL_SCHEMA_VERSION,
     resources: [{
       path: "plugin.json",
       type: "json",
@@ -1116,7 +1116,7 @@ assert.equal(Object.prototype.hasOwnProperty.call(invalidRenderer, "layout"), fa
 assert.equal(invalidRendererSnapshot.diagnostics.some(item => /imageGrid/.test(item.message)), true);
 assert.equal(invalidRendererSnapshot.diagnostics.some(item => /keyValue/.test(item.message)), true);
 
-console.log("qingzhou plugin tests passed");
+console.log("zuri plugin tests passed");
 
 function readSource(relative) {
   const path = new URL(relative, import.meta.url);

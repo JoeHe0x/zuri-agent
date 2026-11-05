@@ -25,7 +25,7 @@ async function request(page, type, fields = {}) {
 }
 
 async function withOfflinePanel(testInfo, scenario, run) {
-  const directory = await mkdtemp(join(tmpdir(), "qingzhou-models-offline-stress-"));
+  const directory = await mkdtemp(join(tmpdir(), "zuri-models-offline-stress-"));
   const output = resolve("tests/results/models-dev-offline-stress", scenario);
   const evidence = { pageErrors: [], requests: [], failedRequests: [], selections: [] };
   let context;

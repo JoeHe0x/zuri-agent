@@ -23,7 +23,7 @@ export function createSidepanelPortRuntime(options: RuntimeOptions = {}) {
     maxReconnectDelayMs: options.maxReconnectDelayMs || 3000,
     shouldKeepAlive: options.shouldKeepAlive,
     onListenerError(error, event) {
-      console.warn("[轻舟] port listener failed", (event && typeof event === "object" && "type" in event ? event.type : "event"), error);
+      console.warn("[Zuri] port listener failed", (event && typeof event === "object" && "type" in event ? event.type : "event"), error);
     },
   });
 

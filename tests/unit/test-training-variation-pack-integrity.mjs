@@ -22,7 +22,7 @@ import {
 } from "../benchmarks/article-extraction/training-variation-pack-integrity.mjs";
 
 function fixture() {
-  const root = mkdtempSync(join(tmpdir(), "qz-pack-integrity-"));
+  const root = mkdtempSync(join(tmpdir(), "zuri-pack-integrity-"));
   test.after(() => rmSync(root, { recursive: true, force: true }));
   return root;
 }

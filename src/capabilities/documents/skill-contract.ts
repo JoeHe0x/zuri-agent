@@ -5,8 +5,8 @@ import {
   DOCUMENT_SHEET_INPUT_SCHEMA,
 } from "#sdk/shared/document-input";
 
-export const QINGZHOU_DOCUMENTS_SKILL_ID = "qingzhou-documents";
-export const QINGZHOU_DOCUMENTS_RUNTIME_PREFIX = "qingzhou_documents";
+export const ZURI_DOCUMENTS_SKILL_ID = "zuri-documents";
+export const ZURI_DOCUMENTS_RUNTIME_PREFIX = "zuri_documents";
 
 export const DOCUMENT_TOOL_CORE_NAMES = Object.freeze([
   "document_fetch",
@@ -25,10 +25,10 @@ const getDocumentOutputFormatLiterals = () => (DOCUMENT_OUTPUT_FORMATS
 export function getDocumentSkillToolName(coreName = "") {
   const name = String(coreName || "").trim();
   if (!DOCUMENT_TOOL_CORE_NAME_SET.has(name)) return "";
-  return name ? `${QINGZHOU_DOCUMENTS_RUNTIME_PREFIX}__${name}` : "";
+  return name ? `${ZURI_DOCUMENTS_RUNTIME_PREFIX}__${name}` : "";
 }
 
-export const QINGZHOU_DOCUMENT_TOOL_SPECS = Object.freeze({
+export const ZURI_DOCUMENT_TOOL_SPECS = Object.freeze({
   document_fetch: Object.freeze({
     get description() { return modelT("documentFetch"); },
     parameters: {

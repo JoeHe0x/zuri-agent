@@ -8,7 +8,7 @@ import { validateExtensionBoundaries } from "../../scripts/extension-boundaries.
 import { capabilityBuildProfile, generateCapabilityCatalogs } from "../../scripts/capability-catalog.mjs";
 
 async function fixture(t) {
-  const root = await realpath(await mkdtemp(join(tmpdir(), "qz-sdk-boundary-")));
+  const root = await realpath(await mkdtemp(join(tmpdir(), "zuri-sdk-boundary-")));
   t.after(() => rm(root, { recursive: true, force: true }));
   const put = async (path, text) => { await mkdir(join(root, path, ".."), { recursive: true }); await writeFile(join(root, path), text); };
   await put("src/sdk/background.ts", "export interface ToolExtensionAPI {}\n");
@@ -31,7 +31,7 @@ test("extension imports use own context, shared code, explicit SDK entries and n
     type Lazy = import('./helper.js').Helper;
     const misleading = 'import("../../background/private.js")';
     // import type { Private } from '../../background/private.js';
-    export default (qz: ToolExtensionAPI) => void format(value);
+    export default (zuri: ToolExtensionAPI) => void format(value);
   `);
   assert.doesNotThrow(() => validateExtensionBoundaries(source));
 });

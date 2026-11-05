@@ -3,7 +3,7 @@
   "tabs.tab": "タブ {tabId}",
   "tabs.current": "現在",
   "tabs.window": "ウィンドウ {windowId}",
-  "tabs.qingzhouTask": "Zuri のタスク",
+  "tabs.zuriTask": "Zuri のタスク",
   "tabs.organizedInto": "「{name}」に整理しました",
   "tabs.namedTabCount": "タブ数：{count} · {name}",
   "tabs.groupedTabs": "グループ内のタブ数：{count}",

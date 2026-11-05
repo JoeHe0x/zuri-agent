@@ -5,10 +5,10 @@ import { createLlmGateway } from "../../src/background/llm/index.js";
 import { getConfig } from "../../src/background/llm/config.js";
 import { SYSTEM_PROMPT } from "../../src/background/agent/prompts.js";
 import {
-  getBuiltinQingzhouManagementContent,
-  getBuiltinQingzhouManagementDescription,
-  getQingzhouManageSettingsToolDescription,
-  QINGZHOU_MANAGE_SETTINGS_TOOL_PARAMETERS,
+  getBuiltinZuriManagementContent,
+  getBuiltinZuriManagementDescription,
+  getZuriManageSettingsToolDescription,
+  ZURI_MANAGE_SETTINGS_TOOL_PARAMETERS,
 } from "../../src/capabilities/settings/embedded-skill.js";
 
 const options = parseArgs(process.argv.slice(2));
@@ -38,7 +38,7 @@ const gateway = createLlmGateway({ rateGovernor: null, rateLearning: null });
 const prompt = [
   {
     role: "system",
-    content: "Solve the problem carefully. In the final answer output only QZ=<integer>.",
+    content: "Solve the problem carefully. In the final answer output only ZURI=<integer>.",
   },
   {
     role: "user",
@@ -49,7 +49,7 @@ const prompt = [
 try {
   const report = {
     ok: true,
-    pipeline: "qingzhou-management manage_settings -> stored preset -> getConfig -> LLM gateway -> provider",
+    pipeline: "zuri-management manage_settings -> stored preset -> getConfig -> LLM gateway -> provider",
     providers: {},
   };
 
@@ -215,7 +215,7 @@ async function checkManagementIntent() {
     [
       {
         role: "system",
-        content: `${SYSTEM_PROMPT}\n\n## 可用 Skills（经验库）\n- qingzhou-management（Agent管理）: ${getBuiltinQingzhouManagementDescription()}`,
+        content: `${SYSTEM_PROMPT}\n\n## 可用 Skills（经验库）\n- zuri-management（Agent管理）: ${getBuiltinZuriManagementDescription()}`,
       },
       {
         role: "user",
@@ -243,8 +243,8 @@ async function checkManagementIntent() {
     arguments: JSON.parse(call.function?.arguments || "{}"),
   }));
   assert.ok(
-    calls.some(call => call.name === "load_skill" && call.arguments.name === "qingzhou-management"),
-    `management intent did not load qingzhou-management: ${JSON.stringify({ text: response.text, calls })}`,
+    calls.some(call => call.name === "load_skill" && call.arguments.name === "zuri-management"),
+    `management intent did not load zuri-management: ${JSON.stringify({ text: response.text, calls })}`,
   );
   return {
     instruction: "关闭模型思考",
@@ -255,13 +255,13 @@ async function checkManagementIntent() {
 
 async function checkManagementParameterChoice() {
   requestLabel = "deepseek.management_parameter_choice";
-  const toolName = "qingzhou_management__manage_settings";
+  const toolName = "zuri_management__manage_settings";
   const runtimeConfig = await getConfig();
   const response = await collectStream(gateway.chatStream(
     [
       {
         role: "system",
-        content: `${SYSTEM_PROMPT}\n\n[已加载 Skill: qingzhou-management]\n${getBuiltinQingzhouManagementContent()}`,
+        content: `${SYSTEM_PROMPT}\n\n[已加载 Skill: zuri-management]\n${getBuiltinZuriManagementContent()}`,
       },
       { role: "user", content: "关闭模型思考" },
       {
@@ -298,8 +298,8 @@ async function checkManagementParameterChoice() {
       type: "function",
       function: {
         name: toolName,
-        description: getQingzhouManageSettingsToolDescription(),
-        parameters: QINGZHOU_MANAGE_SETTINGS_TOOL_PARAMETERS,
+        description: getZuriManageSettingsToolDescription(),
+        parameters: ZURI_MANAGE_SETTINGS_TOOL_PARAMETERS,
       },
     }],
     AbortSignal.timeout(120_000),

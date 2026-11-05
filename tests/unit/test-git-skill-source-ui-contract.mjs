@@ -25,7 +25,7 @@ assert.match(ui, /request\("check_git_skill_source"/u, "refresh should check thr
 assert.match(ui, /request\("update_git_skill_source"/u, "source view should update through Background API");
 assert.match(ui, /request\("remove_git_skill_source"/u, "source view should unbind through Background API");
 assert.doesNotMatch(ui, /chrome\.storage|localStorage/u, "source view must not write persistence directly");
-assert.match(ui, /class="qz-icon-btn qz-icon-btn--sm git-skill-source-action/u, "row actions should use shared icon buttons");
+assert.match(ui, /class="zuri-icon-btn zuri-icon-btn--sm git-skill-source-action/u, "row actions should use shared icon buttons");
 assert.match(ui, /data-git-source-action="check"[\s\S]+title="\$\{escapeHtmlAttribute\(t\("checkForUpdates"\)\)\}"/u, "refresh icon should expose its read-only command name");
 assert.match(ui, /data-git-source-action="update"[\s\S]+>\$\{checked\.repairAvailable \? t\("restore"\) : t\("update"\)\}<\/button>/u, "an explicit apply command should appear only after checking");
 assert.match(ui, /data-git-source-action="remove"[\s\S]+title="\$\{escapeHtmlAttribute\(t\("disconnectSource"\)\)\}"/u, "unlink icon should expose its command name");
@@ -35,7 +35,7 @@ assert.match(ui, /label:\s*t\("removeUnchangedItems"\)[\s\S]+tone:\s*"danger"/u,
 assert.match(ui, /deleteUnmodifiedSkills/u, "cleanup must preserve locally modified Skills");
 assert.match(ui, /toast\(message,\s*\{[\s\S]*title,[\s\S]*actionLabel:[\s\S]*t\("retry"\)[\s\S]*onAction:\s*retry/u, "repository errors should use the structured shared Toast with a real retry action");
 assert.match(decision, /createElement\("dialog"\)/u, "short decisions should use the browser modal top layer");
-assert.match(decision, /className = `qz-btn qz-btn--ghost qz-decision-option/u, "choice rows should reuse the shared command primitive");
+assert.match(decision, /className = `zuri-btn zuri-btn--ghost zuri-decision-option/u, "choice rows should reuse the shared command primitive");
 
 for (const skin of skins) {
   const panel = extractCssRule(skin.css, ".git-skill-sources-panel");
@@ -43,11 +43,11 @@ for (const skin of skins) {
   const title = extractCssRule(skin.css, ".git-skill-source-title a");
   const issue = extractCssRule(skin.css, ".git-skill-source-meta em");
   const subpath = extractCssRule(skin.css, ".git-skill-source-subpath");
-  const dialog = extractCssRule(skin.css, ".qz-decision-dialog");
-  const dialogOpen = extractCssRule(skin.css, ".qz-decision-dialog[open]");
-  const decisionPanel = extractCssRule(skin.css, ".qz-decision-panel");
-  assertClassTokens(html, "git-skill-sources-panel", ["qz:flex", "qz:flex-col", "qz:flex-1", "qz:min-h-0"], `${skin.name} should use the workbench viewport`);
-  assertClassTokens(html, "git-skill-sources-panel", ["qz:overflow-hidden"], `${skin.name} should keep one owned scroll surface`);
+  const dialog = extractCssRule(skin.css, ".zuri-decision-dialog");
+  const dialogOpen = extractCssRule(skin.css, ".zuri-decision-dialog[open]");
+  const decisionPanel = extractCssRule(skin.css, ".zuri-decision-panel");
+  assertClassTokens(html, "git-skill-sources-panel", ["zuri:flex", "zuri:flex-col", "zuri:flex-1", "zuri:min-h-0"], `${skin.name} should use the workbench viewport`);
+  assertClassTokens(html, "git-skill-sources-panel", ["zuri:overflow-hidden"], `${skin.name} should keep one owned scroll surface`);
   assert.match(row, /grid-template-columns:\s*28px minmax\(0,\s*1fr\) auto/u, `${skin.name} should keep source rows stable`);
   assert.match(title, /text-overflow:\s*ellipsis/u, `${skin.name} should contain long repository names`);
   assert.match(issue, /color:\s*var\(--orange\)/u, `${skin.name} should reserve one signal color for actionable drift`);

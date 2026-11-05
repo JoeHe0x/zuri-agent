@@ -40,8 +40,8 @@ function installAutomationReplies({ automation, run, session, artifacts }) {
       if (message.type === "list_automations") reply = { type: "automations", automations: [automation], runs: { [automation.id]: [run] } };
       if (message.type === "get_session_artifacts") reply = { type: "session_artifacts", sessionId: session.id, artifacts };
       if (reply) {
-        window.__qzPostedMessages.push(structuredClone(message));
-        queueMicrotask(() => window.__qzEmitPortMessage({ ...reply, requestId: message.requestId }));
+        window.__zuriPostedMessages.push(structuredClone(message));
+        queueMicrotask(() => window.__zuriEmitPortMessage({ ...reply, requestId: message.requestId }));
       } else post(message);
     };
     return port;
@@ -56,7 +56,7 @@ for (const [language, chromeLocale] of languages) for (const colorScheme of ["li
       const options = { uiLanguage: language, localeMessages, localStorage: { _sessions: { [session.id]: session } } };
       await page.addInitScript({ content: `(${installBenchmarkChromeStub.toString()})(${JSON.stringify(options)}); (${installAutomationReplies.toString()})(${JSON.stringify({ automation, run, session, artifacts })});` });
       await page.goto("/extension/sidepanel/sidepanel.html", { waitUntil: "domcontentloaded" });
-      await page.waitForFunction(() => Boolean(window.qingzhouConversationBenchmark));
+      await page.waitForFunction(() => Boolean(window.zuriConversationBenchmark));
       await page.locator('[data-tab="sessions"]').click();
       await page.locator('[data-sessions-mode="automation"]').click();
       const card = page.locator(`[data-automation-id="${automation.id}"]`);
@@ -78,7 +78,7 @@ for (const [language, chromeLocale] of languages) for (const colorScheme of ["li
         await page.setViewportSize({ width, height: 860 });
         await captureArtifactLayout(page, ".automation-card", { language, colorScheme, width, scenario: "automation" }, testInfo);
       }
-      expect(await page.evaluate(() => window.__qzPostedMessages.some(message => ["run_automation", "prompt"].includes(message.type)))).toBe(false);
+      expect(await page.evaluate(() => window.__zuriPostedMessages.some(message => ["run_automation", "prompt"].includes(message.type)))).toBe(false);
     });
   });
 }

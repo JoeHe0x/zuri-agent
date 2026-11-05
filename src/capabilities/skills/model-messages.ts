@@ -32,8 +32,8 @@ const messages = defineMessages("skills-model", {
     en: "Include full content of all text resources. Default: false (prefer load_skill_resource for individual files).",
   },
   loadSkillResource: {
-    "zh-CN": "读取 Skill 包内单个资源文件（path）：文本资源按 start/maxChars 分段返回；DOCX、XLSX、PDF 自动解析并返回首块预览与 docModelId（续读长文档请先 load_skill(\"qingzhou-documents\") 再调 document_read_chunk）。读取 Skill 正文请用 load_skill。",
-    en: "Read a single resource file (path) from a Skill package: text resources return character slices via start/maxChars; DOCX, XLSX, and PDF resources are parsed automatically and return an initial preview plus docModelId (load qingzhou-documents and call document_read_chunk to read further). Use load_skill for the Skill Markdown body.",
+    "zh-CN": "读取 Skill 包内单个资源文件（path）：文本资源按 start/maxChars 分段返回；DOCX、XLSX、PDF 自动解析并返回首块预览与 docModelId（续读长文档请先 load_skill(\"zuri-documents\") 再调 document_read_chunk）。读取 Skill 正文请用 load_skill。",
+    en: "Read a single resource file (path) from a Skill package: text resources return character slices via start/maxChars; DOCX, XLSX, and PDF resources are parsed automatically and return an initial preview plus docModelId (load zuri-documents and call document_read_chunk to read further). Use load_skill for the Skill Markdown body.",
   },
   skillResourcePath: {
     "zh-CN": "必填。Skill 包内资源相对路径，如 plugin.json、scripts/collect.js、references/checklist.md、references/report.xlsx。",
@@ -108,12 +108,12 @@ const messages = defineMessages("skills-model", {
     en: "Optional Git commit message.",
   },
   runtimeGuidance: {
-    "zh-CN": `Skill 运行在轻舟浏览器扩展中（非 Node.js 或服务器）：
-- content 编写浏览器 SOP；读取 references/模板/脚本等单文件用 load_skill_resource(name, path)（DOCX/XLSX/PDF 自动返回预览与 docModelId，截断时加载 qingzhou-documents 用 document_read_chunk 续读）。
+    "zh-CN": `Skill 运行在Zuri浏览器扩展中（非 Node.js 或服务器）：
+- content 编写浏览器 SOP；读取 references/模板/脚本等单文件用 load_skill_resource(name, path)（DOCX/XLSX/PDF 自动返回预览与 docModelId，截断时加载 zuri-documents 用 document_read_chunk 续读）。
 - 页面工具用 tabRef 声明和传入页面目标（当前任务拥有的标签页别名或正整数 ID，也可用数字字符串）；省略时使用当前任务工作标签页，未知别名报错。
 - 脚本采用单个 async () => { ... } 函数表达式：runtime:"page" 可用 document/window/Web APIs、input/args、宿主解析后的数字 tabId、tools/tool；runtime:"inner" 在无 DOM Worker 中运行，可用 $plugin.config 和 manifest 允许来源的 fetch；禁止使用 fs/path/process/require/npm/shell，也不要在页面脚本内直接触发导致当前 frame 卸载的点击或提交。`,
-    en: `Skills run in the qz browser extension (not Node.js or a server):
-- Content describes browser SOPs; read individual references, templates, or scripts with load_skill_resource(name, path) (DOCX/XLSX/PDF automatically return a preview and docModelId; load qingzhou-documents and call document_read_chunk if truncated).
+    en: `Skills run in the zuri browser extension (not Node.js or a server):
+- Content describes browser SOPs; read individual references, templates, or scripts with load_skill_resource(name, path) (DOCX/XLSX/PDF automatically return a preview and docModelId; load zuri-documents and call document_read_chunk if truncated).
 - Declare and pass page targets as tabRef (a task-owned tab alias or positive integer ID; numeric strings also work). Omit it to use the current task's working tab; unknown aliases fail.
 - Write scripts as a single async () => { ... } function expression: runtime:"page" provides document/window/Web APIs, input/args, the host-resolved numeric tabId, and tools/tool; runtime:"inner" runs in a DOM-free Worker with $plugin.config and fetch for manifest-allowed origins. Do not use fs/path/process/require/npm/shell, and do not click or submit inside a page script if it unloads the frame.`,
   },

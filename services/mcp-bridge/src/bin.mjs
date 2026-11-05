@@ -10,8 +10,8 @@ if (isEntry) {
   if (Number(process.versions.node.split(".")[0]) < 22) {
     const error = {
       code: "unsupported_node_version",
-      message: `qz requires Node.js 22 or later. Current version: ${process.versions.node}.`,
-      hint: "Install Node.js 22 or later, then run qz again.",
+      message: `zuri requires Node.js 22 or later. Current version: ${process.versions.node}.`,
+      hint: "Install Node.js 22 or later, then run zuri again.",
     };
     if (argv.includes("--json")) process.stdout.write(`${JSON.stringify({ ok: false, error })}\n`);
     else process.stderr.write(`${error.message}\n${error.hint}\n`);

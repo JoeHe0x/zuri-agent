@@ -34,7 +34,7 @@ from sklearn.model_selection import GroupKFold
 
 HERE = Path(__file__).resolve().parent
 GLOBAL_PATH = HERE / "study-tree-dp-global-choice.py"
-SPEC = importlib.util.spec_from_file_location("qingzhou_joint_crf_global", GLOBAL_PATH)
+SPEC = importlib.util.spec_from_file_location("zuri_joint_crf_global", GLOBAL_PATH)
 if SPEC is None or SPEC.loader is None:
     raise RuntimeError(f"cannot load {GLOBAL_PATH}")
 GLOBAL = importlib.util.module_from_spec(SPEC)
@@ -982,7 +982,7 @@ def main() -> int:
 
     summary = ROOT_QUALITY.summarize(rows)
     report = {
-        "schema": "qingzhou.tree-dp-joint-crf-study.v1",
+        "schema": "zuri.tree-dp-joint-crf-study.v1",
         "protocol": {
             "model": (
                 "multi-root-forest-dp-joint-local-carve-and-root-empty"

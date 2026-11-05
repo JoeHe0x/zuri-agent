@@ -193,4 +193,4 @@ export interface UiExtensionAPI {
 }
 
 /** File-discovered setup runs once per mount; the package directory supplies its identity. */
-export type UiExtension = (qz: UiExtensionAPI) => void | Promise<void>;
+export type UiExtension = (zuri: UiExtensionAPI) => void | Promise<void>;

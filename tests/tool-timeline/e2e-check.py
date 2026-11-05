@@ -514,7 +514,7 @@ def main():
         with sync_playwright() as p:
             browser = p.chromium.launch(
                 headless=not args.headed,
-                channel=os.environ.get("QINGZHOU_PLAYWRIGHT_CHANNEL", "chromium"),
+                channel=os.environ.get("ZURI_PLAYWRIGHT_CHANNEL", "chromium"),
             )
             page = browser.new_page(locale="zh-CN", viewport={"width": 1180, "height": 980}, device_scale_factor=1)
             page.goto(url)

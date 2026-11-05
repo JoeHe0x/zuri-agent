@@ -5,13 +5,13 @@ test("explains why compact cannot run before a conversation exists", async ({ pa
   await page.locator("#btn-send").click();
 
   await expect(page.locator(".case-toast.visible")).toContainText("当前没有可压缩的对话");
-  const posted = await page.evaluate(() => window.__qzPostedMessages);
+  const posted = await page.evaluate(() => window.__zuriPostedMessages);
   expect(posted.some(message => message.type === "compact_context")).toBe(false);
 });
 
 test("shows a command category and executes compact with optional instructions outside the chat stream", async ({ page }) => {
   await page.evaluate(async () => {
-    await window.qingzhouConversationBenchmark.runSnapshotRender({
+    await window.zuriConversationBenchmark.runSnapshotRender({
       sessionId: "slash-command-session",
       transcript: [{
         type: "assistant",
@@ -20,12 +20,12 @@ test("shows a command category and executes compact with optional instructions o
         content: "已有对话历史",
       }],
     });
-    window.qingzhouConversationBenchmark.dispatchBackgroundEvent({
+    window.zuriConversationBenchmark.dispatchBackgroundEvent({
       type: "agent_start",
       sessionId: "slash-command-session",
       runId: "previous-run",
     });
-    window.qingzhouConversationBenchmark.dispatchBackgroundEvent({
+    window.zuriConversationBenchmark.dispatchBackgroundEvent({
       type: "message_update",
       sessionId: "slash-command-session",
       runId: "previous-run",
@@ -33,12 +33,12 @@ test("shows a command category and executes compact with optional instructions o
       eventSeq: 12,
       content: "上一轮已经完成",
     });
-    window.qingzhouConversationBenchmark.dispatchBackgroundEvent({
+    window.zuriConversationBenchmark.dispatchBackgroundEvent({
       type: "agent_end",
       sessionId: "slash-command-session",
       runId: "previous-run",
     });
-    window.__qzCompactLifecycle = {
+    window.__zuriCompactLifecycle = {
       compactId: "manual-compact-after-reload",
       delayMs: 500,
       summary: "数据库设计与未完成事项已经保留。",
@@ -72,7 +72,7 @@ test("shows a command category and executes compact with optional instructions o
   await expect(compactCard).toContainText("数据库设计与未完成事项已经保留");
   await expect(page.locator(".case-toast")).toBeHidden();
 
-  const posted = await page.evaluate(() => window.__qzPostedMessages);
+  const posted = await page.evaluate(() => window.__zuriPostedMessages);
   const compact = posted.find(message => message.type === "compact_context");
   expect(compact).toMatchObject({
     sessionId: "slash-command-session",
@@ -85,7 +85,7 @@ test("shows a command category and executes compact with optional instructions o
 
 test("only shows a toast when manual compact fails", async ({ page }) => {
   await page.evaluate(async () => {
-    await window.qingzhouConversationBenchmark.runSnapshotRender({
+    await window.zuriConversationBenchmark.runSnapshotRender({
       sessionId: "slash-command-error-session",
       transcript: [{
         type: "assistant",
@@ -94,7 +94,7 @@ test("only shows a toast when manual compact fails", async ({ page }) => {
         content: "等待压缩的对话历史",
       }],
     });
-    window.__qzCompactFailure = {
+    window.__zuriCompactFailure = {
       code: "CONTEXT_COMPACTION_FAILED",
       message: "模拟压缩失败",
     };
@@ -108,7 +108,7 @@ test("only shows a toast when manual compact fails", async ({ page }) => {
 
 test("shows an error toast when the conversation has no compactable history", async ({ page }) => {
   await page.evaluate(async () => {
-    await window.qingzhouConversationBenchmark.runSnapshotRender({
+    await window.zuriConversationBenchmark.runSnapshotRender({
       sessionId: "slash-command-no-segment-session",
       transcript: [{
         type: "assistant",
@@ -117,7 +117,7 @@ test("shows an error toast when the conversation has no compactable history", as
         content: "只有一轮的对话",
       }],
     });
-    window.__qzCompactResult = {
+    window.__zuriCompactResult = {
       compacted: false,
       reason: "no_compactable_segment",
     };

@@ -9,10 +9,10 @@ interface WakeHandlers {
   onSuspend?(): void;
 }
 interface WakeChrome {
-  qzFirefoxMcpWake?: boolean;
-  qzFirefoxMcpWakeInstalled?: boolean;
-  qzFirefoxMcpWakePending?: boolean;
-  qzFirefoxMcpWakeHandlers?: WakeHandlers;
+  zuriFirefoxMcpWake?: boolean;
+  zuriFirefoxMcpWakeInstalled?: boolean;
+  zuriFirefoxMcpWakePending?: boolean;
+  zuriFirefoxMcpWakeHandlers?: WakeHandlers;
   alarms?: { onAlarm?: { addListener(listener: (alarm: { name?: string }) => void): void } };
   runtime?: {
     getPlatformInfo?(callback?: () => void): unknown;
@@ -22,9 +22,9 @@ interface WakeChrome {
 
 /** Arm the Firefox event-page keepalive and the MCP reconnect alarm listener. */
 export function installFirefoxMcpWake(chromeApi: WakeChrome): void {
-  chromeApi.qzFirefoxMcpWake = true;
-  if (chromeApi.qzFirefoxMcpWakeInstalled) return;
-  chromeApi.qzFirefoxMcpWakeInstalled = true;
+  chromeApi.zuriFirefoxMcpWake = true;
+  if (chromeApi.zuriFirefoxMcpWakeInstalled) return;
+  chromeApi.zuriFirefoxMcpWakeInstalled = true;
   let timer: ReturnType<typeof setInterval> | undefined;
   const ping = () => {
     const ask = chromeApi.runtime?.getPlatformInfo;
@@ -41,27 +41,27 @@ export function installFirefoxMcpWake(chromeApi: WakeChrome): void {
       if (timer === undefined) return;
       clearInterval(timer);
       timer = undefined;
-      console.info("[轻舟] firefox mcp keepalive stopped");
+      console.info("[Zuri] firefox mcp keepalive stopped");
       return;
     }
     if (timer !== undefined) return;
     ping();
     timer = setInterval(ping, FIREFOX_MCP_KEEPALIVE_MS);
     unrefInterval(timer);
-    console.info("[轻舟] firefox mcp keepalive armed");
+    console.info("[Zuri] firefox mcp keepalive armed");
   };
-  chromeApi.qzFirefoxMcpWakeHandlers = { ...chromeApi.qzFirefoxMcpWakeHandlers, noteEnabled };
+  chromeApi.zuriFirefoxMcpWakeHandlers = { ...chromeApi.zuriFirefoxMcpWakeHandlers, noteEnabled };
   chromeApi.alarms?.onAlarm?.addListener(alarm => {
     if (alarm?.name !== RECONNECT_ALARM) return;
-    const handle = chromeApi.qzFirefoxMcpWakeHandlers?.onAlarm;
+    const handle = chromeApi.zuriFirefoxMcpWakeHandlers?.onAlarm;
     if (handle) {
       handle();
       return;
     }
-    chromeApi.qzFirefoxMcpWakePending = true;
+    chromeApi.zuriFirefoxMcpWakePending = true;
   });
   chromeApi.runtime?.onSuspend?.addListener(() => {
-    try { chromeApi.qzFirefoxMcpWakeHandlers?.onSuspend?.(); }
+    try { chromeApi.zuriFirefoxMcpWakeHandlers?.onSuspend?.(); }
     catch { /* Suspension still proceeds. */ }
   });
 }

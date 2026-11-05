@@ -34,11 +34,11 @@ def load_module(name: str, path: Path):
 
 
 ROOT_QUALITY = load_module(
-    "qingzhou_root_quality_for_confidence",
+    "zuri_root_quality_for_confidence",
     HERE / "study-tree-dp-root-quality.py",
 )
 ROOT_RANKING = load_module(
-    "qingzhou_root_ranking_for_confidence",
+    "zuri_root_ranking_for_confidence",
     HERE / "study-tree-dp-root-ranking.py",
 )
 READABILITY = ROOT_QUALITY.READABILITY
@@ -171,7 +171,7 @@ def main() -> int:
         validation_report = {"summary": ROOT_QUALITY.summarize(rows), "rows": rows}
 
     report = {
-        "schema": "qingzhou.tree-dp-root-confidence-study.v1",
+        "schema": "zuri.tree-dp-root-confidence-study.v1",
         "protocol": {
             "model": "absolute-root-quality-plus-monotone-one-root-bonus",
             "runtimeReadabilityCandidate": False,

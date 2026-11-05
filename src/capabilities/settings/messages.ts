@@ -2,7 +2,7 @@ import { defineMessages } from "#sdk/shared/i18n-definition";
 
 /** Package-owned copy; interpolation values remain plain text. */
 export default defineMessages("settings", {
-  qingzhouSettings: { "zh-CN": "轻舟设置", en: "qz settings" },
+  zuriSettings: { "zh-CN": "Zuri设置", en: "zuri settings" },
   providerWithName: { "zh-CN": "服务商 {provider}", en: "Provider: {provider}" },
   modelWithName: { "zh-CN": "模型 {model}", en: "Model: {model}" },
   rule: { "zh-CN": "规则 {rule}", en: "Rule: {rule}" },
@@ -157,7 +157,7 @@ export default defineMessages("settings", {
   configurationNotSaved: { "zh-CN": "配置未保存：{reason}", en: "Could not save: {reason}" },
   thisPreset: { "zh-CN": "该预设", en: "this preset" },
   deletePresetConfirmation: { "zh-CN": "删除「{name}」？", en: "Delete “{name}”?" },
-  thisModelPresetWillBeRemovedFromQingzhou: { "zh-CN": "该模型预设会从轻舟中移除。", en: "This model preset will be removed from qz." },
+  thisModelPresetWillBeRemovedFromZuri: { "zh-CN": "该模型预设会从Zuri中移除。", en: "This model preset will be removed from zuri." },
   selectContextLength: { "zh-CN": "选择上下文长度", en: "Select a context window" },
   customContextLength: { "zh-CN": "自定义...", en: "Custom…" },
   newConfiguration: { "zh-CN": "新配置", en: "New preset" },
@@ -208,7 +208,7 @@ export default defineMessages("settings", {
   noModelListAvailableYouCanEnterANameManually: { "zh-CN": "暂无模型列表，可直接手动输入。", en: "Could not list models. Enter a model name instead." },
   skills: { "zh-CN": "技能", en: "Skills" },
   advanced: { "zh-CN": "高级", en: "Advanced" },
-  qingzhouReminder: { "zh-CN": "轻舟提醒", en: "qz" },
+  zuriReminder: { "zh-CN": "Zuri提醒", en: "zuri" },
   thisTaskNeedsYourAttention: { "zh-CN": "需要你处理当前任务。", en: "This task needs your attention." },
   skillSettingsAreUnavailable: { "zh-CN": "Skill 设置能力不可用。", en: "Skill settings are unavailable." },
   skillSettingsNotFoundListTheSettingsAgainAndSelect: { "zh-CN": "未找到对应的 Skill 设置，请重新 list 后选择 settingId。", en: "Skill settings not found. List the settings again and select a settingId." },
@@ -263,7 +263,7 @@ export default defineMessages("settings", {
   researchTopicTitle: { "zh-CN": "今天网上最火的新闻是啥", en: "What's making headlines today?" },
   researchTopicDescription: { "zh-CN": "帮我抓几个真正值得看的热点", en: "Five stories worth catching up on" },
   createWebsiteSkillTitle: { "zh-CN": "给 Hacker News 生成站点 Skill", en: "Build a Hacker News skill" },
-  createWebsiteSkillDescription: { "zh-CN": "让轻舟学会搜索帖子、阅读评论和查看作者", en: "Search posts, read comments, and look up users" },
+  createWebsiteSkillDescription: { "zh-CN": "让Zuri学会搜索帖子、阅读评论和查看作者", en: "Search posts, read comments, and look up users" },
   notificationsUnavailable: { "zh-CN": "浏览器通知不可用", en: "Browser notifications are not available" },
   notificationPermission: { "zh-CN": "通知权限状态为 {permission}", en: "Notification permission is {permission}" },
   notificationFailed: { "zh-CN": "创建通知失败", en: "Could not send notification" },

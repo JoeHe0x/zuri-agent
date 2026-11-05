@@ -1,5 +1,5 @@
 {
-  "schema": "qingzhou.article-extraction-sites.v1",
+  "schema": "zuri.article-extraction-sites.v1",
   "sampleTarget": 1000,
   "design": {
     "purpose": "Expand the frozen Chinese real-world corpus from 500 to 1500 pages without adding any host already declared by v1/v2.",

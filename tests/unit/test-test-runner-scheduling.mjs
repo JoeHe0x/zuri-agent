@@ -42,7 +42,7 @@ test("ordinary resource lanes overlap, then all three conversation measurements 
 
 test("an ordinary failure stops peers and prevents the exclusive phase", async t => {
   const fixture = await createFixture(t);
-  const result = await fixture.run({ QZ_FAIL_TASK: PRIMARY });
+  const result = await fixture.run({ ZURI_FAIL_TASK: PRIMARY });
   assert.equal(result.code, 7, result.output);
   const events = await fixture.events();
   assert.ok(events.some(event => event.id === PRIMARY && event.kind === "end"));
@@ -133,7 +133,7 @@ test("SIGTERM during ordinary work cancels the pending exclusive phase", { skip:
 for (const cancellation of ["peer failure", "external SIGTERM"]) {
   test(`a detached web server releases its port after ${cancellation}`, { skip: process.platform === "win32" }, async t => {
     const fixture = await createFixture(t);
-    const env = { QZ_DETACHED_SERVER: "1", ...(cancellation === "peer failure" ? { QZ_FAIL_TASK: SECONDARY } : {}) };
+    const env = { ZURI_DETACHED_SERVER: "1", ...(cancellation === "peer failure" ? { ZURI_FAIL_TASK: SECONDARY } : {}) };
     const { child, completion } = fixture.start(env);
     if (cancellation === "external SIGTERM") {
       await Promise.race([
@@ -169,7 +169,7 @@ async function waitForPortRelease(port) {
 }
 
 async function createFixture(t, { secondaryPeer = SECONDARY } = {}) {
-  const root = await mkdtemp(join(tmpdir(), "qingzhou-runner-scheduling-"));
+  const root = await mkdtemp(join(tmpdir(), "zuri-runner-scheduling-"));
   const children = new Set();
   const sockets = new Set();
   const events = [];
@@ -251,8 +251,8 @@ async function createFixture(t, { secondaryPeer = SECONDARY } = {}) {
     start(env = {}, args = ["e2e", "release", "visual", "--jobs", "3"]) {
       const environment = {
         ...process.env,
-        QZ_RUNNER_EVENT_PORT: String(server.address().port),
-        QZ_RUNNER_SECONDARY_PEER: secondaryPeer,
+        ZURI_RUNNER_EVENT_PORT: String(server.address().port),
+        ZURI_RUNNER_SECONDARY_PEER: secondaryPeer,
         PATH: [dirname(process.execPath), process.env.PATH].filter(Boolean).join(delimiter),
         ...env,
       };
@@ -300,8 +300,8 @@ import { createConnection } from "node:net";
 import { relative } from "node:path";
 const script = relative(process.cwd(), process.argv[1]).replaceAll("\\\\", "/");
 const id = script.endsWith("run-python-browser.mjs") ? process.argv[2] : script;
-const peers = [${JSON.stringify(PRIMARY)}, process.env.QZ_RUNNER_SECONDARY_PEER];
-const socket = createConnection({ host: "127.0.0.1", port: Number(process.env.QZ_RUNNER_EVENT_PORT) });
+const peers = [${JSON.stringify(PRIMARY)}, process.env.ZURI_RUNNER_SECONDARY_PEER];
+const socket = createConnection({ host: "127.0.0.1", port: Number(process.env.ZURI_RUNNER_EVENT_PORT) });
 const ready = peers.includes(id) ? once(socket, "data") : null;
 await once(socket, "connect");
 const event = kind => JSON.stringify({ kind, id, chromeExecutable: process.env.CHROME_EXECUTABLE }) + "\\n";
@@ -311,7 +311,7 @@ process.on("SIGTERM", () => {
   socket.once("close", () => process.exit(0));
   socket.end(event("stopped"));
 });
-if (process.env.QZ_DETACHED_SERVER && id === ${JSON.stringify(PRIMARY)}) {
+if (process.env.ZURI_DETACHED_SERVER && id === ${JSON.stringify(PRIMARY)}) {
   // Match Playwright's separate group and dedicated stdin pipe; the runner cannot
   // reach this grandchild by signalling the ordinary command's process group.
   const server = spawn(process.execPath, ["tests/support/static-server.mjs", "--port", "0", "--watch-stdin"], {
@@ -332,10 +332,10 @@ if (process.env.QZ_DETACHED_SERVER && id === ${JSON.stringify(PRIMARY)}) {
 }
 log("start");
 if (ready) await ready;
-if (process.env.QZ_DETACHED_SERVER && id === ${JSON.stringify(PRIMARY)}) await new Promise(() => {});
+if (process.env.ZURI_DETACHED_SERVER && id === ${JSON.stringify(PRIMARY)}) await new Promise(() => {});
 await delay(script.endsWith("chrome-smoke.mjs") ? 600 : 60);
 const closed = once(socket, "close");
 socket.end(event("end"));
 await closed;
-if (process.env.QZ_FAIL_TASK === id) process.exit(7);
+if (process.env.ZURI_FAIL_TASK === id) process.exit(7);
 `;

@@ -3,8 +3,8 @@ import { expect, test } from "./sidepanel-fixtures.mjs";
 test("shows a follow-up initialization failure before agent_start and permits recovery", async ({ page }) => {
   const sessionId = "pending-run-error";
   const failure = "Run configuration could not be initialized.";
-  const dispatch = event => page.evaluate(event => window.__qzEmitPortMessage(event), { sessionId, ...event });
-  await page.evaluate(sessionId => window.qingzhouConversationBenchmark.runSnapshotRender({
+  const dispatch = event => page.evaluate(event => window.__zuriEmitPortMessage(event), { sessionId, ...event });
+  await page.evaluate(sessionId => window.zuriConversationBenchmark.runSnapshotRender({
     sessionId,
     transcript: [{ type: "user", text: "First request", clientMessageId: "first-request" }],
   }), sessionId);
@@ -35,7 +35,7 @@ test("shows a follow-up initialization failure before agent_start and permits re
   await expect(page.locator("#btn-send")).toBeEnabled();
   await page.locator("#input").press("Enter");
   await expect(page.locator("#input")).toHaveValue("");
-  expect(await page.evaluate(() => window.__qzPostedMessages.filter(message => message.type === "prompt").map(message => message.text)))
+  expect(await page.evaluate(() => window.__zuriPostedMessages.filter(message => message.type === "prompt").map(message => message.text)))
     .toEqual(["Follow up on the first answer", "Retry after fixing the configuration"]);
   await dispatch({ type: "session_pending", runId: "r3" });
   await expect(page.locator("#status-bar")).toBeVisible();

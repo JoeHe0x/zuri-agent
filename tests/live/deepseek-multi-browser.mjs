@@ -25,11 +25,11 @@ const taskTimeout = Number(values["task-timeout-seconds"]);
 assert.ok(taskTimeout >= 60 && taskTimeout <= 900);
 const selected = values.cases ? CASES.filter(item => values.cases.split(",").includes(item.id)) : CASES;
 assert.ok(selected.length); assert.ok(!values.cases || values.cases.split(",").every(id => CASES.some(item => item.id === id)), "Unknown live case");
-const apiKey = readTestApiKey("deepseek", { keyFile: process.env.QINGZHOU_DEEPSEEK_AK_FILE || "" });
-const model = process.env.QINGZHOU_DEEPSEEK_MODEL || "deepseek-flash";
+const apiKey = readTestApiKey("deepseek", { keyFile: process.env.ZURI_DEEPSEEK_AK_FILE || "" });
+const model = process.env.ZURI_DEEPSEEK_MODEL || "deepseek-flash";
 const output = resolve(values.output || join(root, "tests/results/multi-browser", `deepseek-${new Date().toISOString().replace(/[:.]/g, "-")}`));
 await mkdir(output, { recursive: true, mode: 0o700 });
-const directory = await mkdtemp(join(tmpdir(), "qz-live-three-browsers-"));
+const directory = await mkdtemp(join(tmpdir(), "zuri-live-three-browsers-"));
 const browsers = [], children = new Set(), pendingWrites = new Set();
 const report = { ok: false, phase: "setup", provider: "deepseek", model, startedAt: new Date().toISOString(),
   environment: "Three independent Chrome processes/profiles, real DeepSeek, public websites, production extension, real CLI subprocesses and MCP SDK. No synthetic model responses or user browser state.",
@@ -62,12 +62,12 @@ async function connect(browser) {
   const page = await browser.context.newPage();
   try {
     await page.goto(result.result.url);
-    await page.locator('[data-qz-connection-state="connected"]').waitFor({ timeout: 40000 });
+    await page.locator('[data-zuri-connection-state="connected"]').waitFor({ timeout: 40000 });
     await connected(browser);
   } finally { await page.close(); }
 }
 async function openMcp(browser) {
-  browser.mcp = new Client({ name: `qz-live-${browser.name}`, version: "1.0.0" });
+  browser.mcp = new Client({ name: `zuri-live-${browser.name}`, version: "1.0.0" });
   browser.transport = new StreamableHTTPClientTransport(new URL("/mcp", bridge.endpoint), { fetch: localFetch });
   await browser.mcp.connect(browser.transport);
 }
@@ -86,7 +86,7 @@ async function mcp(browser, name, args = {}, options = {}) {
 function observeMcp(browser, name, args) {
   const observer = { events: [], settled: false };
   observer.promise = mcp(browser, name, { ...args, stream: true, waitTimeoutSeconds: taskTimeout }, { onprogress(progress) {
-    const event = progress._meta?.["qz/task-event"];
+    const event = progress._meta?.["zuri/task-event"];
     if (event) { observer.events.push({ at: Date.now(), event }); if (event.type === "created") observer.created = event; }
   } }).then(value => { observer.value = value; }, error => { observer.error = error; }).finally(() => { observer.settled = true; });
   return observer;
@@ -125,7 +125,7 @@ function observeCli(browser, args) {
 async function cli(browser, args) { const observer = observeCli(browser, args); await observer.promise; if (observer.error) throw observer.error; return observer.value; }
 const text = content => typeof content === "string" ? content : Array.isArray(content) ? content.filter(part => part.type === "text").map(part => part.text).join("\n") : "";
 const assistantText = snapshot => (snapshot.transcript || []).filter(entry => entry.type === "assistant").map(entry => text(entry.content)).join("\n");
-async function snapshot(browser, sessionId) { return mcp(browser, "qingzhou_get_session_snapshot", { sessionId, compact: false, tail: false, includeArtifacts: true }); }
+async function snapshot(browser, sessionId) { return mcp(browser, "zuri_get_session_snapshot", { sessionId, compact: false, tail: false, includeArtifacts: true }); }
 function attachCapture(browser) {
   browser.sources = []; browser.network = []; browser.diagnostics = [];
   browser.context.on("response", response => {
@@ -161,7 +161,7 @@ async function answerInput(browser, entry, input, observer) {
   })) : undefined;
   entry.inputs.push({ waitId: input.waitId, kind: input.kind, form: input.form, action, answers });
   if (entry.route === "mcp") await cli(browser, [action, entry.sessionId, ...(answers ? [JSON.stringify(answers)] : []), "--wait-id", input.waitId]);
-  else await mcp(browser, "qingzhou_respond_to_user_input", { sessionId: entry.sessionId, waitId: input.waitId, action, ...(answers ? { answers } : {}) });
+  else await mcp(browser, "zuri_respond_to_user_input", { sessionId: entry.sessionId, waitId: input.waitId, action, ...(answers ? { answers } : {}) });
 }
 async function verifyTable(browser, entry) {
   const listed = await cli(browser, ["data", "list"]);
@@ -207,7 +207,7 @@ async function runCase(spec) {
     startedAt: new Date().toISOString(), inputs: [], ok: false };
   report.tasks.push(entry); await persist(); progress("task-start", { id: entry.id, browser: browser.name, route: entry.route });
   const observer = spec.route === "cli" ? observeCli(browser, ["create", entry.prompt, "--title", `Live ${entry.id}`, "--stream"])
-    : observeMcp(browser, "qingzhou_create_session", { firstMessage: entry.prompt, title: `Live ${entry.id}` });
+    : observeMcp(browser, "zuri_create_session", { firstMessage: entry.prompt, title: `Live ${entry.id}` });
   try {
     const created = await until(() => { if (observer.error) throw observer.error; return observer.created; }, `${entry.id} admission`, 45000);
     entry.sessionId = created.session?.id || created.sessionId; assert.ok(entry.sessionId); browser.sessions.add(entry.sessionId);
@@ -236,7 +236,7 @@ async function runCase(spec) {
     entry.error = redact(error.stack || error.message); entry.failureKind = /assert|match|equal|expected/i.test(error.message) ? "acceptance" : "execution-or-environment";
     if (entry.sessionId) {
       entry.snapshot = await snapshot(browser, entry.sessionId).catch(() => null);
-      if (entry.snapshot?.status !== "completed") await mcp(browser, "qingzhou_stop_session", { sessionId: entry.sessionId }).catch(() => {});
+      if (entry.snapshot?.status !== "completed") await mcp(browser, "zuri_stop_session", { sessionId: entry.sessionId }).catch(() => {});
     }
     await Promise.race([observer.promise, delay(5000)]);
   } finally {
@@ -260,12 +260,12 @@ async function scenario(name, work) {
   entry.finishedAt = new Date().toISOString(); await persist(); return entry;
 }
 try {
-  extensionPath = process.env.QINGZHOU_TEST_EXTENSION_DIR;
+  extensionPath = process.env.ZURI_TEST_EXTENSION_DIR;
   if (!extensionPath) {
     const { buildExtension } = await import("../../scripts/build-extension.mjs");
     extensionPath = (await buildExtension({ outputDir: join(output, "extension"), mode: "production" })).outputDir;
   }
-  process.env.QINGZHOU_TEST_EXTENSION_DIR = extensionPath;
+  process.env.ZURI_TEST_EXTENSION_DIR = extensionPath;
   ({ saveExtensionLlmConfig } = await import("../support/isolated-extension-mcp.mjs"));
   report.extensionPath = extensionPath; report.manifest = JSON.parse(await readFile(join(extensionPath, "manifest.json"), "utf8"));
   report.extensionSha256 = createHash("sha256").update(await readFile(join(extensionPath, "background/service-worker.js"))).digest("hex");
@@ -288,30 +288,30 @@ try {
   report.phase = "running"; heartbeat = setInterval(() => { progress("heartbeat", { tasks: report.tasks.length, finished: report.tasks.filter(item => item.finishedAt).length }); track(persist()); }, 30000);
   assert.equal(new Set(browsers.map(browser => browser.uuid)).size, 3);
   await scenario("explicit-selection-required", async () => {
-    await assert.rejects(browsers[0].mcp.callTool({ name: "qingzhou_list_sessions", arguments: {} }).then(result => { if (result.isError) throw new Error(JSON.stringify(resultValue(result))); }), /select|multiple|client|browser/i);
+    await assert.rejects(browsers[0].mcp.callTool({ name: "zuri_list_sessions", arguments: {} }).then(result => { if (result.isError) throw new Error(JSON.stringify(resultValue(result))); }), /select|multiple|client|browser/i);
   });
   await scenario("pairing-name-conflict-preserves-existing-connection", async entry => {
     const page = await browsers[0].context.newPage();
     try {
-      await page.goto(`${bridge.endpoint}/qz-connect?name=work`);
-      await page.locator('[data-qz-connection-code="BRIDGE_NAME_IN_USE"]').waitFor({ timeout: 15000 });
+      await page.goto(`${bridge.endpoint}/zuri-connect?name=work`);
+      await page.locator('[data-zuri-connection-code="BRIDGE_NAME_IN_USE"]').waitFor({ timeout: 15000 });
       const own = await connected(browsers[0]); assert.equal(own.name, "default");
-      await Promise.all(browsers.map(browser => mcp(browser, "qingzhou_list_sessions")));
+      await Promise.all(browsers.map(browser => mcp(browser, "zuri_list_sessions")));
       entry.clientId = own.clientId; entry.browserName = own.name;
     } finally { await page.close(); }
   });
   await Promise.all(selected.filter(spec => CASES.indexOf(spec) < 3).map(runCase));
   if (selected.some(spec => spec.id === "python-counter")) await scenario("follow-up-same-task", async entry => {
     const task = report.tasks.find(item => item.id === "python-counter"); assert.ok(task.ok);
-    const result = await mcp(browsers[0], "qingzhou_send_message", { sessionId: task.sessionId, text: "Now explain in English how ties are ordered by Counter.most_common. Cite the documentation.", wait: true, waitTimeoutSeconds: taskTimeout });
+    const result = await mcp(browsers[0], "zuri_send_message", { sessionId: task.sessionId, text: "Now explain in English how ties are ordered by Counter.most_common. Cite the documentation.", wait: true, waitTimeoutSeconds: taskTimeout });
     assert.equal(result.sessionId, task.sessionId); assert.equal(result.snapshot.status, "completed");
     const full = await snapshot(browsers[0], task.sessionId); await save("follow-up/snapshot.json", full);
     assert.match(assistantText(full), /first|encounter|insert/i); entry.sessionId = task.sessionId;
   });
   await scenario("disconnect-one-profile-others-remain-usable", async () => {
     assert.equal((await settings(browsers[1], "mcp_connection_disconnect")).ok, true);
-    await assert.rejects(mcp(browsers[1], "qingzhou_list_sessions"), /offline|disconnect|not.*connect/i);
-    await Promise.all([mcp(browsers[0], "qingzhou_list_sessions"), mcp(browsers[2], "qingzhou_list_sessions")]);
+    await assert.rejects(mcp(browsers[1], "zuri_list_sessions"), /offline|disconnect|not.*connect/i);
+    await Promise.all([mcp(browsers[0], "zuri_list_sessions"), mcp(browsers[2], "zuri_list_sessions")]);
     await connect(browsers[1]);
   });
   await scenario("service-restart-retains-profile-and-task-ownership", async () => {
@@ -333,7 +333,7 @@ try {
         await snapshot(other, task.sessionId).then(outside => {
           assert.equal(outside.session, null); assert.equal(outside.transcript.length, 0); assert.equal(outside.hasHistory, false);
         }, error => assert.match(error.message, /not.found|unknown|missing|不存在/i));
-        const listed = await mcp(other, "qingzhou_list_sessions", { limit: 100 }); assert.ok(!listed.sessions.some(session => session.id === task.sessionId));
+        const listed = await mcp(other, "zuri_list_sessions", { limit: 100 }); assert.ok(!listed.sessions.some(session => session.id === task.sessionId));
       }
       entry.checked.push({ sessionId: task.sessionId, clientId: owner.uuid });
     }
@@ -345,7 +345,7 @@ finally {
   for (const child of children) child.kill("SIGTERM");
   const cleanupErrors = [];
   for (const browser of browsers) {
-    for (const sessionId of browser.sessions || []) await mcp(browser, "qingzhou_stop_session", { sessionId }).catch(() => {});
+    for (const sessionId of browser.sessions || []) await mcp(browser, "zuri_stop_session", { sessionId }).catch(() => {});
     await closeMcp(browser); await browser.stop().catch(error => cleanupErrors.push(error.message));
     await save(`${browser.name}/browser.json`, { uuid: browser.uuid, logs: browser.logs, crashes: browser.crashes, network: browser.network, diagnostics: browser.diagnostics });
   }

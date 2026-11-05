@@ -20,7 +20,7 @@ const RECONNECT_ALARM = readFileSync(join(repoRoot, "src/shared/reconnect-alarm.
 test("the firefox boot does not arm session automations and chrome still does", async () => {
   assert.notEqual(RECONNECT_ALARM, AUTOMATION_SCHEDULER_ALARM);
   assert.equal(sessionAutomationsEnabled({}), true);
-  assert.equal(sessionAutomationsEnabled({ qzSessionAutomationsEnabled: false }), false);
+  assert.equal(sessionAutomationsEnabled({ zuriSessionAutomationsEnabled: false }), false);
 
   const armed = [];
   let listed = 0;
@@ -41,7 +41,7 @@ test("the firefox boot does not arm session automations and chrome still does", 
   assert.equal(chromeRuntime.handleAlarm({ name: RECONNECT_ALARM }), false);
 
   const previous = globalThis.chrome;
-  globalThis.chrome = { qzSessionAutomationsEnabled: false };
+  globalThis.chrome = { zuriSessionAutomationsEnabled: false };
   let disabled;
   try {
     disabled = createAutomationRuntime({
@@ -56,7 +56,7 @@ test("the firefox boot does not arm session automations and chrome still does", 
   assert.equal(disabled.handleAlarm({ name: AUTOMATION_SCHEDULER_ALARM }), false);
   assert.equal(disabled.handleAlarm({ name: RECONNECT_ALARM }), false);
   assert.equal(await disabled.syncSessionOutcome("session"), false);
-  assert.equal(disabled.consumeNotificationSession("qz_auto"), "");
+  assert.equal(disabled.consumeNotificationSession("zuri_auto"), "");
   await assert.rejects(disabled.run("stored"), error => error.code === "AUTOMATION_DISABLED");
   await assert.rejects(disabled.list(), error => error.code === "AUTOMATION_DISABLED");
 
@@ -67,11 +67,11 @@ test("the firefox boot does not arm session automations and chrome still does", 
       create(name, info) { created.push({ name, info }); return Promise.resolve(); },
       clear(name) { cleared.push(name); return Promise.resolve(true); },
     },
-    runtime: { id: "qz-browser-agent@heleifz.github.io", getURL: path => `moz-extension://uuid/${path}` },
+    runtime: { id: "zuri-agent@heleifz.github.io", getURL: path => `moz-extension://uuid/${path}` },
   };
   installFirefoxHost(browser);
-  assert.equal(browser.qzSessionAutomationsEnabled, false);
-  assert.equal(browser.qzFirefoxMcpWake, true);
+  assert.equal(browser.zuriSessionAutomationsEnabled, false);
+  assert.equal(browser.zuriFirefoxMcpWake, true);
   assert.deepEqual(cleared, [AUTOMATION_SCHEDULER_ALARM]);
   await browser.alarms.create(AUTOMATION_SCHEDULER_ALARM, { periodInMinutes: 1 });
   await browser.alarms.create(RECONNECT_ALARM, { periodInMinutes: 0.5 });
@@ -102,9 +102,9 @@ test("the firefox sidebar drops automation controls and the chrome source keeps 
     return [selector, node];
   }));
   const root = { querySelector: selector => nodes[selector] || null };
-  const panel = { qzSessionAutomationsEnabled: true };
+  const panel = { zuriSessionAutomationsEnabled: true };
   installSidepanelFirefoxHost(panel, undefined, root);
-  assert.equal(panel.qzSessionAutomationsEnabled, false);
+  assert.equal(panel.zuriSessionAutomationsEnabled, false);
   assert.equal(nodes["[data-sessions-mode=\"automation\"]"].removed, true);
   assert.equal(nodes["#btn-new-automation"].removed, true);
   assert.equal(nodes["#automations-panel"].removed, true);
@@ -139,7 +139,7 @@ test("firefox manage_sessions refuses automation actions and chrome still accept
   assert.equal(calls.length, 1);
 
   const previous = globalThis.chrome;
-  globalThis.chrome = { qzSessionAutomationsEnabled: false };
+  globalThis.chrome = { zuriSessionAutomationsEnabled: false };
   let disabled;
   let refused;
   try {
@@ -181,7 +181,7 @@ test("the firefox prompt says scheduled tasks are unavailable and the chrome pro
   assert.equal(getAgentPrompts("en").SYSTEM_PROMPT.includes("Session automations are unavailable"), false);
   assert.equal(getAgentPrompts("zh-CN").SYSTEM_PROMPT.includes("本 Firefox 包不提供定时任务"), false);
   const previous = globalThis.chrome;
-  globalThis.chrome = { qzSessionAutomationsEnabled: false };
+  globalThis.chrome = { zuriSessionAutomationsEnabled: false };
   try {
     assert.match(sessionAutomationPromptSuffix("en"), /Session automations are unavailable/);
     assert.match(sessionAutomationPromptSuffix("zh-CN"), /定时任务/);

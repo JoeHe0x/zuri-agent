@@ -19,13 +19,13 @@ from extension_assets import LoopbackHTTPServer, extension_directory
 
 ROOT = Path(__file__).resolve().parents[2]
 EXTENSION = extension_directory()
-HTML_PATH = Path("/tmp/轻舟-两篇论文关系分析.html")
-SCREENSHOT_PATH = Path("/tmp/qingzhou-session-export-smoke.png")
-NIGHT_SCREENSHOT_PATH = Path("/tmp/qingzhou-session-export-smoke-night.png")
-MOBILE_SCREENSHOT_PATH = Path("/tmp/qingzhou-session-export-smoke-mobile.png")
-BRIDGE_SCREENSHOT_PATH = Path("/tmp/qingzhou-session-export-import-cta.png")
-PAGES_ALLOWED_SCREENSHOT_PATH = Path("/tmp/qingzhou-pages-import-allowed.png")
-PAGES_DENIED_SCREENSHOT_PATH = Path("/tmp/qingzhou-pages-import-denied.png")
+HTML_PATH = Path("/tmp/Zuri-两篇论文关系分析.html")
+SCREENSHOT_PATH = Path("/tmp/zuri-session-export-smoke.png")
+NIGHT_SCREENSHOT_PATH = Path("/tmp/zuri-session-export-smoke-night.png")
+MOBILE_SCREENSHOT_PATH = Path("/tmp/zuri-session-export-smoke-mobile.png")
+BRIDGE_SCREENSHOT_PATH = Path("/tmp/zuri-session-export-import-cta.png")
+PAGES_ALLOWED_SCREENSHOT_PATH = Path("/tmp/zuri-pages-import-allowed.png")
+PAGES_DENIED_SCREENSHOT_PATH = Path("/tmp/zuri-pages-import-denied.png")
 OWNED_TAB_URLS = [
     "https://workspace.example.test/search?q=42",
     "https://workspace.example.test/project/42#resume",
@@ -126,9 +126,9 @@ def open_routed_export(context, html):
 def expected_import_label(page):
     lang = (page.locator("html").get_attribute("lang") or "").lower()
     if lang.startswith("zh"):
-        return "导入轻舟继续对话"
+        return "导入Zuri继续对话"
     if lang.startswith("en"):
-        return "Continue in qz"
+        return "Continue in zuri"
     raise AssertionError(f"unexpected export language {lang!r}")
 
 
@@ -140,8 +140,8 @@ def assert_allowlisted_https_page_offers_import(context, html):
         allowed.on("pageerror", lambda error: allowed_errors.append(str(error)))
         allowed.on("console", lambda message: allowed_errors.append(message.text) if message.type == "error" else None)
         allowed.goto(allowed_url, wait_until="domcontentloaded")
-        allowed.wait_for_selector("#qingzhou-session-cta[data-qingzhou-session-import]", timeout=10000)
-        assert allowed.locator("#qingzhou-session-cta").text_content() == expected_import_label(allowed)
+        allowed.wait_for_selector("#zuri-session-cta[data-zuri-session-import]", timeout=10000)
+        assert allowed.locator("#zuri-session-cta").text_content() == expected_import_label(allowed)
         allowed.screenshot(path=str(PAGES_ALLOWED_SCREENSHOT_PATH))
         assert allowed_errors == [], json.dumps(allowed_errors, ensure_ascii=False)
     finally:
@@ -156,25 +156,25 @@ def assert_unlisted_https_origin_hides_import(context, extension_page, html):
         denied.on("pageerror", lambda error: denied_errors.append(str(error)))
         denied.on("console", lambda message: denied_errors.append(message.text) if message.type == "error" else None)
         denied.goto(denied_url, wait_until="domcontentloaded")
-        denied.wait_for_selector("#qingzhou-session-cta", state="attached", timeout=10000)
+        denied.wait_for_selector("#zuri-session-cta", state="attached", timeout=10000)
         observation = denied.evaluate(
             """() => new Promise(resolve => {
               let results = 0;
               const onMessage = event => {
-                if (event.source !== window || event.data?.type !== "qingzhou:session-export:result") return;
+                if (event.source !== window || event.data?.type !== "zuri:session-export:result") return;
                 results += 1;
               };
               window.addEventListener("message", onMessage);
               window.postMessage({
-                type: "qingzhou:session-export:probe",
+                type: "zuri:session-export:probe",
                 requestId: "allowlist-denied",
               }, location.origin);
               setTimeout(() => {
                 window.removeEventListener("message", onMessage);
-                const cta = document.getElementById("qingzhou-session-cta");
+                const cta = document.getElementById("zuri-session-cta");
                 resolve({
                   results,
-                  importable: Boolean(cta?.hasAttribute("data-qingzhou-session-import")),
+                  importable: Boolean(cta?.hasAttribute("data-zuri-session-import")),
                   hidden: cta?.hidden === true,
                   text: cta?.textContent || "",
                 });
@@ -188,7 +188,7 @@ def assert_unlisted_https_origin_hides_import(context, extension_page, html):
               if (!tab?.id) return { found: false, urls: tabs.map(item => item.url || "") };
               const [injected] = await chrome.scripting.executeScript({
                 target: { tabId: tab.id },
-                func: () => window.__QINGZHOU_SESSION_EXPORT_BRIDGE_VERSION || "",
+                func: () => window.__ZURI_SESSION_EXPORT_BRIDGE_VERSION || "",
               });
               return { found: true, version: injected?.result || "" };
             }""",
@@ -200,7 +200,7 @@ def assert_unlisted_https_origin_hides_import(context, extension_page, html):
         assert observation["importable"] is False, observation
         assert observation["hidden"] is True, observation
         assert observation["text"] == "", observation
-        assert denied.locator("#qingzhou-session-cta[data-qingzhou-session-import]").count() == 0
+        assert denied.locator("#zuri-session-cta[data-zuri-session-import]").count() == 0
         denied.screenshot(path=str(PAGES_DENIED_SCREENSHOT_PATH))
         assert denied_errors == [], json.dumps(denied_errors, ensure_ascii=False)
     finally:
@@ -208,7 +208,7 @@ def assert_unlisted_https_origin_hides_import(context, extension_page, html):
 
 
 def run():
-    with TemporaryDirectory(prefix="qingzhou-session-exchange-") as temporary_dir, sync_playwright() as playwright:
+    with TemporaryDirectory(prefix="zuri-session-exchange-") as temporary_dir, sync_playwright() as playwright:
         user_data_dir = Path(temporary_dir) / "profile"
         extension_dir = Path(temporary_dir) / "extension"
         shutil.copytree(EXTENSION, extension_dir)
@@ -244,7 +244,7 @@ def run():
             )
             ext_id = extension_id(context, user_data_dir, extension_dir)
             page = context.new_page()
-            page.add_init_script("window.__QZ_CONVERSATION_BENCHMARK__ = true")
+            page.add_init_script("window.__ZURI_CONVERSATION_BENCHMARK__ = true")
             sidepanel_errors = []
             heavy_requests = []
             page.on("request", lambda request: heavy_requests.append(request.url)
@@ -252,10 +252,10 @@ def run():
             page.on("pageerror", lambda error: sidepanel_errors.append(str(error)))
             page.on("console", lambda message: sidepanel_errors.append(message.text) if message.type == "error" else None)
             page.goto(f"chrome-extension://{ext_id}/sidepanel/sidepanel.html")
-            page.evaluate("() => chrome.storage.local.set({ _qingzhou_mcp_bridge: { enabled: false } })")
+            page.evaluate("() => chrome.storage.local.set({ _zuri_mcp_bridge: { enabled: false } })")
             page.locator("[data-consent-accept]").click()
             try:
-                page.wait_for_function("() => Boolean(window.qingzhouConversationBenchmark?.renderSessionDocument)")
+                page.wait_for_function("() => Boolean(window.zuriConversationBenchmark?.renderSessionDocument)")
             except Exception:
                 raise AssertionError(json.dumps(sidepanel_errors, ensure_ascii=False, indent=2))
             session_id = "session-exchange-visual"
@@ -360,7 +360,7 @@ def run():
             assert heavy_requests == [], f"Fresh panel unexpectedly loaded heavy features: {heavy_requests}"
             assert page.evaluate("typeof window.MathJax?.typesetPromise") == "undefined"
             exported_document = page.evaluate(
-                "() => window.qingzhouConversationBenchmark.renderSessionDocument(window.__sessionExchangeFixture)",
+                "() => window.zuriConversationBenchmark.renderSessionDocument(window.__sessionExchangeFixture)",
             )
             unexpected_heavy = [url for url in heavy_requests if "/vendor/mathjax/" not in url]
             assert unexpected_heavy == [], f"Static export loaded non-math panel libraries: {unexpected_heavy}"
@@ -371,7 +371,7 @@ def run():
             assert "moz-extension://" not in html
             assert "<script src" not in html.lower()
             assert "<svg" in html
-            assert 'id="qingzhou-session-exchange"' in html
+            assert 'id="zuri-session-exchange"' in html
             assert 'id="messages"' in html
             assert 'class="msg msg-user"' in html
             assert 'class="msg msg-thinking-group' in html
@@ -386,21 +386,21 @@ def run():
 
             reskinned_html = page.evaluate(
                 """async () => {
-                  const link = document.getElementById('qingzhou-sidepanel-skin');
-                  link.dataset.qingzhouSkin = 'e2e-active';
+                  const link = document.getElementById('zuri-sidepanel-skin');
+                  link.dataset.zuriSkin = 'e2e-active';
                   const loaded = new Promise(resolve => {
                     link.addEventListener('load', resolve, { once: true });
                     setTimeout(resolve, 1000);
                   });
                   link.href = chrome.runtime.getURL('sidepanel/sidepanel.css?skin=e2e-active');
                   await loaded;
-                  return (await window.qingzhouConversationBenchmark.renderSessionDocument(
+                  return (await window.zuriConversationBenchmark.renderSessionDocument(
                     window.__sessionExchangeFixture
                   )).html;
                 }"""
             )
-            assert 'data-qingzhou-skin="e2e-active"' in reskinned_html
-            assert 'data-qingzhou-skin-path="sidepanel/sidepanel.css"' in reskinned_html
+            assert 'data-zuri-skin="e2e-active"' in reskinned_html
+            assert 'data-zuri-skin-path="sidepanel/sidepanel.css"' in reskinned_html
             assert "--bg-primary" in reskinned_html
 
             roundtrip = page.evaluate(
@@ -486,16 +486,16 @@ def run():
                 bridge.on("pageerror", lambda error: bridge_errors.append(str(error)))
                 bridge.on("console", lambda message: bridge_errors.append(message.text) if message.type == "error" else None)
                 bridge.goto(bridge_url, wait_until="domcontentloaded")
-                bridge.wait_for_selector("#qingzhou-session-cta[data-qingzhou-session-import]", timeout=10000)
-                bridge_cta = bridge.locator("#qingzhou-session-cta")
+                bridge.wait_for_selector("#zuri-session-cta[data-zuri-session-import]", timeout=10000)
+                bridge_cta = bridge.locator("#zuri-session-cta")
                 assert bridge_cta.text_content() == expected_import_label(bridge)
                 bridge.screenshot(path=str(BRIDGE_SCREENSHOT_PATH), full_page=True)
                 bridge_cta.click()
                 bridge.wait_for_function(
-                    "document.getElementById('qingzhou-session-cta')?.textContent === '已导入'",
+                    "document.getElementById('zuri-session-cta')?.textContent === '已导入'",
                     timeout=20000,
                 )
-                bridge_session_id = bridge_cta.get_attribute("data-qingzhou-imported-session-id")
+                bridge_session_id = bridge_cta.get_attribute("data-zuri-imported-session-id")
                 assert bridge_session_id
                 bridge_session = page.evaluate(
                     """async sessionId => {
@@ -520,18 +520,18 @@ def run():
             exported.on("console", lambda message: page_errors.append(message.text) if message.type == "error" else None)
             exported.add_init_script(
                 """(() => {
-                  window.__qzCtaReadyAt = null;
+                  window.__zuriCtaReadyAt = null;
                   const recordCta = () => {
-                    const cta = document.getElementById('qingzhou-session-cta');
-                    if (cta?.hasAttribute('data-qingzhou-session-import') && window.__qzCtaReadyAt == null) {
-                      window.__qzCtaReadyAt = performance.now();
+                    const cta = document.getElementById('zuri-session-cta');
+                    if (cta?.hasAttribute('data-zuri-session-import') && window.__zuriCtaReadyAt == null) {
+                      window.__zuriCtaReadyAt = performance.now();
                     }
                   };
                   new MutationObserver(recordCta).observe(document, {
                     subtree: true,
                     childList: true,
                     attributes: true,
-                    attributeFilter: ['data-qingzhou-session-import'],
+                    attributeFilter: ['data-zuri-session-import'],
                   });
                 })();"""
             )
@@ -541,20 +541,20 @@ def run():
             )
             assert file_access_allowed is True
             exported.goto(HTML_PATH.as_uri(), wait_until="domcontentloaded")
-            exported.wait_for_selector("#qingzhou-session-cta[data-qingzhou-session-import]", timeout=10000)
-            bridge_timing = exported.evaluate("() => window.__qzCtaReadyAt")
+            exported.wait_for_selector("#zuri-session-cta[data-zuri-session-import]", timeout=10000)
+            bridge_timing = exported.evaluate("() => window.__zuriCtaReadyAt")
             assert bridge_timing is not None, bridge_timing
             assert exported.locator("#messages svg").count() >= 1
             assert exported.locator("script[src]").count() == 0
 
-            exported_cta = exported.locator("#qingzhou-session-cta")
+            exported_cta = exported.locator("#zuri-session-cta")
             assert exported_cta.text_content() == expected_import_label(exported)
             exported_cta.click()
             exported.wait_for_function(
-                "document.getElementById('qingzhou-session-cta')?.textContent === '已导入'",
+                "document.getElementById('zuri-session-cta')?.textContent === '已导入'",
                 timeout=20000,
             )
-            exported_session_id = exported_cta.get_attribute("data-qingzhou-imported-session-id")
+            exported_session_id = exported_cta.get_attribute("data-zuri-imported-session-id")
             assert exported_session_id
             exported_session = page.evaluate(
                 """async sessionId => {
@@ -608,7 +608,7 @@ def run():
                   const shell = document.querySelector('.session-export-shell').getBoundingClientRect();
                   const bar = document.querySelector('.session-title-bar').getBoundingClientRect();
                   const title = document.getElementById('current-session-title').getBoundingClientRect();
-                  const cta = document.getElementById('qingzhou-session-cta').getBoundingClientRect();
+                  const cta = document.getElementById('zuri-session-cta').getBoundingClientRect();
                   const center = rect => rect.top + rect.height / 2;
                   return {
                     shellTop: shell.top,

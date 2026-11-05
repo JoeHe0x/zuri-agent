@@ -18,7 +18,7 @@ const runtimes = new Map([["s1", { sessionId: "s1", status: "completed", running
 const api = createBackgroundApi({
   system: {
     ready: async () => calls.push(["ready"]),
-    contentLanguage: async () => ({ v: 1, locale: "ja", messages: { brand: "Qingzhou", noStableSelector: "選択できません", importFailed: "読み込めません" } }),
+    contentLanguage: async () => ({ v: 1, locale: "ja", messages: { brand: "Zuri", noStableSelector: "選択できません", importFailed: "読み込めません" } }),
     ping: async () => ({ pong: true }),
     runtimeMessage: async message => ({ message }),
   },

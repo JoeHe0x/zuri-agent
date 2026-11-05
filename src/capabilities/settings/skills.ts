@@ -1,7 +1,7 @@
 import type { SkillExtension } from "#sdk/shared/skill-definition";
 import embedded from "./embedded-skill.js";
 
-const register: SkillExtension = qz => {
-  qz.registerSkill(embedded);
+const register: SkillExtension = zuri => {
+  zuri.registerSkill(embedded);
 };
 export default register;

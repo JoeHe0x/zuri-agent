@@ -1,15 +1,15 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import {
-  QINGZHOU_MCP_METHODS,
+  ZURI_MCP_METHODS,
   createMcpTransport,
 } from "../../src/background/transports/mcp.js";
 
 const source = readFileSync("src/background/transports/mcp.ts", "utf8");
 const switchMethods = [...source.matchAll(/case\s+["']([a-z_]+)["']\s*:/g)].map(match => match[1]);
-assert.equal(new Set(QINGZHOU_MCP_METHODS).size, QINGZHOU_MCP_METHODS.length, "MCP capability methods must be unique");
+assert.equal(new Set(ZURI_MCP_METHODS).size, ZURI_MCP_METHODS.length, "MCP capability methods must be unique");
 assert.deepEqual(
-  [...new Set(QINGZHOU_MCP_METHODS)].sort(),
+  [...new Set(ZURI_MCP_METHODS)].sort(),
   [...new Set(switchMethods)].sort(),
   "advertised MCP capabilities must exactly match dispatchable methods",
 );
@@ -17,19 +17,19 @@ assert.deepEqual(
 await everyAdvertisedMethodDispatches();
 await readinessAndBusinessFailuresRemainObservable();
 
-console.log(`MCP/background contracts passed (${QINGZHOU_MCP_METHODS.length} methods)`);
+console.log(`MCP/background contracts passed (${ZURI_MCP_METHODS.length} methods)`);
 
 async function everyAdvertisedMethodDispatches() {
   const calls = [];
   const api = createApiFixture(calls);
   const transport = createMcpTransport(api, {
     bridge: {
-      describe: () => ({ protocolVersion: 1, methods: QINGZHOU_MCP_METHODS }),
+      describe: () => ({ protocolVersion: 1, methods: ZURI_MCP_METHODS }),
       getConfig: () => ({ enabled: true }),
       saveConfig: config => ({ ...config, saved: true }),
     },
   });
-  for (const method of QINGZHOU_MCP_METHODS) {
+  for (const method of ZURI_MCP_METHODS) {
     await transport.dispatch({
       method,
       params: {
@@ -41,7 +41,7 @@ async function everyAdvertisedMethodDispatches() {
       },
     });
   }
-  assert.equal(calls.filter(call => call === "system.ready").length, QINGZHOU_MCP_METHODS.length);
+  assert.equal(calls.filter(call => call === "system.ready").length, ZURI_MCP_METHODS.length);
 }
 
 async function readinessAndBusinessFailuresRemainObservable() {

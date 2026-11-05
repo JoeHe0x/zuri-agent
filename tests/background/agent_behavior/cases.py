@@ -22,23 +22,23 @@ class CaseSpec:
 
 
 def build_base_cases(base_url: str, run_tag: str) -> list[CaseSpec]:
-    data_table = f"qz_reg_data_{run_tag}"
-    news_table = f"qz_reg_news_{run_tag}"
-    catalog_table = f"qz_reg_catalog_{run_tag}"
-    goal_table = f"qz_reg_goal_{run_tag}"
-    document_table = f"qz_reg_document_{run_tag}"
-    mcp_table = f"qz_reg_mcp_{run_tag}"
-    confirm_table = f"qz_reg_confirm_{run_tag}"
-    network_table = f"qz_reg_network_{run_tag}"
-    image_table = f"qz_reg_images_{run_tag}"
-    image_url_table = f"qz_reg_image_urls_{run_tag}"
-    image_selection_table = f"qz_reg_image_selection_{run_tag}"
-    image_locality_table = f"qz_reg_image_locality_{run_tag}"
-    opaque_image_table = f"qz_reg_image_opaque_{run_tag}"
-    article_table = f"qz_reg_article_{run_tag}"
-    dynamic_table = f"qz_reg_dynamic_{run_tag}"
-    environment_table = f"qz_reg_environment_{run_tag}"
-    no_working_table = f"qz_reg_no_working_{run_tag}"
+    data_table = f"zuri_reg_data_{run_tag}"
+    news_table = f"zuri_reg_news_{run_tag}"
+    catalog_table = f"zuri_reg_catalog_{run_tag}"
+    goal_table = f"zuri_reg_goal_{run_tag}"
+    document_table = f"zuri_reg_document_{run_tag}"
+    mcp_table = f"zuri_reg_mcp_{run_tag}"
+    confirm_table = f"zuri_reg_confirm_{run_tag}"
+    network_table = f"zuri_reg_network_{run_tag}"
+    image_table = f"zuri_reg_images_{run_tag}"
+    image_url_table = f"zuri_reg_image_urls_{run_tag}"
+    image_selection_table = f"zuri_reg_image_selection_{run_tag}"
+    image_locality_table = f"zuri_reg_image_locality_{run_tag}"
+    opaque_image_table = f"zuri_reg_image_opaque_{run_tag}"
+    article_table = f"zuri_reg_article_{run_tag}"
+    dynamic_table = f"zuri_reg_dynamic_{run_tag}"
+    environment_table = f"zuri_reg_environment_{run_tag}"
+    no_working_table = f"zuri_reg_no_working_{run_tag}"
     return [
         *[
             CaseSpec(
@@ -46,7 +46,7 @@ def build_base_cases(base_url: str, run_tag: str) -> list[CaseSpec]:
                 suite="base",
                 title=f"agent-behavior/navigation-readiness-{mode}",
                 timeout_seconds=300,
-                table=f"qz_reg_navigation_{mode}_{run_tag}",
+                table=f"zuri_reg_navigation_{mode}_{run_tag}",
                 min_rows=4,
                 required_tools=("open_tab", "navigate", "read_article", "data_store")
                     + (("network_recent",) if watch else ()),
@@ -60,7 +60,7 @@ def build_base_cases(base_url: str, run_tag: str) -> list[CaseSpec]:
 3. 再次 navigate 到完全相同的第 2 步 URL，读取结果记作 step=reload。
 4. navigate 到 {base_url}/navigation/redirect?key={run_tag}_{mode}，读取重定向后的正文，记作 step=redirect。
 不要加入 wait、wait_for_navigation、脚本、额外截图或预先探测，不要并发执行，也不要遇错重试；出现工具错误就停止并报告。
-四步完成后，把四步的 step、receipt 写入 Data 表 qz_reg_navigation_{mode}_{run_tag}，唯一键用 step，最后简短汇报。
+四步完成后，把四步的 step、receipt 写入 Data 表 zuri_reg_navigation_{mode}_{run_tag}，唯一键用 step，最后简短汇报。
 """.strip(),
             )
             for mode, watch in (("plain", False), ("watched", True))
@@ -75,7 +75,7 @@ def build_base_cases(base_url: str, run_tag: str) -> list[CaseSpec]:
             required_tools=("data_store",),
             journey_ids=("A06", "A19"),
             prompt=f"""
-请在轻舟 Data 表 {data_table} 完成一次小型数据生命周期验证。
+请在Zuri Data 表 {data_table} 完成一次小型数据生命周期验证。
 目标数据：alpha/value=100/tag=first，beta/value=200/tag=second，唯一键用 name。
 验收标准：表结构可读取；beta 能被读取、更新为 value=999/status=updated 后再删除；最终表里只剩 alpha。
 最后用一句话总结数据生命周期是否成功。
@@ -108,7 +108,7 @@ def build_base_cases(base_url: str, run_tag: str) -> list[CaseSpec]:
                 },
             },
             prompt=f"""
-我的浏览器里正在看的页面和这个任务自己的工作标签页不是同一页。请分别读取“我当前正在看的页面”和“当前任务工作标签页”，把每页的 pageRole、marker、title、url 写入轻舟 Data 表 {environment_table}，唯一键用 pageRole；保持我正在看的页面不变。完成后简短告诉我两页是否区分正确。
+我的浏览器里正在看的页面和这个任务自己的工作标签页不是同一页。请分别读取“我当前正在看的页面”和“当前任务工作标签页”，把每页的 pageRole、marker、title、url 写入Zuri Data 表 {environment_table}，唯一键用 pageRole；保持我正在看的页面不变。完成后简短告诉我两页是否区分正确。
 """.strip(),
         ),
         CaseSpec(
@@ -131,7 +131,7 @@ def build_base_cases(base_url: str, run_tag: str) -> list[CaseSpec]:
                 },
             },
             prompt=f"""
-请确认当前任务是否已有工作标签页，并读取“我当前正在看的页面”的 pageRole、marker、title、url。把结果写入轻舟 Data 表 {no_working_table}，唯一键用 check，记录 check=no-working-page-context 和 hasWorkingTab；保持我正在看的页面不变，完成后简短汇报。
+请确认当前任务是否已有工作标签页，并读取“我当前正在看的页面”的 pageRole、marker、title、url。把结果写入Zuri Data 表 {no_working_table}，唯一键用 check，记录 check=no-working-page-context 和 hasWorkingTab；保持我正在看的页面不变，完成后简短汇报。
 """.strip(),
         ),
         CaseSpec(
@@ -161,7 +161,7 @@ def build_base_cases(base_url: str, run_tag: str) -> list[CaseSpec]:
             prompt=f"""
 打开本地商品页 {base_url}/catalog?page=1。
 目标：高效采集第 1 页和第 2 页全部商品，不要逐行手工复制。
-每条记录包含 sku、name、price、page、url，写入轻舟 Data 表 {catalog_table}，dedupField 用 sku。
+每条记录包含 sku、name、price、page、url，写入Zuri Data 表 {catalog_table}，dedupField 用 sku。
 完成前验证共有 6 条商品记录，然后简短汇报。
 """.strip(),
         ),
@@ -187,13 +187,13 @@ def build_base_cases(base_url: str, run_tag: str) -> list[CaseSpec]:
             timeout_seconds=300,
             table=document_table,
             min_rows=1,
-            required_tools=("load_skill", "qingzhou_documents__document_fetch", "qingzhou_documents__document_parse", "qingzhou_documents__document_read_chunk", "qingzhou_documents__document_create", "data_store"),
+            required_tools=("load_skill", "zuri_documents__document_fetch", "zuri_documents__document_parse", "zuri_documents__document_read_chunk", "zuri_documents__document_create", "data_store"),
             journey_ids=("A08", "A13", "A19"),
             prompt=f"""
-请把远程文本 {base_url}/docs/sample.txt 处理成一个轻舟文档摘要产物。
-这是 qingzhou-documents 全局 skill 的专项回归：先用 load_skill 加载 qingzhou-documents，再依次使用其中的 document_fetch、document_parse、document_read_chunk、document_create；不要用 open_tab、read_article 或 save_file 替代。
-验收标准：能拉取并解析该文本，读取首段内容，生成标题为 Qingzhou regression document summary 的 txt 产物，且不触发下载。
-把流程结果写入轻舟 Data 表 {document_table}，dedupField 用 step，至少写入 step=document_pipeline_completed，包含 fileId、docModelId、artifactId。
+请把远程文本 {base_url}/docs/sample.txt 处理成一个Zuri文档摘要产物。
+这是 zuri-documents 全局 skill 的专项回归：先用 load_skill 加载 zuri-documents，再依次使用其中的 document_fetch、document_parse、document_read_chunk、document_create；不要用 open_tab、read_article 或 save_file 替代。
+验收标准：能拉取并解析该文本，读取首段内容，生成标题为 Zuri regression document summary 的 txt 产物，且不触发下载。
+把流程结果写入Zuri Data 表 {document_table}，dedupField 用 step，至少写入 step=document_pipeline_completed，包含 fileId、docModelId、artifactId。
 完成前验证表里至少 1 条记录。
 """.strip(),
         ),
@@ -204,11 +204,11 @@ def build_base_cases(base_url: str, run_tag: str) -> list[CaseSpec]:
             timeout_seconds=300,
             table=mcp_table,
             min_rows=1,
-            required_tools=("load_skill", "qingzhou_mcp__mcp_list_tools", "data_store"),
+            required_tools=("load_skill", "zuri_mcp__mcp_list_tools", "data_store"),
             journey_ids=("A13", "A16", "A19"),
             prompt=f"""
 请做一次 MCP registry 的轻量探测，只需要列出少量可用工具和服务器统计，不要调用具体外部 MCP 工具。
-把结果摘要写入轻舟 Data 表 {mcp_table}，dedupField 用 check，至少包含 check=mcp_registry_listed、serverCount、toolCount。
+把结果摘要写入Zuri Data 表 {mcp_table}，dedupField 用 check，至少包含 check=mcp_registry_listed、serverCount、toolCount。
 完成前验证表里至少 1 条记录。
 """.strip(),
         ),
@@ -223,7 +223,7 @@ def build_base_cases(base_url: str, run_tag: str) -> list[CaseSpec]:
             journey_ids=("A12", "A19"),
             prompt=f"""
 目标：在无需用户输入的情况下短暂停顿约 1 秒，然后记录等待完成。
-等待结束后写入轻舟 Data 表 {confirm_table}，dedupField 用 check，至少写入 check=wait_completed，包含 waited=true。
+等待结束后写入Zuri Data 表 {confirm_table}，dedupField 用 check，至少写入 check=wait_completed，包含 waited=true。
 完成前验证表里至少 1 条记录。
 """.strip(),
         ),
@@ -246,7 +246,7 @@ def build_base_cases(base_url: str, run_tag: str) -> list[CaseSpec]:
 目标：填 Query=chair，Category=furniture，勾选 VIP only，提交 Run search。
 提交前重新观察表单，确认 Query、Category 和 VIP 三个控件都已处于目标值；若 Category 仍是 all，先修正为 furniture 再提交。
 验收标准：页面结果渲染完成；能用网络请求证据确认 /api/search 命中；能用控制台证据确认提交和渲染日志出现。
-把结果写入轻舟 Data 表 {network_table}，dedupField 用 check，至少写入 check=form_network_console，包含 query、category、vip、resultCount、networkMatched、consoleSeen。
+把结果写入Zuri Data 表 {network_table}，dedupField 用 check，至少写入 check=form_network_console，包含 query、category、vip、resultCount、networkMatched、consoleSeen。
 完成前验证表里至少 1 条记录。
 """.strip(),
         ),
@@ -334,7 +334,7 @@ def build_base_cases(base_url: str, run_tag: str) -> list[CaseSpec]:
 - 记录正文容器的 data-topic。
 - 记录正文里的相关文档链接 href。
 - 忽略 header/sidebar/footer 等噪声文案。
-把结果写入轻舟 Data 表 {article_table}，dedupField 用 topic；topic 使用 insight_alpha、insight_beta、insight_gamma、article_data_topic、related_document_href。
+把结果写入Zuri Data 表 {article_table}，dedupField 用 topic；topic 使用 insight_alpha、insight_beta、insight_gamma、article_data_topic、related_document_href。
 完成前验证表里至少 5 条记录，并简短汇报审计是否干净。
 """.strip(),
         ),
@@ -351,7 +351,7 @@ def build_base_cases(base_url: str, run_tag: str) -> list[CaseSpec]:
 打开动态元素页 {base_url}/dynamic，完成一次动态控件保存任务。
 页面会先展示一些不可用或重名控件，真正可用的输入框和保存按钮会在交互后生成。
 目标：把生成出来的 value 设置为 edge-ok，保存后确认页面状态变成 saved:edge-ok。
-把验证结果写入轻舟 Data 表 {dynamic_table}，dedupField 用 check，至少写入 check=dynamic_saved、value=edge-ok、saved=true。
+把验证结果写入Zuri Data 表 {dynamic_table}，dedupField 用 check，至少写入 check=dynamic_saved、value=edge-ok、saved=true。
 完成前验证表里至少 1 条记录。
 """.strip(),
         ),
@@ -359,9 +359,9 @@ def build_base_cases(base_url: str, run_tag: str) -> list[CaseSpec]:
 
 
 def build_realworld_cases(run_tag: str) -> list[CaseSpec]:
-    hackernews_table = f"qz_real_hn_{run_tag}"
-    wikipedia_table = f"qz_real_wiki_{run_tag}"
-    github_table = f"qz_real_github_{run_tag}"
+    hackernews_table = f"zuri_real_hn_{run_tag}"
+    wikipedia_table = f"zuri_real_wiki_{run_tag}"
+    github_table = f"zuri_real_github_{run_tag}"
     return [
         CaseSpec(
             name="real_hackernews_frontpage",
@@ -412,16 +412,16 @@ def build_realworld_cases(run_tag: str) -> list[CaseSpec]:
 
 
 def build_journey_cases(base_url: str, run_tag: str) -> list[CaseSpec]:
-    parallel_table = f"qz_journey_parallel_{run_tag}"
-    wait_table = f"qz_journey_wait_{run_tag}"
-    clarification_table = f"qz_journey_clarify_{run_tag}"
+    parallel_table = f"zuri_journey_parallel_{run_tag}"
+    wait_table = f"zuri_journey_wait_{run_tag}"
+    clarification_table = f"zuri_journey_clarify_{run_tag}"
     target = datetime.now(timezone(timedelta(hours=8))) + timedelta(seconds=60)
     target_iso = target.strftime("%Y-%m-%dT%H:%M:%S+08:00")
-    skill_name = f"qz-reg-settings-{run_tag.replace('_', '-')}"
+    skill_name = f"zuri-reg-settings-{run_tag.replace('_', '-')}"
     plugin_manifest = {
-        "format": "qingzhou.plugin",
+        "format": "zuri.plugin",
         "schemaVersion": 1,
-        "id": f"qz-reg-settings-{run_tag.replace('_', '-')}",
+        "id": f"zuri-reg-settings-{run_tag.replace('_', '-')}",
         "displayName": "回归偏好设置",
         "version": "0.1.0",
         "description": "行为回归使用的隔离设置样例",
@@ -470,7 +470,7 @@ def build_journey_cases(base_url: str, run_tag: str) -> list[CaseSpec]:
 - Gamma：{base_url}/parallel/gamma
 
 输出字段固定为 branch、code、status、url。可用分支的 code 和 status 必须原样保留页面中的实际值；不可用分支的 status 写 unavailable，code 留空字符串，不能猜测 code。
-把最终三项写入轻舟 Data 表 {parallel_table}，唯一键使用 branch，完成前核对恰好三行。
+把最终三项写入Zuri Data 表 {parallel_table}，唯一键使用 branch，完成前核对恰好三行。
 """.strip(),
         ),
         CaseSpec(
@@ -484,7 +484,7 @@ def build_journey_cases(base_url: str, run_tag: str) -> list[CaseSpec]:
             journey_ids=("A11", "A19"),
             expected={"targetIso": target_iso, "targetEpochMs": int(target.timestamp() * 1000)},
             prompt=f"""
-请在北京时间 {target_iso} 到达后，才把一条 check=exact-ready、reached=true 的记录写入轻舟 Data 表 {wait_table}。
+请在北京时间 {target_iso} 到达后，才把一条 check=exact-ready、reached=true 的记录写入Zuri Data 表 {wait_table}。
 不能提前写入，也不要用估算时长替代这个绝对时间点；完成后核对表中只有这一条记录。
 """.strip(),
         ),
@@ -499,12 +499,12 @@ def build_journey_cases(base_url: str, run_tag: str) -> list[CaseSpec]:
             expected={
                 "titleMarker": f"Journey-schedule-{run_tag}",
                 "probeUrl": f"{base_url}/schedule/probe",
-                "outputTable": f"qz_journey_schedule_{run_tag}",
+                "outputTable": f"zuri_journey_schedule_{run_tag}",
             },
             prompt=f"""
 请把下面的长期工作安排好并保存：标题包含“Journey-schedule-{run_tag}”；每天北京时间 11:55 开始读取
-{base_url}/schedule/probe 做准备，到 12:00 整才把 status、code、checkedAt 写入轻舟 Data 表
-qz_journey_schedule_{run_tag}。设备离线漏跑时只处理最新一次，只有失败才提醒我。
+{base_url}/schedule/probe 做准备，到 12:00 整才把 status、code、checkedAt 写入Zuri Data 表
+zuri_journey_schedule_{run_tag}。设备离线漏跑时只处理最新一次，只有失败才提醒我。
 保存后重新核对规则，告诉我下一次会何时运行。
 """.strip(),
         ),
@@ -520,7 +520,7 @@ qz_journey_schedule_{run_tag}。设备离线漏跑时只处理最新一次，只
             expected={"waitAnswers": {"currency": "CNY"}},
             prompt=f"""
 为项目记录预算 1000，但币种必须由我决定，不能根据上下文猜测。得到我的选择后，把 project=journey、
-amount=1000 和实际币种写入轻舟 Data 表 {clarification_table}，唯一键使用 project，并在完成前读取确认。
+amount=1000 和实际币种写入Zuri Data 表 {clarification_table}，唯一键使用 project，并在完成前读取确认。
 """.strip(),
         ),
         CaseSpec(
@@ -531,9 +531,9 @@ amount=1000 和实际币种写入轻舟 Data 表 {clarification_table}，唯一�
             table="",
             required_tools=(
                 "load_skill",
-                "qingzhou_skill_author__create_skill",
-                "qingzhou_skill_author__edit_skill_resource",
-                "qingzhou_management__manage_skill_settings",
+                "zuri_skill_author__create_skill",
+                "zuri_skill_author__edit_skill_resource",
+                "zuri_management__manage_skill_settings",
             ),
             journey_ids=("A14", "A15", "A19"),
             expected={
@@ -603,7 +603,7 @@ journey-alert-{run_tag}。同一结果只提醒一次，完成后也在对话中
 
 
 def build_vision_cases(base_url: str, run_tag: str) -> list[CaseSpec]:
-    table = f"qz_journey_visual_{run_tag}"
+    table = f"zuri_journey_visual_{run_tag}"
     ui_specs = [
         (
             "visual_ui_form",
@@ -625,9 +625,9 @@ def build_vision_cases(base_url: str, run_tag: str) -> list[CaseSpec]:
             "visual_ui_drag",
             "drag",
             "visual-drag",
-            "drag-qz27-archive",
+            "drag-zuri27-archive",
             {"drag": 1, "click": 1},
-            "把 QZ-27 卡片拖入 ARCHIVE 区域并应用",
+            "把 ZURI-27 卡片拖入 ARCHIVE 区域并应用",
         ),
         (
             "visual_ui_scroll",
@@ -651,7 +651,7 @@ def build_vision_cases(base_url: str, run_tag: str) -> list[CaseSpec]:
             expected={"answer": "circle-left-line-right"},
             prompt=f"""
 打开 {base_url}/visual/canvas，判断画布中的深色圆形位于横线的哪一侧。页面结构没有答案文本，不要猜测。
-把 check=canvas-layout、answer=circle-left-line-right、verified=true 写入轻舟 Data 表 {table}，完成前读取确认。
+把 check=canvas-layout、answer=circle-left-line-right、verified=true 写入Zuri Data 表 {table}，完成前读取确认。
 """.strip(),
         ),
         *[
@@ -660,7 +660,7 @@ def build_vision_cases(base_url: str, run_tag: str) -> list[CaseSpec]:
                 suite="journeys-vision",
                 title=f"agent-journey/{name.replace('_', '-')}",
                 timeout_seconds=360,
-                table=f"qz_journey_{check.replace('-', '_')}_{run_tag}",
+                table=f"zuri_journey_{check.replace('-', '_')}_{run_tag}",
                 min_rows=1,
                 required_tools=("open_tab", "screenshot", "act_on_screen", "data_store"),
                 journey_ids=("A21", "A19"),
@@ -672,7 +672,7 @@ def build_vision_cases(base_url: str, run_tag: str) -> list[CaseSpec]:
                 },
                 prompt=f"""
 打开 {base_url}/visual/ui?mode={mode}&key={run_tag}:{mode}，{instruction}。
-页面显示 SUCCESS 回执后，把 check={check}、receipt={receipt}、verified=true 写入轻舟 Data 表 qz_journey_{check.replace('-', '_')}_{run_tag}，完成前读取确认。
+页面显示 SUCCESS 回执后，把 check={check}、receipt={receipt}、verified=true 写入Zuri Data 表 zuri_journey_{check.replace('-', '_')}_{run_tag}，完成前读取确认。
 """.strip(),
             )
             for name, mode, check, receipt, action_counts, instruction in ui_specs

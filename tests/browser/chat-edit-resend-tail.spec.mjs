@@ -37,7 +37,7 @@ test.describe("edited message resend tail", () => {
         runId: "edited-tail-old-run",
       });
 
-      await window.qingzhouConversationBenchmark.runSnapshotRender({ sessionId, transcript });
+      await window.zuriConversationBenchmark.runSnapshotRender({ sessionId, transcript });
       await frames(4);
 
       const messages = document.querySelector("#messages");
@@ -70,8 +70,8 @@ test.describe("edited message resend tail", () => {
 
       await new Promise(resolve => setTimeout(resolve, 1400));
 
-      window.qingzhouConversationBenchmark.configureVisualState({ running: true });
-      window.qingzhouConversationBenchmark.dispatchBackgroundEvent({
+      window.zuriConversationBenchmark.configureVisualState({ running: true });
+      window.zuriConversationBenchmark.dispatchBackgroundEvent({
         type: "thinking_update",
         sessionId,
         runId,
@@ -84,7 +84,7 @@ test.describe("edited message resend tail", () => {
       const messagesRect = messages.getBoundingClientRect();
       const thinkingBottomGap = messages.scrollHeight - messages.scrollTop - messages.clientHeight;
 
-      window.qingzhouConversationBenchmark.dispatchBackgroundEvent({
+      window.zuriConversationBenchmark.dispatchBackgroundEvent({
         type: "message_start",
         sessionId,
         runId,
@@ -92,7 +92,7 @@ test.describe("edited message resend tail", () => {
         spanId: "edited-tail-new-assistant",
         message: { role: "assistant", content: "" },
       });
-      window.qingzhouConversationBenchmark.dispatchBackgroundEvent({
+      window.zuriConversationBenchmark.dispatchBackgroundEvent({
         type: "message_update",
         sessionId,
         runId,

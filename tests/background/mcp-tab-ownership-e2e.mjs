@@ -18,7 +18,7 @@ let environment = null;
 const report = { ok: false, scenario: "node-bridge-connect-and-tab-ownership" };
 try {
   environment = await launchIsolatedExtensionMcp({
-    profilePrefix: "qingzhou-tab-owner-e2e-",
+    profilePrefix: "zuri-tab-owner-e2e-",
     headless: true,
     requestTimeoutSeconds: 60,
   });
@@ -48,7 +48,7 @@ try {
   const moved = await environment.connect();
   assert.equal(moved.clients[0].clientId, clientId);
   assert.equal(await environment.page.evaluate(async () =>
-    (await chrome.storage.local.get("_qingzhou_mcp_bridge"))._qingzhou_mcp_bridge.endpoint), environment.bridge.endpoint,
+    (await chrome.storage.local.get("_zuri_mcp_bridge"))._zuri_mcp_bridge.endpoint), environment.bridge.endpoint,
   "connection page saves the new port without DevTools configuration");
   report.endpoint = environment.bridge.endpoint;
   report.previousEndpoint = oldEndpoint;
@@ -98,7 +98,7 @@ async function cliMcpBrowserRoundTrip(environment, baseUrl) {
   const mcp = (name, args) => callTool(environment.bridge.endpoint, name, {
     clientId: environment.bridgeStatus.clients[0].clientId, timeoutSeconds: 30, ...args,
   }, { timeoutMs: 30_000 });
-  const created = await mcp("qingzhou_create_session", { title: "CLI local page" });
+  const created = await mcp("zuri_create_session", { title: "CLI local page" });
   const sessionId = created.session.id;
   assert.ok(sessionId);
   assert.equal(created.session.title, "CLI local page");
@@ -109,24 +109,24 @@ async function cliMcpBrowserRoundTrip(environment, baseUrl) {
   assert.equal(snapshot.sessionId, sessionId);
   assert.equal(snapshot.session.title, "CLI local page");
 
-  const schema = await mcp("qingzhou_get_tool", { name: "open_tab", sessionId });
+  const schema = await mcp("zuri_get_tool", { name: "open_tab", sessionId });
   assert.equal(schema.name, "open_tab");
   assert.equal(schema.parameters.properties.url.type, "string");
   assert.ok(schema.parameters.required.includes("url"));
-  const articleSchema = await mcp("qingzhou_get_tool", { name: "read_article", sessionId });
+  const articleSchema = await mcp("zuri_get_tool", { name: "read_article", sessionId });
   assert.deepEqual(articleSchema.parameters.properties.tabRef.type, ["integer", "string"]);
   assert.equal(Object.hasOwn(articleSchema.parameters.properties, "tabId"), false);
   assert.ok(articleSchema.parameters.required.includes("limit"));
 
   const url = `${baseUrl}/cli-roundtrip`;
-  const opened = await mcp("qingzhou_execute_tool", { name: "open_tab", sessionId, args: { url, tabAlias: "cli-page" }, wait: true });
+  const opened = await mcp("zuri_execute_tool", { name: "open_tab", sessionId, args: { url, tabAlias: "cli-page" }, wait: true });
   assert.equal(opened.toolName, "open_tab");
   assert.equal(opened.sessionId, sessionId);
   const tabId = opened.result.id;
   assert.equal(typeof tabId, "number");
   assert.equal(opened.result.url, url);
   assert.equal(opened.result.tabAlias, "cli-page");
-  const article = await mcp("qingzhou_execute_tool", {
+  const article = await mcp("zuri_execute_tool", {
     name: "read_article", sessionId, args: { tabRef: "cli-page", source: "body", limit: 4000 }, wait: true,
   });
   assert.equal(article.toolName, "read_article");
@@ -136,7 +136,7 @@ async function cliMcpBrowserRoundTrip(environment, baseUrl) {
   const active = await command("show", sessionId);
   assert.ok(active.runtime.ownedTabIds.includes(tabId));
 
-  const closed = await mcp("qingzhou_execute_tool", { name: "close_tab", sessionId, args: { tabRef: String(tabId) }, wait: true });
+  const closed = await mcp("zuri_execute_tool", { name: "close_tab", sessionId, args: { tabRef: String(tabId) }, wait: true });
   assert.equal(closed.toolName, "close_tab");
   assert.equal(closed.result.closed, tabId);
   assert.equal(await environment.page.evaluate(async tabId => {
@@ -145,8 +145,8 @@ async function cliMcpBrowserRoundTrip(environment, baseUrl) {
   const stopped = await command("cancel", sessionId);
   assert.equal(stopped.sessionId, sessionId);
   return { ok: true, sessionId, tabId, commands: ["tasks", "show", "cancel"],
-    mcpCalls: ["qingzhou_create_session", "qingzhou_get_tool:open_tab", "qingzhou_get_tool:read_article",
-      "qingzhou_execute_tool:open_tab", "qingzhou_execute_tool:read_article", "qingzhou_execute_tool:close_tab"],
+    mcpCalls: ["zuri_create_session", "zuri_get_tool:open_tab", "zuri_get_tool:read_article",
+      "zuri_execute_tool:open_tab", "zuri_execute_tool:read_article", "zuri_execute_tool:close_tab"],
     readText: article.result.text };
 }
 
@@ -162,7 +162,7 @@ async function startFixtureServer() {
         const body = JSON.parse(raw);
         const userText = (body.messages || []).filter(message => message.role === "user")
           .map(message => JSON.stringify(message.content)).join("\n");
-        const marker = ["QZ_CLI_STREAM", "QZ_CLI_WAIT", "QZ_CLI_NEEDS_USER"].find(value => userText.includes(value)) || "validation";
+        const marker = ["ZURI_CLI_STREAM", "ZURI_CLI_WAIT", "ZURI_CLI_NEEDS_USER"].find(value => userText.includes(value)) || "validation";
         providerRequests.push({ marker, stream: body.stream === true });
         if (!body.stream) {
           response.writeHead(200, { "content-type": "application/json" });
@@ -174,7 +174,7 @@ async function startFixtureServer() {
         const send = (delta, finish_reason = null) => response.write(`data: ${JSON.stringify({
           id: `cli-${marker}`, object: "chat.completion.chunk", choices: [{ index: 0, delta, finish_reason }],
         })}\n\n`);
-        if (marker === "QZ_CLI_NEEDS_USER") {
+        if (marker === "ZURI_CLI_NEEDS_USER") {
           send({ role: "assistant", tool_calls: [{ index: 0, id: "cli-wait-choice", type: "function", function: {
             name: "ask_user", arguments: JSON.stringify({ title: "Choose a route", message: "Choose the local option to continue.",
               fields: [{ id: "route", label: "Route", type: "single_choice", options: [
@@ -182,7 +182,7 @@ async function startFixtureServer() {
               ], required: true }] }),
           } }] });
           send({}, "tool_calls");
-        } else if (marker === "QZ_CLI_STREAM") {
+        } else if (marker === "ZURI_CLI_STREAM") {
           send({ role: "assistant", reasoning_content: "Hidden fixture reasoning." });
           for (const [index, content] of ["Streaming ", "from the real ", "extension."].entries()) {
             if (response.destroyed) return;
@@ -192,7 +192,7 @@ async function startFixtureServer() {
           streamFinished = true;
           send({}, "stop");
         } else {
-          send({ role: "assistant", content: "QZ_CLI_WAIT finished in the extension." });
+          send({ role: "assistant", content: "ZURI_CLI_WAIT finished in the extension." });
           send({}, "stop");
         }
         response.end("data: [DONE]\n\n");
@@ -236,7 +236,7 @@ async function cliModelTasks(environment, fixture) {
   const updates = [];
   const created = [];
   let textBeforeProviderFinished = false;
-  const stream = (await runCli(["create", "Say QZ_CLI_STREAM.", "--title", "Chosen CLI title", "--stream", "--timeout", "30"], {
+  const stream = (await runCli(["create", "Say ZURI_CLI_STREAM.", "--title", "Chosen CLI title", "--stream", "--timeout", "30"], {
     ...dependencies,
     onTaskCreated: result => created.push(result),
     onTaskUpdate: update => {
@@ -256,14 +256,14 @@ async function cliModelTasks(environment, fixture) {
   assert.ok(deltas.every(update => update.messageId && update.runId), "raw transcript identity survives MCP snapshot projection");
   assert.ok(!deltas.some(update => /Hidden fixture reasoning/.test(update.text)));
 
-  const waited = (await runCli(["create", "Say QZ_CLI_WAIT.", "--wait", "--timeout", "30"], dependencies)).result;
+  const waited = (await runCli(["create", "Say ZURI_CLI_WAIT.", "--wait", "--timeout", "30"], dependencies)).result;
   assert.equal(waited.snapshot.status, "completed");
   assert.ok(waited.snapshot.transcript.some(entry => entry.type === "assistant"
-    && JSON.stringify(entry.content).includes("QZ_CLI_WAIT finished in the extension.")), "--wait returns the completed answer");
+    && JSON.stringify(entry.content).includes("ZURI_CLI_WAIT finished in the extension.")), "--wait returns the completed answer");
 
   const waitingUpdates = [];
   let waitingTask, waitingResult, waitingError, waitingSettled = false;
-  const waitingRun = runCli(["create", "Ask me QZ_CLI_NEEDS_USER.", "--stream", "--timeout", "30"], {
+  const waitingRun = runCli(["create", "Ask me ZURI_CLI_NEEDS_USER.", "--stream", "--timeout", "30"], {
     ...dependencies,
     onTaskCreated: result => { waitingTask = result; },
     onTaskUpdate: update => waitingUpdates.push(update),
@@ -286,11 +286,11 @@ async function cliModelTasks(environment, fixture) {
   await waitingRun;
   if (waitingError) throw waitingError;
   assert.equal(waitingResult.snapshot.status, "aborted", "an explicit task stop ends the same streaming call");
-  for (const marker of ["QZ_CLI_STREAM", "QZ_CLI_WAIT", "QZ_CLI_NEEDS_USER"]) {
+  for (const marker of ["ZURI_CLI_STREAM", "ZURI_CLI_WAIT", "ZURI_CLI_NEEDS_USER"]) {
     assert.equal(fixture.providerRequests.filter(request => request.stream && request.marker === marker).length, 1,
       `${marker} must not replay the prompt or make an extra model request`);
   }
-  assert.equal(fixture.providerRequests.filter(request => request.marker === "QZ_CLI_STREAM").length, 1,
+  assert.equal(fixture.providerRequests.filter(request => request.marker === "ZURI_CLI_STREAM").length, 1,
     "an explicit CLI title must not trigger a separate title model request");
   return { ok: true, streamingBeforeCompletion: true, streamChunks: deltas.length, waitReturnsFinal: true,
     waitingUserStaysLive: true, waitingTaskCancelled: true, providerRequests: fixture.providerRequests };

@@ -126,7 +126,7 @@ for (const [language, chromeLocale] of languages) for (const colorScheme of ["li
         const { insertDataRows, updateDataTableMetadata } = await import("/extension/shared/data-store.js");
         await insertDataRows("Original images / 原图 / صور", [{ title: "Original image", src: "https://example.test/image.png", status: "failed" }]);
         await updateDataTableMetadata("Original images / 原图 / صور", { kind: "image_collection", assetKind: "image" });
-        window.__qzEmitPortMessage({ type: "data_changed", table: "Original images / 原图 / صور" });
+        window.__zuriEmitPortMessage({ type: "data_changed", table: "Original images / 原图 / صور" });
       });
       await page.locator("#data-table-search").click();
       await page.locator('.data-table-select[data-table="Original images / 原图 / صور"]').click();

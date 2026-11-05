@@ -6,7 +6,7 @@ import { resolve } from "node:path";
 import { chromeMessageId, decodeChromeMessage, encodeChromeMessage, HISTORICAL_LABELS_MESSAGE_ID } from "../src/shared/i18n/definition.ts";
 import { readTranslationVariants } from "./capability-locales.mjs";
 
-export const FIREFOX_GECKO_ID = "qz-browser-agent@heleifz.github.io";
+export const FIREFOX_GECKO_ID = "zuri-agent@heleifz.github.io";
 export const FIREFOX_MIN_VERSION = "154.0";
 export const FIREFOX_BACKGROUND_SCRIPT = "background/firefox-boot.js";
 export const FIREFOX_PANEL_SCRIPT = "sidepanel/firefox-boot.js";
@@ -27,22 +27,22 @@ export const FIREFOX_DATA_COLLECTION = Object.freeze({
 });
 export const FILE_ACCESS_MESSAGE_KEY = "backend.toolError.FILE_ACCESS_REQUIRED.message";
 export const FIREFOX_SIDEBAR_STYLESHEET = "sidepanel/firefox-sidebar.css";
-export const FIREFOX_TOOLBAR_ICON = "icons/firefox/qz-glyph.svg";
+export const FIREFOX_TOOLBAR_ICON = "icons/firefox/zuri-glyph.svg";
 
 const droppedPermissions = new Set(FIREFOX_DROPPED_PERMISSIONS);
 const FILE_ACCESS_TEXT = Object.freeze({
-  en: "Open qz in about:addons, open Permissions, enable Access local files on your computer, then retry.",
-  zh_CN: "请在 about:addons 中打开轻舟，进入权限页，开启“访问您计算机上的本地文件”，然后重试。",
+  en: "Open zuri in about:addons, open Permissions, enable Access local files on your computer, then retry.",
+  zh_CN: "请在 about:addons 中打开Zuri，进入权限页，开启“访问您计算机上的本地文件”，然后重试。",
   zh_TW: "請在 about:addons 中開啟輕舟，進入權限頁，開啟「存取您電腦上的本機檔案」，然後重試。",
   ja: "about:addons で軽舟を開き、権限ページで「コンピューター上のローカルファイルへのアクセス」を有効にしてから再試行してください。",
-  ko: "about:addons에서 qz를 열고 권한 페이지에서 컴퓨터의 로컬 파일 액세스를 켠 다음 다시 시도하세요.",
-  de: "Öffnen Sie qz unter about:addons, öffnen Sie die Berechtigungen, aktivieren Sie den Zugriff auf lokale Dateien auf Ihrem Computer und versuchen Sie es erneut.",
-  es: "Abra qz en about:addons, abra Permisos, active el acceso a los archivos locales del equipo y vuelva a intentarlo.",
-  fr: "Ouvrez qz dans about:addons, ouvrez Autorisations, activez l’accès aux fichiers locaux de votre ordinateur, puis réessayez.",
-  pt_BR: "Abra o qz em about:addons, abra Permissões, ative o acesso a arquivos locais no computador e tente novamente.",
-  ru: "Откройте qz на странице about:addons, откройте разрешения, включите доступ к локальным файлам на компьютере и повторите попытку.",
-  ar: "افتح qz في about:addons، ثم افتح الأذونات، وفعّل الوصول إلى الملفات المحلية على جهاز الكمبيوتر، ثم أعد المحاولة.",
-  hi: "about:addons में qz खोलें, अनुमतियाँ खोलें, अपने कंप्यूटर पर स्थानीय फ़ाइलों की पहुँच चालू करें और फिर से कोशिश करें।",
+  ko: "about:addons에서 zuri를 열고 권한 페이지에서 컴퓨터의 로컬 파일 액세스를 켠 다음 다시 시도하세요.",
+  de: "Öffnen Sie zuri unter about:addons, öffnen Sie die Berechtigungen, aktivieren Sie den Zugriff auf lokale Dateien auf Ihrem Computer und versuchen Sie es erneut.",
+  es: "Abra zuri en about:addons, abra Permisos, active el acceso a los archivos locales del equipo y vuelva a intentarlo.",
+  fr: "Ouvrez zuri dans about:addons, ouvrez Autorisations, activez l’accès aux fichiers locaux de votre ordinateur, puis réessayez.",
+  pt_BR: "Abra o zuri em about:addons, abra Permissões, ative o acesso a arquivos locais no computador e tente novamente.",
+  ru: "Откройте zuri на странице about:addons, откройте разрешения, включите доступ к локальным файлам на компьютере и повторите попытку.",
+  ar: "افتح zuri في about:addons، ثم افتح الأذونات، وفعّل الوصول إلى الملفات المحلية على جهاز الكمبيوتر، ثم أعد المحاولة.",
+  hi: "about:addons में zuri खोलें, अनुमतियाँ खोलें, अपने कंप्यूटर पर स्थानीय फ़ाइलों की पहुँच चालू करें और फिर से कोशिश करें।",
 });
 
 /** True for sources that exist only in the Firefox package. */
@@ -192,8 +192,8 @@ function matchingCloseEnd(html, open) {
  * declarations.
  *
  * The accent fills only primary controls and is never mixed into a surface.
- * sidepanel/firefox/theme.ts reads the resolved accent and writes the --qz-ff-primary
- * fill, hover, active, and label, and the --qz-ff-accent-ink for rings and links,
+ * sidepanel/firefox/theme.ts reads the resolved accent and writes the --zuri-ff-primary
+ * fill, hover, active, and label, and the --zuri-ff-accent-ink for rings and links,
  * each at least 4.5:1. Until it runs, Firefox's own primary button colors apply.
  * Disabled primary controls drop to the neutral fill with deemphasized text and a
  * not-allowed cursor instead of fading.
@@ -203,142 +203,142 @@ export function firefoxSidebarCss() {
 :root {
   color-scheme: light dark;
 
-  --qz-ff-sidebar: light-dark(#ffffff, #1c1b22);
-  --qz-ff-sidebar-text: light-dark(#15141a, #f9f9fa);
-  --qz-ff-sidebar-border: var(--qz-ff-hairline);
-  --qz-ff-accent: light-dark(#764edd, #b89cff);
-  --qz-ff-accent-text: light-dark(#ffffff, #252428);
-  --qz-ff-focus: var(--qz-ff-accent-ink);
-  --qz-ff-field: light-dark(var(--qz-ff-sidebar), color-mix(in srgb, black 18%, var(--qz-ff-sidebar)));
-  --qz-ff-field-text: var(--qz-ff-sidebar-text);
-  --qz-ff-field-border: var(--qz-ff-border);
-  --qz-ff-popup: light-dark(var(--qz-ff-sidebar), color-mix(in srgb, var(--qz-ff-sidebar-text) 9%, var(--qz-ff-sidebar)));
-  --qz-ff-popup-text: var(--qz-ff-sidebar-text);
-  --qz-ff-popup-border: var(--qz-ff-hairline);
+  --zuri-ff-sidebar: light-dark(#ffffff, #1c1b22);
+  --zuri-ff-sidebar-text: light-dark(#15141a, #f9f9fa);
+  --zuri-ff-sidebar-border: var(--zuri-ff-hairline);
+  --zuri-ff-accent: light-dark(#764edd, #b89cff);
+  --zuri-ff-accent-text: light-dark(#ffffff, #252428);
+  --zuri-ff-focus: var(--zuri-ff-accent-ink);
+  --zuri-ff-field: light-dark(var(--zuri-ff-sidebar), color-mix(in srgb, black 18%, var(--zuri-ff-sidebar)));
+  --zuri-ff-field-text: var(--zuri-ff-sidebar-text);
+  --zuri-ff-field-border: var(--zuri-ff-border);
+  --zuri-ff-popup: light-dark(var(--zuri-ff-sidebar), color-mix(in srgb, var(--zuri-ff-sidebar-text) 9%, var(--zuri-ff-sidebar)));
+  --zuri-ff-popup-text: var(--zuri-ff-sidebar-text);
+  --zuri-ff-popup-border: var(--zuri-ff-hairline);
 
-  --qz-ff-text-deemphasized: color-mix(in srgb, var(--qz-ff-sidebar-text) 72%, var(--qz-ff-sidebar));
-  --qz-ff-text-muted: color-mix(in srgb, var(--qz-ff-sidebar-text) 60%, var(--qz-ff-sidebar));
-  --qz-ff-popup-text-deemphasized: color-mix(in srgb, var(--qz-ff-popup-text) 72%, var(--qz-ff-popup));
-  --qz-ff-popup-text-muted: color-mix(in srgb, var(--qz-ff-popup-text) 60%, var(--qz-ff-popup));
-  --qz-ff-field-text-deemphasized: color-mix(in srgb, var(--qz-ff-field-text) 72%, transparent);
-  --qz-ff-field-placeholder: color-mix(in srgb, var(--qz-ff-field-text) 60%, transparent);
-  --qz-ff-hairline: color-mix(in srgb, var(--qz-ff-sidebar-text) 12%, transparent);
-  --qz-ff-border: color-mix(in srgb, var(--qz-ff-sidebar-text) 24%, transparent);
-  --qz-ff-border-hover: color-mix(in srgb, var(--qz-ff-sidebar-text) 40%, transparent);
-  --qz-ff-border-strong: color-mix(in srgb, var(--qz-ff-sidebar-text) 55%, var(--qz-ff-sidebar));
-  --qz-ff-box: light-dark(color-mix(in srgb, var(--qz-ff-sidebar-text) 3%, var(--qz-ff-sidebar)), color-mix(in srgb, var(--qz-ff-sidebar-text) 5%, var(--qz-ff-sidebar)));
-  --qz-ff-box-hover: color-mix(in srgb, var(--qz-ff-sidebar-text) 8%, var(--qz-ff-sidebar));
-  --qz-ff-box-active: color-mix(in srgb, var(--qz-ff-sidebar-text) 12%, var(--qz-ff-sidebar));
-  --qz-ff-row-hover: color-mix(in srgb, var(--qz-ff-sidebar-text) 6%, transparent);
-  --qz-ff-fill: color-mix(in srgb, var(--qz-ff-sidebar-text) 7%, transparent);
-  --qz-ff-selected: color-mix(in srgb, var(--qz-ff-sidebar-text) 11%, transparent);
-  --qz-ff-fill-hover: color-mix(in srgb, var(--qz-ff-sidebar-text) 14%, transparent);
-  --qz-ff-fill-active: color-mix(in srgb, var(--qz-ff-sidebar-text) 21%, transparent);
-  --qz-ff-primary: light-dark(#764edd, #b89cff);
-  --qz-ff-primary-hover: light-dark(#5939a8, #d4c1ff);
-  --qz-ff-primary-active: light-dark(#3e2976, #eaddff);
-  --qz-ff-primary-text: light-dark(#ffffff, #252428);
-  --qz-ff-accent-ink: light-dark(#764edd, #b89cff);
+  --zuri-ff-text-deemphasized: color-mix(in srgb, var(--zuri-ff-sidebar-text) 72%, var(--zuri-ff-sidebar));
+  --zuri-ff-text-muted: color-mix(in srgb, var(--zuri-ff-sidebar-text) 60%, var(--zuri-ff-sidebar));
+  --zuri-ff-popup-text-deemphasized: color-mix(in srgb, var(--zuri-ff-popup-text) 72%, var(--zuri-ff-popup));
+  --zuri-ff-popup-text-muted: color-mix(in srgb, var(--zuri-ff-popup-text) 60%, var(--zuri-ff-popup));
+  --zuri-ff-field-text-deemphasized: color-mix(in srgb, var(--zuri-ff-field-text) 72%, transparent);
+  --zuri-ff-field-placeholder: color-mix(in srgb, var(--zuri-ff-field-text) 60%, transparent);
+  --zuri-ff-hairline: color-mix(in srgb, var(--zuri-ff-sidebar-text) 12%, transparent);
+  --zuri-ff-border: color-mix(in srgb, var(--zuri-ff-sidebar-text) 24%, transparent);
+  --zuri-ff-border-hover: color-mix(in srgb, var(--zuri-ff-sidebar-text) 40%, transparent);
+  --zuri-ff-border-strong: color-mix(in srgb, var(--zuri-ff-sidebar-text) 55%, var(--zuri-ff-sidebar));
+  --zuri-ff-box: light-dark(color-mix(in srgb, var(--zuri-ff-sidebar-text) 3%, var(--zuri-ff-sidebar)), color-mix(in srgb, var(--zuri-ff-sidebar-text) 5%, var(--zuri-ff-sidebar)));
+  --zuri-ff-box-hover: color-mix(in srgb, var(--zuri-ff-sidebar-text) 8%, var(--zuri-ff-sidebar));
+  --zuri-ff-box-active: color-mix(in srgb, var(--zuri-ff-sidebar-text) 12%, var(--zuri-ff-sidebar));
+  --zuri-ff-row-hover: color-mix(in srgb, var(--zuri-ff-sidebar-text) 6%, transparent);
+  --zuri-ff-fill: color-mix(in srgb, var(--zuri-ff-sidebar-text) 7%, transparent);
+  --zuri-ff-selected: color-mix(in srgb, var(--zuri-ff-sidebar-text) 11%, transparent);
+  --zuri-ff-fill-hover: color-mix(in srgb, var(--zuri-ff-sidebar-text) 14%, transparent);
+  --zuri-ff-fill-active: color-mix(in srgb, var(--zuri-ff-sidebar-text) 21%, transparent);
+  --zuri-ff-primary: light-dark(#764edd, #b89cff);
+  --zuri-ff-primary-hover: light-dark(#5939a8, #d4c1ff);
+  --zuri-ff-primary-active: light-dark(#3e2976, #eaddff);
+  --zuri-ff-primary-text: light-dark(#ffffff, #252428);
+  --zuri-ff-accent-ink: light-dark(#764edd, #b89cff);
   /* Text-safe on the sidebar and on a 12% tint of themselves in both schemes. */
-  --qz-ff-success: light-dark(#00713e, #8adf8d);
-  --qz-ff-warning: light-dark(#905300, #f5cc58);
-  --qz-ff-critical: light-dark(#b20037, #ffa0aa);
+  --zuri-ff-success: light-dark(#00713e, #8adf8d);
+  --zuri-ff-warning: light-dark(#905300, #f5cc58);
+  --zuri-ff-critical: light-dark(#b20037, #ffa0aa);
 
   --font-sans: system-ui, sans-serif;
   --font-mono: ui-monospace, Menlo, Consolas, monospace;
-  --bg-primary: var(--qz-ff-sidebar);
-  --bg-secondary: var(--qz-ff-sidebar);
-  --bg-tertiary: color-mix(in srgb, var(--qz-ff-sidebar-text) 8%, var(--qz-ff-sidebar));
-  --bg-elevated: var(--qz-ff-box);
-  --bg-glass: var(--qz-ff-sidebar);
-  --text-primary: var(--qz-ff-sidebar-text);
-  --text-secondary: var(--qz-ff-text-deemphasized);
-  --text-muted: var(--qz-ff-text-muted);
-  --text-faint: var(--qz-ff-text-muted);
-  --border: var(--qz-ff-hairline);
-  --border-focus: var(--qz-ff-border);
-  --accent: var(--qz-ff-sidebar-text);
-  --accent-strong: var(--qz-ff-sidebar-text);
-  --accent-glow: var(--qz-ff-fill);
-  --accent-subtle: var(--qz-ff-row-hover);
+  --bg-primary: var(--zuri-ff-sidebar);
+  --bg-secondary: var(--zuri-ff-sidebar);
+  --bg-tertiary: color-mix(in srgb, var(--zuri-ff-sidebar-text) 8%, var(--zuri-ff-sidebar));
+  --bg-elevated: var(--zuri-ff-box);
+  --bg-glass: var(--zuri-ff-sidebar);
+  --text-primary: var(--zuri-ff-sidebar-text);
+  --text-secondary: var(--zuri-ff-text-deemphasized);
+  --text-muted: var(--zuri-ff-text-muted);
+  --text-faint: var(--zuri-ff-text-muted);
+  --border: var(--zuri-ff-hairline);
+  --border-focus: var(--zuri-ff-border);
+  --accent: var(--zuri-ff-sidebar-text);
+  --accent-strong: var(--zuri-ff-sidebar-text);
+  --accent-glow: var(--zuri-ff-fill);
+  --accent-subtle: var(--zuri-ff-row-hover);
   --selection-bg: Highlight;
 
   --control-track: transparent;
-  --control-hover-fill: var(--qz-ff-row-hover);
-  --control-active-fill: var(--qz-ff-selected);
+  --control-hover-fill: var(--zuri-ff-row-hover);
+  --control-active-fill: var(--zuri-ff-selected);
   --control-active-border: transparent;
   --control-radius: 6px;
   --control-border: transparent;
   --control-border-hover: transparent;
   --control-surface: transparent;
-  --control-surface-hover: var(--qz-ff-fill-hover);
-  --control-surface-pressed: var(--qz-ff-fill-active);
-  --control-text: var(--qz-ff-sidebar-text);
-  --control-text-hover: var(--qz-ff-sidebar-text);
-  --control-primary-surface: var(--qz-ff-primary);
-  --control-primary-surface-hover: var(--qz-ff-primary-hover);
-  --control-primary-text: var(--qz-ff-primary-text);
-  --control-danger-text: var(--qz-ff-critical);
-  --control-danger-surface-hover: color-mix(in srgb, var(--qz-ff-critical) 12%, transparent);
+  --control-surface-hover: var(--zuri-ff-fill-hover);
+  --control-surface-pressed: var(--zuri-ff-fill-active);
+  --control-text: var(--zuri-ff-sidebar-text);
+  --control-text-hover: var(--zuri-ff-sidebar-text);
+  --control-primary-surface: var(--zuri-ff-primary);
+  --control-primary-surface-hover: var(--zuri-ff-primary-hover);
+  --control-primary-text: var(--zuri-ff-primary-text);
+  --control-danger-text: var(--zuri-ff-critical);
+  --control-danger-surface-hover: color-mix(in srgb, var(--zuri-ff-critical) 12%, transparent);
   --control-danger-border-hover: transparent;
-  --control-focus-ring: 0 0 0 2px var(--qz-ff-sidebar), 0 0 0 4px var(--qz-ff-focus);
+  --control-focus-ring: 0 0 0 2px var(--zuri-ff-sidebar), 0 0 0 4px var(--zuri-ff-focus);
   --control-disabled-opacity: 1;
-  --field-surface: var(--qz-ff-field);
-  --field-surface-disabled: var(--qz-ff-box);
-  --field-text: var(--qz-ff-field-text);
-  --field-border: var(--qz-ff-field-border);
-  --field-border-hover: var(--qz-ff-border-hover);
-  --field-border-focus: var(--qz-ff-focus);
-  --field-placeholder: var(--qz-ff-field-placeholder);
-  --field-focus-ring: 0 0 0 1px var(--qz-ff-focus);
-  --choice-border: var(--qz-ff-border-strong);
-  --choice-border-hover: var(--qz-ff-sidebar-text);
-  --qz-choice-checked-surface: var(--qz-ff-primary);
-  --qz-choice-mark: var(--qz-ff-primary-text);
+  --field-surface: var(--zuri-ff-field);
+  --field-surface-disabled: var(--zuri-ff-box);
+  --field-text: var(--zuri-ff-field-text);
+  --field-border: var(--zuri-ff-field-border);
+  --field-border-hover: var(--zuri-ff-border-hover);
+  --field-border-focus: var(--zuri-ff-focus);
+  --field-placeholder: var(--zuri-ff-field-placeholder);
+  --field-focus-ring: 0 0 0 1px var(--zuri-ff-focus);
+  --choice-border: var(--zuri-ff-border-strong);
+  --choice-border-hover: var(--zuri-ff-sidebar-text);
+  --zuri-choice-checked-surface: var(--zuri-ff-primary);
+  --zuri-choice-mark: var(--zuri-ff-primary-text);
 
-  --popover-surface: var(--qz-ff-popup);
-  --popover-border: var(--qz-ff-popup-border);
+  --popover-surface: var(--zuri-ff-popup);
+  --popover-border: var(--zuri-ff-popup-border);
   --popover-radius: 8px;
   --popover-shadow: 0 1px 4px rgb(0 0 0 / 0.16);
   --modal-backdrop: light-dark(rgb(0 0 0 / 0.2), rgb(0 0 0 / 0.5));
-  --modal-surface: var(--qz-ff-sidebar);
-  --modal-muted-surface: var(--qz-ff-box);
-  --modal-card-surface: var(--qz-ff-sidebar);
-  --modal-card-border: var(--qz-ff-sidebar-border);
+  --modal-surface: var(--zuri-ff-sidebar);
+  --modal-muted-surface: var(--zuri-ff-box);
+  --modal-card-surface: var(--zuri-ff-sidebar);
+  --modal-card-border: var(--zuri-ff-sidebar-border);
   --modal-card-shadow: none;
-  --surface-porcelain: var(--qz-ff-box);
-  --surface-porcelain-border: var(--qz-ff-hairline);
+  --surface-porcelain: var(--zuri-ff-box);
+  --surface-porcelain-border: var(--zuri-ff-hairline);
   --surface-porcelain-shadow: none;
 
-  --user-bubble-bg: color-mix(in srgb, var(--qz-ff-sidebar-text) 8%, var(--qz-ff-sidebar));
-  --user-bubble-text: var(--qz-ff-sidebar-text);
+  --user-bubble-bg: color-mix(in srgb, var(--zuri-ff-sidebar-text) 8%, var(--zuri-ff-sidebar));
+  --user-bubble-text: var(--zuri-ff-sidebar-text);
   --user-bubble-selection-bg: Highlight;
   --user-bubble-selection-text: HighlightText;
-  --block-fill: color-mix(in srgb, var(--qz-ff-sidebar-text) 4%, transparent);
-  --block-fill-hover: var(--qz-ff-fill);
+  --block-fill: color-mix(in srgb, var(--zuri-ff-sidebar-text) 4%, transparent);
+  --block-fill-hover: var(--zuri-ff-fill);
   --block-radius: 6px;
-  --code-bg: var(--qz-ff-box);
-  --code-inline-bg: var(--qz-ff-fill);
+  --code-bg: var(--zuri-ff-box);
+  --code-inline-bg: var(--zuri-ff-fill);
   --code-border: transparent;
-  --code-accent: var(--qz-ff-accent-ink);
-  --green: var(--qz-ff-success);
-  --orange: var(--qz-ff-warning);
-  --red: var(--qz-ff-critical);
-  --danger-subtle: color-mix(in srgb, var(--qz-ff-critical) 12%, transparent);
-  --success-border: color-mix(in srgb, var(--qz-ff-success) 40%, transparent);
-  --send-standby-bg: color-mix(in srgb, var(--qz-ff-field-text) 14%, transparent);
-  --send-standby-mark: var(--qz-ff-field-text-deemphasized);
+  --code-accent: var(--zuri-ff-accent-ink);
+  --green: var(--zuri-ff-success);
+  --orange: var(--zuri-ff-warning);
+  --red: var(--zuri-ff-critical);
+  --danger-subtle: color-mix(in srgb, var(--zuri-ff-critical) 12%, transparent);
+  --success-border: color-mix(in srgb, var(--zuri-ff-success) 40%, transparent);
+  --send-standby-bg: color-mix(in srgb, var(--zuri-ff-field-text) 14%, transparent);
+  --send-standby-mark: var(--zuri-ff-field-text-deemphasized);
   --shadow-sm: none;
   --shadow-md: var(--popover-shadow);
   --shadow-lg: var(--popover-shadow);
-  --qz-scrollbar-thumb: color-mix(in srgb, var(--qz-ff-sidebar-text) 32%, transparent);
+  --zuri-scrollbar-thumb: color-mix(in srgb, var(--zuri-ff-sidebar-text) 32%, transparent);
   --radius-sm: 4px;
   --radius-md: 6px;
   --radius-lg: 8px;
   --radius-xl: 8px;
 
-  accent-color: var(--qz-ff-primary);
-  scrollbar-color: var(--qz-scrollbar-thumb) transparent;
+  accent-color: var(--zuri-ff-primary);
+  scrollbar-color: var(--zuri-scrollbar-thumb) transparent;
 }
 
 @layer components {
@@ -347,21 +347,21 @@ export function firefoxSidebarCss() {
     color: HighlightText;
   }
 
-  .qz-popover,
+  .zuri-popover,
   .msg-user-edit-btn::before {
-    --text-primary: var(--qz-ff-popup-text);
-    --text-secondary: var(--qz-ff-popup-text-deemphasized);
-    --text-muted: var(--qz-ff-popup-text-muted);
-    --text-faint: var(--qz-ff-popup-text-muted);
-    --control-text: var(--qz-ff-popup-text);
-    --control-text-hover: var(--qz-ff-popup-text);
-    --control-hover-fill: color-mix(in srgb, var(--qz-ff-popup-text) 6%, transparent);
-    --control-active-fill: color-mix(in srgb, var(--qz-ff-popup-text) 11%, transparent);
-    --border: color-mix(in srgb, var(--qz-ff-popup-text) 12%, transparent);
+    --text-primary: var(--zuri-ff-popup-text);
+    --text-secondary: var(--zuri-ff-popup-text-deemphasized);
+    --text-muted: var(--zuri-ff-popup-text-muted);
+    --text-faint: var(--zuri-ff-popup-text-muted);
+    --control-text: var(--zuri-ff-popup-text);
+    --control-text-hover: var(--zuri-ff-popup-text);
+    --control-hover-fill: color-mix(in srgb, var(--zuri-ff-popup-text) 6%, transparent);
+    --control-active-fill: color-mix(in srgb, var(--zuri-ff-popup-text) 11%, transparent);
+    --border: color-mix(in srgb, var(--zuri-ff-popup-text) 12%, transparent);
   }
 
-  .qz-popover {
-    color: var(--qz-ff-popup-text);
+  .zuri-popover {
+    color: var(--zuri-ff-popup-text);
   }
 
   .header-tabs,
@@ -373,139 +373,139 @@ export function firefoxSidebarCss() {
 
   .tab-btn,
   .settings-tab,
-  .qz-list-toolbar-tab {
+  .zuri-list-toolbar-tab {
     border-radius: 4px;
     background: transparent;
-    color: var(--qz-ff-text-deemphasized);
+    color: var(--zuri-ff-text-deemphasized);
     box-shadow: none;
   }
 
   .tab-btn:hover,
   .settings-tab:hover,
-  .qz-list-toolbar-tab:hover {
-    background: var(--qz-ff-row-hover);
-    color: var(--qz-ff-sidebar-text);
+  .zuri-list-toolbar-tab:hover {
+    background: var(--zuri-ff-row-hover);
+    color: var(--zuri-ff-sidebar-text);
     transform: none;
   }
 
   .tab-btn:active,
   .settings-tab:active,
-  .qz-list-toolbar-tab:active {
-    background: var(--qz-ff-fill-hover);
+  .zuri-list-toolbar-tab:active {
+    background: var(--zuri-ff-fill-hover);
   }
 
   .tab-btn.active,
   .settings-tab.active,
-  .qz-list-toolbar-tab.active {
-    background: var(--qz-ff-selected);
-    color: var(--qz-ff-sidebar-text);
+  .zuri-list-toolbar-tab.active {
+    background: var(--zuri-ff-selected);
+    color: var(--zuri-ff-sidebar-text);
     box-shadow: none;
   }
 
-  .qz-icon-btn,
+  .zuri-icon-btn,
   .icon-btn {
     border-radius: 4px;
   }
 
-  .qz-icon-btn:disabled {
-    color: var(--qz-ff-text-muted);
+  .zuri-icon-btn:disabled {
+    color: var(--zuri-ff-text-muted);
   }
 
-  .qz-btn:not(.qz-btn--primary, .qz-btn--ghost, .qz-btn--inline, .qz-btn--danger) {
-    --qz-control-bg: var(--qz-ff-fill);
-    --qz-control-bg-hover: var(--qz-ff-fill-hover);
-    --qz-control-bg-pressed: var(--qz-ff-fill-active);
+  .zuri-btn:not(.zuri-btn--primary, .zuri-btn--ghost, .zuri-btn--inline, .zuri-btn--danger) {
+    --zuri-control-bg: var(--zuri-ff-fill);
+    --zuri-control-bg-hover: var(--zuri-ff-fill-hover);
+    --zuri-control-bg-pressed: var(--zuri-ff-fill-active);
   }
 
-  .qz-btn--primary {
-    --qz-control-bg-pressed: var(--qz-ff-primary-active);
+  .zuri-btn--primary {
+    --zuri-control-bg-pressed: var(--zuri-ff-primary-active);
   }
 
-  .qz-btn--danger {
-    --qz-control-bg-pressed: color-mix(in srgb, var(--qz-ff-critical) 20%, transparent);
+  .zuri-btn--danger {
+    --zuri-control-bg-pressed: color-mix(in srgb, var(--zuri-ff-critical) 20%, transparent);
   }
 
-  .qz-btn:disabled {
-    --qz-control-color: var(--qz-ff-text-deemphasized);
+  .zuri-btn:disabled {
+    --zuri-control-color: var(--zuri-ff-text-deemphasized);
   }
 
-  .qz-btn--primary:disabled {
-    --qz-control-bg: var(--qz-ff-fill);
+  .zuri-btn--primary:disabled {
+    --zuri-control-bg: var(--zuri-ff-fill);
     cursor: not-allowed;
   }
 
-  .settings-preset-row .qz-btn:disabled {
+  .settings-preset-row .zuri-btn:disabled {
     opacity: 1;
   }
 
-  .qz-btn:focus-visible,
-  .qz-icon-btn:focus-visible,
+  .zuri-btn:focus-visible,
+  .zuri-icon-btn:focus-visible,
   .send-btn:focus-visible,
   .onboarding-action:focus-visible,
-  .qz-checkbox:focus-visible,
-  .qz-radio:focus-visible,
-  .qz-switch:focus-visible {
-    outline: 2px solid var(--qz-ff-focus);
+  .zuri-checkbox:focus-visible,
+  .zuri-radio:focus-visible,
+  .zuri-switch:focus-visible {
+    outline: 2px solid var(--zuri-ff-focus);
     outline-offset: 2px;
     box-shadow: none;
   }
 
   .tab-btn:focus-visible,
   .settings-tab:focus-visible,
-  .qz-list-toolbar-tab:focus-visible,
+  .zuri-list-toolbar-tab:focus-visible,
   .tool-timeline-step:focus-visible,
   .thinking-group-summary:focus-visible,
   .tool-summary:focus-visible {
-    outline: 2px solid var(--qz-ff-focus);
+    outline: 2px solid var(--zuri-ff-focus);
     outline-offset: -2px;
     box-shadow: none;
   }
 
-  .qz-field:disabled,
-  .qz-field[readonly] {
+  .zuri-field:disabled,
+  .zuri-field[readonly] {
     opacity: 1;
   }
 
-  .qz-switch {
-    border-color: var(--qz-ff-border-strong);
+  .zuri-switch {
+    border-color: var(--zuri-ff-border-strong);
     background: transparent;
   }
 
-  .qz-switch::before {
-    background: var(--qz-ff-border-strong);
+  .zuri-switch::before {
+    background: var(--zuri-ff-border-strong);
   }
 
-  .qz-switch:checked {
-    border-color: var(--qz-ff-primary);
-    background: var(--qz-ff-primary);
+  .zuri-switch:checked {
+    border-color: var(--zuri-ff-primary);
+    background: var(--zuri-ff-primary);
   }
 
-  .qz-switch:checked::before {
-    background: var(--qz-ff-primary-text);
+  .zuri-switch:checked::before {
+    background: var(--zuri-ff-primary-text);
   }
 
   .input-wrapper {
-    border-color: var(--qz-ff-field-border);
+    border-color: var(--zuri-ff-field-border);
     border-radius: 8px;
-    background: var(--qz-ff-field);
+    background: var(--zuri-ff-field);
   }
 
   .input-wrapper:hover {
-    border-color: var(--qz-ff-border-hover);
+    border-color: var(--zuri-ff-border-hover);
   }
 
   .input-wrapper:focus-within,
   .input-wrapper.is-file-dragover {
-    border-color: var(--qz-ff-focus);
-    box-shadow: 0 0 0 1px var(--qz-ff-focus);
+    border-color: var(--zuri-ff-focus);
+    box-shadow: 0 0 0 1px var(--zuri-ff-focus);
   }
 
   #input {
-    color: var(--qz-ff-field-text);
+    color: var(--zuri-ff-field-text);
   }
 
   #input::placeholder {
-    color: var(--qz-ff-field-placeholder);
+    color: var(--zuri-ff-field-placeholder);
   }
 
   .input-hint {
@@ -514,23 +514,23 @@ export function firefoxSidebarCss() {
 
   .input-hint kbd {
     border-radius: 4px;
-    background: var(--qz-ff-fill);
+    background: var(--zuri-ff-fill);
   }
 
   .send-btn {
     border-radius: 6px;
-    background: var(--qz-ff-primary);
-    color: var(--qz-ff-primary-text);
+    background: var(--zuri-ff-primary);
+    color: var(--zuri-ff-primary-text);
   }
 
   .send-btn:not(:disabled):hover {
-    background: var(--qz-ff-primary-hover);
+    background: var(--zuri-ff-primary-hover);
     box-shadow: none;
     transform: none;
   }
 
   .send-btn:not(:disabled):active {
-    background: var(--qz-ff-primary-active);
+    background: var(--zuri-ff-primary-active);
     transform: none;
   }
 
@@ -542,11 +542,11 @@ export function firefoxSidebarCss() {
   @keyframes send-button-disable {
     0%,
     38% {
-      background-color: var(--qz-ff-primary);
-      color: var(--qz-ff-primary-text);
+      background-color: var(--zuri-ff-primary);
+      color: var(--zuri-ff-primary-text);
     }
     38.01% {
-      background-color: var(--qz-ff-primary);
+      background-color: var(--zuri-ff-primary);
       color: var(--send-standby-mark);
       animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
     }
@@ -558,11 +558,11 @@ export function firefoxSidebarCss() {
   }
 
   .code-copy-btn {
-    --qz-control-border: transparent;
-    --qz-control-border-hover: transparent;
-    --qz-control-border-focus: transparent;
-    --qz-control-bg: transparent;
-    --qz-control-bg-hover: var(--qz-ff-fill-hover);
+    --zuri-control-border: transparent;
+    --zuri-control-border-hover: transparent;
+    --zuri-control-border-focus: transparent;
+    --zuri-control-bg: transparent;
+    --zuri-control-bg-hover: var(--zuri-ff-fill-hover);
     backdrop-filter: none;
   }
 
@@ -570,13 +570,13 @@ export function firefoxSidebarCss() {
     border-radius: 8px;
   }
 
-  :is(.msg-assistant .msg-content, .qz-markdown) a {
-    color: var(--qz-ff-accent-ink);
+  :is(.msg-assistant .msg-content, .zuri-markdown) a {
+    color: var(--zuri-ff-accent-ink);
   }
 
   /* Zero specificity: only links no other rule colors leave the browser's default blue. */
   :where(a:any-link) {
-    color: var(--qz-ff-accent-ink);
+    color: var(--zuri-ff-accent-ink);
   }
 
   .thinking-group-summary,
@@ -591,15 +591,15 @@ export function firefoxSidebarCss() {
   .thinking-group-summary:focus-visible,
   .tool-summary:hover {
     border-color: transparent;
-    background: var(--qz-ff-row-hover);
+    background: var(--zuri-ff-row-hover);
   }
 
   .msg-thinking-group.thinking-group-expanded,
   .msg-tool-timeline.tool-timeline-expanded,
   .msg-tool.tool-expanded {
     border-radius: 8px;
-    background: var(--qz-ff-box);
-    box-shadow: 0 0 0 1px var(--qz-ff-hairline);
+    background: var(--zuri-ff-box);
+    box-shadow: 0 0 0 1px var(--zuri-ff-hairline);
   }
 
   .msg-thinking-group.thinking-group-expanded > .thinking-group-summary,
@@ -607,7 +607,7 @@ export function firefoxSidebarCss() {
   .msg-tool.tool-expanded > .tool-summary,
   .msg-tool-timeline.tool-timeline-expanded .tool-timeline-nav-area {
     border-radius: 8px 8px 0 0;
-    background: var(--qz-ff-box);
+    background: var(--zuri-ff-box);
     backdrop-filter: none;
   }
 
@@ -619,14 +619,14 @@ export function firefoxSidebarCss() {
   .msg-thinking-group.thinking-group-expanded > .thinking-group-summary:focus-visible,
   .msg-tool-timeline.tool-timeline-expanded > .tool-timeline-summary:hover,
   .msg-tool.tool-expanded > .tool-summary:hover {
-    background: var(--qz-ff-box-hover);
+    background: var(--zuri-ff-box-hover);
   }
 
   .tool-timeline-step {
     border-color: transparent;
     border-radius: 4px;
     background: transparent;
-    color: var(--qz-ff-text-deemphasized);
+    color: var(--zuri-ff-text-deemphasized);
     box-shadow: none;
   }
 
@@ -638,14 +638,14 @@ export function firefoxSidebarCss() {
   .tool-timeline-step:hover,
   .tool-timeline-step:focus-visible {
     border-color: transparent;
-    background: var(--qz-ff-row-hover);
-    color: var(--qz-ff-sidebar-text);
+    background: var(--zuri-ff-row-hover);
+    color: var(--zuri-ff-sidebar-text);
   }
 
   .tool-timeline-step.active {
     border-color: transparent;
-    background: var(--qz-ff-selected);
-    color: var(--qz-ff-sidebar-text);
+    background: var(--zuri-ff-selected);
+    color: var(--zuri-ff-sidebar-text);
     box-shadow: none;
   }
 
@@ -662,52 +662,52 @@ export function firefoxSidebarCss() {
   .tool-chip {
     border-color: transparent;
     border-radius: 4px;
-    background: var(--qz-ff-fill);
-    color: var(--qz-ff-text-deemphasized);
+    background: var(--zuri-ff-fill);
+    color: var(--zuri-ff-text-deemphasized);
   }
 
   .tool-error-code {
     border-color: transparent;
-    background: color-mix(in srgb, var(--qz-ff-critical) 12%, transparent);
-    color: var(--qz-ff-critical);
+    background: color-mix(in srgb, var(--zuri-ff-critical) 12%, transparent);
+    color: var(--zuri-ff-critical);
   }
 
   .onboarding-status {
     border-color: transparent;
     border-radius: 8px;
-    background: var(--qz-ff-box);
-    color: var(--qz-ff-sidebar-text);
+    background: var(--zuri-ff-box);
+    color: var(--zuri-ff-sidebar-text);
   }
 
   .onboarding-status[data-state="needs_setup"] {
-    border-color: color-mix(in srgb, var(--qz-ff-warning) 24%, transparent);
-    background: color-mix(in srgb, var(--qz-ff-warning) 10%, var(--qz-ff-sidebar));
+    border-color: color-mix(in srgb, var(--zuri-ff-warning) 24%, transparent);
+    background: color-mix(in srgb, var(--zuri-ff-warning) 10%, var(--zuri-ff-sidebar));
   }
 
   .onboarding-status[data-state="ready"] {
-    border-color: color-mix(in srgb, var(--qz-ff-success) 24%, transparent);
-    background: color-mix(in srgb, var(--qz-ff-success) 10%, var(--qz-ff-sidebar));
+    border-color: color-mix(in srgb, var(--zuri-ff-success) 24%, transparent);
+    background: color-mix(in srgb, var(--zuri-ff-success) 10%, var(--zuri-ff-sidebar));
   }
 
   .onboarding-action {
     border-color: transparent;
     border-radius: 8px;
-    background: var(--qz-ff-box);
+    background: var(--zuri-ff-box);
   }
 
   .onboarding-action:hover,
   .onboarding-action:focus-visible {
     border-color: transparent;
-    background: var(--qz-ff-box-hover);
+    background: var(--zuri-ff-box-hover);
   }
 
   .onboarding-action:active {
-    background: var(--qz-ff-box-active);
+    background: var(--zuri-ff-box-active);
     transform: none;
   }
 
   .settings-body {
-    scrollbar-color: var(--qz-scrollbar-thumb) transparent;
+    scrollbar-color: var(--zuri-scrollbar-thumb) transparent;
   }
 
   /* The shared stream inset is 10px. Firefox's scrollbar sits in that inset and
@@ -764,7 +764,7 @@ export function firefoxFallbackSupplements(locale, variants) {
     if (updated === authored) continue;
     const manifestMessage = String(qualified).startsWith("manifest.");
     const name = manifestMessage ? String(qualified).slice("manifest.".length) : chromeMessageId(qualified);
-    if (!name || name === "qz_language" || name === HISTORICAL_LABELS_MESSAGE_ID) continue;
+    if (!name || name === "zuri_language" || name === HISTORICAL_LABELS_MESSAGE_ID) continue;
     supplements[name] = encodeChromeMessage(updated, { substitutions: !manifestMessage });
   }
   return supplements;
@@ -780,24 +780,24 @@ export function rewriteFirefoxMessages(locale, messages, supplements = {}) {
   // English and zh-CN keep the Chrome sentence in the shared bundle. Their catalogs omit the key,
   // so the Firefox package adds it and the loader prefers the catalog over that sentence.
   let next = messages;
-  if (messages[id] || messages.qz_language) {
+  if (messages[id] || messages.zuri_language) {
     const text = FILE_ACCESS_TEXT[locale] || FILE_ACCESS_TEXT.en;
     next = { ...messages, [id]: { message: text } };
   }
   let changed = next !== messages;
   const rewritten = { ...next };
   for (const [key, value] of Object.entries(supplements || {})) {
-    if (key === "qz_language" || key === HISTORICAL_LABELS_MESSAGE_ID || rewritten[key]) continue;
+    if (key === "zuri_language" || key === HISTORICAL_LABELS_MESSAGE_ID || rewritten[key]) continue;
     rewritten[key] = value;
     changed = true;
   }
   for (const [key, value] of Object.entries(rewritten)) {
-    if (key === "qz_language" || key === HISTORICAL_LABELS_MESSAGE_ID) continue;
+    if (key === "zuri_language" || key === HISTORICAL_LABELS_MESSAGE_ID) continue;
     const text = decodeChromeMessage(value);
     if (text === undefined) continue;
     const updated = firefoxUserText(text);
     if (updated === text) continue;
-    const manifestMessage = !key.startsWith("qz_");
+    const manifestMessage = !key.startsWith("zuri_");
     rewritten[key] = encodeChromeMessage(updated, { substitutions: !manifestMessage });
     changed = true;
   }

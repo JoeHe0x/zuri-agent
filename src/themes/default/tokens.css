@@ -167,9 +167,9 @@
   --chat-sticky-offset: 0px;
   --lane-summary-width: 520px;
   --lane-detail-width: 820px;
-  --qz-scrollbar-size: 4px;
-  --qz-scrollbar-radius: 2px;
-  --qz-scrollbar-thumb: color-mix(in srgb, var(--border) 72%, transparent);
+  --zuri-scrollbar-size: 4px;
+  --zuri-scrollbar-radius: 2px;
+  --zuri-scrollbar-thumb: color-mix(in srgb, var(--border) 72%, transparent);
 
   --font-mono: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
   --font-sans: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;

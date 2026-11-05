@@ -11,7 +11,7 @@ const scenarios = [
   ["ru-RU", "ru", "ru"], ["ar-SA", "ar", "ar"], ["hi-IN", "hi", "hi"],
 ];
 const artifacts = resolve("tests/results/i18n/workspaces");
-const messageId = key => `qz_${key.replace(/[^a-z0-9]/g, char => `_${char.charCodeAt(0).toString(16).padStart(4, "0")}`)}`;
+const messageId = key => `zuri_${key.replace(/[^a-z0-9]/g, char => `_${char.charCodeAt(0).toString(16).padStart(4, "0")}`)}`;
 const config = { provider: "custom", model: "qwen3.5-plus", apiKey: "test-key", customEndpoint: "https://example.test/v1/chat/completions", contextWindow: 128000, vision: false };
 const skill = { name: "fixture-skill", displayName: "fixture-skill", description: "fixture-description", content: "# fixture-content\n\nOriginal / 原文 / نص", scope: "global", status: "active", resources: [], updatedAt: "2026-09-19 12:00:00" };
 const task = { id: "fixture-task", title: "fixture-task", parentSessionId: "0", status: "running", updatedAt: "2026-09-19 12:00:00", tracker: { mode: "pagination", current: 1, total: 5 } };
@@ -30,8 +30,8 @@ function installWorkspaceReplies(sessions) {
       if (message.type === "list_automations") reply = { type: "automations", automations: [], runs: {} };
       if (message.type === "get_state" && message.sessionId === "fixture-task") reply = { type: "state", sessionId: message.sessionId, status: "running", runtime: { ...sessions[0], sessionId: message.sessionId, running: true } };
       if (reply) {
-        window.__qzPostedMessages.push(structuredClone(message));
-        queueMicrotask(() => window.__qzEmitPortMessage({ ...reply, requestId: message.requestId }));
+        window.__zuriPostedMessages.push(structuredClone(message));
+        queueMicrotask(() => window.__zuriEmitPortMessage({ ...reply, requestId: message.requestId }));
       } else postMessage(message);
     };
     return port;
@@ -42,7 +42,7 @@ async function auditView(page, rootSelector, messages, name, testInfo) {
   const report = await page.locator(rootSelector).evaluate((root, catalog) => {
     const normalize = value => String(value || "").replace(/\s+/g, " ").trim();
     const visible = element => element.getClientRects().length > 0 && getComputedStyle(element).visibility !== "hidden";
-    const id = key => `qz_${key.replace(/[^a-z0-9]/g, char => `_${char.charCodeAt(0).toString(16).padStart(4, "0")}`)}`;
+    const id = key => `zuri_${key.replace(/[^a-z0-9]/g, char => `_${char.charCodeAt(0).toString(16).padStart(4, "0")}`)}`;
     const translations = [];
     for (const element of root.querySelectorAll("[data-i18n], [data-i18n-title], [data-i18n-aria-label], [data-i18n-placeholder]")) {
       if (!visible(element)) continue;
@@ -60,7 +60,7 @@ async function auditView(page, rootSelector, messages, name, testInfo) {
         if (normalize(actual) !== normalize(expected)) translations.push({ element: element.id || element.tagName, key, attribute, expected, actual });
       }
     }
-    const overflow = [...root.querySelectorAll("button, input, select, textarea, .qz-popover, .automation-editor-card, .data-import-card, .automation-filter-tabs")]
+    const overflow = [...root.querySelectorAll("button, input, select, textarea, .zuri-popover, .automation-editor-card, .data-import-card, .automation-filter-tabs")]
       // Tables and status filters own horizontal scrolling. The filter container
       // is bounded here; each filter is checked for scroll reachability below.
       .filter(element => visible(element) && !element.closest(".tabulator") && !element.matches(".automation-filter-btn, .settings-tab"))
@@ -110,7 +110,7 @@ for (const width of [320, 360, 430]) {
           const options = { uiLanguage: locale, localeMessages: messages, config, localStorage: { _skills: { [skill.name]: skill }, _sessions: { [task.id]: task, [childTask.id]: childTask } } };
           await page.addInitScript({ content: `(${installBenchmarkChromeStub.toString()})(${JSON.stringify(options)}); (${installWorkspaceReplies.toString()})(${JSON.stringify([task, childTask])});` });
           await page.goto("/extension/sidepanel/sidepanel.html", { waitUntil: "domcontentloaded" });
-          await page.waitForFunction(() => Boolean(window.qingzhouConversationBenchmark));
+          await page.waitForFunction(() => Boolean(window.zuriConversationBenchmark));
           const catalog = await page.evaluateHandle(async ({ catalog, language }) => {
             const { decodeChromeMessage, chromeMessageId } = await import("/extension/shared/i18n/definition.js");
             const { default: capabilities } = await import("/extension/capability-catalogs/translations.js");
@@ -234,9 +234,9 @@ for (const width of [320, 360, 430]) {
           await expect(page.locator("#skill-body-text")).toBeVisible();
           await page.locator("#skill-body-text").fill(`${skill.content}\nfixture unsaved edit`);
           await page.locator("#btn-back-skills").click();
-          await expect(page.locator("#qz-decision-dialog")).toBeVisible();
-          await audit("#qz-decision-dialog", "discard-confirmation");
-          await page.locator("#qz-decision-cancel").click();
+          await expect(page.locator("#zuri-decision-dialog")).toBeVisible();
+          await audit("#zuri-decision-dialog", "discard-confirmation");
+          await page.locator("#zuri-decision-cancel").click();
           await expect(page.locator("#skill-body-text")).toHaveValue(`${skill.content}\nfixture unsaved edit`);
           await expect(page.locator("#btn-save-skill-edit-top span")).toHaveText(t("skills.save"));
           await audit("#skill-detail", "skill-editor");
@@ -282,11 +282,11 @@ for (const width of [320, 360, 430]) {
           await page.locator("#btn-data-table-actions").click();
           await audit("#data-panel", "data-actions");
           await page.locator("#btn-delete-data").click();
-          await expect(page.locator("#qz-decision-dialog")).toBeVisible();
-          await audit("#qz-decision-dialog", "delete-confirmation");
-          await page.locator("#qz-decision-cancel").click();
+          await expect(page.locator("#zuri-decision-dialog")).toBeVisible();
+          await audit("#zuri-decision-dialog", "delete-confirmation");
+          await page.locator("#zuri-decision-cancel").click();
           await expect(page.locator("#data-preview")).toContainText("fixture-b");
-          expect(await page.evaluate(() => window.__qzPostedMessages.some(message => message.type === "prompt"))).toBe(false);
+          expect(await page.evaluate(() => window.__zuriPostedMessages.some(message => message.type === "prompt"))).toBe(false);
         });
       });
     }

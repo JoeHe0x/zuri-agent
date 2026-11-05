@@ -57,21 +57,21 @@ function assertUiRuntimeContracts() {
   assert.match(sidepanelCss, /\.msg-user-edit-btn::before[\s\S]*content:\s*attr\(data-tooltip\)/, "edit tooltip should be rendered from data-tooltip");
   assert.match(sidepanelCss, /\.msg-user-edit-btn::before[\s\S]*border-radius:\s*999px/, "edit tooltip should use an oval pill shape");
   assert.match(sidepanelCss, /\.msg-user-edit-btn::after\s*\{\s*content:\s*none;\s*\}/, "edit tooltip should not render an arrow");
-  assert.match(sidepanel, /class="qz-icon-btn qz-icon-btn--sm msg-action-btn msg-user-edit-btn"/, "edit icon should consume the shared icon-button primitive");
+  assert.match(sidepanel, /class="zuri-icon-btn zuri-icon-btn--sm msg-action-btn msg-user-edit-btn"/, "edit icon should consume the shared icon-button primitive");
   assert.match(sidepanelCss, /--control-surface-hover:\s*var\(--control-hover-fill\)/, "edit icon should inherit the shared quiet hover fill");
   assert.match(sidepanelCss, /\.msg-user-row\s*\{[\s\S]*align-items:\s*flex-end/, "edit icon should align to the user bubble bottom edge");
   assert.doesNotMatch(sidepanelCss, /\.msg-user-actions\s*\{[\s\S]*margin:\s*3px\s+3px\s+0\s+0/, "edit icon should not reserve a separate row below the bubble");
   assert.match(sidepanelCss, /\.msg-user-edit-btn::before\s*\{[\s\S]*bottom:\s*calc\(100% \+ 3px\)/, "edit tooltip should appear above the icon");
-  assert.match(sidepanel, /class="qz-field qz-field--bare msg-user-edit-input"/, "message editing should use the shared borderless field treatment");
+  assert.match(sidepanel, /class="zuri-field zuri-field--bare msg-user-edit-input"/, "message editing should use the shared borderless field treatment");
   assert.match(sidepanelCss, /textarea\.msg-user-edit-input\s*\{[\s\S]*border:\s*0[\s\S]*resize:\s*none/, "message editing should override the generic textarea border and resize handle");
   assert.match(sidepanelHtml, /id="chat-dock"[\s\S]*id="status-bar"[\s\S]*<footer id="input-area"[^>]*>/, "status and composer should live in one chat dock");
   const appClasses = sidepanelHtml.match(/id="app"[^>]*class="([^"]*)"/)?.[1].split(/\s+/) || [];
-  for (const utility of ["qz:rounded-none", "qz:w-full", "qz:h-full", "qz:flex", "qz:flex-col"]) {
+  for (const utility of ["zuri:rounded-none", "zuri:w-full", "zuri:h-full", "zuri:flex", "zuri:flex-col"]) {
     assert.ok(appClasses.includes(utility), `the full-panel square shell requires ${utility}`);
   }
   assert.match(sidepanelCss, /\.chat-dock\s*\{[\s\S]*border-radius:\s*0/, "chat dock should not add bottom corner rounding");
   const inputAreaClasses = sidepanelHtml.match(/id="input-area"[^>]*class="([^"]*)"/)?.[1].split(/\s+/) || [];
-  for (const utility of ["qz:pt-1.75", "qz:px-2.5", "qz:pb-1"]) {
+  for (const utility of ["zuri:pt-1.75", "zuri:px-2.5", "zuri:pb-1"]) {
     assert.ok(inputAreaClasses.includes(utility), `the compact 7px/10px/4px composer inset requires ${utility}`);
   }
   assert.match(sidepanelCss, /#input-area\s*\{[^}]*border-radius:\s*0/, "composer should not round the shell corners");
@@ -270,7 +270,7 @@ function assertUiRuntimeContracts() {
   assert.match(sidepanelHtml, /id="queued-followups"/, "composer should render the session follow-up queue");
   assert.match(sidepanelHtml, /class="input-composer-frame(?:\s[^"]*)?"[\s\S]*id="queued-followups"[\s\S]*class="input-wrapper(?:\s[^"]*)?"/, "queued follow-ups and the composer should share one surface");
   const composerFrameClasses = sidepanelHtml.match(/class="input-composer-frame([^"]*)"/)?.[1].split(/\s+/) || [];
-  for (const utility of ["qz:flex", "qz:flex-col", "qz:min-w-0"]) {
+  for (const utility of ["zuri:flex", "zuri:flex-col", "zuri:min-w-0"]) {
     assert.ok(composerFrameClasses.includes(utility), `the queue/composer surface requires ${utility}`);
   }
   assert.match(sidepanelCss, /\.input-composer-frame:has\(\.queued-followups:not\(\.hidden\)\)\s*\{[\s\S]*border:\s*1px solid/, "the shared queue/composer surface should own the quiet boundary");
@@ -281,7 +281,7 @@ function assertUiRuntimeContracts() {
   const steeringRowCss = (sidepanelCss.match(/\.queued-followup\.is-steering\s*\{[\s\S]*?\n\}/) || [""])[0];
   assert.match(steeringRowCss, /background:[\s\S]*color:/, "steering rows should have a distinct neutral treatment");
   assert.doesNotMatch(steeringRowCss, /--accent|--green|--red/, "steering rows should stay inside the neutral ink palette");
-  assert.doesNotMatch(sidepanel, /qz-icon-btn--danger queued-followup-delete/, "queued-message deletion should not use danger coloring");
+  assert.doesNotMatch(sidepanel, /zuri-icon-btn--danger queued-followup-delete/, "queued-message deletion should not use danger coloring");
   assert.match(sidepanelCss, /\.queued-followup-steer\s*\{[\s\S]*width:\s*50px/, "the steering action should keep a fixed width without hover expansion");
   assert.match(sidepanelCss, /\.queued-followup-copy\s*\{[\s\S]*overflow:\s*hidden[\s\S]*white-space:\s*nowrap/, "long queued messages should truncate without moving their metadata");
   assert.match(sidepanelTransport, /steer_follow_up:\s*\{\s*method:\s*"sessions\.steerFollowUp",\s*response:\s*"follow_up_steered"[\s\S]*requestOnly:\s*true/, "Side Panel steering should use a request/ack transport route");

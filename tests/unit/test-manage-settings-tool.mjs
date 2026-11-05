@@ -99,12 +99,12 @@ const toolModel = await import("../../src/sidepanel/tools/tool-model.js");
 const pluginUi = await import("../../src/sidepanel/tools/skill-tool-ui-registry.js");
 const sidepanelEvents = await import("../../src/sidepanel/features/app/sidepanel-event-router.js");
 
-const MANAGEMENT_SETTINGS_TOOL = "qingzhou_management__manage_settings";
-const MANAGEMENT_GUARDRAILS_TOOL = "qingzhou_management__manage_guardrails";
-const MANAGEMENT_SKILL_SETTINGS_TOOL = "qingzhou_management__manage_skill_settings";
+const MANAGEMENT_SETTINGS_TOOL = "zuri_management__manage_settings";
+const MANAGEMENT_GUARDRAILS_TOOL = "zuri_management__manage_guardrails";
+const MANAGEMENT_SKILL_SETTINGS_TOOL = "zuri_management__manage_skill_settings";
 const loadedManagementContext = Object.freeze({
   source: "test",
-  loadedPluginSkillNames: [managementSkill.BUILTIN_QINGZHOU_MANAGEMENT_SKILL_NAME],
+  loadedPluginSkillNames: [managementSkill.BUILTIN_ZURI_MANAGEMENT_SKILL_NAME],
 });
 
 function resetStorage() {
@@ -132,7 +132,7 @@ await skillSettings.save({
 
 await runtime.commitSkillToolRegistryCandidate(
   await runtime.prepareSkillToolRegistryFromStorage(),
-  { reason: "test_qingzhou_management_skill" },
+  { reason: "test_zuri_management_skill" },
 );
 pluginUi.setSkillToolUiCatalog(await runtime.listSkillContributions(loadedManagementContext));
 const initialToolNames = tools.getToolSchemas().map(item => item.function?.name);
@@ -147,29 +147,29 @@ await assert.rejects(
   err => err?.code === "UNKNOWN_TOOL",
 );
 
-const loadedSkill = await skills.loadSkill(managementSkill.BUILTIN_QINGZHOU_MANAGEMENT_SKILL_NAME);
-assert.equal(loadedSkill.name, managementSkill.BUILTIN_QINGZHOU_MANAGEMENT_SKILL_NAME);
-assert.equal(loadedSkill.metadata.displayName, managementSkill.getBuiltinQingzhouManagementDisplayName());
+const loadedSkill = await skills.loadSkill(managementSkill.BUILTIN_ZURI_MANAGEMENT_SKILL_NAME);
+assert.equal(loadedSkill.name, managementSkill.BUILTIN_ZURI_MANAGEMENT_SKILL_NAME);
+assert.equal(loadedSkill.metadata.displayName, managementSkill.getBuiltinZuriManagementDisplayName());
 assert.equal(loadedSkill.scope, "global");
 assert.equal(loadedSkill.builtin, true);
 assert.equal(loadedSkill.readOnly, true);
-assert.match(loadedSkill.content, /qingzhou_management__manage_settings/);
-assert.match(loadedSkill.content, /qingzhou_management__manage_guardrails/);
-assert.match(loadedSkill.content, /qingzhou_management__manage_skill_settings/);
+assert.match(loadedSkill.content, /zuri_management__manage_settings/);
+assert.match(loadedSkill.content, /zuri_management__manage_guardrails/);
+assert.match(loadedSkill.content, /zuri_management__manage_skill_settings/);
 const managementManifest = JSON.parse(loadedSkill.resources.find(resource => resource.path === "plugin.json")?.content || "{}");
-assert.equal(managementManifest.id, "qingzhou-management");
+assert.equal(managementManifest.id, "zuri-management");
 assert.deepEqual(managementManifest.tools.map(tool => tool.name), ["manage_settings", "manage_guardrails", "manage_skill_settings"]);
 const skillCatalog = await skills.buildSkillPromptSection();
-assert.match(skillCatalog, /qingzhou-management（Agent管理）/);
-assert.match(skillCatalog, /通过对话管理轻舟自身的模型、Provider、模型请求参数、预设/);
+assert.match(skillCatalog, /zuri-management（Agent管理）/);
+assert.match(skillCatalog, /通过对话管理Zuri自身的模型、Provider、模型请求参数、预设/);
 await assert.rejects(
-  () => skills.updateSkill(managementSkill.BUILTIN_QINGZHOU_MANAGEMENT_SKILL_NAME, { description: "x" }),
+  () => skills.updateSkill(managementSkill.BUILTIN_ZURI_MANAGEMENT_SKILL_NAME, { description: "x" }),
   err => err?.code === "SKILL_READ_ONLY",
 );
 
 const loadedSchemas = tools.getToolSchemas(loadedManagementContext);
 const schema = loadedSchemas.find(item => item.function?.name === MANAGEMENT_SETTINGS_TOOL);
-assert.ok(schema, "qingzhou-management should expose model settings after load_skill");
+assert.ok(schema, "zuri-management should expose model settings after load_skill");
 assert.match(schema.function.description, /AK|API Key/, "tool description should cover model credentials");
 assert.ok(schema.function.parameters.properties.action.enum.includes("apply_preset"), "manage_settings should expose preset application");
 assert.ok(schema.function.parameters.properties.action.enum.includes("delete_preset"), "manage_settings should expose preset deletion");
@@ -198,14 +198,14 @@ assert.equal(schema.function.parameters.properties.action.enum.includes("add_gua
 assert.equal(Object.prototype.hasOwnProperty.call(schema.function.parameters.properties, "securityGuardrails"), false, "manage_settings should not expose guardrail snapshots");
 
 const guardrailSchema = loadedSchemas.find(item => item.function?.name === MANAGEMENT_GUARDRAILS_TOOL);
-assert.ok(guardrailSchema, "qingzhou-management should expose guardrails after load_skill");
+assert.ok(guardrailSchema, "zuri-management should expose guardrails after load_skill");
 assert.ok(guardrailSchema.function.parameters.properties.action.enum.includes("add_rule"), "manage_guardrails should expose access rules");
 assert.ok(guardrailSchema.function.parameters.properties.action.enum.includes("add_rate_limit"), "manage_guardrails should expose rate limits");
 assert.ok(Object.prototype.hasOwnProperty.call(guardrailSchema.function.parameters.properties, "minOpenIntervalSeconds"), "rate-limit interval should be seconds-facing");
 assert.equal(Object.prototype.hasOwnProperty.call(guardrailSchema.function.parameters.properties, "minOpenIntervalMs"), false, "rate-limit interval should not expose milliseconds");
 
 const skillSettingsSchema = loadedSchemas.find(item => item.function?.name === MANAGEMENT_SKILL_SETTINGS_TOOL);
-assert.ok(skillSettingsSchema, "qingzhou-management should expose Skill settings after load_skill");
+assert.ok(skillSettingsSchema, "zuri-management should expose Skill settings after load_skill");
 assert.deepEqual(skillSettingsSchema.function.parameters.properties.action.enum, ["list", "get", "update"]);
 assert.equal(skillSettingsSchema.function.parameters.properties.settingId.type, "string");
 assert.equal(skillSettingsSchema.function.parameters.properties.values.type, "object");
@@ -320,7 +320,7 @@ sidepanelEventRouter.handle({ type: "skill_settings_changed", settingId: skillSe
 assert.deepEqual(acceptedSettingsEvents, [{ type: "skill_settings_changed", settingId: skillSettingsList.settings[0].id }],
   "Skill settings changes should reach the public accepted-event channel exactly once");
 const settingsUiSource = readFileSync(new URL("../../src/capabilities/settings/ui.ts", import.meta.url), "utf8");
-assert.match(settingsUiSource, /qz\.on\("\*", event =>[\s\S]*case "skill_settings_changed":\s*void settings\.refreshSkillSettings\(\{ silent: true \}\)/,
+assert.match(settingsUiSource, /zuri\.on\("\*", event =>[\s\S]*case "skill_settings_changed":\s*void settings\.refreshSkillSettings\(\{ silent: true \}\)/,
   "the Settings contribution owns silent refresh of its open projection after an accepted change");
 
 const secret = "sk-test-secret-value";
@@ -354,7 +354,7 @@ assert.equal(updateResult.config.presets[0].hasApiKey, true);
 assert.equal(updateResult.config.apiKey, secret);
 assert.equal(updateResult.config.providerApiKeys.custom, secret);
 assert.equal(updateResult.config.presets.find(preset => preset.id === updateResult.config.activePresetId)?.apiKey, secret);
-assert.equal(updateResult._plugin.id, "qingzhou-management");
+assert.equal(updateResult._plugin.id, "zuri-management");
 assert.equal(updateResult._plugin.runtime, "host");
 assert.equal(stringify(updateResult).includes(secret), true, "update result should preserve apiKey like any other field");
 assert.equal(Object.prototype.hasOwnProperty.call(updateResult, "trace"), false, "management results should not expose host trace");
@@ -727,11 +727,11 @@ assert.equal(Object.hasOwn(deletePresetResult, "applied"), false);
 assert.equal(deletePresetResult.config.presets.some(preset => preset.id === zhipuPresetId), false);
 assert.equal(runtimeConfig.getCurrentRuntimeConfigSnapshot().presets.some(preset => preset.id === zhipuPresetId), false);
 
-assert.match(prompts.SYSTEM_PROMPT, /用户可以通过对话管理轻舟自身/, "kernel prompt should preserve Qingzhou self-management");
+assert.match(prompts.SYSTEM_PROMPT, /用户可以通过对话管理Zuri自身/, "kernel prompt should preserve Zuri self-management");
 assert.match(prompts.SYSTEM_PROMPT, /先加载当前可用的配置管理技能/, "kernel prompt should route settings requests through the management skill");
 assert.match(prompts.SYSTEM_PROMPT, /模型接口 429\/频率限制/, "kernel prompt should route model rate-limit recovery through the management skill");
 assert.match(prompts.SYSTEM_PROMPT, /Skill 配置/, "kernel prompt should route Skill configuration requests through the management skill");
-assert.match(prompts.SYSTEM_PROMPT, /轻舟不自行更换模型、修改设置或放宽安全护栏/, "kernel prompt should require an explicit user request");
+assert.match(prompts.SYSTEM_PROMPT, /Zuri不自行更换模型、修改设置或放宽安全护栏/, "kernel prompt should require an explicit user request");
 assert.doesNotMatch(prompts.SYSTEM_PROMPT, /AK\/API Key 只接受本轮明确提供的新值|不得读取、回显、复述/, "kernel prompt should not retain the removed credential policy");
 assert.doesNotMatch(prompts.SYSTEM_PROMPT, /manage_settings\.apply_preset/, "preset SOP should move out of the kernel");
 assert.match(loadedSkill.content, /只传本次要改变的字段/, "management skill should explain patch-style model updates");
@@ -808,6 +808,6 @@ assert.doesNotMatch(genericResultRendererSource, /isSensitiveDisplayKey|isSensit
 assert.match(dataSettingsProfileSource, /apiKey:\s*config\.apiKey[\s\S]*providerApiKeys:\s*config\.providerApiKeys/, "settings results should render credential fields with the rest of the config");
 assert.match(dataSettingsProfileSource, /modelParameters:\s*config\.modelParameters/, "settings results should render model parameters with the active model config");
 assert.match(timelineRendererSource, /formatToolActionTitle\(toolOrName, args\)/, "timeline should use the shared action labeler");
-assert.doesNotMatch(timelineRendererSource, /qingzhou_management__manage_settings/, "timeline should not special-case management runtime names");
+assert.doesNotMatch(timelineRendererSource, /zuri_management__manage_settings/, "timeline should not special-case management runtime names");
 
 console.log("manage settings tool tests passed");

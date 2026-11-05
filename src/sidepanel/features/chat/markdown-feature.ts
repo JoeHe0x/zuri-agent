@@ -638,7 +638,7 @@ function extractMarkdownMathPlaceholdersInText(text: string, math: MathPlacehold
 function createMarkdownMathPlaceholder(math: MathPlaceholder[], tex: string, display: boolean, { pending = false } = {}) {
   const index = math.length;
   math.push({ tex, display, pending, key: createMarkdownMathKey(tex, display, index) });
-  return `@@QZ_MATH_${index}@@`;
+  return `@@ZURI_MATH_${index}@@`;
 }
 
 function createMarkdownMathKey(tex: string, display: boolean, index: number) {
@@ -659,7 +659,7 @@ function restoreMarkdownMathPlaceholders(html: string, math: MathPlaceholder[]) 
   if (!math.length) return html;
   const template = document.createElement("template");
   template.innerHTML = String(html || "");
-  const pattern = /@@QZ_MATH_(\d+)@@/g;
+  const pattern = /@@ZURI_MATH_(\d+)@@/g;
   const walker = document.createTreeWalker(template.content, NodeFilter.SHOW_TEXT);
   const textNodes: Text[] = [];
   while (walker.nextNode()) {

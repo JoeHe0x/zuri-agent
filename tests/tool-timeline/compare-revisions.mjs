@@ -27,7 +27,7 @@ mkdirSync(join(output, "baseline"));
 execFileSync("tar", ["-xf", "-", "-C", join(output, "baseline")], { input: archive });
 const candidateDir = option("--candidate-dir") ? resolve(option("--candidate-dir")) : join(output, "current-extension");
 const build = option("--candidate-dir")
-  ? JSON.parse(readFileSync(join(candidateDir, ".qingzhou-build.json"), "utf8"))
+  ? JSON.parse(readFileSync(join(candidateDir, ".zuri-build.json"), "utf8"))
   : await buildExtension({ outputDir: candidateDir, mode: "development" });
 if (build.mode !== "development") throw new Error("Renderer comparison requires a development build with individual modules");
 save("current-build.json", { ...build, outputDir: candidateDir, hashes: Object.fromEntries(build.files.map(path => [path, hash(readFileSync(join(candidateDir, path)))])) });

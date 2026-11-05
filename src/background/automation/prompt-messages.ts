@@ -5,7 +5,7 @@ export const promptT = createTranslator(defineMessages("automation-prompts", {
   manual: { "zh-CN": "手动立即运行", en: "Run now (manual)" },
   catchup: { "zh-CN": "本地恢复后补跑", en: "Catch-up run after this device resumed" },
   scheduled: { "zh-CN": "本地定时触发", en: "Scheduled on this device" },
-  introduction: { "zh-CN": "这是一次轻舟本地定时任务运行。", en: "This is a qz scheduled task running on this device." },
+  introduction: { "zh-CN": "这是一次Zuri本地定时任务运行。", en: "This is a zuri scheduled task running on this device." },
   title: { "zh-CN": "任务名称：{value}", en: "Task: {value}" },
   trigger: { "zh-CN": "触发方式：{value}", en: "Trigger: {value}" },
   planned: { "zh-CN": "计划时间：{value}", en: "Scheduled time: {value}" },

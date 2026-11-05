@@ -199,7 +199,7 @@ async function work() {
         requestAnimationFrame(() => requestAnimationFrame(resolveFrame))
       )));
       const result = await page.evaluate((goldSelection) => (
-        globalThis.__qingzhouArticleBenchmark.collect(document, {
+        globalThis.__zuriArticleBenchmark.collect(document, {
           provenance: true,
           goldSelection,
         })
@@ -212,8 +212,8 @@ async function work() {
       const tree = provenance?.sourceTree?.treeElements;
       const gold = provenance?.gold;
       const forced = result?.diagnostics?.forcedTreeDp;
-      if (provenance?.schema !== "qingzhou.article-extraction-provenance.v1"
-        || gold?.schema !== "qingzhou.article-extraction-tree-dp-gold-selection.v1"
+      if (provenance?.schema !== "zuri.article-extraction-provenance.v1"
+        || gold?.schema !== "zuri.article-extraction-tree-dp-gold-selection.v1"
         || !Array.isArray(tree)) {
         throw new Error("instrumented extractor returned incomplete training provenance");
       }
@@ -230,7 +230,7 @@ async function work() {
       }
       const unknown = tree.filter(element => element.tokens > 0 && !element.goldKnown).length;
       const record = {
-        schema: "qingzhou.article-extraction-tree-dp-training-page.v2",
+        schema: "zuri.article-extraction-tree-dp-training-page.v2",
         id: sample.id,
         siteId: sample.siteId,
         siteFamily: registrableSiteFallback(sample),
@@ -253,7 +253,7 @@ async function work() {
         gold,
         tree: provenance.sourceTree,
         shipped: forced || {
-          schema: "qingzhou.article-extraction-tree-dp-diagnostics.v1",
+          schema: "zuri.article-extraction-tree-dp-diagnostics.v1",
           available: false,
           nodeCount: tree.length,
           pageTokens,
@@ -293,7 +293,7 @@ try {
 }
 
 const report = {
-  schema: "qingzhou.article-extraction-tree-dp-training-export.v2",
+  schema: "zuri.article-extraction-tree-dp-training-export.v2",
   corpus,
   labels,
   output,

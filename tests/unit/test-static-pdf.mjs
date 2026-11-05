@@ -7,7 +7,7 @@ import { copyRuntimeAssets, createDependencyGraph } from "../../scripts/vendor/a
 import { hardenPdfSource } from "../../scripts/vendor/pdfjs.mjs";
 import { textPdf } from "../support/text-pdf.mjs";
 
-const root = await mkdtemp(join(tmpdir(), "qz-static-pdf-"));
+const root = await mkdtemp(join(tmpdir(), "zuri-static-pdf-"));
 const previous = globalThis.pdfjsWorker;
 try {
   await copyRuntimeAssets(root, createDependencyGraph());

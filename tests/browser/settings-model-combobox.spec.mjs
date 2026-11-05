@@ -16,10 +16,10 @@ test.use({
 
 async function openModelSettings(page) {
   await page.locator("#btn-settings").click();
-  await page.waitForFunction(() => window.__qzPostedMessages.some(message => message.type === "list_models"));
+  await page.waitForFunction(() => window.__zuriPostedMessages.some(message => message.type === "list_models"));
   await page.evaluate(models => {
-    const request = window.__qzPostedMessages.find(message => message.type === "list_models");
-    window.__qzEmitPortMessage({ type: "models", requestId: request.requestId, provider: request.provider, models });
+    const request = window.__zuriPostedMessages.find(message => message.type === "list_models");
+    window.__zuriEmitPortMessage({ type: "models", requestId: request.requestId, provider: request.provider, models });
   }, models);
   await expect(page.locator("#cfg-model")).not.toHaveAttribute("title", /正在获取/);
 }

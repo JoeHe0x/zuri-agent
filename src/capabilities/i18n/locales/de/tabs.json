@@ -3,7 +3,7 @@
   "tabs.tab": "Tab {tabId}",
   "tabs.current": "Aktuell",
   "tabs.window": "Fenster {windowId}",
-  "tabs.qingzhouTask": "qz-Aufgabe",
+  "tabs.zuriTask": "zuri-Aufgabe",
   "tabs.organizedInto": "In „{name}“ organisiert",
   "tabs.namedTabCount": "Tabs: {count} · {name}",
   "tabs.groupedTabs": "Gruppierte Tabs: {count}",

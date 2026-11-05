@@ -146,7 +146,7 @@ test("legacy exchange -> stored references -> new exchange -> independent image-
   const exported = await f.commands.exportSessionExchangeRuntime(sourceId);
   const file = JSON.stringify(exported);
   assert.ok(file.includes(image));
-  assert.ok(!file.includes("qz-history-image:"));
+  assert.ok(!file.includes("zuri-history-image:"));
   // Export/import is the application's independent-copy operation; there is no
   // separate fork/duplicate Session command in this branch.
   const clone = await f.commands.importSessionExchangeRuntime(JSON.parse(file));

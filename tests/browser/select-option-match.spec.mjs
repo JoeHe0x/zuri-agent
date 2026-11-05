@@ -11,7 +11,7 @@ async function installContentScript(page, html) {
     if (!window.chrome) Object.defineProperty(window, "chrome", { configurable: true, value: {} });
     let listener = null;
     const runtime = {
-      getManifest: () => ({ name: "Qingzhou Test", version: "0.0.0" }),
+      getManifest: () => ({ name: "Zuri Test", version: "0.0.0" }),
       onMessage: {
         addListener(nextListener) {
           listener = nextListener;
@@ -23,7 +23,7 @@ async function installContentScript(page, html) {
       configurable: true,
       value: runtime,
     });
-    window.__callQingzhouContent = (action, params = {}) => new Promise((resolve, reject) => {
+    window.__callZuriContent = (action, params = {}) => new Promise((resolve, reject) => {
       if (typeof listener !== "function") {
         reject(new Error("content-script listener is not installed"));
         return;
@@ -38,12 +38,12 @@ async function installContentScript(page, html) {
   for (const script of contentScripts) {
     await page.addScriptTag({ url: testAssetUrl(script) });
   }
-  await expect.poll(() => page.evaluate(() => window.__QZ_CONTENT_READY)).toBe(true);
+  await expect.poll(() => page.evaluate(() => window.__ZURI_CONTENT_READY)).toBe(true);
 }
 
 async function callSelect(page, params = {}) {
   return page.evaluate(
-    ({ nextParams }) => window.__callQingzhouContent("actOnElement", nextParams),
+    ({ nextParams }) => window.__callZuriContent("actOnElement", nextParams),
     {
       nextParams: {
         selector: "#city",
@@ -150,7 +150,7 @@ test("select returns OPTION_NOT_FOUND when neither value nor label matches", asy
 test("select with action instead of elementAction would overwrite the route (regression guard)", async ({ page }) => {
   await installContentScript(page, selectHtml);
   // Spreading action into the message overwrites content action "actOnElement".
-  const broken = await page.evaluate(() => window.__callQingzhouContent("actOnElement", {
+  const broken = await page.evaluate(() => window.__callZuriContent("actOnElement", {
     selector: "#city",
     action: "select",
     value: "bj",

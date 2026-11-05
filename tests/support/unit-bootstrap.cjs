@@ -18,6 +18,6 @@ console.log = (...args) => {
 };
 
 console.debug = (...args) => {
-  if (String(args[0] || "") === "[轻舟] collect artifact table meta failed:") return;
+  if (String(args[0] || "") === "[Zuri] collect artifact table meta failed:") return;
   originalDebug(...args);
 };

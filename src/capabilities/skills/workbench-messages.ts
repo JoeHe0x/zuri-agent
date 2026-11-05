@@ -240,8 +240,8 @@ const messages = defineMessages("skill-workbench", {
     "en": "Optional Git commit message; uses a default message if omitted."
   },
   "manifestDescription": {
-    "zh-CN": "通用轻舟 skill 的创建、更新、删除、列出、包导入和 Git 分发工具。适用：用户要创建、修改、删除某个已指定的 skill，或导入 skill、编辑其 content、plugin.json、scripts、resources、把本地 Skill 安装到 Git；给具体网站生成站点 skill、Skill 工具、采集工具或网页操作能力时使用 site-skill-author。",
-    "en": "Create, update, delete, list, import, and distribute qz Skills through Git. Use for managing a specified Skill, editing content/plugin.json/scripts/resources, importing packages, or installing a local Skill into Git. Use site-skill-author to build site-specific Skills, tools, collectors, or page actions."
+    "zh-CN": "通用Zuri skill 的创建、更新、删除、列出、包导入和 Git 分发工具。适用：用户要创建、修改、删除某个已指定的 skill，或导入 skill、编辑其 content、plugin.json、scripts、resources、把本地 Skill 安装到 Git；给具体网站生成站点 skill、Skill 工具、采集工具或网页操作能力时使用 site-skill-author。",
+    "en": "Create, update, delete, list, import, and distribute zuri Skills through Git. Use for managing a specified Skill, editing content/plugin.json/scripts/resources, importing packages, or installing a local Skill into Git. Use site-skill-author to build site-specific Skills, tools, collectors, or page actions."
   },
   "system": {
     "zh-CN": "系统",
@@ -252,7 +252,7 @@ const messages = defineMessages("skill-workbench", {
     "en": "List available renderers"
   },
   "listRenderersDescription": {
-    "zh-CN": "读取轻舟支持的 UI renderer 类型、用途与返回 JSON schema（设计带 UI 的 Skill 工具前先调用）。",
+    "zh-CN": "读取Zuri支持的 UI renderer 类型、用途与返回 JSON schema（设计带 UI 的 Skill 工具前先调用）。",
     "en": "List supported UI renderer types, purposes, and return JSON schemas (call before designing a Skill tool with a result UI)."
   },
   "listSkills": {
@@ -436,8 +436,8 @@ const messages = defineMessages("skill-workbench", {
     "en": "Updated"
   },
   "workbenchDescription": {
-    "zh-CN": "通用轻舟 skill 管理工作台。适用：用户要创建、更新、删除某个 skill，或编辑某个 skill 的 content、plugin.json、scripts、resources、导入 skill、探测并导入 Git Skill 仓库、把本地 Skill 安装到 Git。与 site-skill-author 区别：本 skill 面向已指定 skill 的管理、包导入和分发；给具体网站生成站点能力时使用 site-skill-author。",
-    "en": "Manage qz Skills: create, update, delete, edit content/plugin.json/scripts/resources, import packages, inspect and import Git repositories, or install a local Skill into Git. This skill manages specified Skills and their distribution; use site-skill-author to build capabilities for a particular website."
+    "zh-CN": "通用Zuri skill 管理工作台。适用：用户要创建、更新、删除某个 skill，或编辑某个 skill 的 content、plugin.json、scripts、resources、导入 skill、探测并导入 Git Skill 仓库、把本地 Skill 安装到 Git。与 site-skill-author 区别：本 skill 面向已指定 skill 的管理、包导入和分发；给具体网站生成站点能力时使用 site-skill-author。",
+    "en": "Manage zuri Skills: create, update, delete, edit content/plugin.json/scripts/resources, import packages, inspect and import Git repositories, or install a local Skill into Git. This skill manages specified Skills and their distribution; use site-skill-author to build capabilities for a particular website."
   },
   "manifestTitle": {
     "zh-CN": "技能工作台 Skill 工具清单",

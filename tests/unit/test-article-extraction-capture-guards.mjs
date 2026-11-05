@@ -17,7 +17,7 @@ import {
 } from "../support/article-extraction-benchmark.mjs";
 
 test("live capture rejects generic challenge and login redirects without matching a normal verify query", async t => {
-  const fixtureRoot = mkdtempSync(join(tmpdir(), "qingzhou-capture-interstitials-"));
+  const fixtureRoot = mkdtempSync(join(tmpdir(), "zuri-capture-interstitials-"));
   t.after(() => rmSync(fixtureRoot, { recursive: true, force: true }));
   const normalText = "这是一篇讨论账号登录体验的正常产品文章，URL 查询参数不应把正文误判为验证页。".repeat(18);
   const server = createServer((request, response) => {
@@ -59,7 +59,7 @@ test("live capture rejects generic challenge and login redirects without matchin
   const config = join(fixtureRoot, "config.json");
   const output = join(fixtureRoot, "capture");
   writeFileSync(config, `${JSON.stringify({
-    schema: "qingzhou.article-extraction-sites.v1",
+    schema: "zuri.article-extraction-sites.v1",
     sampleTarget: 1,
     strictSiteQuotas: true,
     sites: [{
@@ -102,7 +102,7 @@ test("live capture rejects generic challenge and login redirects without matchin
 });
 
 test("strict site quotas preserve site diversity instead of filling a failed site from another site's reserve", async t => {
-  const fixtureRoot = mkdtempSync(join(tmpdir(), "qingzhou-capture-strict-quota-"));
+  const fixtureRoot = mkdtempSync(join(tmpdir(), "zuri-capture-strict-quota-"));
   t.after(() => rmSync(fixtureRoot, { recursive: true, force: true }));
   const requests = new Map();
   const server = createServer((request, response) => {
@@ -127,7 +127,7 @@ test("strict site quotas preserve site diversity instead of filling a failed sit
   const config = join(fixtureRoot, "config.json");
   const output = join(fixtureRoot, "capture");
   writeFileSync(config, `${JSON.stringify({
-    schema: "qingzhou.article-extraction-sites.v1",
+    schema: "zuri.article-extraction-sites.v1",
     sampleTarget: 2,
     strictSiteQuotas: true,
     sites: [{
@@ -166,7 +166,7 @@ test("strict site quotas preserve site diversity instead of filling a failed sit
 });
 
 test("live capture freezes CSS-hidden roots without depending on site styles during replay", async t => {
-  const fixtureRoot = mkdtempSync(join(tmpdir(), "qingzhou-capture-visibility-"));
+  const fixtureRoot = mkdtempSync(join(tmpdir(), "zuri-capture-visibility-"));
   t.after(() => rmSync(fixtureRoot, { recursive: true, force: true }));
   const visibleText = "真实可见的中心正文应当完整保留。".repeat(30);
   const externalHidden = "外部样式隐藏的调试面板不得复活";
@@ -196,7 +196,7 @@ test("live capture freezes CSS-hidden roots without depending on site styles dur
   const config = join(fixtureRoot, "config.json");
   const output = join(fixtureRoot, "capture");
   writeFileSync(config, `${JSON.stringify({
-    schema: "qingzhou.article-extraction-sites.v1",
+    schema: "zuri.article-extraction-sites.v1",
     sampleTarget: 1,
     samplesPerSite: 1,
     sites: [{
@@ -284,7 +284,7 @@ test("live capture freezes CSS-hidden roots without depending on site styles dur
     }).parse();
     return {
       legacy: parseReadability()?.textContent || "",
-      current: globalThis.QingzhouArticleExtractor.extract(document, {
+      current: globalThis.ZuriArticleExtractor.extract(document, {
         readability: parseReadability(),
       })?.text || "",
     };

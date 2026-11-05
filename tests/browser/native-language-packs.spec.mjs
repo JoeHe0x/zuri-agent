@@ -6,23 +6,23 @@ import { join, resolve } from "node:path";
 import { expect, test } from "./fixtures.mjs";
 import { ensureTestExtension } from "../support/extension-build.mjs";
 
-const literal = "$5 / $$6 / $$$7 / $HOME$ / $1 / $QZ_LITERAL$ / {name} / trailing $";
+const literal = "$5 / $$6 / $$$7 / $HOME$ / $1 / $ZURI_LITERAL$ / {name} / trailing $";
 const userText = "$9 {name} <script>user text</script>";
-const literalId = "qz_native_002dcheck_002eliteral";
+const literalId = "zuri_native_002dcheck_002eliteral";
 // This expected wire value is deliberately independent of the encoder exercised in the browser.
-const literalEntry = { message: "$QZ_LITERAL$", placeholders: { qz_literal: {
-  content: "$$5 / $$$6 / $$$$7 / $$HOME$$ / $$1 / $$QZ_LITERAL$$ / {name} / trailing $$",
+const literalEntry = { message: "$ZURI_LITERAL$", placeholders: { zuri_literal: {
+  content: "$$5 / $$$6 / $$$$7 / $$HOME$$ / $$1 / $$ZURI_LITERAL$$ / {name} / trailing $$",
 } } };
 
 for (const [language, chromeLocale, brand, tagline] of [
-  ["en", "en", "qz", "A lighter way to get things done."],
-  ["zh-CN", "zh_CN", "轻舟", "你的浏览器 AI 助手"],
+  ["en", "en", "zuri", "A lighter way to get things done."],
+  ["zh-CN", "zh_CN", "Zuri", "你的浏览器 AI 助手"],
   ["zh-TW", "zh_TW", "輕舟", "你的瀏覽器 AI 助手"],
   ["ja", "ja", "軽舟", "やりたいことを、軽やかに。"],
-  ["ar", "ar", "qz", "أفق أوسع، وخطوة أخف."],
+  ["ar", "ar", "zuri", "أفق أوسع، وخطوة أخف."],
 ]) {
   test(`Chrome loads the generated ${language} catalog and resolves it through the real kernel`, async () => {
-    const directory = await mkdtemp(join(tmpdir(), "qingzhou-native-locale-"));
+    const directory = await mkdtemp(join(tmpdir(), "zuri-native-locale-"));
     let context;
     try {
       const extension = join(directory, "extension");
@@ -33,7 +33,7 @@ for (const [language, chromeLocale, brand, tagline] of [
         await mkdir(join(extension, "_locales", locale), { recursive: true });
         const messages = JSON.parse(await readFile(join(compiled, "_locales", locale, "messages.json"), "utf8"));
         messages[literalId] = literalEntry;
-        messages.literalManifest = { message: "$QZ_LITERAL$", placeholders: { qz_literal: { content: literal } } };
+        messages.literalManifest = { message: "$ZURI_LITERAL$", placeholders: { zuri_literal: { content: literal } } };
         await writeFile(join(extension, "_locales", locale, "messages.json"), JSON.stringify(messages));
       }
       await writeFile(join(extension, "manifest.json"), JSON.stringify({
@@ -59,7 +59,7 @@ for (const [language, chromeLocale, brand, tagline] of [
       const page = await context.newPage();
       await page.goto(new URL("/probe.html", worker.url()).href);
       const result = await page.evaluate(async ({ language, userText, literal }) => {
-        const native = chrome.i18n.getMessage("qz_language");
+        const native = chrome.i18n.getMessage("zuri_language");
         Object.defineProperty(chrome.i18n, "getUILanguage", { configurable: true, value: () => language });
         const { getLanguage, getTextDirection, createTranslator, defineMessages, chromeMessageId, encodeChromeMessage, languageRuntime, t } = await import("./probe.js");
         const thirdParty = createTranslator(defineMessages("native-check", {
@@ -85,7 +85,7 @@ for (const [language, chromeLocale, brand, tagline] of [
         unknown: `${language === "zh-CN" ? "已保存" : "Saved"} $5 {name} <script>user text</script>`,
         literal: literal.replace("{name}", userText), manifestLiteral: literal,
         literalId, encodedLiteral: literalEntry,
-        encodedManifestLiteral: { message: "$QZ_LITERAL$", placeholders: { qz_literal: { content: literal } } },
+        encodedManifestLiteral: { message: "$ZURI_LITERAL$", placeholders: { zuri_literal: { content: literal } } },
       });
       // Extension pages and workers can load another language privately, regardless of Chrome's
       // chosen native locale. Content scripts use the Background protocol instead of exposing WAR.
@@ -93,8 +93,8 @@ for (const [language, chromeLocale, brand, tagline] of [
         const response = await fetch(chrome.runtime.getURL(`_locales/${locale}/messages.json`));
         const messages = await response.json();
         return {
-          status: response.status, language: messages.qz_language.message,
-          native: chrome.i18n.getMessage("qz_language"), count: Object.keys(messages).length,
+          status: response.status, language: messages.zuri_language.message,
+          native: chrome.i18n.getMessage("zuri_language"), count: Object.keys(messages).length,
           exposed: Boolean(chrome.runtime.getManifest().web_accessible_resources),
           nativeLiteral: chrome.i18n.getMessage(literalId), rawLiteral: messages[literalId],
         };
@@ -116,7 +116,7 @@ for (const [language, chromeLocale, brand, tagline] of [
         // Source-language UI strings use their authored fallbacks; Chrome owns only manifest
         // metadata, the language marker and historical title aliases, plus the two literal probes.
         expect(Object.keys(nativeMessages).sort()).toEqual([
-          "extensionName", "extensionDescription", "switchModel", "qz_language", "qz_historical_labels", literalId, "literalManifest",
+          "extensionName", "extensionDescription", "switchModel", "zuri_language", "zuri_historical_labels", literalId, "literalManifest",
         ].sort());
       } else {
         expect(Object.keys(nativeMessages).length).toBeGreaterThan(2000);

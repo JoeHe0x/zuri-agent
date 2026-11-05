@@ -6,7 +6,7 @@ for (const colorScheme of ["light", "dark"]) {
 
     test("resumes and keeps following streamed text without losing manual reading position", async ({ page }, testInfo) => {
       await page.evaluate(async () => {
-        const api = window.qingzhouConversationBenchmark;
+        const api = window.zuriConversationBenchmark;
         const sessionId = "thinking-tail-session";
         const runId = "thinking-tail-run";
         const spanId = "thinking-tail-span";
@@ -78,7 +78,7 @@ for (const colorScheme of ["light", "dark"]) {
     test("scrolling above thinking pauses only that card's inner tail", async ({ page }) => {
       await page.evaluate(async () => {
         const text = Array.from({ length: 50 }, (_, index) => `Reading line ${index + 1}`).join("\n");
-        await window.qingzhouConversationBenchmark.runSnapshotRender({
+        await window.zuriConversationBenchmark.runSnapshotRender({
           sessionId: "thinking-wheel-scope",
           transcript: [
             { type: "thinking", spanId: "first-thought", runId: "first-run", text, streaming: true },

@@ -21,7 +21,7 @@ versions in the lockfile. Build, test, and benchmark commands accept `--help`.
 | `npm run doctor` | Check the local tools, dependencies, and test browser |
 | `npm run release` | Build a versioned Chrome ZIP locally. The default target is `manual` |
 | `npm run release:firefox` | Build a versioned unsigned Firefox `.xpi` locally. Same as `npm run release -- --target firefox` |
-| `npm run qz -- --help` | Show the local CLI commands for tasks, resources, and MCP |
+| `npm run zuri -- --help` | Show the local CLI commands for tasks, resources, and MCP |
 
 For npm installation and installed CLI usage, see the
 [CLI and MCP guide](cli.md#quick-start).
@@ -60,11 +60,11 @@ the same commands.
 Pass `--output-dir` when that directory must stay separate from another watcher. `dist/extension/`
 stays the Chrome package from `npm run dev` and `npm run build`.
 
-The Firefox add-on id is `qz-browser-agent@heleifz.github.io`. The Chrome `key` is omitted from
+The Firefox add-on id is `zuri-agent@heleifz.github.io`. The Chrome `key` is omitted from
 this package. The unpacked Chrome id `ghbaodmonhcgkfeejcpffknlggbjhjgj` comes from the `key` in
 [`src/manifest.json`](../src/manifest.json) and stays on `dist/extension/`. The two ids do not
 share storage or an update channel. `npm run release:firefox` writes
-`dist/releases/<version>/firefox/qz-browser-agent-firefox-<version>.xpi`. Load
+`dist/releases/<version>/firefox/zuri-agent-firefox-<version>.xpi`. Load
 `dist/extension-firefox/manifest.json` for a temporary add-on. The archive layout is in
 [Firefox packaging](firefox-packaging.md).
 
@@ -78,13 +78,13 @@ open the sidebar. Firefox chooses the side and shows one sidebar. Remaining diff
 1. Open `about:debugging#/runtime/this-firefox`.
 2. Click **Load Temporary Add-on**.
 3. Select `dist/extension-firefox/manifest.json`.
-4. Click the toolbar button, or open Firefox's sidebar and choose qz.
+4. Click the toolbar button, or open Firefox's sidebar and choose zuri.
 
 Reload the temporary add-on after a rebuild. Temporary add-ons are removed when Firefox exits.
 
 The CLI is one daemon for both packages. It lives in `services/mcp-bridge` and is omitted from
 `dist/extension/` and `dist/extension-firefox/`. Pairing steps are in
-[Load qz in Firefox](cli.md#load-qz-in-firefox).
+[Load zuri in Firefox](cli.md#load-zuri-in-firefox).
 
 ## Run tests
 
@@ -148,9 +148,9 @@ passes `executablePath`. It does not launch Chromium. Set `FIREFOX_EXECUTABLE` t
 Otherwise the locator uses `firefox` on `PATH`, then a Firefox build from `npx playwright install
 firefox` whose `--version` prints `Mozilla Firefox` 139 or newer, then
 `/tmp/ff/firefox/firefox`, `/usr/bin/firefox`, and `/snap/bin/firefox`. A missing binary stops the
-suite with those install commands in the error. Set `QINGZHOU_FIREFOX_HEADED=1` to show the window.
-`QINGZHOU_FIREFOX_PLAYWRIGHT_WORKERS` bounds that Playwright process; it does not read
-`QINGZHOU_PLAYWRIGHT_WORKERS`.
+suite with those install commands in the error. Set `ZURI_FIREFOX_HEADED=1` to show the window.
+`ZURI_FIREFOX_PLAYWRIGHT_WORKERS` bounds that Playwright process; it does not read
+`ZURI_PLAYWRIGHT_WORKERS`.
 
 ```bash
 npm run verify:firefox
@@ -170,7 +170,7 @@ the sidebar by shortcut, switcher, or toolbar must clear the badge.
 Reports go to `tests/results/playwright-firefox/` and `tests/results/firefox-suite.json`. The JSON
 record names `browser=firefox` and `package=dist/extension-firefox`. The Chromium Playwright report
 stays in `tests/results/playwright-report/`. A log line at the start of each suite names the browser
-and package. `QINGZHOU_PLAYWRIGHT_CHANNEL` cannot point the Chromium suites at Firefox.
+and package. `ZURI_PLAYWRIGHT_CHANNEL` cannot point the Chromium suites at Firefox.
 
 Choose checks by the size of the change:
 
@@ -181,7 +181,7 @@ Choose checks by the size of the change:
   finish with a full suite run.
 - Broad changes to shared contracts, or a task that asks for it, run `npm run verify`. Add
   `npm run verify:chrome` or `npm run verify:firefox` only for risky changes specific to that
-  package. For a Chrome run, set `QINGZHOU_PLAYWRIGHT_WORKERS` to the available core count
+  package. For a Chrome run, set `ZURI_PLAYWRIGHT_WORKERS` to the available core count
   (`$(nproc)` on Linux).
 - `npm run verify:coverage` runs for releases or an explicit request for coverage gates. For
   narrower coverage checks, use `npm test -- unit --coverage`.
@@ -282,8 +282,8 @@ npm run release:firefox -- --version 0.0.0.1
 `build-extension.mjs --browser firefox`, the production path `npm run build:firefox` uses, and writes:
 
 ```text
-dist/releases/<version>/firefox/qz-browser-agent-firefox-<version>.xpi
-dist/releases/<version>/firefox/qz-browser-agent-firefox-<version>.debug.zip
+dist/releases/<version>/firefox/zuri-agent-firefox-<version>.xpi
+dist/releases/<version>/firefox/zuri-agent-firefox-<version>.debug.zip
 dist/releases/<version>/firefox/version.json
 ```
 
@@ -342,38 +342,38 @@ license hash. Review the supplement again when upgrading.
 
 ## Other tools
 
-Connect a local MCP client or use qz from the terminal:
+Connect a local MCP client or use zuri from the terminal:
 
 ```bash
-npm run qz -- connect
-npm run qz -- status
-npm run qz -- browsers
-npm run qz -- mcp
-npm run qz -- create "Summarize the current page." --wait
-npm run qz -- create "Compare these two laptops." --title "Research" --stream
-npm run qz -- send TASK_ID "Add the source links." --stream
-npm run qz -- send TASK_ID "Focus on open-source options." --steer --stream
-npm run qz -- tasks
-npm run qz -- show TASK_ID
-npm run qz -- submit TASK_ID '{"selectedIds":["option-a"]}' --stream
-npm run qz -- approve TASK_ID --wait
-npm run qz -- reject TASK_ID
-npm run qz -- watch TASK_ID --stream
-npm run qz -- cancel TASK_ID
-npm run qz -- data
-npm run qz -- data export TABLE --format xlsx
-npm run qz -- images export COLLECTION
-npm run qz -- skills --query research
-npm run qz -- skills export NAME
-npm run qz -- settings get model
-npm run qz -- settings set vision true
-npm run qz -- automations
-npm run qz -- stop
+npm run zuri -- connect
+npm run zuri -- status
+npm run zuri -- browsers
+npm run zuri -- mcp
+npm run zuri -- create "Summarize the current page." --wait
+npm run zuri -- create "Compare these two laptops." --title "Research" --stream
+npm run zuri -- send TASK_ID "Add the source links." --stream
+npm run zuri -- send TASK_ID "Focus on open-source options." --steer --stream
+npm run zuri -- tasks
+npm run zuri -- show TASK_ID
+npm run zuri -- submit TASK_ID '{"selectedIds":["option-a"]}' --stream
+npm run zuri -- approve TASK_ID --wait
+npm run zuri -- reject TASK_ID
+npm run zuri -- watch TASK_ID --stream
+npm run zuri -- cancel TASK_ID
+npm run zuri -- data
+npm run zuri -- data export TABLE --format xlsx
+npm run zuri -- images export COLLECTION
+npm run zuri -- skills --query research
+npm run zuri -- skills export NAME
+npm run zuri -- settings get model
+npm run zuri -- settings set vision true
+npm run zuri -- automations
+npm run zuri -- stop
 ```
 
-`npm run qz` starts the same daemon as the published `qz` command. Firefox load steps are
+`npm run zuri` starts the same daemon as the published `zuri` command. Firefox load steps are
 [above](#load-temporarily-in-firefox). Pairing detail is in
-[Load qz in Firefox](cli.md#load-qz-in-firefox).
+[Load zuri in Firefox](cli.md#load-zuri-in-firefox).
 
 `connect` starts the local service and opens its connection page for first pairing. The first
 browser is named `default`; repeating the command reuses an online connection. `status` shows the
@@ -384,7 +384,7 @@ existing address. Use the reported address when connecting another profile.
 To pair a chosen browser Profile from the shell:
 
 ```bash
-npm run qz -- connect --no-open --name work --json
+npm run zuri -- connect --no-open --name work --json
 ```
 
 Open `result.url` in that Profile and verify its online UUID with `browsers --json`.
@@ -396,7 +396,7 @@ accepts `--client`. See [platform launch commands](cli.md#pair-a-selected-browse
 `--client NAME|UUID` selects a browser for task and resource commands. With one online browser,
 selection is automatic; with several, it is required. Unknown or offline selections fail without
 falling back. Names are persistent and case-sensitive. `stop` stops the service and disconnects all browsers. To release an offline name, run
-`npm run qz -- browsers forget NAME`. Each command and its suggested next steps remain bound to
+`npm run zuri -- browsers forget NAME`. Each command and its suggested next steps remain bound to
 the resolved profile UUID.
 
 Connections require opening a pairing URL. Ordinary connection failures

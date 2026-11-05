@@ -4,7 +4,7 @@ import type { ToolArguments } from '#sdk/background';
 type McpToolsHost = Pick<ToolExtensionAPI,
   "registerTool" | "ToolExecutionError" | "inspectServer" | "callServerTool"
   | "listSkillMcpServers" | "listSkillMcpTools">;
-import { QINGZHOU_MCP_TOOL_SPECS } from "./skill-contract.js";
+import { ZURI_MCP_TOOL_SPECS } from "./skill-contract.js";
 
 /** Registers the MCP discovery and invocation family against the core ToolRuntime. */
 export function registerMcpTools({
@@ -17,8 +17,8 @@ export function registerMcpTools({
 }: McpToolsHost) {
   registerTool({
   name: "mcp_inspect_server",
-  get description() { return QINGZHOU_MCP_TOOL_SPECS.mcp_inspect_server.description; },
-  get parameters() { return QINGZHOU_MCP_TOOL_SPECS.mcp_inspect_server.parameters; },
+  get description() { return ZURI_MCP_TOOL_SPECS.mcp_inspect_server.description; },
+  get parameters() { return ZURI_MCP_TOOL_SPECS.mcp_inspect_server.parameters; },
   hidden: true,
   execute: async ({
       url = "",
@@ -45,7 +45,7 @@ export function registerMcpTools({
     args = {},
     validate = false,
     refresh = false,
-  }: ToolArguments<typeof QINGZHOU_MCP_TOOL_SPECS.mcp_call_tool.parameters>, signal?: AbortSignal) {
+  }: ToolArguments<typeof ZURI_MCP_TOOL_SPECS.mcp_call_tool.parameters>, signal?: AbortSignal) {
     const id = String(name || "adhoc").trim() || "adhoc";
     const server = { id, name: id, url, headers, enabled: true };
     const toolName = String(tool || "").trim();
@@ -64,16 +64,16 @@ export function registerMcpTools({
 
   registerTool({
   name: "mcp_call_tool",
-  get description() { return QINGZHOU_MCP_TOOL_SPECS.mcp_call_tool.description; },
-  get parameters() { return QINGZHOU_MCP_TOOL_SPECS.mcp_call_tool.parameters; },
+  get description() { return ZURI_MCP_TOOL_SPECS.mcp_call_tool.description; },
+  get parameters() { return ZURI_MCP_TOOL_SPECS.mcp_call_tool.parameters; },
   hidden: true,
   execute: executeCall,
 });
 
   registerTool({
   name: "mcp_list_tools",
-  get description() { return QINGZHOU_MCP_TOOL_SPECS.mcp_list_tools.description; },
-  get parameters() { return QINGZHOU_MCP_TOOL_SPECS.mcp_list_tools.parameters; },
+  get description() { return ZURI_MCP_TOOL_SPECS.mcp_list_tools.description; },
+  get parameters() { return ZURI_MCP_TOOL_SPECS.mcp_list_tools.parameters; },
   hidden: true,
   execute: async ({ server = "", refresh = false, activeOnly = false, limit }, signal, context = {}) => {
       const includeInactive = activeOnly !== true;
@@ -98,8 +98,8 @@ export function registerMcpTools({
 
   registerTool({
   name: "mcp_search_tools",
-  get description() { return QINGZHOU_MCP_TOOL_SPECS.mcp_search_tools.description; },
-  get parameters() { return QINGZHOU_MCP_TOOL_SPECS.mcp_search_tools.parameters; },
+  get description() { return ZURI_MCP_TOOL_SPECS.mcp_search_tools.description; },
+  get parameters() { return ZURI_MCP_TOOL_SPECS.mcp_search_tools.parameters; },
   hidden: true,
   execute: async ({ query, server = "", refresh = false, activeOnly = false, limit }, signal, context = {}) => {
       const includeInactive = activeOnly !== true;

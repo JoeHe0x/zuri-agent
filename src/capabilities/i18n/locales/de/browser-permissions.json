@@ -8,6 +8,6 @@
   "browser-permissions.name.history": "Browserverlauf",
   "browser-permissions.name.desktopCapture": "Bildschirmaufnahme",
   "browser-permissions.name.downloads.open": "Öffnen heruntergeladener Dateien",
-  "browser-permissions.required": "Erteile die Berechtigung „{permission}“ im qz-Seitenbereich und versuche es erneut.",
+  "browser-permissions.required": "Erteile die Berechtigung „{permission}“ im zuri-Seitenbereich und versuche es erneut.",
   "browser-permissions.denied": "Die Berechtigung „{permission}“ wurde verweigert. Die Aktion wurde abgebrochen. Versuche es erneut, um die Berechtigung zu erteilen."
 }

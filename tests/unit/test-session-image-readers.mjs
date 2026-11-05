@@ -33,7 +33,7 @@ test("storage.onChanged recovery resolves references before projecting user imag
   f.emit(await snapshot());
   for (let tries = 0; !f.seeded.length && tries < 30; tries++) await tick();
   assert.equal(f.seeded[0].transcript[0].images[0].dataUrl, image);
-  assert.ok(!JSON.stringify(f.seeded).includes("qz-history-image:"));
+  assert.ok(!JSON.stringify(f.seeded).includes("zuri-history-image:"));
 });
 
 for (const action of ["stop", "clear", "newer"]) for (const fail of [false, true]) {

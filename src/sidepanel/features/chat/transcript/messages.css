@@ -196,9 +196,9 @@
 }
 
 .msg-user-edit-btn {
-  --qz-control-size: 26px;
-  --qz-control-icon-size: 15px;
-  --qz-control-color: color-mix(in srgb, var(--text-muted) 88%, transparent);
+  --zuri-control-size: 26px;
+  --zuri-control-icon-size: 15px;
+  --zuri-control-color: color-mix(in srgb, var(--text-muted) 88%, transparent);
   border-radius: 9px;
 }
 
@@ -277,8 +277,8 @@ textarea.msg-user-edit-input::placeholder {
 
 .msg-user-edit-cancel,
 .msg-user-edit-submit {
-  --qz-control-font-size: 12px;
-  --qz-control-font-weight: 650;
+  --zuri-control-font-size: 12px;
+  --zuri-control-font-weight: 650;
 }
 
 .msg-user.is-resending .msg-content {
@@ -395,21 +395,21 @@ textarea.msg-user-edit-input::placeholder {
   line-height: 1.55;
 }
 
-:is(.msg-assistant .msg-content, .qz-markdown) :is(p, li, blockquote, table, td, th, a, code) {
+:is(.msg-assistant .msg-content, .zuri-markdown) :is(p, li, blockquote, table, td, th, a, code) {
   max-width: 100%;
   overflow-wrap: anywhere;
   word-break: break-word;
 }
 
-:is(.msg-assistant .msg-content, .qz-markdown) p {
+:is(.msg-assistant .msg-content, .zuri-markdown) p {
   margin-bottom: 8px;
 }
 
-:is(.msg-assistant .msg-content, .qz-markdown) p:last-child {
+:is(.msg-assistant .msg-content, .zuri-markdown) p:last-child {
   margin-bottom: 0;
 }
 
-:is(.msg-assistant .msg-content, .qz-markdown) code {
+:is(.msg-assistant .msg-content, .zuri-markdown) code {
   display: inline;
   max-width: 100%;
   background: var(--code-inline-bg);
@@ -428,7 +428,7 @@ textarea.msg-user-edit-input::placeholder {
   box-decoration-break: clone;
 }
 
-:is(.msg-assistant .msg-content, .qz-markdown) pre {
+:is(.msg-assistant .msg-content, .zuri-markdown) pre {
   background: var(--block-fill);
   border: 0;
   border-radius: var(--block-radius);
@@ -441,7 +441,7 @@ textarea.msg-user-edit-input::placeholder {
   line-height: 1.5;
 }
 
-:is(.msg-assistant .msg-content, .qz-markdown) .copyable-code-block pre {
+:is(.msg-assistant .msg-content, .zuri-markdown) .copyable-code-block pre {
   --code-block-max-height: min(56vh, 520px);
   margin: 0;
   padding: 10px 42px 10px 12px;
@@ -452,7 +452,7 @@ textarea.msg-user-edit-input::placeholder {
   scrollbar-gutter: stable;
 }
 
-:is(.msg-assistant .msg-content, .qz-markdown) pre code {
+:is(.msg-assistant .msg-content, .zuri-markdown) pre code {
   display: block;
   max-width: none;
   padding: 0;
@@ -469,41 +469,41 @@ textarea.msg-user-edit-input::placeholder {
   box-decoration-break: slice;
 }
 
-:is(.msg-assistant .msg-content, .qz-markdown) .markdown-code-block {
+:is(.msg-assistant .msg-content, .zuri-markdown) .markdown-code-block {
   margin: 8px 0;
   overflow-anchor: none;
   contain: layout paint;
 }
 
-:is(.msg-assistant .msg-content, .qz-markdown) :is(h1, h2, h3, h4) {
+:is(.msg-assistant .msg-content, .zuri-markdown) :is(h1, h2, h3, h4) {
   margin: 12px 0 6px;
   font-weight: 600;
   line-height: 1.3;
 }
-:is(.msg-assistant .msg-content, .qz-markdown) h1 { font-size: var(--markdown-h1-font-size, calc(16px * var(--chat-text-scale, 1))); }
-:is(.msg-assistant .msg-content, .qz-markdown) h2 { font-size: var(--markdown-h2-font-size, calc(14px * var(--chat-text-scale, 1))); }
-:is(.msg-assistant .msg-content, .qz-markdown) h3 { font-size: var(--markdown-h3-font-size, calc(13px * var(--chat-text-scale, 1))); color: var(--text-secondary); }
+:is(.msg-assistant .msg-content, .zuri-markdown) h1 { font-size: var(--markdown-h1-font-size, calc(16px * var(--chat-text-scale, 1))); }
+:is(.msg-assistant .msg-content, .zuri-markdown) h2 { font-size: var(--markdown-h2-font-size, calc(14px * var(--chat-text-scale, 1))); }
+:is(.msg-assistant .msg-content, .zuri-markdown) h3 { font-size: var(--markdown-h3-font-size, calc(13px * var(--chat-text-scale, 1))); color: var(--text-secondary); }
 
-:is(.msg-assistant .msg-content, .qz-markdown) :is(ul, ol) {
+:is(.msg-assistant .msg-content, .zuri-markdown) :is(ul, ol) {
   padding-left: 20px;
   margin: 6px 0;
 }
 
-:is(.msg-assistant .msg-content, .qz-markdown) li {
+:is(.msg-assistant .msg-content, .zuri-markdown) li {
   margin: 3px 0;
 }
 
-:is(.msg-assistant .msg-content, .qz-markdown) hr {
+:is(.msg-assistant .msg-content, .zuri-markdown) hr {
   border: none;
   border-top: 1px solid var(--border);
   margin: 12px 0;
 }
 
-:is(.msg-assistant .msg-content, .qz-markdown) a {
+:is(.msg-assistant .msg-content, .zuri-markdown) a {
   color: var(--accent);
   text-decoration: none;
 }
-:is(.msg-assistant .msg-content, .qz-markdown) a:hover {
+:is(.msg-assistant .msg-content, .zuri-markdown) a:hover {
   text-decoration: underline;
 }
 
@@ -588,7 +588,7 @@ textarea.msg-user-edit-input::placeholder {
   margin: 3px 0;
 }
 
-:is(.msg-assistant .msg-content, .qz-markdown) blockquote {
+:is(.msg-assistant .msg-content, .zuri-markdown) blockquote {
   border: 0;
   border-radius: var(--block-radius);
   padding: 8px 10px;
@@ -597,14 +597,14 @@ textarea.msg-user-edit-input::placeholder {
   color: var(--text-secondary);
 }
 
-:is(.msg-assistant .msg-content, .qz-markdown) .markdown-table-pending {
+:is(.msg-assistant .msg-content, .zuri-markdown) .markdown-table-pending {
   margin: 8px 0;
   color: var(--text-muted);
   font-size: var(--markdown-table-font-size, calc(12px * var(--chat-text-scale, 1)));
   font-variant-numeric: tabular-nums;
 }
 
-:is(.msg-assistant .msg-content, .qz-markdown) table {
+:is(.msg-assistant .msg-content, .zuri-markdown) table {
   border-collapse: collapse;
   width: 100%;
   margin: 8px 0;
@@ -623,17 +623,17 @@ textarea.msg-user-edit-input::placeholder {
   }
 }
 
-:is(.msg-assistant .msg-content, .qz-markdown) :is(th, td) {
+:is(.msg-assistant .msg-content, .zuri-markdown) :is(th, td) {
   border: 1px solid var(--border);
   padding: 6px 8px;
   text-align: start;
 }
-:is(.msg-assistant .msg-content, .qz-markdown) th {
+:is(.msg-assistant .msg-content, .zuri-markdown) th {
   background: var(--bg-tertiary);
   font-weight: 600;
 }
 
-:is(.msg-assistant .msg-content, .qz-markdown) img {
+:is(.msg-assistant .msg-content, .zuri-markdown) img {
   max-width: 100%;
   border-radius: var(--radius-sm);
   margin: 4px 0;
@@ -651,7 +651,7 @@ textarea.msg-user-edit-input::placeholder {
 
 .msg-action-btn {
   border: 0;
-  --qz-control-color: var(--text-muted);
+  --zuri-control-color: var(--text-muted);
 }
 
 .msg-action-btn svg {

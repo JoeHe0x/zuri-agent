@@ -244,7 +244,7 @@ assert.deepEqual(bound.ids, [0, 44], "a selector that matches two nodes must not
   assert.equal((await runtime.callElement(5, ref, 'inspectElement', {}, context)).action, 'inspectElement');
   await assert.rejects(runtime.resolveElementReference(5, { target: hit.target }, { sessionId: 'another-session' }), { code: 'ELEMENT_UID_SESSION_MISMATCH' });
   assert.ok(commands.some(command => command.method === 'DOM.describeNode' && command.params.objectId === 'found-shadow-node'));
-  assert.ok(commands.some(command => command.method === 'Runtime.releaseObjectGroup' && command.params.objectGroup.startsWith('qz-uid-find-')));
+  assert.ok(commands.some(command => command.method === 'Runtime.releaseObjectGroup' && command.params.objectGroup.startsWith('zuri-uid-find-')));
   const removed = await runtime.addElementTargetsToFindResult({ results: [{ selector: '', actionable: true, _elementRef: 'removed' }] }, 5, context);
   assert.deepEqual(removed, { results: [{ selector: '', actionable: false }] });
   try {
@@ -623,7 +623,7 @@ chrome.scripting = {
   async executeScript(options) {
     scriptCalls.push(options);
     if (options.target?.allFrames) throw new Error("element runtime must not probe frames");
-    if (String(options.func || "").includes("__qzFrameProbe")) throw new Error("frame probe is not used");
+    if (String(options.func || "").includes("__zuriFrameProbe")) throw new Error("frame probe is not used");
     return [{ documentId: "doc-live", frameId: options.target?.frameIds?.[0] ?? 0, result: null }];
   },
 };

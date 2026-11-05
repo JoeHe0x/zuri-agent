@@ -18,7 +18,7 @@ except Exception as exc:  # pragma: no cover - exercised by CLI users.
     ) from exc
 
 
-class QingzhouMcpClient:
+class ZuriMcpClient:
     def __init__(self, session: ClientSession) -> None:
         self.session = session
 
@@ -39,14 +39,14 @@ class QingzhouMcpClient:
             raise RuntimeError(f"{name} returned non-JSON text: {text[:500]}") from exc
 
     async def create_session(self, case: CaseSpec) -> str:
-        payload = await self.call("qingzhou_create_session", {
+        payload = await self.call("zuri_create_session", {
             "title": case.title,
             "firstMessage": case.prompt,
         })
         return self.session_id_from_payload(payload)
 
     async def create_empty_session(self, title: str) -> str:
-        payload = await self.call("qingzhou_create_session", {"title": title})
+        payload = await self.call("zuri_create_session", {"title": title})
         return self.session_id_from_payload(payload)
 
     @staticmethod
@@ -61,7 +61,7 @@ class QingzhouMcpClient:
         return str(session_id)
 
     async def send_message(self, session_id: str, text: str) -> dict[str, Any]:
-        return await self.call("qingzhou_send_message", {
+        return await self.call("zuri_send_message", {
             "sessionId": session_id,
             "text": text,
             "wait": False,
@@ -69,7 +69,7 @@ class QingzhouMcpClient:
         })
 
     async def activate_session_working_tab(self, session_id: str) -> dict[str, Any]:
-        payload = await self.call("qingzhou_call", {
+        payload = await self.call("zuri_call", {
             "method": "runtime_message",
             "params": {
                 "message": {
@@ -85,7 +85,7 @@ class QingzhouMcpClient:
         return response
 
     async def snapshot(self, session_id: str, *, num: int = 500) -> dict[str, Any]:
-        return await self.call("qingzhou_get_session_snapshot", {
+        return await self.call("zuri_get_session_snapshot", {
             "sessionId": session_id,
             "compact": False,
             "includeTrace": False,
@@ -97,7 +97,7 @@ class QingzhouMcpClient:
 
     async def stop_session(self, session_id: str) -> None:
         with contextlib.suppress(Exception):
-            await self.call("qingzhou_stop_session", {
+            await self.call("zuri_stop_session", {
                 "sessionId": session_id,
                 "cascade": True,
             })
@@ -113,28 +113,28 @@ class QingzhouMcpClient:
         }
         if session_id:
             payload["sessionId"] = session_id
-        tool_result = await self.call("qingzhou_execute_tool", payload)
+        tool_result = await self.call("zuri_execute_tool", payload)
         return tool_result.get("result") or {}
 
     async def execute_tool(self, name: str, args: dict[str, Any], *, session_id: str = "") -> Any:
         payload: dict[str, Any] = {"name": name, "args": args}
         if session_id:
             payload["sessionId"] = session_id
-        result = await self.call("qingzhou_execute_tool", payload)
+        result = await self.call("zuri_execute_tool", payload)
         return result.get("result")
 
     async def list_automations(self) -> dict[str, Any]:
-        return await self.call("qingzhou_list_automations", {"limit": 100, "runLimit": 5})
+        return await self.call("zuri_list_automations", {"limit": 100, "runLimit": 5})
 
     async def get_skill(self, name: str) -> dict[str, Any]:
-        return await self.call("qingzhou_get_skill", {
+        return await self.call("zuri_get_skill", {
             "name": name,
             "includeContent": True,
             "includeResources": False,
         })
 
     async def get_skill_resource(self, name: str, path: str) -> dict[str, Any]:
-        return await self.call("qingzhou_get_skill_resource", {
+        return await self.call("zuri_get_skill_resource", {
             "name": name,
             "path": path,
             "start": 0,
@@ -142,7 +142,7 @@ class QingzhouMcpClient:
         })
 
     async def submit_wait_form(self, session_id: str, wait_id: str, answers: dict[str, Any]) -> dict[str, Any]:
-        return await self.call("qingzhou_submit_wait_form", {
+        return await self.call("zuri_submit_wait_form", {
             "sessionId": session_id,
             "waitId": wait_id,
             "answers": answers,

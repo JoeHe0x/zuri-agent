@@ -48,7 +48,7 @@ function harness(worlds, options = {}) {
           if (item.error) throw item.error;
           return { result: { value: runInNewContext(params.expression, {
             chrome: { runtime: { id: item.extensionId } },
-            __qzInvoke: item.bridge ? () => {} : undefined,
+            __zuriInvoke: item.bridge ? () => {} : undefined,
           }) } };
         }
         if (method === "DOM.resolveNode") {

@@ -47,9 +47,9 @@ for (const [language, chromeLocale] of languages) for (const colorScheme of ["li
       const localeMessages = JSON.parse(await readFile(resolve(await ensureTestExtension(), `_locales/${chromeLocale}/messages.json`), "utf8"));
       await page.addInitScript(installBenchmarkChromeStub, { uiLanguage: language, localeMessages });
       await page.goto("/extension/sidepanel/sidepanel.html", { waitUntil: "domcontentloaded" });
-      await page.waitForFunction(() => Boolean(window.qingzhouConversationBenchmark));
+      await page.waitForFunction(() => Boolean(window.zuriConversationBenchmark));
       await page.evaluate(async () => {
-        await window.qingzhouConversationBenchmark.runSnapshotRender({ sessionId: "tool-copy", transcript: [{ type: "user", text: "Layout review" }] });
+        await window.zuriConversationBenchmark.runSnapshotRender({ sessionId: "tool-copy", transcript: [{ type: "user", text: "Layout review" }] });
         const { renderToolEvent, disposeRendererTree } = await import("/extension/sidepanel/tools/tool-renderer.js");
         const { getToolMetadataCatalog } = await import("/extension/shared/tools/tool-metadata.js");
         window.__toolCopy = {
@@ -88,8 +88,8 @@ for (const [language, chromeLocale] of languages) for (const colorScheme of ["li
         await expect(page.locator(".tool-error-diagnostic-row")).toHaveCount(6);
         await audit(page, ".tool-error-diagnostic-row > span, .tool-error-diagnostic-row > b", `${prefix}-diagnostics`, testInfo);
         await page.evaluate(() => {
-          window.qingzhouConversationBenchmark.configureVisualState({ running: true });
-          window.qingzhouConversationBenchmark.dispatchBackgroundEvent({ type: "llm_retry", sessionId: "tool-copy", runId: "benchmark-visual-run", delayMs: 32000, maxRetries: 5 });
+          window.zuriConversationBenchmark.configureVisualState({ running: true });
+          window.zuriConversationBenchmark.dispatchBackgroundEvent({ type: "llm_retry", sessionId: "tool-copy", runId: "benchmark-visual-run", delayMs: 32000, maxRetries: 5 });
         });
         await expect(page.locator("#status-bar")).toBeVisible();
         await expect(page.locator("#status-text")).toContainText("32");

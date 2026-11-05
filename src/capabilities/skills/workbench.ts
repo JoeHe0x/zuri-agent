@@ -176,7 +176,7 @@ export function skillResourceEditArgs(args: Record<string, unknown>) {
 const getSkillAuthorToolManifest = () => ({
   format: SKILL_MANIFEST_FORMAT,
   schemaVersion: SKILL_MANIFEST_SCHEMA_VERSION,
-  id: "qingzhou-skill-author",
+  id: "zuri-skill-author",
   get displayName() { return workbenchT("name"); },
   version: "0.2.0",
   get description() { return workbenchT("manifestDescription"); },
@@ -334,7 +334,7 @@ return await tools.manage_skill({ ...payload, action: "update" });`,
 return await tools.manage_skill({ ...payload, action: "delete" });`,
   "scripts/list-skills.js": `const scope = args.scope || "all";
 return await tools.manage_skill({ action: "list_skills", scope });`,
-  "scripts/load-available-renderers.js": `// Host-handled by qingzhou-skill-author:load_available_renderers.
+  "scripts/load-available-renderers.js": `// Host-handled by zuri-skill-author:load_available_renderers.
 return { ok: true };`,
   "scripts/import-page-zip.js": `const payload = { url: args.url, overwrite: args.overwrite === true };
 return await tools.import_skill_from_page_zip(payload);`,

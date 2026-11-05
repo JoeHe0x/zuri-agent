@@ -12,8 +12,8 @@ import { readTestApiKey } from '../support/local-credentials.mjs';
 const { values } = parseArgs({ options: { steps: { type: 'string', default: '9' } } });
 const steps = Number(values.steps);
 assert.ok(Number.isInteger(steps) && steps >= 9 && steps <= 64, '--steps must be an integer from 9 to 64');
-const apiKey = readTestApiKey('deepseek', { keyFile: process.env.QINGZHOU_DEEPSEEK_AK_FILE || '' });
-const model = process.env.QINGZHOU_DEEPSEEK_MODEL || 'deepseek-flash';
+const apiKey = readTestApiKey('deepseek', { keyFile: process.env.ZURI_DEEPSEEK_AK_FILE || '' });
+const model = process.env.ZURI_DEEPSEEK_MODEL || 'deepseek-flash';
 const output = resolve('tests/results/deepseek-vision', ...(steps === 9 ? [] : [`retention-${steps}`]));
 const reportPath = join(output, 'retention.json');
 const extension = await ensureTestExtension();
@@ -27,7 +27,7 @@ try {
   await mkdir(output, { recursive: true });
   await new Promise((resolve, reject) => { server.once('error', reject); server.listen(0, '127.0.0.1', resolve); });
   const url = `http://127.0.0.1:${server.address().port}/visual-retention?steps=${steps}`;
-  profile = await mkdtemp(join(tmpdir(), 'qingzhou-deepseek-vision-'));
+  profile = await mkdtemp(join(tmpdir(), 'zuri-deepseek-vision-'));
   context = await chromium.launchPersistentContext(profile, {
     headless: true, executablePath: chromium.executablePath(), viewport: report.viewport, locale: 'en-US',
     ignoreDefaultArgs: ['--disable-extensions'],
@@ -43,7 +43,7 @@ try {
       if (url.hostname === 'api.deepseek.com' && typeof init?.body === 'string') {
         const body = JSON.parse(init.body);
         const messages = body.messages || [];
-        if (JSON.stringify(messages).includes('QZ_VISION_RETENTION')) {
+        if (JSON.stringify(messages).includes('ZURI_VISION_RETENTION')) {
           const parts = messages.flatMap(message => Array.isArray(message.content) ? message.content : []);
           record = { at: Date.now(), requestBytes: new TextEncoder().encode(init.body).byteLength,
             images: parts.filter(part => part.type === 'image_url').length,
@@ -70,7 +70,7 @@ try {
   const sessionId = created.session.id;
   report.sessionId = sessionId;
   await page.evaluate(({ sessionId, url, steps }) => window.__visionHarness.send({ type: 'prompt', sessionId,
-    text: `QZ_VISION_RETENTION：打开 ${url}，完成画布上的${steps}步视觉点击测试。每步只点击当前蓝色圆形，点击成功后蓝圆会换位置。必须使用 screenshot(actionable:true,maxWidth:2048,maxHeight:2048) 观察当前画面，再调用 act_on_screen(action:"click",returnScreenshot:false) 点击截图中的像素坐标。每步都单独截图、观察、点击；不要并发或把多步放进run_script，不要凭之前的位置规律推断下一步。不得读取网页脚本、canvas像素或隐藏状态，也不要使用DOM脚本点击。页面结构可先正常查看一次。连续完成${steps}次，最后截图看到DONE后停止，简短报告。` }), { sessionId, url, steps });
+    text: `ZURI_VISION_RETENTION：打开 ${url}，完成画布上的${steps}步视觉点击测试。每步只点击当前蓝色圆形，点击成功后蓝圆会换位置。必须使用 screenshot(actionable:true,maxWidth:2048,maxHeight:2048) 观察当前画面，再调用 act_on_screen(action:"click",returnScreenshot:false) 点击截图中的像素坐标。每步都单独截图、观察、点击；不要并发或把多步放进run_script，不要凭之前的位置规律推断下一步。不得读取网页脚本、canvas像素或隐藏状态，也不要使用DOM脚本点击。页面结构可先正常查看一次。连续完成${steps}次，最后截图看到DONE后停止，简短报告。` }), { sessionId, url, steps });
   const terminal = await page.evaluate(sessionId => window.__visionHarness.waitForTerminal(sessionId), sessionId);
   assert.equal(terminal.type, 'agent_end', terminal.message || 'agent did not finish');
   const target = context.pages().find(candidate => candidate.url() === url);

@@ -23,7 +23,7 @@ All final commands passed with exit code 0:
 - `npm ci`
 - `npm run typecheck`
 - `npm test -- unit --match tab-reference` — 53 tests
-- `npm test -- unit --match qingzhou-plugin`
+- `npm test -- unit --match zuri-plugin`
 - `npm test -- unit --match plugin-inner-runtime`
 - `npm test -- unit --match tool-behavior` — 12 tests
 - `npm test -- unit --match agent-tab-batch` — 23 tests

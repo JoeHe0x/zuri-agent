@@ -35,7 +35,7 @@ test("native cards support label clicks, keyboard selection, exclusive radio cho
   await expect(compiler).not.toBeChecked();
   const invalidBorder = await compiler.evaluate(input => {
     input.setAttribute("aria-invalid", "true");
-    const card = input.closest(".qz-choice-card");
+    const card = input.closest(".zuri-choice-card");
     const expected = document.createElement("span");
     expected.style.color = "var(--red)";
     card.append(expected);
@@ -43,7 +43,7 @@ test("native cards support label clicks, keyboard selection, exclusive radio cho
     expected.remove();
     return result;
   });
-  await expect(page.locator(".qz-choice-card").first()).toHaveCSS("border-color", invalidBorder);
+  await expect(page.locator(".zuri-choice-card").first()).toHaveCSS("border-color", invalidBorder);
   const database = page.getByRole("checkbox", { name: "Database engineer" });
   await expect(database).toBeChecked();
   await expect(database).toBeDisabled();
@@ -70,7 +70,7 @@ test("opening a source preserves selection and text and URLs remain inert", asyn
   await popup.waitForLoadState();
   await expect(page.getByRole("checkbox").first()).toBeChecked();
   await popup.close();
-  expect(await page.locator(".qz-choice-card").first().evaluate(card => {
+  expect(await page.locator(".zuri-choice-card").first().evaluate(card => {
     const cloned = document.createElement("div");
     cloned.innerHTML = card.outerHTML;
     return { checked: cloned.querySelector("input").checked, rel: card.querySelector("a").rel };
@@ -90,7 +90,7 @@ for (const colorScheme of ["light", "dark"]) for (const direction of ["ltr", "rt
       { label: "Compiler engineer · أدوات المطور", description: "Build a local-first editor and language tools. Long uninterrupted text: " + "narrow-panel".repeat(6), meta: ["Remote · Europe", "Rust / TypeScript", "Open source", "a-long-metadata-value".repeat(3), "Full time", "Senior"], url: "https://careers.example.com/jobs/123", imageUrl: "https://example.com/thumb-landscape.svg", checked: true },
       { label: "Backend engineer", description: "Work on the database engine.", meta: ["Remote", "Full time"], imageUrl: "https://example.com/thumb-portrait.svg" },
     ]);
-    const thumbnails = await page.locator(".qz-choice-card-image").evaluateAll(async images => {
+    const thumbnails = await page.locator(".zuri-choice-card-image").evaluateAll(async images => {
       for (const image of images) { image.loading = "eager"; await image.decode(); }
       return images.map(image => ({
         natural: [image.naturalWidth, image.naturalHeight],
@@ -102,7 +102,7 @@ for (const colorScheme of ["light", "dark"]) for (const direction of ["ltr", "rt
       { natural: [160, 90], displayed: [40, 40], fit: "cover" },
       { natural: [90, 160], displayed: [40, 40], fit: "cover" },
     ]);
-    const selectedCard = page.locator(".qz-choice-card").first();
+    const selectedCard = page.locator(".zuri-choice-card").first();
     const selectedStyle = await selectedCard.evaluate(card => ({
       border: getComputedStyle(card).borderColor,
       background: getComputedStyle(card).backgroundColor,
@@ -112,7 +112,7 @@ for (const colorScheme of ["light", "dark"]) for (const direction of ["ltr", "rt
     await expect(selectedCard).toHaveCSS("background-color", selectedStyle.background);
     await page.getByRole("checkbox").first().focus();
     const layout = await page.evaluate(() => {
-      const card = document.querySelector(".qz-choice-card");
+      const card = document.querySelector(".zuri-choice-card");
       const label = card.querySelector("label");
       const input = label.querySelector("input");
       const image = label.querySelector("img");

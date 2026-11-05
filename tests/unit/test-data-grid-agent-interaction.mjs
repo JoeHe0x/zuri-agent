@@ -35,7 +35,7 @@ globalThis.chrome = {
   },
   runtime: {
     getURL(path) {
-      return `chrome-extension://qingzhou/${path}`;
+      return `chrome-extension://zuri/${path}`;
     },
     lastError: null,
   },

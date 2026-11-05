@@ -340,7 +340,7 @@ test("GitHub directory binding imports only Skills below the selected subpath", 
   assert.equal(current.action, "current", "changes outside the selected directory must not update the source");
 });
 
-test("a Skill published by Qingzhou binds without conflict and is immediately clean", async () => {
+test("a Skill published by Zuri binds without conflict and is immediately clean", async () => {
   const localSkill = normalizeModernSkill({
     name: "publish-smoke",
     displayName: "发布测试",
@@ -349,7 +349,7 @@ test("a Skill published by Qingzhou binds without conflict and is immediately cl
     scope: "global",
     status: "active",
     metadata: {
-      qingzhou: {
+      zuri: {
         origin: { type: "local-draft", note: "legacy publish metadata" },
       },
     },

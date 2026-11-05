@@ -26,7 +26,7 @@ const source = `<!doctype html><html><head><meta charset="gbk">
   </body></html>`;
 
 test("snapshots preserve article evidence and remain inert when loaded or reparsed", async t => {
-  const directory = mkdtempSync(join(tmpdir(), "qz-snapshot-html-"));
+  const directory = mkdtempSync(join(tmpdir(), "zuri-snapshot-html-"));
   t.after(() => rmSync(directory, { recursive: true, force: true }));
   const browser = await chromium.launch({ headless: true });
   t.after(() => browser.close());
@@ -82,7 +82,7 @@ test("snapshots preserve article evidence and remain inert when loaded or repars
 });
 
 test("offline sanitization updates snapshot hashes and produces stable files", async t => {
-  const directory = mkdtempSync(join(tmpdir(), "qz-snapshot-command-"));
+  const directory = mkdtempSync(join(tmpdir(), "zuri-snapshot-command-"));
   t.after(() => rmSync(directory, { recursive: true, force: true }));
   const sample = fixtureSample(directory, "article", "https://example.test/article", { html: source });
   writeFixtureCorpus(directory, { samples: [sample] });

@@ -44,7 +44,7 @@ for (const skin of skins) {
           return {
             selectedText: selection.toString(),
             isEditing: content.closest(".msg-user").classList.contains("is-editing"),
-            legacyTextToken: rootStyle.getPropertyValue("--qz-user-bubble-text").trim(),
+            legacyTextToken: rootStyle.getPropertyValue("--zuri-user-bubble-text").trim(),
             selectionBgToken: rootStyle.getPropertyValue("--user-bubble-selection-bg").trim(),
             selectionTextToken: rootStyle.getPropertyValue("--user-bubble-selection-text").trim(),
             surfaceBg,

@@ -17,7 +17,7 @@ export const CHAT_TEXT_SIZES = Object.freeze([
 ]);
 
 export const DEFAULT_CHAT_TEXT_SIZE = "standard";
-export const CHAT_TEXT_SIZE_STORAGE_KEY = "qingzhou.chatTextSize";
+export const CHAT_TEXT_SIZE_STORAGE_KEY = "zuri.chatTextSize";
 
 const SIZE_INDEX = new Map<string, number>(CHAT_TEXT_SIZES.map((size, index) => [size.id, index]));
 

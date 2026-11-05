@@ -148,7 +148,7 @@ export function createRunScriptBridge({
           });
           scheduleArtifactRefresh(sessionId, { action: "artifacts", touchSession: true, delay: 400 });
         } catch (error) {
-          logger?.debug?.("[轻舟] record run_script resource artifacts failed:", error instanceof Error ? error.message : error);
+          logger?.debug?.("[Zuri] record run_script resource artifacts failed:", error instanceof Error ? error.message : error);
         }
       }
       const observation = nestedObservation(definition?.behavior, toolArgs, result);

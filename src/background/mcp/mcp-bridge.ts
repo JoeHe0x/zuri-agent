@@ -26,28 +26,28 @@ interface FirefoxMcpWakeHandlers {
   onSuspend?(): void;
 }
 interface FirefoxMcpWakeChrome {
-  qzFirefoxMcpWake?: boolean;
-  qzFirefoxMcpWakePending?: boolean;
-  qzFirefoxMcpWakeHandlers?: FirefoxMcpWakeHandlers;
+  zuriFirefoxMcpWake?: boolean;
+  zuriFirefoxMcpWakePending?: boolean;
+  zuriFirefoxMcpWakeHandlers?: FirefoxMcpWakeHandlers;
 }
 function firefoxWakeChrome(): FirefoxMcpWakeChrome | undefined {
   const host = (globalThis as { chrome?: FirefoxMcpWakeChrome }).chrome;
-  return host?.qzFirefoxMcpWake === true ? host : undefined;
+  return host?.zuriFirefoxMcpWake === true ? host : undefined;
 }
-const upgradeGuidance = "Wait for running tasks to finish, then run npx --yes qz-browser-agent@latest stop (disconnects ALL browsers). Update/reload the extension in each browser and run npx --yes qz-browser-agent@latest connect. Reconnect other browsers from Settings.";
+const upgradeGuidance = "Wait for running tasks to finish, then run npx --yes zuri-agent@latest stop (disconnects ALL browsers). Update/reload the extension in each browser and run npx --yes zuri-agent@latest connect. Reconnect other browsers from Settings.";
 const newPairingToken = () => btoa(String.fromCharCode(...crypto.getRandomValues(new Uint8Array(32)))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 
-export function qingzhouMcpBridgeStorageKey() { return BRIDGE_STORAGE_KEY; }
+export function zuriMcpBridgeStorageKey() { return BRIDGE_STORAGE_KEY; }
 /** Management callers receive public configuration, never pairing credentials. */
-export async function getQingzhouMcpBridgeConfig() {
+export async function getZuriMcpBridgeConfig() {
   const config = await getConnectionConfig();
   const { pairingToken: _token, instanceId: _instance, authorizationId: _authorization, connectionId: _connection, ...visible } = config;
   return visible;
 }
-export async function getQingzhouMcpConnectionStatus() { return connectionStatus(await getConnectionConfig()); }
+export async function getZuriMcpConnectionStatus() { return connectionStatus(await getConnectionConfig()); }
 
 /** Configuration updates cannot authorize a connection; Connect owns that operation. */
-export async function saveQingzhouMcpBridgeConfig(value: unknown = {}) {
+export async function saveZuriMcpBridgeConfig(value: unknown = {}) {
   const patch = record(value);
   await updateConnectionConfig(current => ({
     ...current,
@@ -55,14 +55,14 @@ export async function saveQingzhouMcpBridgeConfig(value: unknown = {}) {
     ...(patch.endpoint !== undefined ? { endpoint: connectionEndpoint(patch.endpoint) } : {}),
     ...(patch.enabled === false ? { enabled: false, state: "disconnected", authorizationId: "" } : {}),
   }));
-  return getQingzhouMcpBridgeConfig();
+  return getZuriMcpBridgeConfig();
 }
 
-export function startQingzhouMcpBridge(dependencies: BridgeDependencies = {}) {
-  return new QingzhouMcpBridgeRuntime(dependencies).start();
+export function startZuriMcpBridge(dependencies: BridgeDependencies = {}) {
+  return new ZuriMcpBridgeRuntime(dependencies).start();
 }
 
-class QingzhouMcpBridgeRuntime {
+class ZuriMcpBridgeRuntime {
   private config: BridgeConfig | undefined;
   private started = false;
   private generation = 0;
@@ -115,7 +115,7 @@ class QingzhouMcpBridgeRuntime {
   private bindFirefoxWake() {
     const host = firefoxWakeChrome();
     if (!host) return;
-    const handlers = host.qzFirefoxMcpWakeHandlers ??= {};
+    const handlers = host.zuriFirefoxMcpWakeHandlers ??= {};
     handlers.onAlarm = () => { if (this.started) void this.attempt(); };
     handlers.onSuspend = () => { void this.flushLease(); };
   }
@@ -123,7 +123,7 @@ class QingzhouMcpBridgeRuntime {
     const host = firefoxWakeChrome();
     if (!host) return;
     const enabled = Boolean(this.started && this.config?.enabled && this.config.state !== "paused");
-    host.qzFirefoxMcpWakeHandlers?.noteEnabled?.(enabled);
+    host.zuriFirefoxMcpWakeHandlers?.noteEnabled?.(enabled);
   }
   private adoptLease(config: BridgeConfig) {
     if (firefoxWakeChrome() && config.connectionId) this.connectionId = config.connectionId;
@@ -138,8 +138,8 @@ class QingzhouMcpBridgeRuntime {
   }
   private consumeWakePending() {
     const host = firefoxWakeChrome();
-    if (!host?.qzFirefoxMcpWakePending) return;
-    host.qzFirefoxMcpWakePending = false;
+    if (!host?.zuriFirefoxMcpWakePending) return;
+    host.zuriFirefoxMcpWakePending = false;
     if (this.started && this.config?.enabled && this.config.state !== "paused") void this.attempt();
   }
   private flushLease() {
@@ -179,7 +179,7 @@ class QingzhouMcpBridgeRuntime {
       });
     } else if (config.enabled && config.attemptsRemaining <= 0 && config.state !== "paused") {
       config = await this.persist(generation, { state: "paused", lastError: config.lastError || {
-        code: "MCP_CONNECTION_UNAVAILABLE", message: "Connection attempts are paused. Run qz connect or click Connect to retry.",
+        code: "MCP_CONNECTION_UNAVAILABLE", message: "Connection attempts are paused. Run zuri connect or click Connect to retry.",
       } });
     }
     this.emit();
@@ -248,7 +248,7 @@ class QingzhouMcpBridgeRuntime {
       await assertCurrent(); this.check(generation);
       const config = this.config!;
       if (name && name !== config.name) {
-        const paired = await this.json(config.endpoint, "/v1/qingzhou/rename", {
+        const paired = await this.json(config.endpoint, "/v1/zuri/rename", {
           clientId: config.clientId, name, pairingToken: config.pairingToken,
           instanceId: config.instanceId, connectionId: this.connectionId,
         }, this.controller.signal, 5000);
@@ -286,7 +286,7 @@ class QingzhouMcpBridgeRuntime {
     return this.status();
   }
   private async release(config: BridgeConfig, connectionId: string) {
-    try { await this.json(config.endpoint, "/v1/qingzhou/disconnect", {
+    try { await this.json(config.endpoint, "/v1/zuri/disconnect", {
       clientId: config.clientId, pairingToken: config.pairingToken, instanceId: config.instanceId, connectionId,
     }, new AbortController().signal, 3000); } catch { /* An offline service will expire its old lease. */ }
   }
@@ -353,11 +353,11 @@ class QingzhouMcpBridgeRuntime {
       if (!this.paired) {
         await assertCurrent(); this.check(generation);
         const health = await this.json(config.endpoint, "/health", undefined, signal, 5000);
-        if (health.service !== "qz-browser-agent" || health.protocolVersion !== 1 || record(health.features).browserPairing !== 1 || typeof health.instanceId !== "string" || !health.instanceId) {
+        if (health.service !== "zuri-agent" || health.protocolVersion !== 1 || record(health.features).browserPairing !== 1 || typeof health.instanceId !== "string" || !health.instanceId) {
           throw failure("MCP_CONNECTION_INCOMPATIBLE", upgradeGuidance);
         }
         await assertCurrent(); this.check(generation);
-        const paired = await this.json(config.endpoint, "/v1/qingzhou/pair", {
+        const paired = await this.json(config.endpoint, "/v1/zuri/pair", {
           clientId: config.clientId, name: config.name || undefined, pairingToken: config.pairingToken || undefined,
           connectionId: this.connectionId, instanceId: health.instanceId,
         }, signal, 5000);
@@ -380,7 +380,7 @@ class QingzhouMcpBridgeRuntime {
       if (this.deps.describe && config.includeCapabilities) client.capabilities = await this.deps.describe();
       this.check(generation);
       const nameRevision = this.nameRevision;
-      const response = await this.json(config.endpoint, "/v1/qingzhou/poll", { client }, signal, Number(client.pollTimeoutMs) + 5000);
+      const response = await this.json(config.endpoint, "/v1/zuri/poll", { client }, signal, Number(client.pollTimeoutMs) + 5000);
       this.check(generation);
       if (!Array.isArray(response.requests)) throw failure("MCP_CONNECTION_INCOMPATIBLE", upgradeGuidance);
       if (response.instanceId !== config.instanceId) throw failure("BRIDGE_INSTANCE_CHANGED", "The local service restarted. Reconnecting.");
@@ -414,7 +414,7 @@ class QingzhouMcpBridgeRuntime {
         state: paused ? "paused" : "reconnecting",
         ...(leaseWait ? { attemptsRemaining, leaseWaitRemaining: 0, nextRetryAt: Date.now() + Math.ceil(retryAfterMs) + 100 } : {}),
         ...(recoverSleep && attemptsRemaining <= 0 ? { attemptsRemaining: RETRY_LIMIT, nextRetryAt: Date.now() + RETRY_DELAY_MS } : {}),
-        lastError: { code, message: error instanceof Error ? error.message : "The local service is unavailable. Run qz connect to retry." },
+        lastError: { code, message: error instanceof Error ? error.message : "The local service is unavailable. Run zuri connect to retry." },
       });
       if (paused) await this.setAlarm(false);
       else this.schedule(Math.max(0, (this.config?.nextRetryAt || 0) - Date.now()));
@@ -430,7 +430,7 @@ class QingzhouMcpBridgeRuntime {
       const started = Date.now();
       try {
         this.check(generation);
-        if (!this.deps.dispatch) throw new Error("qz dispatcher is unavailable");
+        if (!this.deps.dispatch) throw new Error("zuri dispatcher is unavailable");
         const result = await bounded(Promise.resolve(this.deps.dispatch({ id, method: String(request.method || ""), params: record(request.params), raw: request, signal })), signal,
           Math.max(1000, Math.min(600_000, Number(request.timeoutMs) || config.requestTimeoutMs)));
         payload = { ok: true, result };
@@ -439,7 +439,7 @@ class QingzhouMcpBridgeRuntime {
       }
       this.check(generation);
       // Results are bound to the exact service/worker lease that dequeued the request.
-      await this.json(config.endpoint, "/v1/qingzhou/result", {
+      await this.json(config.endpoint, "/v1/zuri/result", {
         clientId: config.clientId, pairingToken: config.pairingToken, instanceId: config.instanceId, connectionId,
         requestId: id, ...payload, durationMs: Date.now() - started,
       }, signal, 15_000);
@@ -456,7 +456,7 @@ class QingzhouMcpBridgeRuntime {
       const value = record(await response.json());
       if (!response.ok) {
         const detail = record(value.error);
-        throw Object.assign(failure(String(detail.code || value.code || "MCP_CONNECTION_UNAVAILABLE"), String(detail.message || value.error || "The local service is unavailable. Run qz connect to retry.")), {
+        throw Object.assign(failure(String(detail.code || value.code || "MCP_CONNECTION_UNAVAILABLE"), String(detail.message || value.error || "The local service is unavailable. Run zuri connect to retry.")), {
           retryAfterMs: value.retryAfterMs ?? detail.retryAfterMs,
         });
       }
@@ -469,7 +469,7 @@ function bounded<T>(promise: Promise<T>, signal: AbortSignal, ms: number): Promi
   if (signal.aborted) return Promise.reject(signal.reason || cancelled());
   return new Promise((resolve, reject) => {
     const onAbort = () => finish(signal.reason || cancelled());
-    const timer = setTimeout(() => finish(failure("MCP_CONNECTION_UNAVAILABLE", "The local service timed out. Run qz connect to retry.")), ms);
+    const timer = setTimeout(() => finish(failure("MCP_CONNECTION_UNAVAILABLE", "The local service timed out. Run zuri connect to retry.")), ms);
     const finish = (error: unknown, value?: T) => {
       clearTimeout(timer); signal.removeEventListener("abort", onAbort);
       if (error) reject(error); else resolve(value as T);

@@ -5,7 +5,7 @@ import { join } from "node:path";
 const DEFAULT_MAX_ACTIONS = 64;
 const DEFAULT_MAX_DEPTH = 2;
 const DEFAULT_SETTLE_MS = 240;
-const CONTROL_TARGET_ATTR = "data-qz-visual-audit-target";
+const CONTROL_TARGET_ATTR = "data-zuri-visual-audit-target";
 
 const ROOTS = Object.freeze([
   { id: "conversation", setup: "conversation" },
@@ -101,7 +101,7 @@ export async function runConversationVisualAudit(page, fixture, options = {}) {
     activeAction = "";
     page.off("pageerror", onPageError);
     page.off("console", onConsole);
-    await page.evaluate(() => window.__qzVisualAudit?.clearMarks?.()).catch(() => {});
+    await page.evaluate(() => window.__zuriVisualAudit?.clearMarks?.()).catch(() => {});
   }
 
   for (const error of runtimeErrors) {
@@ -131,7 +131,7 @@ export async function runConversationVisualAudit(page, fixture, options = {}) {
   ), 0);
 
   await prepareAuditRoot(page, fixture, "conversation", settleMs);
-  const finalMetrics = await page.evaluate(() => window.qingzhouConversationBenchmark.collectMetrics({ phase: "visual-audit" }));
+  const finalMetrics = await page.evaluate(() => window.zuriConversationBenchmark.collectMetrics({ phase: "visual-audit" }));
   return {
     ...(initialMetrics || finalMetrics || {}),
     benchmark: "visual-audit",
@@ -163,7 +163,7 @@ export async function runConversationVisualAudit(page, fixture, options = {}) {
 
 async function installVisualAuditRuntime(page) {
   await page.evaluate(() => {
-    if (window.__qzVisualAudit) return;
+    if (window.__zuriVisualAudit) return;
     const CHAT_CONTAINER_SELECTOR = [
       "#messages",
       "#chat-dock",
@@ -305,7 +305,7 @@ async function installVisualAuditRuntime(page) {
       clearMarks();
       const element = findControl(signature, occurrence);
       if (!element) return null;
-      element.setAttribute("data-qz-visual-audit-target", token);
+      element.setAttribute("data-zuri-visual-audit-target", token);
       const waiting = element.closest(".waiting-card");
       if (waiting) {
         waiting.querySelectorAll("input, textarea, select").forEach(control => {
@@ -320,7 +320,7 @@ async function installVisualAuditRuntime(page) {
     }
 
     function clearMarks() {
-      document.querySelectorAll("[data-qz-visual-audit-target]").forEach(element => element.removeAttribute("data-qz-visual-audit-target"));
+      document.querySelectorAll("[data-zuri-visual-audit-target]").forEach(element => element.removeAttribute("data-zuri-visual-audit-target"));
     }
 
     function rectObject(rect) {
@@ -336,7 +336,7 @@ async function installVisualAuditRuntime(page) {
     }
 
     function collectState(token = "") {
-      const target = token ? document.querySelector(`[data-qz-visual-audit-target="${CSS.escape(token)}"]`) : null;
+      const target = token ? document.querySelector(`[data-zuri-visual-audit-target="${CSS.escape(token)}"]`) : null;
       const targetRect = target?.getBoundingClientRect?.() || null;
       const targetPoint = targetRect ? {
         x: Math.max(0, Math.min(innerWidth - 1, targetRect.left + targetRect.width / 2)),
@@ -440,7 +440,7 @@ async function installVisualAuditRuntime(page) {
       };
     }
 
-    window.__qzVisualAudit = {
+    window.__zuriVisualAudit = {
       inventory,
       markControl,
       clearMarks,
@@ -453,16 +453,16 @@ async function installVisualAuditRuntime(page) {
 
 async function prepareAuditRoot(page, fixture, setup, settleMs = DEFAULT_SETTLE_MS) {
   let metrics = null;
-  await page.evaluate(() => window.qingzhouConversationBenchmark.configureVisualState({
+  await page.evaluate(() => window.zuriConversationBenchmark.configureVisualState({
     running: false,
     pendingFollowUps: [],
     resetOnboarding: true,
   }));
   await page.keyboard.press("Escape");
   if (setup === "welcome") {
-    metrics = await page.evaluate(() => window.qingzhouConversationBenchmark.reset({ debug: false, clearStorage: false }));
+    metrics = await page.evaluate(() => window.zuriConversationBenchmark.reset({ debug: false, clearStorage: false }));
   } else {
-    metrics = await page.evaluate(input => window.qingzhouConversationBenchmark.runSnapshotRender(input, { debug: false, clearStorage: false }), fixture);
+    metrics = await page.evaluate(input => window.zuriConversationBenchmark.runSnapshotRender(input, { debug: false, clearStorage: false }), fixture);
   }
   if (setup === "expanded") {
     await page.evaluate(async () => {
@@ -485,7 +485,7 @@ async function prepareAuditRoot(page, fixture, setup, settleMs = DEFAULT_SETTLE_
     await page.locator("#input").fill("视觉审计：验证发送按钮状态");
   }
   if (setup === "running" || setup === "queued") {
-    await page.evaluate(({ queued }) => window.qingzhouConversationBenchmark.configureVisualState({
+    await page.evaluate(({ queued }) => window.zuriConversationBenchmark.configureVisualState({
       running: true,
       pendingFollowUps: queued ? [
         { clientMessageId: "visual-queue-1", text: "继续整理第二批结果", index: 0 },
@@ -495,15 +495,15 @@ async function prepareAuditRoot(page, fixture, setup, settleMs = DEFAULT_SETTLE_
   }
   await page.waitForTimeout(Math.max(90, Number(settleMs) || DEFAULT_SETTLE_MS));
   await page.evaluate(() => {
-    document.querySelectorAll("[data-qz-visual-audit-target]").forEach(element => {
-      element.removeAttribute("data-qz-visual-audit-target");
+    document.querySelectorAll("[data-zuri-visual-audit-target]").forEach(element => {
+      element.removeAttribute("data-zuri-visual-audit-target");
     });
   });
   return metrics;
 }
 
 async function readControlInventory(page, includeHidden = false) {
-  return page.evaluate(value => window.__qzVisualAudit.inventory(value), includeHidden);
+  return page.evaluate(value => window.__zuriVisualAudit.inventory(value), includeHidden);
 }
 
 function mergeCoverage(coverage, inventory, rootId) {
@@ -571,8 +571,8 @@ async function exerciseControl(page, fixture, task, options) {
   if (!target.found) {
     clickError ||= `未找到控件 ${task.signature}`;
   } else {
-    await page.evaluate(() => window.__qzVisualAudit.startShiftMonitor());
-    const before = await page.evaluate(value => window.__qzVisualAudit.collectState(value), token);
+    await page.evaluate(() => window.__zuriVisualAudit.startShiftMonitor());
+    const before = await page.evaluate(value => window.__zuriVisualAudit.collectState(value), token);
     snapshots.push(...await captureFrame(page, options, task, "before"));
     anomalies.push(...stateAnomalies(before, task, "before", { requireTarget: true }));
     try {
@@ -583,17 +583,17 @@ async function exerciseControl(page, fixture, task, options) {
       clickError = error?.message || String(error);
     }
     await nextFrame(page);
-    const immediate = await page.evaluate(value => window.__qzVisualAudit.collectState(value), token);
+    const immediate = await page.evaluate(value => window.__zuriVisualAudit.collectState(value), token);
     snapshots.push(...await captureFrame(page, options, task, "frame-1"));
     anomalies.push(...stateAnomalies(immediate, task, "frame-1"));
     await page.waitForTimeout(options.settleMs);
-    const settled = await page.evaluate(value => window.__qzVisualAudit.collectState(value), token);
+    const settled = await page.evaluate(value => window.__zuriVisualAudit.collectState(value), token);
     snapshots.push(...await captureFrame(page, options, task, "settled"));
     anomalies.push(...stateAnomalies(settled, task, "settled"));
     await nextFrame(page);
     await nextFrame(page);
-    const stable = await page.evaluate(value => window.__qzVisualAudit.collectState(value), token);
-    const shift = await page.evaluate(() => window.__qzVisualAudit.stopShiftMonitor());
+    const stable = await page.evaluate(value => window.__zuriVisualAudit.collectState(value), token);
+    const shift = await page.evaluate(() => window.__zuriVisualAudit.stopShiftMonitor());
     const stableMovementPx = geometryMovement(settled.geometry, stable.geometry);
     if (stableMovementPx > 1) {
       anomalies.push({
@@ -627,7 +627,7 @@ async function exerciseControl(page, fixture, task, options) {
       });
     }
     const afterInventory = await readControlInventory(page, true);
-    await page.evaluate(() => window.__qzVisualAudit.clearMarks());
+    await page.evaluate(() => window.__zuriVisualAudit.clearMarks());
     return {
       actionId: task.actionId,
       rootId: task.rootId,
@@ -678,7 +678,7 @@ async function exerciseControl(page, fixture, task, options) {
 
 async function markAndPrepareControl(page, descriptor, token) {
   const marked = await page.evaluate(({ descriptor: value, token: marker }) => (
-    window.__qzVisualAudit.markControl(value.signature, value.occurrence || 0, marker)
+    window.__zuriVisualAudit.markControl(value.signature, value.occurrence || 0, marker)
   ), { descriptor, token });
   if (!marked) return { found: false, locator: null };
   const locator = page.locator(`[${CONTROL_TARGET_ATTR}="${token}"]`);

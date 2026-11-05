@@ -761,17 +761,17 @@ function buildCdpToolBridgeExpression(code: string, { tabId, sessionId, runId, d
   const source = wrapRunScriptSource(String(code || ""));
   return `
 (async () => {
-  const __qzSourceTabId = ${JSON.stringify(tabId)};
-  const __qzSessionId = ${JSON.stringify(sessionId)};
-  const __qzRunId = ${JSON.stringify(runId || "")};
-  const __qzDepth = ${JSON.stringify(depth)};
-  const __qzReason = ${JSON.stringify(reason)};
+  const __zuriSourceTabId = ${JSON.stringify(tabId)};
+  const __zuriSessionId = ${JSON.stringify(sessionId)};
+  const __zuriRunId = ${JSON.stringify(runId || "")};
+  const __zuriDepth = ${JSON.stringify(depth)};
+  const __zuriReason = ${JSON.stringify(reason)};
   const input = ${JSON.stringify(scriptArgs || {})};
   const args = input;
   const $plugin = input.$plugin || {};
-  let __qzSeq = 0;
-  let __qzLastObservation = null;
-  function __qzCallTool(name, args = {}) {
+  let __zuriSeq = 0;
+  let __zuriLastObservation = null;
+  function __zuriCallTool(name, args = {}) {
     const toolName = String(name || "").trim();
     if (!toolName) throw new Error("tools call requires a tool name");
     let input;
@@ -781,25 +781,25 @@ function buildCdpToolBridgeExpression(code: string, { tabId, sessionId, runId, d
       input = args;
     }
     try {
-      if (input && typeof input === "object" && input.tabId == null && __qzSourceTabId) input.tabId = __qzSourceTabId;
+      if (input && typeof input === "object" && input.tabId == null && __zuriSourceTabId) input.tabId = __zuriSourceTabId;
     } catch (_e) {}
-    const safeInput = __qzSafeValueForMessage(input || {});
-    __qzPushTrace("tool.start", [toolName, safeInput]);
-    const id = "qz_tool_" + Date.now() + "_" + (++__qzSeq);
+    const safeInput = __zuriSafeValueForMessage(input || {});
+    __zuriPushTrace("tool.start", [toolName, safeInput]);
+    const id = "zuri_tool_" + Date.now() + "_" + (++__zuriSeq);
     return new Promise((resolve, reject) => {
       function onMessage(event) {
         if (event.source !== window) return;
         const data = event.data;
-        if (!data || data.source !== "qz-run-script-tool-response" || data.id !== id) return;
+        if (!data || data.source !== "zuri-run-script-tool-response" || data.id !== id) return;
         window.removeEventListener("message", onMessage);
         const response = data.response;
         if (!response) {
-          __qzPushTrace("tool.error", [toolName, "empty bridge response"]);
+          __zuriPushTrace("tool.error", [toolName, "empty bridge response"]);
           reject(new Error("tools." + toolName + " returned empty bridge response"));
           return;
         }
         if (!response.ok) {
-          __qzPushTrace("tool.error", [toolName, response.error || "bridge failed"]);
+          __zuriPushTrace("tool.error", [toolName, response.error || "bridge failed"]);
           const bridgeError = new Error(response.error || ("tools." + toolName + " bridge failed"));
           if (response.code) bridgeError.code = response.code;
           if (response.diagnostic) bridgeError.diagnostic = response.diagnostic;
@@ -808,37 +808,37 @@ function buildCdpToolBridgeExpression(code: string, { tabId, sessionId, runId, d
           return;
         }
         if (response.observation && typeof response.observation === "object") {
-          __qzLastObservation = response.observation;
+          __zuriLastObservation = response.observation;
         }
-        __qzPushTrace("tool.end", [toolName, response.result]);
-        __qzAddToolArtifacts(response.artifacts || response.artifact);
+        __zuriPushTrace("tool.end", [toolName, response.result]);
+        __zuriAddToolArtifacts(response.artifacts || response.artifact);
         resolve(response.result);
       }
       window.addEventListener("message", onMessage);
       window.postMessage({
-        source: "qz-run-script-tool-call",
+        source: "zuri-run-script-tool-call",
         id,
         toolName,
         args: safeInput,
-        sessionId: __qzSessionId,
-        runId: __qzRunId,
-        depth: __qzDepth + 1,
-        reason: __qzReason,
+        sessionId: __zuriSessionId,
+        runId: __zuriRunId,
+        depth: __zuriDepth + 1,
+        reason: __zuriReason,
       }, "*");
     });
   }
-  const tool = __qzCallTool;
+  const tool = __zuriCallTool;
   const tools = new Proxy(Object.create(null), {
     get(_target, prop) {
       if (prop === "then") return undefined;
       if (prop === Symbol.toStringTag) return "RunScriptTools";
-      if (prop === "$call") return __qzCallTool;
-      if (prop === "$list") return () => __qzCallTool("__list_tools__", {});
+      if (prop === "$call") return __zuriCallTool;
+      if (prop === "$list") return () => __zuriCallTool("__list_tools__", {});
       if (typeof prop !== "string") return undefined;
-      return (args = {}) => __qzCallTool(prop, args);
+      return (args = {}) => __zuriCallTool(prop, args);
     },
   });
-  const tabId = __qzSourceTabId;
+  const tabId = __zuriSourceTabId;
   ${runScriptTraceRuntimeSource({ reason, source, withConsolePatch: true, defineInputBindings: false, securityGuardrails })}
 })()
 `;
@@ -861,97 +861,97 @@ function runScriptTraceRuntimeSource({ tabId, reason, scriptArgs = {}, source, w
   const args = input;
   const $plugin = input.$plugin || {};
   ` : ""}
-  const __qzTrace = [];
-  const __qzArtifacts = [];
-  const __qzMaxTrace = ${MAX_SCRIPT_TRACE_ENTRIES};
-  const __qzStartedAt = Date.now();
+  const __zuriTrace = [];
+  const __zuriArtifacts = [];
+  const __zuriMaxTrace = ${MAX_SCRIPT_TRACE_ENTRIES};
+  const __zuriStartedAt = Date.now();
   ${SCRIPT_RUNTIME_SOURCE}
-  const __qzSafeValueForMessage = value => QZ_SCRIPT_RUNTIME.safeValueForMessage(value, "page");
-  function __qzTraceText(value) {
+  const __zuriSafeValueForMessage = value => ZURI_SCRIPT_RUNTIME.safeValueForMessage(value, "page");
+  function __zuriTraceText(value) {
     try {
       if (typeof value === "string") return value;
       if (value instanceof Error) return value.stack || value.message || String(value);
-      if (value && typeof value === "object") return JSON.stringify(__qzSafeValueForMessage(value));
+      if (value && typeof value === "object") return JSON.stringify(__zuriSafeValueForMessage(value));
       return String(value);
     } catch(_e) {
       try { return String(value); } catch(_err) { return "[unserializable]"; }
     }
   }
-  function __qzPushTrace(level, items) {
-    const message = Array.from(items || []).map(__qzTraceText).join(" ");
-    __qzTrace.push({
+  function __zuriPushTrace(level, items) {
+    const message = Array.from(items || []).map(__zuriTraceText).join(" ");
+    __zuriTrace.push({
       time: new Date().toISOString(),
       level: String(level || "trace"),
       message: message.length > 1000 ? message.slice(0, 1000) + "…[truncated]" : message,
     });
-    if (__qzTrace.length > __qzMaxTrace) __qzTrace.splice(0, __qzTrace.length - __qzMaxTrace);
+    if (__zuriTrace.length > __zuriMaxTrace) __zuriTrace.splice(0, __zuriTrace.length - __zuriMaxTrace);
   }
-  function trace(...items) { __qzPushTrace("trace", items); }
+  function trace(...items) { __zuriPushTrace("trace", items); }
   const log = trace;
-  function __qzAddToolArtifacts(items) {
+  function __zuriAddToolArtifacts(items) {
     const list = Array.isArray(items) ? items : (items ? [items] : []);
     for (const item of list) {
       if (!item || typeof item !== "object") continue;
-      __qzArtifacts.push(item);
+      __zuriArtifacts.push(item);
     }
   }
-  const __qzConsoleOriginal = {};
+  const __zuriConsoleOriginal = {};
   ${withConsolePatch ? `
-  for (const __qzLevel of ["log", "info", "warn", "error", "debug"]) {
+  for (const __zuriLevel of ["log", "info", "warn", "error", "debug"]) {
     try {
-      __qzConsoleOriginal[__qzLevel] = console[__qzLevel];
-      console[__qzLevel] = function(...items) {
-        __qzPushTrace("console." + __qzLevel, items);
-        return __qzConsoleOriginal[__qzLevel]?.apply(this, items);
+      __zuriConsoleOriginal[__zuriLevel] = console[__zuriLevel];
+      console[__zuriLevel] = function(...items) {
+        __zuriPushTrace("console." + __zuriLevel, items);
+        return __zuriConsoleOriginal[__zuriLevel]?.apply(this, items);
       };
     } catch(_e) {}
   }
   ` : ""}
-  const __qzSecurityGuardrails = ${JSON.stringify(compactRunScriptSecurityGuardrails(securityGuardrails))};
-  function __qzEnvelope(ok, result, error) {
-    const __qzSafeResult = ok && result !== undefined ? __qzSafeValueForMessage(result) : null;
+  const __zuriSecurityGuardrails = ${JSON.stringify(compactRunScriptSecurityGuardrails(securityGuardrails))};
+  function __zuriEnvelope(ok, result, error) {
+    const __zuriSafeResult = ok && result !== undefined ? __zuriSafeValueForMessage(result) : null;
     const out = {
       __runScriptEnvelope: true,
       ok,
       hasResult: ok && result !== undefined,
-      result: __qzSafeResult,
+      result: __zuriSafeResult,
       resultType: ok ? (result === null ? "null" : Array.isArray(result) ? "array" : typeof result) : "error",
       engine: "cdp",
       reason: ${JSON.stringify(reason || "cdp")},
-      trace: __qzSafeValueForMessage(__qzTrace.slice()),
-      elapsedMs: Date.now() - __qzStartedAt,
+      trace: __zuriSafeValueForMessage(__zuriTrace.slice()),
+      elapsedMs: Date.now() - __zuriStartedAt,
     };
     if (!ok) {
       out.error = error?.stack || error?.message || String(error || "Script evaluation failed");
       out.code = error?.code || "SCRIPT_EVALUATION_FAILED";
-      out.details = __qzSafeValueForMessage({
+      out.details = __zuriSafeValueForMessage({
         reason: ${JSON.stringify(reason || "cdp")},
         ...(error?.details && typeof error.details === "object" ? error.details : {}),
       });
-      if (error?.diagnostic && typeof error.diagnostic === "object") out.diagnostic = __qzSafeValueForMessage(error.diagnostic);
+      if (error?.diagnostic && typeof error.diagnostic === "object") out.diagnostic = __zuriSafeValueForMessage(error.diagnostic);
     } else if (result === undefined) {
       out.message = "Script completed successfully but returned undefined. Put an expression at the end or use return to inspect a value.";
     }
-    if (__qzArtifacts.length) out.artifacts = __qzSafeValueForMessage(__qzArtifacts.slice());
-    if (typeof __qzLastObservation !== "undefined" && __qzLastObservation) {
-      out.__lastObservation = __qzSafeValueForMessage(__qzLastObservation);
+    if (__zuriArtifacts.length) out.artifacts = __zuriSafeValueForMessage(__zuriArtifacts.slice());
+    if (typeof __zuriLastObservation !== "undefined" && __zuriLastObservation) {
+      out.__lastObservation = __zuriSafeValueForMessage(__zuriLastObservation);
     }
     return out;
   }
-  const __qzRestoreSecurityGuards = QZ_SCRIPT_RUNTIME.installSecurityGuards(__qzSecurityGuardrails, "page");
+  const __zuriRestoreSecurityGuards = ZURI_SCRIPT_RUNTIME.installSecurityGuards(__zuriSecurityGuardrails, "page");
   try {
-    const __qzResult = await (async () => {
+    const __zuriResult = await (async () => {
       ${source}
     })();
-    return __qzEnvelope(true, __qzResult, null);
-  } catch (__qzError) {
-    __qzPushTrace("error", [__qzError]);
-    return __qzEnvelope(false, null, __qzError);
+    return __zuriEnvelope(true, __zuriResult, null);
+  } catch (__zuriError) {
+    __zuriPushTrace("error", [__zuriError]);
+    return __zuriEnvelope(false, null, __zuriError);
   } finally {
-    __qzRestoreSecurityGuards();
+    __zuriRestoreSecurityGuards();
     ${withConsolePatch ? `
-    for (const __qzLevel of Object.keys(__qzConsoleOriginal)) {
-      try { console[__qzLevel] = __qzConsoleOriginal[__qzLevel]; } catch(_e) {}
+    for (const __zuriLevel of Object.keys(__zuriConsoleOriginal)) {
+      try { console[__zuriLevel] = __zuriConsoleOriginal[__zuriLevel]; } catch(_e) {}
     }
     ` : ""}
   }

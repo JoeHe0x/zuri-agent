@@ -14,7 +14,7 @@ async function createHarness() {
     res.end(html);
   });
   await new Promise(resolve => server.listen(0, "127.0.0.1", resolve));
-  const directory = await mkdtemp(join(tmpdir(), "qingzhou-ax-disabled-"));
+  const directory = await mkdtemp(join(tmpdir(), "zuri-ax-disabled-"));
   let browser;
   const close = async () => {
     await browser?.close();

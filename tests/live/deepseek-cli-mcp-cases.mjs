@@ -20,7 +20,7 @@ export const CASES = [
   },
   {
     id: "json-checklist", kind: "export",
-    prompt: 'Use the qingzhou-documents Skill to read https://www.rfc-editor.org/rfc/rfc8259.txt and create a downloadable Markdown checklist of six JSON interoperability pitfalls.',
+    prompt: 'Use the zuri-documents Skill to read https://www.rfc-editor.org/rfc/rfc8259.txt and create a downloadable Markdown checklist of six JSON interoperability pitfalls.',
     expectDownload: true, expectTerms: ["JSON"],
   },
   {

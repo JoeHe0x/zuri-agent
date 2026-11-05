@@ -17,7 +17,7 @@ function scriptString(value) {
 }
 
 test("live capture waits for hydration and retries when the inspected text changes before its screenshot", async t => {
-  const fixtureRoot = mkdtempSync(join(tmpdir(), "qingzhou-capture-consistency-"));
+  const fixtureRoot = mkdtempSync(join(tmpdir(), "zuri-capture-consistency-"));
   t.after(() => rmSync(fixtureRoot, { recursive: true, force: true }));
   const delayedFinal = "延迟水合后的完整中心内容".repeat(24);
   const richShell = "已经足够长但仍然只是导航与推荐占位的壳层内容".repeat(24);
@@ -73,7 +73,7 @@ test("live capture waits for hydration and retries when the inspected text chang
   const config = join(fixtureRoot, "config.json");
   const output = join(fixtureRoot, "capture");
   writeFileSync(config, `${JSON.stringify({
-    schema: "qingzhou.article-extraction-sites.v1",
+    schema: "zuri.article-extraction-sites.v1",
     sampleTarget: 3,
     samplesPerSite: 3,
     sites: [{
@@ -123,7 +123,7 @@ test("live capture waits for hydration and retries when the inspected text chang
 });
 
 test("live capture consistency covers URL, complete rendered text, and basic structure", async t => {
-  const fixtureRoot = mkdtempSync(join(tmpdir(), "qingzhou-capture-signature-"));
+  const fixtureRoot = mkdtempSync(join(tmpdir(), "zuri-capture-signature-"));
   t.after(() => rmSync(fixtureRoot, { recursive: true, force: true }));
   const longPrefix = "八万字之后的正文尾部仍属于页面状态。".repeat(5_000);
   const initialTail = "旧的长文尾部不得进入冻结快照";
@@ -167,7 +167,7 @@ test("live capture consistency covers URL, complete rendered text, and basic str
   const config = join(fixtureRoot, "config.json");
   const output = join(fixtureRoot, "capture");
   writeFileSync(config, `${JSON.stringify({
-    schema: "qingzhou.article-extraction-sites.v1",
+    schema: "zuri.article-extraction-sites.v1",
     sampleTarget: 3,
     samplesPerSite: 3,
     sites: [{

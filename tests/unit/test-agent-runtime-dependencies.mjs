@@ -105,7 +105,7 @@ assert.deepEqual(attachmentMessage.documents, [document]);
 assert.equal(agent._toSendMessage(attachmentMessage, false).content, "请查看附件。");
 assert.equal(attachmentCapsule._origin, "context_capsule");
 assert.match(attachmentCapsule.content, /当前可用技能.*load_skill/);
-assert.doesNotMatch(attachmentCapsule.content, /qingzhou-documents/);
+assert.doesNotMatch(attachmentCapsule.content, /zuri-documents/);
 assert.match(attachmentCapsule.content, /docModelId=model-1/);
 
 const emitted = [];

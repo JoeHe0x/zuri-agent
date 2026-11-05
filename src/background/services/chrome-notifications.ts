@@ -152,7 +152,7 @@ export function createSessionCompletionNotifier({
     if (await notifications.isChromeVisuallyFocused()) return false;
 
     const title = String(session?.title || runtime.workingTitle || t("notification.task"));
-    const notificationId = `qz_completed_${id}_${runId}`.replace(/[^a-zA-Z0-9_-]/g, "_").slice(0, 240);
+    const notificationId = `zuri_completed_${id}_${runId}`.replace(/[^a-zA-Z0-9_-]/g, "_").slice(0, 240);
     const createdId = await notifications!.create(notificationId, {
       type: "basic",
       iconUrl,
@@ -209,7 +209,7 @@ export function createSessionCompletionNotifier({
   }
 
   function parseSessionId(notificationId: string) {
-    const match = String(notificationId || "").match(/^(?:qz_completed_|qz_alert_session_|qz_auto_)([a-z0-9]+)_/i);
+    const match = String(notificationId || "").match(/^(?:zuri_completed_|zuri_alert_session_|zuri_auto_)([a-z0-9]+)_/i);
     return match ? normalizeSessionId(match[1]) : "";
   }
 

@@ -6,5 +6,5 @@ export default {
   get tools() { return { example_table: defineToolMetadata(t("dataTitle"), [], { resultFamily: "table",
     titleRule: { field: "title", values: { "浏览器调研示例": t("researchTitle") } },
   }) }; },
-  documentFormats: [{ id: "json-note", mimeType: "application/vnd.qingzhou.note+json" }],
+  documentFormats: [{ id: "json-note", mimeType: "application/vnd.zuri.note+json" }],
 } satisfies CapabilityMetadata;

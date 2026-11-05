@@ -1,4 +1,4 @@
-"""Exact benchmark mirror of Qingzhou's shipped Tree-DP recurrence."""
+"""Exact benchmark mirror of Zuri's shipped Tree-DP recurrence."""
 
 from __future__ import annotations
 
@@ -279,7 +279,7 @@ def page_from_record(
     *,
     verify_shipped_base_model: bool = True,
 ) -> Page:
-    if record.get("schema") != "qingzhou.article-extraction-tree-dp-training-page.v2":
+    if record.get("schema") != "zuri.article-extraction-tree-dp-training-page.v2":
         raise ValueError(f"{record.get('id', 'unknown')}: unsupported training page schema")
     if record.get("split") not in allowed_splits:
         raise ValueError(f"{record.get('id')}: refusing split {record.get('split')}")

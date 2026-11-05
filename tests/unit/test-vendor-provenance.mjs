@@ -8,7 +8,7 @@ import { build } from "esbuild";
 import { checkDependencyAssets, copyRuntimeAssets, createDependencyGraph, recordDependencyBuild, refreshDependencyProvenance, writeDependencyProvenance } from "../../scripts/vendor/assets.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
-const directory = await mkdtemp(join(tmpdir(), "qingzhou-dependency-audit-"));
+const directory = await mkdtemp(join(tmpdir(), "zuri-dependency-audit-"));
 const output = join(directory, "extension");
 const lockPath = join(directory, "package-lock.json");
 const packagePath = join(directory, "package.json");

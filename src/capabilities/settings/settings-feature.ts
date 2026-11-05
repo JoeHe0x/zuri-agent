@@ -487,15 +487,15 @@ export function createSettingsFeature(options: SettingsFeatureOptions) {
     if (!skillSettingsList) return;
     let markup = "";
     if (loading) {
-      markup = `<div class="skill-settings-empty qz:grid qz:min-h-37.5 qz:gap-2.5">${escapeHtml(t("loadingSkillSettings"))}</div>`;
+      markup = `<div class="skill-settings-empty zuri:grid zuri:min-h-37.5 zuri:gap-2.5">${escapeHtml(t("loadingSkillSettings"))}</div>`;
     } else if (error) {
       markup = `
-        <div class="skill-settings-empty skill-settings-empty--error qz:grid qz:min-h-37.5 qz:gap-2.5">
+        <div class="skill-settings-empty skill-settings-empty--error zuri:grid zuri:min-h-37.5 zuri:gap-2.5">
           <span>${escapeHtml(error)}</span>
-          <button class="qz-btn qz-btn--secondary qz-btn--sm" type="button" data-skill-settings-refresh>${escapeHtml(t("retry"))}</button>
+          <button class="zuri-btn zuri-btn--secondary zuri-btn--sm" type="button" data-skill-settings-refresh>${escapeHtml(t("retry"))}</button>
         </div>`;
     } else if (!skillSettingsItems.length) {
-      markup = `<div class="skill-settings-empty qz:grid qz:min-h-37.5 qz:gap-2.5">${escapeHtml(t("installedSkillsHaveNoSettingsToConfigure"))}</div>`;
+      markup = `<div class="skill-settings-empty zuri:grid zuri:min-h-37.5 zuri:gap-2.5">${escapeHtml(t("installedSkillsHaveNoSettingsToConfigure"))}</div>`;
     } else if (skillSettingsItems.length === 1) {
       markup = renderSkillSettingsCard(skillSettingsItems[0]);
     } else {
@@ -503,7 +503,7 @@ export function createSettingsFeature(options: SettingsFeatureOptions) {
       if (activeSetting) {
         markup = `
         <div class="skill-settings-detail-nav">
-          <button class="qz-btn qz-btn--ghost qz-btn--sm skill-settings-back" type="button" data-skill-settings-back>
+          <button class="zuri-btn zuri-btn--ghost zuri-btn--sm skill-settings-back" type="button" data-skill-settings-back>
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
               <path d="M8.75 3.5L5.25 7l3.5 3.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
@@ -532,7 +532,7 @@ export function createSettingsFeature(options: SettingsFeatureOptions) {
           </div>
         </header>
         ${searchable ? `
-          <input class="qz-field skill-settings-search" type="search" value="${escapeHtmlAttribute(skillSettingsQuery)}" placeholder="${escapeHtmlAttribute(t("searchSkills"))}" aria-label="${escapeHtmlAttribute(t("searchSkills"))}" data-skill-settings-search>` : ""}
+          <input class="zuri-field skill-settings-search" type="search" value="${escapeHtmlAttribute(skillSettingsQuery)}" placeholder="${escapeHtmlAttribute(t("searchSkills"))}" aria-label="${escapeHtmlAttribute(t("searchSkills"))}" data-skill-settings-search>` : ""}
         <div class="skill-settings-index-rows" data-skill-settings-index-rows>
           ${renderSkillSettingsIndexRows()}
         </div>
@@ -554,7 +554,7 @@ export function createSettingsFeature(options: SettingsFeatureOptions) {
       const description = String(setting.description || (source && source !== title ? source : ""));
       const missingCount = Array.isArray(setting.missing) ? setting.missing.length : 0;
       return `
-        <button class="qz-btn qz-btn--secondary skill-settings-index-row" type="button" data-skill-settings-open="${escapeHtmlAttribute(identity)}">
+        <button class="zuri-btn zuri-btn--secondary skill-settings-index-row" type="button" data-skill-settings-open="${escapeHtmlAttribute(identity)}">
           <span class="skill-settings-index-copy">
             <strong>${escapeHtml(title)}</strong>
             ${description ? `<small>${escapeHtml(description)}</small>` : ""}
@@ -650,21 +650,21 @@ export function createSettingsFeature(options: SettingsFeatureOptions) {
     const label = escapeHtml(field.label || field.key || "");
     const labelAttribute = escapeHtmlAttribute(field.label || field.key || "");
     const required = field.required ? '<span class="skill-settings-required" aria-hidden="true">*</span>' : "";
-    const description = field.description ? `<div class="qz-field-hint skill-settings-field-hint">${escapeHtml(field.description)}</div>` : "";
+    const description = field.description ? `<div class="zuri-field-hint skill-settings-field-hint">${escapeHtml(field.description)}</div>` : "";
     const width = field.width === "half" ? " skill-settings-field--half" : "";
     if (field.type === "boolean") {
       return `
         <label class="skill-settings-field skill-settings-field--toggle${width}">
           <span class="skill-settings-toggle-label">${label}${required}</span>
-          <input class="qz-checkbox" type="checkbox" data-skill-setting-field="${key}" data-field-type="boolean" ${field.value === true ? "checked" : ""} ${busy ? "disabled" : ""}>
+          <input class="zuri-checkbox" type="checkbox" data-skill-setting-field="${key}" data-field-type="boolean" ${field.value === true ? "checked" : ""} ${busy ? "disabled" : ""}>
           ${description}
         </label>`;
     }
     if (field.type === "select") {
       return `
         <label class="skill-settings-field${width}">
-          <span class="qz-field-label">${label}${required}</span>
-          <select class="qz-field qz-select" data-skill-setting-field="${key}" data-field-type="select" ${busy ? "disabled" : ""}>
+          <span class="zuri-field-label">${label}${required}</span>
+          <select class="zuri-field zuri-select" data-skill-setting-field="${key}" data-field-type="select" ${busy ? "disabled" : ""}>
             <option value="" ${String(field.value ?? "") === "" ? "selected" : ""}>${escapeHtml(t("selectAnOption"))}</option>
             ${(field.options || []).map(option => `<option value="${escapeHtmlAttribute(option.value)}" ${String(field.value ?? "") === option.value ? "selected" : ""}>${escapeHtml(option.label || option.value)}</option>`).join("")}
           </select>
@@ -679,8 +679,8 @@ export function createSettingsFeature(options: SettingsFeatureOptions) {
       : "";
     return `
       <div class="skill-settings-field${width}">
-        <span class="qz-field-label">${label}${required}</span>
-        <input class="qz-field${field.type === "secret" ? " qz-field--mono" : ""}" type="${inputType}" value="${escapeHtmlAttribute(value)}" placeholder="${escapeHtmlAttribute(placeholder)}" aria-label="${labelAttribute}" ${field.required ? 'aria-required="true"' : ""} data-skill-setting-field="${key}" data-field-type="${escapeHtmlAttribute(field.type || "text")}" autocomplete="${field.type === "secret" ? "new-password" : "off"}" ${numberAttrs} ${busy ? "disabled" : ""}>
+        <span class="zuri-field-label">${label}${required}</span>
+        <input class="zuri-field${field.type === "secret" ? " zuri-field--mono" : ""}" type="${inputType}" value="${escapeHtmlAttribute(value)}" placeholder="${escapeHtmlAttribute(placeholder)}" aria-label="${labelAttribute}" ${field.required ? 'aria-required="true"' : ""} data-skill-setting-field="${key}" data-field-type="${escapeHtmlAttribute(field.type || "text")}" autocomplete="${field.type === "secret" ? "new-password" : "off"}" ${numberAttrs} ${busy ? "disabled" : ""}>
         ${description}
       </div>`;
   }
@@ -830,7 +830,7 @@ export function createSettingsFeature(options: SettingsFeatureOptions) {
             <div class="guardrail-domain-meta">${actionLabel} · ${meta}</div>
           </div>
           <button
-            class="qz-btn qz-btn--secondary qz-btn--danger qz-btn--sm  guardrail-domain-remove"
+            class="zuri-btn zuri-btn--secondary zuri-btn--danger zuri-btn--sm  guardrail-domain-remove"
             type="button"
             ${item.kind === "rate_limit" ? `data-remove-rate-limit-id="${escapeHtmlAttribute(item.id)}"` : `data-remove-guardrail-id="${escapeHtmlAttribute(item.id)}"`}
           >${escapeHtml(t("delete"))}</button>
@@ -1133,7 +1133,7 @@ export function createSettingsFeature(options: SettingsFeatureOptions) {
     const label = preset?.name || t("thisPreset");
     if (!await confirmAction({
       title: t("deletePresetConfirmation", { name: String(label) }),
-      message: t("thisModelPresetWillBeRemovedFromQingzhou"),
+      message: t("thisModelPresetWillBeRemovedFromZuri"),
       confirmLabel: t("delete"),
       tone: "danger",
     })) return;
@@ -1559,7 +1559,7 @@ export function createSettingsFeature(options: SettingsFeatureOptions) {
       return `
         <div class="model-parameter-row" data-model-parameter-id="${escapeHtmlAttribute(row.id)}">
           <input
-            class="qz-field qz-field--mono"
+            class="zuri-field zuri-field--mono"
             type="text"
             value="${escapeHtmlAttribute(row.key)}"
             placeholder="${escapeHtmlAttribute(t("modelParameterKey"))}"
@@ -1573,7 +1573,7 @@ export function createSettingsFeature(options: SettingsFeatureOptions) {
             role="combobox"
           >
           <input
-            class="qz-field qz-field--mono"
+            class="zuri-field zuri-field--mono"
             type="text"
             value="${escapeHtmlAttribute(row.value)}"
             placeholder="${escapeHtmlAttribute(t("modelParameterValue"))}"
@@ -1586,7 +1586,7 @@ export function createSettingsFeature(options: SettingsFeatureOptions) {
             aria-expanded="false"
             role="combobox"
           >
-          <button class="qz-icon-btn qz-icon-btn--sm model-parameter-remove" type="button" data-remove-model-parameter="${escapeHtmlAttribute(row.id)}" aria-label="${escapeHtmlAttribute(t("deleteModelParameter"))}">
+          <button class="zuri-icon-btn zuri-icon-btn--sm model-parameter-remove" type="button" data-remove-model-parameter="${escapeHtmlAttribute(row.id)}" aria-label="${escapeHtmlAttribute(t("deleteModelParameter"))}">
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
               <path d="M4.25 4.25l5.5 5.5M9.75 4.25l-5.5 5.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
             </svg>
@@ -1699,7 +1699,7 @@ export function createSettingsFeature(options: SettingsFeatureOptions) {
     menu.innerHTML = modelParameterSuggestionOptions.map((value, index) => `
       <button
         id="cfg-model-parameter-suggestion-${index}"
-        class="qz-btn qz-btn--ghost qz-menu-item model-parameter-suggestion${index === modelParameterSuggestionActiveIndex ? " active" : ""}"
+        class="zuri-btn zuri-btn--ghost zuri-menu-item model-parameter-suggestion${index === modelParameterSuggestionActiveIndex ? " active" : ""}"
         type="button"
         role="option"
         aria-selected="${index === modelParameterSuggestionActiveIndex ? "true" : "false"}"
@@ -2305,7 +2305,7 @@ export function createSettingsFeature(options: SettingsFeatureOptions) {
       label.className = "provider-option-row";
       const title = document.createElement("span"); title.textContent = option.label;
       const select = document.createElement("select");
-      select.className = "qz-field qz-select";
+      select.className = "zuri-field zuri-select";
       select.dataset.providerOption = option.key;
       select.id = `cfg-provider-option-${option.key}`;
       select.replaceChildren(...option.options.map(choice => new Option(choice.label, choice.value)));
@@ -2713,7 +2713,7 @@ export function createSettingsFeature(options: SettingsFeatureOptions) {
       ({ match } = await request("match_model_capabilities", { model: modelName, provider }, 10000));
     } catch (err) {
       if (seq === modelCapabilityMatchSeq) {
-        console.warn("[轻舟] model capability match failed", err);
+        console.warn("[Zuri] model capability match failed", err);
       }
       return;
     }
@@ -2884,7 +2884,7 @@ export function createSettingsFeature(options: SettingsFeatureOptions) {
       modelListError = product.modelError(provider, err);
       applyModelOptions([]);
       modelInput.removeAttribute("title");
-      console.warn("[轻舟] list models failed", err);
+      console.warn("[Zuri] list models failed", err);
       return null;
     }
   }
@@ -3028,7 +3028,7 @@ export function createSettingsFeature(options: SettingsFeatureOptions) {
     setModelSuggestionsVisible(menu, true);
 
     if (modelListLoading) {
-      menu.innerHTML = `<div class="qz-combobox-empty model-suggestion-empty">${escapeHtml(t("loadingModelList"))}</div>`;
+      menu.innerHTML = `<div class="zuri-combobox-empty model-suggestion-empty">${escapeHtml(t("loadingModelList"))}</div>`;
       input.removeAttribute("aria-activedescendant");
       modelSuggestionActiveIndex = -1;
       return;
@@ -3040,7 +3040,7 @@ export function createSettingsFeature(options: SettingsFeatureOptions) {
         : currentModelOptions.length
           ? (providerPresentation().managedAuth ? t("noMatchingModelsAvailable") : t("noMatchingModelsYouCanEnterANameManually"))
           : (providerPresentation().managedAuth ? providerPresentation().noModels : t("noModelListAvailableYouCanEnterANameManually"));
-      menu.innerHTML = `<div class="qz-combobox-empty model-suggestion-empty" role="option" aria-disabled="true">${escapeHtml(message)}</div>`;
+      menu.innerHTML = `<div class="zuri-combobox-empty model-suggestion-empty" role="option" aria-disabled="true">${escapeHtml(message)}</div>`;
       input.removeAttribute("aria-activedescendant");
       modelSuggestionActiveIndex = -1;
       return;
@@ -3051,17 +3051,17 @@ export function createSettingsFeature(options: SettingsFeatureOptions) {
     }
     menu.innerHTML = filteredModelOptions.map((model, index) => {
       const active = index === modelSuggestionActiveIndex;
-      const meta = model.meta ? `<span class="qz-combobox-option-meta model-suggestion-meta">${escapeHtml(model.meta)}</span>` : "";
+      const meta = model.meta ? `<span class="zuri-combobox-option-meta model-suggestion-meta">${escapeHtml(model.meta)}</span>` : "";
       return `
         <button
           id="cfg-model-option-${index}"
-          class="qz-menu-item qz-combobox-option model-suggestion-item${active ? " active" : ""}"
+          class="zuri-menu-item zuri-combobox-option model-suggestion-item${active ? " active" : ""}"
           type="button"
           role="option"
           aria-selected="${active ? "true" : "false"}"
           data-model-index="${index}"
         >
-          <span class="qz-combobox-option-name model-suggestion-name">${escapeHtml(model.label || model.id)}</span>
+          <span class="zuri-combobox-option-name model-suggestion-name">${escapeHtml(model.label || model.id)}</span>
           ${meta}
         </button>
       `;

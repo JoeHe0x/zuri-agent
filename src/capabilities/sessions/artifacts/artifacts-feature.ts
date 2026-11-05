@@ -298,13 +298,13 @@ function renderArtifactsTranscriptHtml(summary: Summary = {}) {
           </div>
           <div class="artifact-strip-preview" title="${escapeHtmlAttribute(preview)}">${escapeHtml(preview)}</div>
         </div>
-        <button class="qz-icon-btn qz-icon-btn--xs artifact-strip-open" type="button" data-artifact-action="open-panel" data-session-id="${escapeHtmlAttribute(summary.sessionId || "")}" title="${escapeHtmlAttribute(t("openTaskArtifactsAction"))}" aria-label="${escapeHtmlAttribute(t("openTaskArtifactsAction"))}">
+        <button class="zuri-icon-btn zuri-icon-btn--xs artifact-strip-open" type="button" data-artifact-action="open-panel" data-session-id="${escapeHtmlAttribute(summary.sessionId || "")}" title="${escapeHtmlAttribute(t("openTaskArtifactsAction"))}" aria-label="${escapeHtmlAttribute(t("openTaskArtifactsAction"))}">
           <svg viewBox="0 0 16 16" fill="none"><path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>
       </div>
       ${itemRows ? `<div class="artifact-strip-items">${itemRows}</div>` : ""}
       <div class="artifact-strip-actions">
-        <button class="qz-btn qz-btn--ghost qz-btn--inline artifact-solid-btn" type="button" data-artifact-action="open-panel" data-session-id="${escapeHtmlAttribute(summary.sessionId || "")}">${escapeHtml(t("openArtifact"))}</button>
+        <button class="zuri-btn zuri-btn--ghost zuri-btn--inline artifact-solid-btn" type="button" data-artifact-action="open-panel" data-session-id="${escapeHtmlAttribute(summary.sessionId || "")}">${escapeHtml(t("openArtifact"))}</button>
       </div>
     </section>
   `;
@@ -364,7 +364,7 @@ function renderSessionArtifactChip(summary: Summary = {}) {
   const count = Number(summary.total || 0);
   if (!count) return "";
   return `
-    <button class="qz-pill session-artifact-chip" type="button" data-session-action="artifacts" data-id="${escapeHtmlAttribute(summary.sessionId || "")}" title="${escapeHtmlAttribute(t("openTaskArtifactsAction"))}" aria-label="${escapeHtmlAttribute(t("openTaskArtifactCount", { count }))}">
+    <button class="zuri-pill session-artifact-chip" type="button" data-session-action="artifacts" data-id="${escapeHtmlAttribute(summary.sessionId || "")}" title="${escapeHtmlAttribute(t("openTaskArtifactsAction"))}" aria-label="${escapeHtmlAttribute(t("openTaskArtifactCount", { count }))}">
       <span>${escapeHtml(t("artifacts"))}</span>
       <span class="session-artifact-chip-count">${count}</span>
     </button>
@@ -604,7 +604,7 @@ function renderArtifactsPanelShell(sessionId = "") {
   if (!id || !artifactsBodyEl) return;
   const session: Session = sessionState.getRecord(id) || {};
   if (artifactsSessionTitleEl) {
-    artifactsSessionTitleEl.textContent = session.title || (isCurrentSessionId(id) ? getCurrentSessionTitle() : "") || t("qingzhouTask");
+    artifactsSessionTitleEl.textContent = session.title || (isCurrentSessionId(id) ? getCurrentSessionTitle() : "") || t("zuriTask");
   }
   const cachedSummary = getArtifactsPanelCachedSummary(id);
   if (cachedSummary?.total) {
@@ -637,7 +637,7 @@ async function renderArtifactsPanel(sessionId = "", { renderSeq = artifactsPanel
   const session = sessions[id] || {};
   if (session.id) sessionState.mergeRecord(session);
   if (artifactsSessionTitleEl) {
-    artifactsSessionTitleEl.textContent = session.title || t("qingzhouTask");
+    artifactsSessionTitleEl.textContent = session.title || t("zuriTask");
   }
 
   commitArtifactsPanelHtml(renderArtifactsPanelHtml(summary), artifactsPanelRenderSignature(summary));

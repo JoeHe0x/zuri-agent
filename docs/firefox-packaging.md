@@ -15,9 +15,9 @@ Related pages keep their current jobs. [Commands](commands.md) lists the command
 [Firefox capability gap](firefox-capability-gap.md) records the API survey. This page owns how the
 two packages are separated.
 
-The CLI daemon is outside both packages. `npm run qz` and the published `qz` command run
+The CLI daemon is outside both packages. `npm run zuri` and the published `zuri` command run
 [`services/mcp-bridge`](../services/mcp-bridge/README.md). Load and pair steps are in
-[Load qz in Firefox](cli.md#load-qz-in-firefox).
+[Load zuri in Firefox](cli.md#load-zuri-in-firefox).
 
 ## Decision
 
@@ -51,7 +51,7 @@ and rewrites only that output:
 
 | Rewrite | Result in `dist/extension-firefox/` |
 | --- | --- |
-| `firefoxManifest` | Drops `key` and `side_panel`. Drops `debugger`, `desktopCapture`, `offscreen`, and `sidePanel`. Adds `webNavigation`, `webRequest`, and `webRequestBlocking`. Sets `sidebar_action`, moves the suggested key to `_execute_sidebar_action`, and sets `background.scripts` to `background/firefox-boot.js` without `service_worker` (Firefox ignores that key). Points `action.default_icon` and `sidebar_action.default_icon` at `icons/firefox/qz-glyph.svg` and keeps the brand `icons` for about:addons. Sets `browser_specific_settings.gecko`. |
+| `firefoxManifest` | Drops `key` and `side_panel`. Drops `debugger`, `desktopCapture`, `offscreen`, and `sidePanel`. Adds `webNavigation`, `webRequest`, and `webRequestBlocking`. Sets `sidebar_action`, moves the suggested key to `_execute_sidebar_action`, and sets `background.scripts` to `background/firefox-boot.js` without `service_worker` (Firefox ignores that key). Points `action.default_icon` and `sidebar_action.default_icon` at `icons/firefox/zuri-glyph.svg` and keeps the brand `icons` for about:addons. Sets `browser_specific_settings.gecko`. |
 | `rewriteFirefoxSidepanelHtml` | The sidebar document loads `firefox-boot.js` and `firefox-sidebar.css`. |
 | `writeFirefoxSidebarSkin` | Writes `sidepanel/firefox-sidebar.css`. That file has no twin under `src/`. |
 | `rewriteFirefoxLocaleFiles` | Rewrites catalog sentences in the Firefox copy. `src/` locale sources stay on the Chrome wording. |
@@ -80,15 +80,15 @@ Firefox's missing `Tab.pendingUrl` through main-frame request and commit events.
 errors from replaced requests from clearing a newer navigation; commits, errors, no-content responses
 and tab removal clear the pending field. This adapter uses the package's existing permissions.
 The host also sets
-`qzSessionAutomationsEnabled` to false, clears `qingzhou.automation.scheduler`, and arms the
-Firefox MCP wake (`qzFirefoxMcpWake`) before that service worker starts. The wake pings a parent
-API while the CLI connection is enabled and registers `qingzhou-mcp-bridge-reconnect` during
+`zuriSessionAutomationsEnabled` to false, clears `zuri.automation.scheduler`, and arms the
+Firefox MCP wake (`zuriFirefoxMcpWake`) before that service worker starts. The wake pings a parent
+API while the CLI connection is enabled and registers `zuri-mcp-bridge-reconnect` during
 event-page startup. Session automations stay disabled. The boundary is in
 [MCP keepalive and reconnect](firefox-differences.md#mcp-keepalive-and-reconnect). The side panel host does the same for display capture, extension-page
 URLs, and the sidebar palette, and sets the same automations flag.
 `rewriteFirefoxSidepanelHtml` removes the automations tab, the new-automation button, and the
 editor from the Firefox sidebar document. The
-`qzFirefoxHost` and `qzFirefoxSidepanel` flags make that install run once. They are not a second
+`zuriFirefoxHost` and `zuriFirefoxSidepanel` flags make that install run once. They are not a second
 browser switch. Behavior a person can observe is in
 [Session automations](firefox-differences.md#session-automations).
 
@@ -114,9 +114,9 @@ src/icons/firefox/**
 them plus the shared graph. The Firefox build fails when a manifest toolbar or sidebar icon is
 missing from the package.
 
-`icons/firefox/qz-glyph.svg` is the toolbar and sidebar glyph: the Side Panel send-button mark
+`icons/firefox/zuri-glyph.svg` is the toolbar and sidebar glyph: the Side Panel send-button mark
 from `sidepanel.html`, scaled into a 16px box. Keep its path equal to the send mark. Firefox grants
-SVG context paint only to Mozilla extensions, so `context-fill` alone draws nothing for qz. The
+SVG context paint only to Mozilla extensions, so `context-fill` alone draws nothing for zuri. The
 glyph names a fallback fill for each color scheme: `#15141a` for light and `#fbfbfe` for dark.
 Firefox loads the image with the color scheme of the toolbar or sidebar that shows it.
 
@@ -174,10 +174,10 @@ boot files remain the extension importers.
 | `npm run verify:coverage` | Shared suites plus Chrome package suites | The coverage gate. Same suites as `verify` and `verify:chrome`, with `--coverage` |
 | `npm test -- firefox` | Firefox suite | Same suite as `verify:firefox` without the leading typecheck |
 | `npm run release` | `chrome` | `dist/releases/<version>/zuri-agent-extension-<version>.zip` |
-| `npm run release:firefox` | `firefox` | `dist/releases/<version>/firefox/qz-browser-agent-firefox-<version>.xpi` |
+| `npm run release:firefox` | `firefox` | `dist/releases/<version>/firefox/zuri-agent-firefox-<version>.xpi` |
 
 `build:firefox` is the production package you load in Firefox. `verify:firefox` rebuilds a
-development package in that same directory unless `QINGZHOU_FIREFOX_EXTENSION_DIR` is set. A shell
+development package in that same directory unless `ZURI_FIREFOX_EXTENSION_DIR` is set. A shell
 that exports the variable tests the directory as it stands, including a production build left by
 `build:firefox`. Leave the variable unset for the suite's own development build.
 
@@ -215,8 +215,8 @@ with `--browser firefox` and writes the unsigned `.xpi` below.
 The Firefox archive is a separate directory and a separate file:
 
 ```text
-dist/releases/<version>/firefox/qz-browser-agent-firefox-<version>.xpi
-dist/releases/<version>/firefox/qz-browser-agent-firefox-<version>.debug.zip
+dist/releases/<version>/firefox/zuri-agent-firefox-<version>.xpi
+dist/releases/<version>/firefox/zuri-agent-firefox-<version>.debug.zip
 dist/releases/<version>/firefox/version.json
 ```
 
@@ -226,7 +226,7 @@ requires: `manifest.json` is a direct child of the archive, and the parent direc
 The bytes are a zip stored with an `.xpi` name. The archive contains the runtime files from the
 Firefox production build, including the license notices the Chrome release packages. It omits
 `.git`, source files, and `META-INF`. Add-ons Manager adds the signature on upload. The manifest
-keeps `browser_specific_settings.gecko`, including id `qz-browser-agent@heleifz.github.io`, and the
+keeps `browser_specific_settings.gecko`, including id `zuri-agent@heleifz.github.io`, and the
 Firefox permissions from `firefox-manifest.mjs`. There is no `key`. `version.json` records
 `browser: "firefox"` and `geckoId`. The debug zip stays local, as the Chrome debug zip does. The
 version number is the same `manifest.version` as the Chrome archive of that commit. The stores do
@@ -236,7 +236,7 @@ not share an update channel.
 
 | | Chrome | Firefox |
 | --- | --- | --- |
-| Id | `ghbaodmonhcgkfeejcpffknlggbjhjgj`, from `key` | `qz-browser-agent@heleifz.github.io`, from `browser_specific_settings.gecko.id` |
+| Id | `ghbaodmonhcgkfeejcpffknlggbjhjgj`, from `key` | `zuri-agent@heleifz.github.io`, from `browser_specific_settings.gecko.id` |
 | Where it is set | `src/manifest.json` | `FIREFOX_GECKO_ID` in `firefox-manifest.mjs`, applied only to the Firefox output |
 | Minimum browser | Chrome's own | `strict_min_version` `154.0` |
 | Data collection | Chrome Web Store form | `websiteContent` and `browsingActivity` required; `locationInfo` and `bookmarksInfo` optional. `none` is not declared |
@@ -262,14 +262,14 @@ risk, this table shows which suite covers it.
 | Change at risk | Suite |
 | --- | --- |
 | Shared runtime, manifest, locales, content scripts, or `scripts/build-extension.mjs` | `npm run verify`; add `npm run verify:firefox` when Firefox behavior is at risk. The Firefox package compiles the shared graph |
-| Chrome side panel, Playwright, e2e, release, or visual behavior | `npm run verify:chrome`. Set `QINGZHOU_PLAYWRIGHT_WORKERS` for the Chrome run |
+| Chrome side panel, Playwright, e2e, release, or visual behavior | `npm run verify:chrome`. Set `ZURI_PLAYWRIGHT_WORKERS` for the Chrome run |
 | Firefox-only trees, `scripts/firefox-manifest.mjs`, `tests/firefox/**`, `tests/unit/test-firefox-*.mjs` | `npm run verify:firefox` when the Firefox package is at risk. The Chrome package's file set does not include those sources |
 | Product facades under `src/products/` | The same shared-runtime row. Product selection is orthogonal and still ships in both packages |
 
 `npm test -- unit --match firefox` is the inner loop for adapter work. `npm test -- firefox` runs
 the Firefox suite without a fresh typecheck.
 
-A change to the Chrome emit path, including a new field inside the packaged `.qingzhou-build.json`,
+A change to the Chrome emit path, including a new field inside the packaged `.zuri-build.json`,
 is a Chrome package change. Prove the default `npm run build` output against the previous Chrome
 tip when that path is edited. A Firefox-only edit leaves that output byte-identical.
 
@@ -284,7 +284,7 @@ tip when that path is edited. A Firefox-only edit leaves that output byte-identi
 | Product axis | `--product` and `src/products/`, orthogonal to the browser |
 | `build:firefox`, `dev:firefox` | Aliases for `--browser firefox`. `npm run build` and `npm run dev` stay Chrome |
 | `release:firefox` | Unsigned `.xpi` at `dist/releases/<version>/firefox/`, with `manifest.json` at the archive root |
-| Build summary | The log line and `--json` stdout include `browser`. The packaged `.qingzhou-build.json` does not |
+| Build summary | The log line and `--json` stdout include `browser`. The packaged `.zuri-build.json` does not |
 | Checks | Tiered by change size. Broad shared-graph changes run `verify`; `verify:chrome` and `verify:firefox` cover browser-specific risk. Coverage is `verify:coverage` |
 | CI | The separate `firefox-package` job runs `verify:firefox`. The portable job stays an OS matrix for Chrome |
 | Typecheck | One program for the repo |
@@ -295,6 +295,6 @@ tip when that path is edited. A Firefox-only edit leaves that output byte-identi
 | --- | --- |
 | Signing and Add-ons Manager upload | Maintainer steps. The local `.xpi` is the unsigned file AMO signs |
 | CI success upload of `dist/extension-firefox/` | The job already fails the build when Firefox tests fail. A success artifact is extra weight on the workflow |
-| Gecko id confirmation | `qz-browser-agent@heleifz.github.io` stays the id until the first signed upload |
+| Gecko id confirmation | `zuri-agent@heleifz.github.io` stays the id until the first signed upload |
 | `productText` rename | A rename rewrites shared modules and moves the Chrome package hash |
 | Data-collection lists | They stay as declared. `none` stays undeclared |

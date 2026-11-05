@@ -3,7 +3,7 @@
   "tabs.tab": "탭 {tabId}",
   "tabs.current": "현재",
   "tabs.window": "창 {windowId}",
-  "tabs.qingzhouTask": "qz 작업",
+  "tabs.zuriTask": "zuri 작업",
   "tabs.organizedInto": "‘{name}’으로 정리됨",
   "tabs.namedTabCount": "탭: {count} · {name}",
   "tabs.groupedTabs": "그룹으로 묶은 탭: {count}",

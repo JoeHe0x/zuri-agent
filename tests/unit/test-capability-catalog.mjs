@@ -184,7 +184,7 @@ test("the typecheck command checks a capability's default export against its dis
 });
 
 async function fixture(t) {
-  const root = await realpath(await mkdtemp(join(tmpdir(), "qingzhou capability ")));
+  const root = await realpath(await mkdtemp(join(tmpdir(), "zuri capability ")));
   t.after(() => rm(root, { recursive: true, force: true }));
   return root;
 }
@@ -254,12 +254,12 @@ test("a Renderer-only package contributes its stylesheet without an empty UI fac
 
 test("package stylesheet declarations are hoisted ahead of the skin without hardcoded dependency names", async t => {
   const root = await fixture(t);
-  await put(root, "src/sidepanel/sidepanel.html", '<head><link id="qingzhou-sidepanel-skin" rel="stylesheet" href="sidepanel.css"></head><body><!-- capability-ui --></body>');
+  await put(root, "src/sidepanel/sidepanel.html", '<head><link id="zuri-sidepanel-skin" rel="stylesheet" href="sidepanel.css"></head><body><!-- capability-ui --></body>');
   await contribution(root, "src/capabilities/new-ui/ui.ts", "export default {};\n");
   await put(root, "src/capabilities/new-ui/ui.html", '<!-- <link rel="stylesheet" href="ignored.css"> --><link rel="stylesheet" href="./dependency.css"><section>Page</section>');
   const result = await capabilityUiAssets(join(root, "src"));
   const html = result.overrides.get(join(root, "src/sidepanel/sidepanel.html"));
-  assert.match(html, /<head><link rel="stylesheet" href="\.\.\/capabilities\/new-ui\/dependency.css">[\s\S]*id="qingzhou-sidepanel-skin"/);
+  assert.match(html, /<head><link rel="stylesheet" href="\.\.\/capabilities\/new-ui\/dependency.css">[\s\S]*id="zuri-sidepanel-skin"/);
   assert.match(html, /<body><!-- <link rel="stylesheet" href="ignored.css"> --><section>Page<\/section><\/body>/);
   await rm(join(root, "src/capabilities/new-ui"), { recursive: true });
   assert.equal((await capabilityUiAssets(join(root, "src"))).overrides.size, 0);
@@ -267,7 +267,7 @@ test("package stylesheet declarations are hoisted ahead of the skin without hard
 
 test("package HTML rebases its own assets while preserving raw text, anchors and external URLs", async t => {
   const root = await fixture(t);
-  await put(root, "src/sidepanel/sidepanel.html", '<head><link id="qingzhou-sidepanel-skin" href="sidepanel.css"></head><!-- capability-ui -->');
+  await put(root, "src/sidepanel/sidepanel.html", '<head><link id="zuri-sidepanel-skin" href="sidepanel.css"></head><!-- capability-ui -->');
   await contribution(root, "src/capabilities/photos/ui.ts", "export default {};\n");
   await put(root, "src/capabilities/photos/ui.html", `
     <link rel=stylesheet href='./theme.css'>
@@ -305,7 +305,7 @@ test('a package with only embedded Skills is discovered, loaded, and removed wit
   const root = await fixture(t);
   await put(root, 'package.json', '{"type":"module"}');
   await put(root, 'src/shared/main.ts', 'import extensions from "#capabilities/skills"; const skills = []; for (const register of extensions) register({registerSkill: skill => skills.push(skill)}); export {skills};');
-  await contribution(root, 'src/capabilities/guide/skills.ts', 'export default qz => qz.registerSkill({name:"independent-guide",description:"A guide",content:"# Guide"});');
+  await contribution(root, 'src/capabilities/guide/skills.ts', 'export default zuri => zuri.registerSkill({name:"independent-guide",description:"A guide",content:"# Guide"});');
   for (const revision of ['present','removed']) {
     if (revision === 'removed') await rm(join(root,'src/capabilities/guide'), {recursive:true});
     const source = join(root,'src');

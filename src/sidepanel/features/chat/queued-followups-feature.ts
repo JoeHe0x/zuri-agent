@@ -545,9 +545,9 @@ function renderQueuedFollowups() {
           ${isSteering
             ? `<span class="queued-followup-steering-state"><span class="queued-followup-meta">${escapeHtml(meta)}</span></span>`
             : `
-            <button class="qz-btn qz-btn--ghost qz-btn--xs queued-followup-steer" type="button" data-steer-follow-up="${escapeHtml(id)}" title="${tHtml("convertToSteering")}" aria-label="${tHtml("convertToSteering")}"${item.submitting ? " disabled" : ""}>${steerActionIcon()}<span>${tHtml("steer")}</span></button>
+            <button class="zuri-btn zuri-btn--ghost zuri-btn--xs queued-followup-steer" type="button" data-steer-follow-up="${escapeHtml(id)}" title="${tHtml("convertToSteering")}" aria-label="${tHtml("convertToSteering")}"${item.submitting ? " disabled" : ""}>${steerActionIcon()}<span>${tHtml("steer")}</span></button>
           `}
-          <button class="qz-icon-btn qz-icon-btn--xs queued-followup-delete" type="button" ${isSteering ? `data-delete-steering="${escapeHtml(id)}"` : `data-delete-follow-up="${escapeHtml(id)}"`} title="${tHtml("edit")}" aria-label="${tHtml("edit")}"${item.submitting ? " disabled" : ""}>
+          <button class="zuri-icon-btn zuri-icon-btn--xs queued-followup-delete" type="button" ${isSteering ? `data-delete-steering="${escapeHtml(id)}"` : `data-delete-follow-up="${escapeHtml(id)}"`} title="${tHtml("edit")}" aria-label="${tHtml("edit")}"${item.submitting ? " disabled" : ""}>
             <svg viewBox="0 0 16 16" fill="none" aria-hidden="true">
               <path d="M4.75 4.75l6.5 6.5M11.25 4.75l-6.5 6.5" />
             </svg>

@@ -13,7 +13,7 @@ function fixture(t, seed) {
 }
 
 const conversation = content => [{ role: "user", content }];
-const record = transcript => ({ type: "qz-browser-agent-session", version: 4, transcript });
+const record = transcript => ({ type: "zuri-agent-session", version: 4, transcript });
 
 test("saved display snapshot takes precedence over active model history without rewriting storage", async t => {
   const storage = fixture(t, {
@@ -59,7 +59,7 @@ test("stored history reads current content once, including empty overrides and o
 
 test("without a display snapshot, active conversation takes precedence over a legacy record conversation", async t => {
   const storage = fixture(t, {
-    _session_task: { type: "qz-browser-agent-session", version: 3, conversation: conversation("legacy record") },
+    _session_task: { type: "zuri-agent-session", version: 3, conversation: conversation("legacy record") },
     _active_conversation_task: conversation("active conversation"),
   });
   assert.equal((await readStoredTranscript("task"))[0].text, "active conversation");

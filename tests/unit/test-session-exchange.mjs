@@ -300,7 +300,7 @@ function assertImportCapsuleLifecycle() {
   const imported = appendSessionExchangeImportCapsule(conversation, "2026-07-10 10:30:00");
   const capsule = imported.entries.at(-1);
   assert.equal(capsule.message._contextCapsule.reason, SESSION_EXCHANGE_IMPORT_CAPSULE_REASON);
-  assert.match(capsule.message.content, /本对话由外部导出的轻舟会话加载/u);
+  assert.match(capsule.message.content, /本对话由外部导出的Zuri会话加载/u);
   assert.match(capsule.message.content, /技能、工具、数据表、图集、文件/u);
 
   const reexported = createSessionExchangePayload({
@@ -482,16 +482,16 @@ function assertSourceContracts() {
   assert.doesNotMatch(sidepanelJs, /showCaseToast\("会话已导入，可以继续工作。"\)/u);
   assert.match(sidepanelJs, /showCaseToast\(errorMessage\(err, t\("couldNotImportConversation"\)\), \{\s*tone: "error",\s*durationMs: 5(?:000|e3),?\s*\}\);/u);
   assert.match(sidepanelJs, /renderSessionExchangeScript\(exchangePayload\)/u);
-  assert.match(sidepanelHtml, /id="qingzhou-sidepanel-skin"[^>]+data-qingzhou-skin="default"/u);
+  assert.match(sidepanelHtml, /id="zuri-sidepanel-skin"[^>]+data-zuri-skin="default"/u);
   assert.match(sidepanelJs, /loadActiveSidepanelSkin/u);
   assert.doesNotMatch(sidepanelJs, /getURL\("sidepanel\/sidepanel\.css"\)/u);
-  assert.match(sidepanelJs, /id="qingzhou-session-cta" class="qz-btn qz-btn--primary qz-btn--xs session-export-cta"/u);
+  assert.match(sidepanelJs, /id="zuri-session-cta" class="zuri-btn zuri-btn--primary zuri-btn--xs session-export-cta"/u);
   assert.match(sidepanelJs, /\.session-export-continuation\s*\{[\s\S]*?gap:\s*7px/u);
-  assert.doesNotMatch(sidepanelJs, /qingzhou-session-cta-copy|continueConversationHint/u);
+  assert.doesNotMatch(sidepanelJs, /zuri-session-cta-copy|continueConversationHint/u);
   assert.match(sidepanelJs, /SESSION_EXPORT_RUNTIME_SOURCE/u);
-  assert.match(sidepanelJs, /qingzhou:session-export:probe/u);
-  assert.match(sidepanelJs, /button\.setAttribute\("data-qingzhou-session-import", ""\)/u);
-  assert.match(sidepanelJs, /button\.textContent = t\("importQingzhou"\)/u);
+  assert.match(sidepanelJs, /zuri:session-export:probe/u);
+  assert.match(sidepanelJs, /button\.setAttribute\("data-zuri-session-import", ""\)/u);
+  assert.match(sidepanelJs, /button\.textContent = t\("importZuri"\)/u);
   assert.match(sidepanelJs, /cta\.textContent = t\("importing"\)/u);
   assert.match(sidepanelJs, /cta\.textContent = t\("imported"\)/u);
   assert.match(sidepanelJs, /event.type === "session_imported_from_export"/u);
@@ -504,7 +504,7 @@ function assertSourceContracts() {
   assert.deepEqual(bridgeContentScript?.js, ["content/session-export-bridge.js"]);
   assert.match(sessionExportBridge, /document\.addEventListener\("click", handleImportClick, true\)/u);
   assert.match(sessionExportBridge, /if \(!event\.isTrusted\) return;/u);
-  assert.match(sessionExportBridge, /document\.getElementById\(QINGZHOU_SESSION_EXCHANGE_SCRIPT_ID\)/u);
+  assert.match(sessionExportBridge, /document\.getElementById\(ZURI_SESSION_EXCHANGE_SCRIPT_ID\)/u);
   assert.match(sessionExportBridge, /type: "session_export_import_request"/u);
   assert.match(sessionExportBridge, /location\.protocol === "file:"/u);
   assert.match(sessionExportBridge, /const targetOrigin = location\.protocol === "file:" \|\| location\.origin === "null"\s*\?\s*"\*"\s*:\s*location\.origin;/u);

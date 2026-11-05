@@ -225,7 +225,7 @@ function monotonicallyAlignedText(value, reference) {
 }
 
 function frozenSnapshotHtml(value) {
-  const style = "<style data-qz-benchmark-freeze>*,*::before,*::after{animation:none!important;transition:none!important}</style>";
+  const style = "<style data-zuri-benchmark-freeze>*,*::before,*::after{animation:none!important;transition:none!important}</style>";
   const html = String(value || "").replace(
     /<meta\b(?=[^>]*\bhttp-equiv\s*=\s*["']?refresh\b)[^>]*>/gi,
     "",
@@ -345,13 +345,13 @@ async function work() {
         requestAnimationFrame(() => requestAnimationFrame(resolveFrame))
       )));
       const result = await page.evaluate(() => (
-        globalThis.__qingzhouArticleBenchmark.collect(document, { provenance: true })
+        globalThis.__zuriArticleBenchmark.collect(document, { provenance: true })
       ));
       const provenance = result?.diagnostics?.provenance;
       const tree = provenance?.sourceTree?.treeElements;
       const segments = provenance?.sourceTree?.treeTextSegments;
       const forced = result?.diagnostics?.forcedTreeDp;
-      if (provenance?.schema !== "qingzhou.article-extraction-provenance.v1"
+      if (provenance?.schema !== "zuri.article-extraction-provenance.v1"
         || !Array.isArray(tree)
         || !Array.isArray(segments)) {
         throw new Error("instrumented extractor returned incomplete provenance");
@@ -421,7 +421,7 @@ async function work() {
       ]);
       const pageTokens = labelledTree.reduce((sum, element) => sum + element.tokens, 0);
       const record = {
-        schema: "qingzhou.article-extraction-tree-dp-training-page.v2",
+        schema: "zuri.article-extraction-tree-dp-training-page.v2",
         id: `wcxb-${id}`,
         siteId: siteFamily,
         siteFamily,
@@ -443,7 +443,7 @@ async function work() {
           noiseBlocks: truth.ground_truth.without || [],
         },
         gold: {
-          schema: "qingzhou.wcxb-text-alignment-gold.v1",
+          schema: "zuri.wcxb-text-alignment-gold.v1",
           status: "extract",
           method: "exact-substring-or-local-token-sequence",
           elementLocalTokenRecall: ELEMENT_LOCAL_TOKEN_RECALL,
@@ -498,7 +498,7 @@ try {
 }
 
 const report = {
-  schema: "qingzhou.wcxb-tree-dp-training-export.v1",
+  schema: "zuri.wcxb-tree-dp-training-export.v1",
   source,
   sourcePartition: "dev-only",
   sealedTestPath: sealedTest,

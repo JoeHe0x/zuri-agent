@@ -84,7 +84,7 @@ test("config and preset filling retain the endpoint for known and unavailable cu
   await expect(preview).toHaveText("https://native.example/new/v1");
   await page.locator("#cfg-preset").selectOption("standard");
   await expect(preview).toHaveText("http://localhost:1234/v1/messages");
-  await page.evaluate(() => window.__qzEmitPortMessage({ type: "config", config: {
+  await page.evaluate(() => window.__zuriEmitPortMessage({ type: "config", config: {
     provider: "extension-without-endpoint", model: "test-model", providers: [{ id: "extension-without-endpoint", label: "Extension without a URL" }],
   } }));
   await expect(preview).toBeHidden();
@@ -95,7 +95,7 @@ test("refreshed provider metadata hides an already displayed endpoint without ch
   await boot(page, "en", { provider: longProvider.id, model: "configured-model", providers: [...providerMenus.en, longProvider] });
   const preview = page.locator("#cfg-provider-endpoint");
   await expect(preview).toHaveText(longEndpoint);
-  await page.evaluate(config => window.__qzEmitPortMessage({ type: "config", config }), {
+  await page.evaluate(config => window.__zuriEmitPortMessage({ type: "config", config }), {
     provider: longProvider.id, model: "configured-model", providers: [...providerMenus.en, { ...longProvider, hideEndpoint: true }],
   });
   await expect(page.locator("#cfg-provider")).toHaveValue(longProvider.id);

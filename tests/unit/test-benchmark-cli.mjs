@@ -108,19 +108,19 @@ test("real benchmark parsers reject unknown and incomplete options before readin
       assert.ifError(result.error);
       assert.equal(result.status, 1, result.stderr);
       assert.match(result.stderr, /Unknown|requires a value|argument missing|ambiguous/);
-      assert.doesNotMatch(result.stderr, /ENOENT|Chromium|missing qingzhou-session-exchange/);
+      assert.doesNotMatch(result.stderr, /ENOENT|Chromium|missing zuri-session-exchange/);
     }
   }
 });
 
 test("rate command replays an exported fixture locally and honors output options", async t => {
-  const directory = await mkdtemp(join(tmpdir(), "qingzhou-rate-cli-"));
+  const directory = await mkdtemp(join(tmpdir(), "zuri-rate-cli-"));
   t.after(() => rm(directory, { recursive: true, force: true }));
   const file = join(directory, "session with spaces.html");
   const exchange = { session: { title: "CLI fixture", conversation: { entries: [{ message: {
     role: "assistant", content: "Completed", _usage: { total_tokens: 60 },
   } }] }, transcript: [{ type: "assistant", content: "Completed", timestamp: "2026-07-21 10:00:00" }] } };
-  await writeFile(file, `<script id="qingzhou-session-exchange" type="application/json">${JSON.stringify(exchange)}</script>`);
+  await writeFile(file, `<script id="zuri-session-exchange" type="application/json">${JSON.stringify(exchange)}</script>`);
   const result = spawnSync(process.execPath, ["tests/benchmarks/run.mjs", "rate", file, "--no-history", "--rpm", "23", "--output-dir", directory, "--name", "cli-result"], { encoding: "utf8", timeout: CLI_STARTUP_TIMEOUT_MS });
   assert.ifError(result.error);
   assert.equal(result.status, 0, result.stderr);
@@ -133,7 +133,7 @@ test("rate command replays an exported fixture locally and honors output options
 });
 
 async function cliFixture(t) {
-  const root = await mkdtemp(join(tmpdir(), "qingzhou-benchmark-cli-"));
+  const root = await mkdtemp(join(tmpdir(), "zuri-benchmark-cli-"));
   t.after(() => rm(root, { recursive: true, force: true }));
   await mkdir(join(root, "tests/benchmarks/conversation-render"), { recursive: true });
   await mkdir(join(root, "tests/support"), { recursive: true });

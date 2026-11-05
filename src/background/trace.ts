@@ -3,7 +3,7 @@ interface TraceDebug {
   enabled?: boolean; console?: boolean; storage?: boolean; logs: string[];
   clear?(): number; dump?(filter?: string): string; last?(count?: number, filter?: string): string;
 }
-const traceGlobal = globalThis as typeof globalThis & { __qzDebug?: TraceDebug };
+const traceGlobal = globalThis as typeof globalThis & { __zuriDebug?: TraceDebug };
 import { nowBeijingDateTime } from "../shared/time-utils.js";
 import { stringifyJsonSafe } from "../shared/unicode-utils.js";
 
@@ -12,7 +12,7 @@ import { stringifyJsonSafe } from "../shared/unicode-utils.js";
 const TRACE_KEY = "_llm_trace";
 const TRACE_MAX = 1000;
 const TRACE_MEMORY_MAX = 1000;
-const TRACE_DEBUG_GLOBAL_KEY = "__qzDebug";
+const TRACE_DEBUG_GLOBAL_KEY = "__zuriDebug";
 const TRACE_ENABLED = false;
 const TRACE_CONSOLE_ENABLED = false;
 const TRACE_STORAGE_ENABLED = false;

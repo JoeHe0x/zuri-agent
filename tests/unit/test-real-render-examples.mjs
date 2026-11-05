@@ -8,7 +8,7 @@ import { discoverRealExamples } from "../benchmarks/conversation-render/tools/re
 import { benchmarkCommand } from "../benchmarks/run.mjs";
 
 test("private corpus discovers exports deterministically without stub, directories or symlinks", t => {
-  const directory = mkdtempSync(join(tmpdir(), "qz-real-examples-"));
+  const directory = mkdtempSync(join(tmpdir(), "zuri-real-examples-"));
   t.after(() => rmSync(directory, { recursive: true, force: true }));
   for (const name of ["stub.json", "README.md", ".hidden.json", "z.HTML", "a session.json", "b.htm"]) {
     writeFileSync(join(directory, name), "{}");
@@ -19,7 +19,7 @@ test("private corpus discovers exports deterministically without stub, directori
 });
 
 test("stub alone cannot produce a false passing real-corpus run", t => {
-  const directory = mkdtempSync(join(tmpdir(), "qz-empty-examples-"));
+  const directory = mkdtempSync(join(tmpdir(), "zuri-empty-examples-"));
   t.after(() => rmSync(directory, { recursive: true, force: true }));
   writeFileSync(join(directory, "stub.json"), "{}");
   assert.throws(() => discoverRealExamples(directory), /No real examples found/);
@@ -32,7 +32,7 @@ test("real corpus is explicit and preserves benchmark modes and health gates", (
 });
 
 test("Git ignores every private sample path but keeps the synthetic stub and instructions", t => {
-  const repository = mkdtempSync(join(tmpdir(), "qz-ignore-policy-"));
+  const repository = mkdtempSync(join(tmpdir(), "zuri-ignore-policy-"));
   t.after(() => rmSync(repository, { recursive: true, force: true }));
   execFileSync("git", ["init", "--quiet", repository]);
   writeFileSync(join(repository, ".gitignore"), readFileSync(".gitignore"));
@@ -50,11 +50,11 @@ test("Git ignores every private sample path but keeps the synthetic stub and ins
 
 test("viewport corpus is explicit, validates content, and parses HTML as data", async t => {
   const { loadFuzzCorpus } = await import("../support/fuzz-corpus.mjs");
-  const directory = mkdtempSync(join(tmpdir(), "qz-fuzz-corpus-"));
+  const directory = mkdtempSync(join(tmpdir(), "zuri-fuzz-corpus-"));
   t.after(() => rmSync(directory, { recursive: true, force: true }));
   const transcript = [{ type: "tool", name: "read_page", result: {} }];
   writeFileSync(join(directory, "fixture.json"), JSON.stringify({ transcript }));
-  writeFileSync(join(directory, "fixture.html"), `<script>throw new Error("must not execute")</script><script id="qingzhou-session-exchange" type="application/json">${JSON.stringify({ format: "qingzhou.session", version: 1, session: { transcript } })}</script>`);
+  writeFileSync(join(directory, "fixture.html"), `<script>throw new Error("must not execute")</script><script id="zuri-session-exchange" type="application/json">${JSON.stringify({ format: "zuri.session", version: 1, session: { transcript } })}</script>`);
   writeFileSync(join(directory, "corpus.json"), JSON.stringify(["fixture.html", "fixture.json"]));
   assert.equal(loadFuzzCorpus(directory, undefined, ["fixture.json"]).length, 1);
   const [html, json] = loadFuzzCorpus(directory, "corpus.json");

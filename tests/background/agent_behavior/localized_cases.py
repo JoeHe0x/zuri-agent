@@ -15,10 +15,10 @@ Starting at {base_url}/posts?page=1, visit all 3 pages and collect title, author
 Before starting, create the goal. After each durable write to data_store, checkpoint the goal. Before finishing, use list to verify that there are exactly 9 records and no duplicates. Finally, complete the goal and give a brief summary in English.
 """,
         "document_pipeline": """
-Turn the remote text at {base_url}/docs/sample.txt into a qz document summary artifact.
-This task specifically tests the global qingzhou-documents skill: first use load_skill to load qingzhou-documents, then use its document_fetch, document_parse, document_read_chunk, and document_create tools in that order. Do not substitute open_tab, read_article, or save_file.
-Fetch and parse the text, read its first paragraph, and create a txt artifact titled Qingzhou regression document summary without triggering a download.
-Write the workflow result to the qz Data table {table}, using step as the dedupField. Include at least one record with step=document_pipeline_completed and the fileId, docModelId, and artifactId.
+Turn the remote text at {base_url}/docs/sample.txt into a zuri document summary artifact.
+This task specifically tests the global zuri-documents skill: first use load_skill to load zuri-documents, then use its document_fetch, document_parse, document_read_chunk, and document_create tools in that order. Do not substitute open_tab, read_article, or save_file.
+Fetch and parse the text, read its first paragraph, and create a txt artifact titled Zuri regression document summary without triggering a download.
+Write the workflow result to the zuri Data table {table}, using step as the dedupField. Include at least one record with step=document_pipeline_completed and the fileId, docModelId, and artifactId.
 Before finishing, verify that the table contains at least 1 record. Give your final response in English.
 """,
         "parallel_subtasks": """
@@ -28,7 +28,7 @@ Check these three independent local branches in parallel. Inspect the first resu
 - Gamma: {base_url}/parallel/gamma
 
 Use the exact fields branch, code, status, and url for each result. For an available branch, preserve the code and status values exactly as shown on its page. For an unavailable branch, set status=unavailable and code="" (an empty string); do not guess its code.
-Write the three final results to the qz Data table {table}, using branch as the unique key. Before finishing, verify that there are exactly 3 rows. Give your final response in English.
+Write the three final results to the zuri Data table {table}, using branch as the unique key. Before finishing, verify that there are exactly 3 rows. Give your final response in English.
 """,
     },
     "ja": {
@@ -39,8 +39,8 @@ Write the three final results to the qz Data table {table}, using branch as the 
 """,
         "document_pipeline": """
 {base_url}/docs/sample.txt のテキストを取得し、軽舟の文書要約アーティファクトを作成してください。
-これはグローバル Skill「qingzhou-documents」の動作確認です。まず load_skill で qingzhou-documents を読み込み、その document_fetch、document_parse、document_read_chunk、document_create をこの順番で使ってください。open_tab、read_article、save_file で代用しないでください。
-テキストを取得・解析して最初の段落を読み、タイトルが Qingzhou regression document summary の txt アーティファクトを作成してください。ダウンロードは実行しないでください。
+これはグローバル Skill「zuri-documents」の動作確認です。まず load_skill で zuri-documents を読み込み、その document_fetch、document_parse、document_read_chunk、document_create をこの順番で使ってください。open_tab、read_article、save_file で代用しないでください。
+テキストを取得・解析して最初の段落を読み、タイトルが Zuri regression document summary の txt アーティファクトを作成してください。ダウンロードは実行しないでください。
 処理結果を軽舟の Data テーブル {table} に保存し、dedupField は step にしてください。少なくとも step=document_pipeline_completed のレコードを 1 件作成し、fileId、docModelId、artifactId を含めてください。
 完了前にテーブルに 1 件以上あることを確認してください。最後の回答は日本語でお願いします。
 """,
@@ -61,10 +61,10 @@ Write the three final results to the qz Data table {table}, using branch as the 
 أنشئ الهدف باستخدام create قبل بدء العمل. بعد كل كتابة دائمة إلى data_store، سجل نقطة تقدم باستخدام checkpoint. قبل الانتهاء، استخدم list للتحقق من وجود 9 سجلات بالضبط دون تكرار. أخيرًا، أكمل الهدف باستخدام complete وقدم ملخصًا موجزًا بالعربية.
 """,
         "document_pipeline": """
-حوّل النص المتاح على {base_url}/docs/sample.txt إلى ملف يلخص المستند داخل qz.
-هذه المهمة تختبر تحديدًا المهارة العامة qingzhou-documents: ابدأ بتحميل qingzhou-documents باستخدام load_skill، ثم استخدم أدواتها document_fetch وdocument_parse وdocument_read_chunk وdocument_create بهذا الترتيب. لا تستبدلها بأدوات open_tab أو read_article أو save_file.
-اجلب النص وحلله واقرأ فقرته الأولى، ثم أنشئ ملف txt بعنوان Qingzhou regression document summary دون بدء تنزيله.
-احفظ نتيجة سير العمل في جدول Data داخل qz المسمى {table}، واستخدم step لحقل dedupField. أضف سجلًا واحدًا على الأقل يحتوي على step=document_pipeline_completed وحقول fileId وdocModelId وartifactId.
+حوّل النص المتاح على {base_url}/docs/sample.txt إلى ملف يلخص المستند داخل zuri.
+هذه المهمة تختبر تحديدًا المهارة العامة zuri-documents: ابدأ بتحميل zuri-documents باستخدام load_skill، ثم استخدم أدواتها document_fetch وdocument_parse وdocument_read_chunk وdocument_create بهذا الترتيب. لا تستبدلها بأدوات open_tab أو read_article أو save_file.
+اجلب النص وحلله واقرأ فقرته الأولى، ثم أنشئ ملف txt بعنوان Zuri regression document summary دون بدء تنزيله.
+احفظ نتيجة سير العمل في جدول Data داخل zuri المسمى {table}، واستخدم step لحقل dedupField. أضف سجلًا واحدًا على الأقل يحتوي على step=document_pipeline_completed وحقول fileId وdocModelId وartifactId.
 قبل الانتهاء، تحقق من وجود 1 سجل على الأقل في الجدول. اكتب ردك النهائي بالعربية.
 """,
         "parallel_subtasks": """
@@ -74,7 +74,7 @@ Write the three final results to the qz Data table {table}, using branch as the 
 - Gamma: {base_url}/parallel/gamma
 
 استخدم أسماء الحقول branch وcode وstatus وurl لكل نتيجة. للفروع المتاحة، احتفظ بقيمتي code وstatus كما تظهران في الصفحة تمامًا. إذا كان الفرع غير متاح، فاكتب status=unavailable وcode="" (سلسلة نصية فارغة)، ولا تخمن قيمة code.
-احفظ النتائج النهائية الثلاث في جدول Data داخل qz المسمى {table}، واستخدم branch مفتاحًا فريدًا. قبل الانتهاء، تحقق من وجود 3 صفوف بالضبط. اكتب ردك النهائي بالعربية.
+احفظ النتائج النهائية الثلاث في جدول Data داخل zuri المسمى {table}، واستخدم branch مفتاحًا فريدًا. قبل الانتهاء، تحقق من وجود 3 صفوف بالضبط. اكتب ردك النهائي بالعربية.
 """,
     },
 }

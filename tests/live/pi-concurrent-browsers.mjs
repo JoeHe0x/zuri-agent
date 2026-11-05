@@ -15,21 +15,21 @@ import { acceptDataDisclosure } from "../support/data-consent.mjs";
 
 // Three independent Pi processes delegate through one isolated service and three real Profiles.
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
-const extension = process.env.QINGZHOU_TEST_EXTENSION_DIR;
-assert.ok(extension && existsSync(join(extension, "manifest.json")), "Set QINGZHOU_TEST_EXTENSION_DIR to a current production build");
-const apiKey = readTestApiKey("deepseek", { keyFile: process.env.QINGZHOU_DEEPSEEK_AK_FILE || "" });
-const model = process.env.QINGZHOU_DEEPSEEK_MODEL || "deepseek-flash";
+const extension = process.env.ZURI_TEST_EXTENSION_DIR;
+assert.ok(extension && existsSync(join(extension, "manifest.json")), "Set ZURI_TEST_EXTENSION_DIR to a current production build");
+const apiKey = readTestApiKey("deepseek", { keyFile: process.env.ZURI_DEEPSEEK_AK_FILE || "" });
+const model = process.env.ZURI_DEEPSEEK_MODEL || "deepseek-flash";
 const output = join(root, "tests/results/final-validation", `pi-concurrent-${new Date().toISOString().replace(/[:.]/g, "-")}`);
-const temporary = await mkdtemp(join(tmpdir(), "qz-three-pi-"));
+const temporary = await mkdtemp(join(tmpdir(), "zuri-three-pi-"));
 const stateDir = join(temporary, "service"), bin = join(temporary, "bin");
-const skill = join(root, "skills/qz-browser-agent/SKILL.md"), cli = join(root, "services/mcp-bridge/src/bin.mjs");
+const skill = join(root, "skills/zuri-agent/SKILL.md"), cli = join(root, "services/mcp-bridge/src/bin.mjs");
 for (const path of [output, stateDir, bin]) mkdirSync(path, { recursive: true, mode: 0o700 });
 const clean = value => String(value).split(apiKey).join("[redacted]");
 const save = (name, value) => {
   const path = join(output, name); mkdirSync(dirname(path), { recursive: true, mode: 0o700 });
   writeFileSync(path, clean(typeof value === "string" ? value : JSON.stringify(value, null, 2)), { mode: 0o600 });
 };
-writeFileSync(join(bin, "qz"), `#!${process.execPath}
+writeFileSync(join(bin, "zuri"), `#!${process.execPath}
 import { spawn } from 'node:child_process';
 import { appendFileSync } from 'node:fs';
 const args=process.argv.slice(2), startedAt=Date.now();
@@ -41,12 +41,12 @@ child.on('error',e=>{console.error(e.message);process.exitCode=1});
 child.on('close',code=>{
  const entry=JSON.stringify({startedAt,finishedAt:Date.now(),args,code,stdout,stderr});
  const key=process.env.DEEPSEEK_API_KEY;
- appendFileSync(process.env.QZ_PI_TRACE,key?entry.split(key).join('[redacted]')+'\\n':entry+'\\n');
+ appendFileSync(process.env.ZURI_PI_TRACE,key?entry.split(key).join('[redacted]')+'\\n':entry+'\\n');
  process.exitCode=code??1;
 });
 `, { mode: 0o700 });
-const baseEnv = { ...process.env, PATH: `${bin}:${dirname(process.execPath)}:${process.env.PATH}`, QZ_STATE_DIR: stateDir,
-  PI_OFFLINE: "1", PI_TELEMETRY: "0", NO_COLOR: "1", QZ_PI_TRACE: join(output, "harness-cli.jsonl") };
+const baseEnv = { ...process.env, PATH: `${bin}:${dirname(process.execPath)}:${process.env.PATH}`, ZURI_STATE_DIR: stateDir,
+  PI_OFFLINE: "1", PI_TELEMETRY: "0", NO_COLOR: "1", ZURI_PI_TRACE: join(output, "harness-cli.jsonl") };
 for (const name of Object.keys(baseEnv)) if (/(?:API_KEY|TOKEN|SECRET|PASSWORD)$/i.test(name)) delete baseEnv[name];
 delete baseEnv.NODE_OPTIONS; delete baseEnv.NODE_PATH;
 const cases = [
@@ -80,7 +80,7 @@ const report = { ok: false, startedAt: new Date().toISOString(), output, model, 
   extensionSha256: createHash("sha256").update(readFileSync(join(extension, "background/service-worker.js"))).digest("hex"),
   skillSha256: createHash("sha256").update(readFileSync(skill)).digest("hex"),
   agentTools: ["read", "bash"], agents: [], phases: [], network: [], checks: [], cleanup: {}, limitations: [
-    "qz on the isolated PATH runs the current unpublished CLI source; this does not test a published npm artifact.",
+    "zuri on the isolated PATH runs the current unpublished CLI source; this does not test a published npm artifact.",
     "The harness initializes first-use consent and DeepSeek settings. The first three Pi processes each perform URL pairing using shell commands. The last two reuse one explicitly selected Profile.",
     "Prompts supply known Profile paths and browser identifiers; this tests real concurrent use, not autonomous discovery of a binding strategy.",
     "Acceptance compares selected source facts and checks task isolation; it does not independently certify every sentence in model output.",
@@ -109,8 +109,8 @@ async function command(executable, args, { env = baseEnv, cwd = temporary, timeo
     });
   });
 }
-async function qz(args) {
-  const result = await command(join(bin, "qz"), [...args, "--json"]);
+async function zuri(args) {
+  const result = await command(join(bin, "zuri"), [...args, "--json"]);
   assert.equal(result.code, 0, result.stderr || result.stdout); assert.equal(result.value?.ok, true, result.stdout);
   return result.value.result;
 }
@@ -128,7 +128,7 @@ async function runPi(browser, spec) {
   const binding = spec.shared
     ? `This Profile is already connected as ${browserName}, UUID ${browser.uuid}. Read browsers --json and verify this exact name/UUID. Reuse that connection without renaming, re-pairing or stopping it. Another Pi is working concurrently in the SAME Profile; create only your own task and follow up only your own task ID.`
     : `First obtain a pairing URL with connect --no-open --name ${browserName} --json, then open that exact URL by launching the executable with --user-data-dir for your exact directory. Read browsers --json, match the exact identifier ${browserName}, and retain that entry's clientId UUID for every task command. Do not infer ownership from before/after list differences or select another online browser.`;
-  const prompt = `Use the qz-browser-agent Skill to delegate one browser research task and one follow-up. Your only selected Chrome data directory is ${JSON.stringify(browser.profile)}. Its browser identifier is ${JSON.stringify(browserName)}; that identifier belongs to this Profile, not to you. The extension, first-use notice and DeepSeek model are configured. qz and Node are on PATH; use qz instead of npx for this unpublished build. Browser executable: ${JSON.stringify(browser.launches[0].executable)}.
+  const prompt = `Use the zuri-agent Skill to delegate one browser research task and one follow-up. Your only selected Chrome data directory is ${JSON.stringify(browser.profile)}. Its browser identifier is ${JSON.stringify(browserName)}; that identifier belongs to this Profile, not to you. The extension, first-use notice and DeepSeek model are configured. zuri and Node are on PATH; use zuri instead of npx for this unpublished build. Browser executable: ${JSON.stringify(browser.launches[0].executable)}.
 ${binding} Check settings for this UUID and retain it on every task command.
 Create this task once: ${JSON.stringify(`${spec.task} Source: ${spec.source} Include ${spec.marker}_INITIAL in your final answer.`)}
 Save its returned task ID, use bounded watches, and review the completed answer. Then send this follow-up to the SAME task ID and UUID: ${JSON.stringify(`${spec.followup} Include ${spec.marker}_FOLLOWUP in your final answer.`)}
@@ -140,9 +140,9 @@ Wait for the follow-up to complete and report the findings, source links, browse
     const result = await command(piExecutable, ["--offline", "--no-extensions", "--no-context-files", "--no-prompt-templates", "--no-themes", "--no-skills", "--skill", skill,
       "--tools", "read,bash", "--provider", "deepseek", "--model", model, "--thinking", "off", "--mode", "json", "--print",
       "--append-system-prompt", `Write scratch files in ${work}.`, "--session-dir", sessions, "--session-id", entry.piSessionId,
-      "--name", `qz concurrent ${spec.name}`, prompt], {
+      "--name", `zuri concurrent ${spec.name}`, prompt], {
       cwd: work, timeout: 10 * 60000,
-      env: { ...baseEnv, PI_CODING_AGENT_DIR: config, QZ_PI_TRACE: join(output, spec.name, "cli.jsonl"), DEEPSEEK_API_KEY: apiKey },
+      env: { ...baseEnv, PI_CODING_AGENT_DIR: config, ZURI_PI_TRACE: join(output, spec.name, "cli.jsonl"), DEEPSEEK_API_KEY: apiKey },
       onLine(line) {
         appendFileSync(join(output, spec.name, "pi.jsonl"), clean(line) + "\n");
         try { const event = JSON.parse(clean(line)); events.push(event); if (event.type === "tool_execution_start") log("pi-tool", { name: spec.name, tool: event.toolName }); } catch {}
@@ -153,14 +153,14 @@ Wait for the follow-up to complete and report the findings, source links, browse
     entry.final = events.filter(event => event.type === "message_end" && event.message?.role === "assistant")
       .flatMap(event => event.message.content.filter(item => item.type === "text").map(item => item.text)).at(-1);
     assert.equal(result.expired, false); assert.equal(result.code, 0, result.stderr);
-    assert.ok(entry.tools.some(tool => tool.name === "read" && String(tool.args.path || tool.args.file_path || "").endsWith("qz-browser-agent/SKILL.md")), "each Pi reads the current Skill");
+    assert.ok(entry.tools.some(tool => tool.name === "read" && String(tool.args.path || tool.args.file_path || "").endsWith("zuri-agent/SKILL.md")), "each Pi reads the current Skill");
     if (!spec.shared) assert.ok(entry.tools.some(tool => tool.name === "bash" && String(tool.args.command).includes("--user-data-dir")), "each initial Pi launches its own selected Profile");
     entry.ok = true;
   } catch (error) { entry.ok = false; entry.error = clean(error.stack || error); }
   finally { clearInterval(heartbeat); entry.finishedAt = new Date().toISOString(); log("pi-finished", { name: spec.name, ok: entry.ok }); }
 }
 async function fullSnapshot(uuid, sessionId) {
-  return callTool(daemon.endpoint, "qingzhou_get_session_snapshot", { clientId: uuid, sessionId, compact: false, tail: false, includeArtifacts: true }, { timeoutMs: 25000 });
+  return callTool(daemon.endpoint, "zuri_get_session_snapshot", { clientId: uuid, sessionId, compact: false, tail: false, includeArtifacts: true }, { timeoutMs: 25000 });
 }
 function sourceSeen(browser, source) {
   const expected = new URL(source); expected.hash = "";
@@ -175,7 +175,7 @@ function sourceSeen(browser, source) {
 }
 async function validateAgent(browser, spec) {
   const browserName = spec.browserName || spec.name, entry = report.agents.find(agent => agent.name === spec.name);
-  const selected = (await qz(["browsers"])).browsers.find(client => client.name === browserName);
+  const selected = (await zuri(["browsers"])).browsers.find(client => client.name === browserName);
   assert.ok(selected); assert.equal(selected.clientId, browser.uuid); assert.equal(selected.online, true);
   const commands = readFileSync(join(output, spec.name, "cli.jsonl"), "utf8").trim().split("\n").map(line => JSON.parse(line));
   if (!spec.shared) assert.ok(commands.some(item => item.args[0] === "connect" && item.code === 0
@@ -256,10 +256,10 @@ try {
     assert.equal(local.result.state, "disconnected"); browser.uuid = local.result.clientId;
     await browser.closeExtensionPages();
   }
-  assert.equal((await qz(["status"])).connected, false, "the harness leaves all three Profiles unpaired");
+  assert.equal((await zuri(["status"])).connected, false, "the harness leaves all three Profiles unpaired");
   const initial = await runPhase("three-pi-three-profiles", browsers.map((browser, index) => ({ browser, spec: cases[index] })), async completed => {
     for (const [index, own] of completed.entries()) {
-      const listed = await qz(["tasks", "--client", own.clientId, "--limit", "500"]);
+      const listed = await zuri(["tasks", "--client", own.clientId, "--limit", "500"]);
       assert.deepEqual(listed.sessions.filter(item => item.id !== "0").map(item => item.id), [own.sessionId]);
       for (const other of browsers.filter(browser => browser.uuid !== own.clientId)) {
         const outside = await fullSnapshot(other.uuid, own.sessionId);
@@ -272,7 +272,7 @@ try {
   await runPhase("two-pi-one-profile", sharedCases.map(spec => ({ browser: browsers[0], spec })), async completed => {
     assert.notEqual(completed[0].sessionId, completed[1].sessionId);
     assert.equal(completed[0].clientId, completed[1].clientId);
-    const listed = await qz(["tasks", "--client", browsers[0].uuid, "--limit", "500"]);
+    const listed = await zuri(["tasks", "--client", browsers[0].uuid, "--limit", "500"]);
     assert.deepEqual(listed.sessions.filter(item => item.id !== "0").map(item => item.id).sort(), [initial[0].sessionId, ...completed.map(item => item.sessionId)].sort());
     for (const own of initial) {
       const after = await fullSnapshot(own.clientId, own.sessionId);

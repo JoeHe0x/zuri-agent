@@ -82,9 +82,9 @@ test("sidebar open outside a user gesture explains the failure and does not retr
   }
   assert.match(errors.lines[0], /firefox sidebarAction failed \(api\): sidebarAction\.open may only be called from a user input handler/);
   assert.match(errors.lines[1], /firefox sidebarAction failed \(toolbar\): sidebarAction\.open may only be called from a user input handler/);
-  assert.equal(host.qzFirefoxSidebar.attempts, 2);
-  assert.equal(host.qzFirefoxSidebar.refused, 2);
-  assert.equal(host.qzFirefoxSidebar.lastSource, "toolbar");
+  assert.equal(host.zuriFirefoxSidebar.attempts, 2);
+  assert.equal(host.zuriFirefoxSidebar.refused, 2);
+  assert.equal(host.zuriFirefoxSidebar.lastSource, "toolbar");
 });
 
 test("an import outside a user gesture points at the toolbar icon and keeps the imported session", async () => {
@@ -114,10 +114,10 @@ test("an import outside a user gesture points at the toolbar icon and keeps the 
     assert.deepEqual(createdTabs, []);
     assert.deepEqual(opens, [0]);
     assert.deepEqual(badges, ["!"]);
-    assert.deepEqual(titles, ["qz: click to open the sidebar"]);
-    assert.equal(notes[0].id, "qz-open-sidebar");
+    assert.deepEqual(titles, ["zuri: click to open the sidebar"]);
+    assert.equal(notes[0].id, "zuri-open-sidebar");
     assert.equal(Object.hasOwn(notes[0].options, "requireInteraction"), false);
-    assert.equal(notes[0].options.message, "Click the qz icon in the toolbar to view.");
+    assert.equal(notes[0].options.message, "Click the zuri icon in the toolbar to view.");
     assert.equal(/notification/i.test(notes[0].options.message), false);
     assert.equal(notes[0].options.iconUrl, "moz-extension://uuid/icons/icon128.png");
 
@@ -125,16 +125,16 @@ test("an import outside a user gesture points at the toolbar icon and keeps the 
     for (let step = 0; step < 4; step += 1) await Promise.resolve();
     assert.equal(notes.filter(item => item.id).length, 1);
 
-    prompt.click("qz-open-sidebar");
+    prompt.click("zuri-open-sidebar");
     await settle();
     assert.deepEqual(opens, [0, 0, 0]);
     assert.equal(notes.filter(item => item.id).length, 1, "a notification click never raises another notification");
-    assert.equal(notes.at(-1).clear, "qz-open-sidebar");
+    assert.equal(notes.at(-1).clear, "zuri-open-sidebar");
     assert.equal(badges.at(-1), "!", "the badge stays until the sidebar opens");
     assert.deepEqual(prompt.focused, [4]);
-    assert.equal(host.qzFirefoxSidebar.notificationClicks, 1);
-    assert.equal(host.qzFirefoxSidebar.lastSource, "notification");
-    assert.equal(host.qzFirefoxSidebar.lastError, "sidebarAction.open may only be called from a user input handler");
+    assert.equal(host.zuriFirefoxSidebar.notificationClicks, 1);
+    assert.equal(host.zuriFirefoxSidebar.lastSource, "notification");
+    assert.equal(host.zuriFirefoxSidebar.lastError, "sidebarAction.open may only be called from a user input handler");
     assert.match(errors.lines.at(-1), /firefox sidebarAction failed \(notification\): sidebarAction\.open may only be called from a user input handler/);
 
     prompt.allowOpen = true;
@@ -159,15 +159,15 @@ test("a sidebar open inside a notification click logs the real error and raises 
     browser.notifications.onClicked.addListener(() => {
       void browser.sidePanel.open({ windowId: 4 }).catch(() => {});
     });
-    prompt.click("qz_completed_root_run-1");
+    prompt.click("zuri_completed_root_run-1");
     await settle();
     assert.deepEqual(notes, []);
     assert.deepEqual(badges, ["!"]);
-    assert.deepEqual(titles, ["qz: click to open the sidebar"]);
-    assert.equal(host.qzFirefoxSidebar.refused, 1);
-    assert.equal(host.qzFirefoxSidebar.lastSource, "notification");
-    assert.equal(host.qzFirefoxSidebar.prompts, 1);
-    assert.equal(host.qzFirefoxSidebar.notified, 0);
+    assert.deepEqual(titles, ["zuri: click to open the sidebar"]);
+    assert.equal(host.zuriFirefoxSidebar.refused, 1);
+    assert.equal(host.zuriFirefoxSidebar.lastSource, "notification");
+    assert.equal(host.zuriFirefoxSidebar.prompts, 1);
+    assert.equal(host.zuriFirefoxSidebar.notified, 0);
     assert.match(errors.lines[0], /\(notification\): sidebarAction\.open may only be called from a user input handler/);
 
     await assert.rejects(browser.sidePanel.open({ windowId: 4 }), /toolbar button/);
@@ -193,15 +193,15 @@ test("opening the sidebar by any route clears the badge and lets a later import 
     assert.deepEqual(badges, ["!"]);
     prompt.connect({ name: "sidepanel", sender: { url: "moz-extension://uuid/sidepanel/sidepanel.html?embedded=1" } });
     assert.deepEqual(badges, ["!", ""]);
-    assert.deepEqual(titles, ["qz: click to open the sidebar", null]);
-    assert.equal(notes.at(-1).clear, "qz-open-sidebar");
+    assert.deepEqual(titles, ["zuri: click to open the sidebar", null]);
+    assert.equal(notes.at(-1).clear, "zuri-open-sidebar");
 
     await assert.rejects(browser.sidePanel.open({ windowId: 4 }), /toolbar button/);
     await settle();
     assert.equal(notes.filter(item => item.id).length, 2);
     assert.equal(badges.at(-1), "!");
-    assert.equal(host.qzFirefoxSidebar.prompts, 2);
-    assert.equal(host.qzFirefoxSidebar.notified, 2);
+    assert.equal(host.zuriFirefoxSidebar.prompts, 2);
+    assert.equal(host.zuriFirefoxSidebar.notified, 2);
   } finally {
     errors.restore();
   }
@@ -215,16 +215,16 @@ test("a refused open while the sidebar is already showing leaves no badge or not
   try {
     installWorkspacePanel(browser, host);
     await assert.rejects(browser.sidePanel.open({ windowId: 4 }), /toolbar button/);
-    prompt.click("qz_completed_root_run-1");
+    prompt.click("zuri_completed_root_run-1");
     await settle();
   } finally {
     errors.restore();
   }
   assert.deepEqual(badges, []);
   assert.deepEqual(notes, []);
-  assert.equal(host.qzFirefoxSidebar.refused, 1);
-  assert.equal(host.qzFirefoxSidebar.prompts, 0);
-  assert.equal(host.qzFirefoxSidebar.notificationClicks, 1);
+  assert.equal(host.zuriFirefoxSidebar.refused, 1);
+  assert.equal(host.zuriFirefoxSidebar.prompts, 0);
+  assert.equal(host.zuriFirefoxSidebar.notificationClicks, 1);
   assert.match(errors.lines[0], /\(api\): sidebarAction\.open may only be called from a user input handler/);
 });
 
@@ -238,9 +238,9 @@ test("the sidebar prompt uses Chinese when the Firefox UI language is Chinese", 
   } finally {
     errors.restore();
   }
-  assert.equal(notes[0].options.title, "轻舟");
-  assert.equal(notes[0].options.message, "点击工具栏中的轻舟图标查看。");
-  assert.deepEqual(titles, ["轻舟：点击打开侧边栏"]);
+  assert.equal(notes[0].options.title, "Zuri");
+  assert.equal(notes[0].options.message, "点击工具栏中的Zuri图标查看。");
+  assert.deepEqual(titles, ["Zuri：点击打开侧边栏"]);
 });
 
 function sidebarPromptBrowser({ language = "en-US" } = {}) {
@@ -314,7 +314,7 @@ function captureErrors() {
 
 test("initiatorDomains use the moz-extension host on Firefox and stay unchanged on Chrome", async () => {
   const seen = [];
-  const firefox = rulesChrome("qz-browser-agent@heleifz.github.io", "moz-extension://uuid/", seen);
+  const firefox = rulesChrome("zuri-agent@heleifz.github.io", "moz-extension://uuid/", seen);
   installInitiatorRewrite(firefox);
   await firefox.declarativeNetRequest.updateSessionRules({ addRules: [{ id: 1, condition: { initiatorDomains: [firefox.runtime.id] } }] });
   assert.deepEqual(seen[0].addRules[0].condition.initiatorDomains, ["uuid"]);
@@ -470,7 +470,7 @@ test("a completion notification is created without requireInteraction and its cl
   assert.equal(seen[0].priority, 2);
   assert.equal(seen[0].title.length > 0, true);
   assert.equal(seen[0].message, "Trip");
-  const click = notifier.handleClick("qz_completed_root_run-1");
+  const click = notifier.handleClick("zuri_completed_root_run-1");
   assert.deepEqual(opens, [0], "the notification click calls sidebarAction.open with no arguments");
   assert.equal(await click, true);
 });
@@ -697,7 +697,7 @@ test("the debugger shim reports frames, isolated contexts, clicks, and network b
   };
   const networkListeners = {};
   const browser = {
-    runtime: { id: "qz-browser-agent@heleifz.github.io", onMessage: { addListener() {} } },
+    runtime: { id: "zuri-agent@heleifz.github.io", onMessage: { addListener() {} } },
     tabs: { onRemoved: { addListener(listener) { browser.removed = listener; } }, async get() { return { windowId: 1, url: "https://example.test/" }; } },
     webNavigation: {
       async getAllFrames() { return [{ frameId: 0, parentFrameId: -1, url: "https://example.test/" }, { frameId: 7, parentFrameId: 0, url: "https://other.test/frame" }]; },
@@ -731,7 +731,7 @@ test("the debugger shim reports frames, isolated contexts, clicks, and network b
     assert.equal(attached.source.sessionId, undefined);
     await browser.debugger.sendCommand({ tabId: 3 }, "Runtime.enable");
     const isolated = events.find(event => event.method === "Runtime.executionContextCreated" && event.params.context.auxData.type === "isolated");
-    assert.equal(isolated.params.context.origin, "chrome-extension://qz-browser-agent@heleifz.github.io");
+    assert.equal(isolated.params.context.origin, "chrome-extension://zuri-agent@heleifz.github.io");
     const agent = await browser.debugger.sendCommand({ tabId: 3 }, "Runtime.evaluate", { expression: "navigator.userAgent", returnByValue: true });
     assert.match(agent.result.value, /Chrome\/131\.0\.0\.0/);
     const root = await browser.debugger.sendCommand({ tabId: 3 }, "DOM.getDocument", { depth: 0 });
@@ -892,7 +892,7 @@ test("duplicate iframe src values follow the sibling index", async () => {
     assert.equal((await owner("5")).backendNodeId, 2);
     assert.equal((await owner("6")).backendNodeId, 3);
     assert.equal((await owner("7")).backendNodeId, 4);
-    delete globalThis.__qzFirefoxPage;
+    delete globalThis.__zuriFirefoxPage;
     frames.splice(0, frames.length, iframe("https://unique.test/only"), iframe("https://other.test/widget"), iframe("https://other.test/widget"));
     listed = [
       { frameId: 0, parentFrameId: -1, url: "https://example.test/" },
@@ -1094,7 +1094,7 @@ test("the accessibility walk names shadow and nested-frame boundaries", async ()
     assert.ok(tree.nodes.some(node => values(node).includes("nested frame has no document")));
     assert.equal(tree.nodes.some(node => values(node).includes("nested frame document is not included")), false);
     assert.ok(tree.nodes.some(node => node.role.value === "link"));
-    delete globalThis.__qzFirefoxPage;
+    delete globalThis.__zuriFirefoxPage;
     const button = {
       nodeName: "BUTTON", nodeType: 1, textContent: "Go",
       children: [{ nodeName: "SPAN", nodeType: 1, children: [], childNodes: [], getAttribute() { return null; }, textContent: "Go" }],
@@ -1120,7 +1120,7 @@ test("Runtime.disable leaves the session hook enabled", async () => {
   assert.deepEqual(await browser.debugger.sendCommand({ tabId: 3 }, "Runtime.disable"), {});
   const agent = await browser.debugger.sendCommand({ tabId: 3 }, "Runtime.evaluate", { expression: "navigator.userAgent", returnByValue: true });
   assert.match(agent.result.value, /Chrome\/131\.0\.0\.0/);
-  onMessage({ type: "qz-firefox-console", record: { kind: "console", type: "log", args: ["still"] } }, { tab: { id: 3 } });
+  onMessage({ type: "zuri-firefox-console", record: { kind: "console", type: "log", args: ["still"] } }, { tab: { id: 3 } });
   assert.equal(events.filter(event => event.method === "Runtime.consoleAPICalled").length, 1);
 });
 
@@ -1316,8 +1316,8 @@ test("isolated content calls run without compiling a function", async () => {
     compiled += 1;
     return nativeFunction(...args);
   };
-  globalThis.chrome = { runtime: { id: "qz-browser-agent@heleifz.github.io" } };
-  globalThis.__qzInvoke = (node, payload) => payload?.action === 'resolveFindElement' ? document.documentElement : ({
+  globalThis.chrome = { runtime: { id: "zuri-agent@heleifz.github.io" } };
+  globalThis.__zuriInvoke = (node, payload) => payload?.action === 'resolveFindElement' ? document.documentElement : ({
     ok: true,
     action: payload && payload.action,
     nodeName: node && node.nodeName,
@@ -1340,7 +1340,7 @@ test("isolated content calls run without compiling a function", async () => {
         contextId: isolatedId,
         returnByValue: true,
       });
-      assert.equal(probe.result.value.extensionId, "qz-browser-agent@heleifz.github.io");
+      assert.equal(probe.result.value.extensionId, "zuri-agent@heleifz.github.io");
       assert.equal(probe.result.value.bridge, true);
       assert.equal(compiled, 0, "the isolated probe does not compile a function");
       const blocked = await browser.debugger.sendCommand({ tabId: 8 }, "Runtime.evaluate", {
@@ -1396,7 +1396,7 @@ test("isolated content calls run without compiling a function", async () => {
     globalThis.Function = nativeFunction;
     if (previousChrome === undefined) delete globalThis.chrome;
     else globalThis.chrome = previousChrome;
-    delete globalThis.__qzInvoke;
+    delete globalThis.__zuriInvoke;
   }
 });
 
@@ -1431,7 +1431,7 @@ test("firefox clicks mark extension events and toggle a checkbox the page left u
     assert.equal(box.checked, true);
     const clickEvent = events.find(event => event.type === "click");
     assert.ok(clickEvent);
-    assert.equal(globalThis.__qzExtensionInputEvents.has(clickEvent), true);
+    assert.equal(globalThis.__zuriExtensionInputEvents.has(clickEvent), true);
     assert.ok(events.some(event => event.type === "change"));
     const before = events.length;
     box.checked = false;
@@ -1457,7 +1457,7 @@ test("Firefox viewport geometry batches 4000 nodes in one page injection", async
     const send = (method, params) => browser.debugger.sendCommand({ tabId: 9 }, method, params);
     await send("DOM.getDocument");
     const nodes = Array.from({ length: 4000 }, (_, index) => ({ nodeId: String(index + 1), backendDOMNodeId: index + 1 }));
-    for (const [index, node] of nodes.entries()) globalThis.__qzFirefoxPage.nodes.set(node.backendDOMNodeId, {
+    for (const [index, node] of nodes.entries()) globalThis.__zuriFirefoxPage.nodes.set(node.backendDOMNodeId, {
       getBoundingClientRect: () => ({ x: 0, y: index * 12, width: 100, height: 10 }),
     });
     injections = 0;
@@ -1477,8 +1477,8 @@ test("Firefox viewport geometry batches 4000 nodes in one page injection", async
     assert.equal([...bands.values()].filter(band => band === "inside").length, 50);
     assert.equal(bands.get("4000"), "below");
     console.log(JSON.stringify({ measurement: "Firefox host/page-command in Node", nodes: 4000, beforeInjections: 4000, afterInjections: 1, beforeMs, afterMs }));
-    globalThis.__qzFirefoxPage.nodes.set(4001, { getBoundingClientRect() { throw new Error("detached"); } });
-    globalThis.__qzFirefoxPage.nodes.set(4002, { getBoundingClientRect: () => ({ x: 0, y: 0, width: 0, height: 0 }) });
+    globalThis.__zuriFirefoxPage.nodes.set(4001, { getBoundingClientRect() { throw new Error("detached"); } });
+    globalThis.__zuriFirefoxPage.nodes.set(4002, { getBoundingClientRect: () => ({ x: 0, y: 0, width: 0, height: 0 }) });
     const partial = await send("DOM.getNodeRects", { backendNodeIds: [4001, 4002, 4002, 9999] });
     assert.deepEqual(partial.rects, [{ backendNodeId: 4002, x: 0, y: 0, width: 0, height: 0 }]);
   });
@@ -1486,7 +1486,7 @@ test("Firefox viewport geometry batches 4000 nodes in one page injection", async
 
 function debuggerBrowser(capture) {
   return {
-    runtime: { id: "qz-browser-agent@heleifz.github.io", onMessage: { addListener() {} } },
+    runtime: { id: "zuri-agent@heleifz.github.io", onMessage: { addListener() {} } },
     tabs: {
       onRemoved: { addListener() {} },
       async get() { return { windowId: 1, url: "https://example.test/" }; },
@@ -1513,9 +1513,9 @@ async function withPage(document, fn) {
   } finally {
     if (previous === undefined) delete globalThis.document;
     else globalThis.document = previous;
-    delete globalThis.__qzFirefoxPage;
-    delete globalThis.__qzInvoke;
-    delete globalThis.__qzExtensionInputEvents;
+    delete globalThis.__zuriFirefoxPage;
+    delete globalThis.__zuriInvoke;
+    delete globalThis.__zuriExtensionInputEvents;
     release();
   }
 }

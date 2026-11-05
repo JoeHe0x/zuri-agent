@@ -97,7 +97,7 @@ function normalizedText(value) {
 
 function frozenHtml(value) {
   const injection = `<meta http-equiv="content-security-policy" content="script-src 'none'; object-src 'none'; base-uri 'none'">
-<style data-qz-benchmark-freeze>*,*::before,*::after{animation:none!important;transition:none!important}</style>`;
+<style data-zuri-benchmark-freeze>*,*::before,*::after{animation:none!important;transition:none!important}</style>`;
   const html = String(value || "").replace(
     /<meta\b(?=[^>]*\bhttp-equiv\s*=\s*["']?refresh\b)[^>]*>/gi,
     "",
@@ -219,7 +219,7 @@ async function work() {
         requestAnimationFrame(() => requestAnimationFrame(resolveFrame))
       )));
       const result = await page.evaluate(keptAnnotationValues => (
-        globalThis.__qingzhouArticleBenchmark.collect(document, {
+        globalThis.__zuriArticleBenchmark.collect(document, {
           provenance: true,
           goldSelection: {
             status: "extract",
@@ -233,8 +233,8 @@ async function work() {
       const segments = provenance?.sourceTree?.treeTextSegments;
       const gold = provenance?.gold;
       const forced = result?.diagnostics?.forcedTreeDp;
-      if (provenance?.schema !== "qingzhou.article-extraction-provenance.v1"
-        || gold?.schema !== "qingzhou.article-extraction-annotation-gold-selection.v1"
+      if (provenance?.schema !== "zuri.article-extraction-provenance.v1"
+        || gold?.schema !== "zuri.article-extraction-annotation-gold-selection.v1"
         || !Array.isArray(tree)
         || !Array.isArray(segments)
         || !forced) {
@@ -278,7 +278,7 @@ async function work() {
       const split = corpusSplit(siteFamily);
       const language = String(record.meta?.language || "unknown");
       const outputRecord = {
-        schema: "qingzhou.article-extraction-tree-dp-training-page.v2",
+        schema: "zuri.article-extraction-tree-dp-training-page.v2",
         id,
         siteId: siteFamily,
         siteFamily,
@@ -399,7 +399,7 @@ try {
 }
 
 const report = {
-  schema: "qingzhou.webmainbench-tree-dp-training-export.v1",
+  schema: "zuri.webmainbench-tree-dp-training-export.v1",
   source,
   sourcePartition: "single-public-jsonl",
   output,

@@ -135,7 +135,7 @@ export function extensionManifest(session) {
 export function createNotification(session, id, options) {
   return session.extension("background", `
     const api = extensionApi();
-    const marked = !!(api.notifications && api.notifications.create && api.notifications.create.qzFirefoxRenewal);
+    const marked = !!(api.notifications && api.notifications.create && api.notifications.create.zuriFirefoxRenewal);
     let created = "";
     let error = "";
     try {
@@ -150,7 +150,7 @@ export function createNotification(session, id, options) {
     function extensionApi() {
       const chromeApi = view.chrome || view.browser;
       const browserApi = view.browser || view.chrome;
-      return chromeApi.notifications && chromeApi.notifications.create && chromeApi.notifications.create.qzFirefoxRenewal ? chromeApi : browserApi;
+      return chromeApi.notifications && chromeApi.notifications.create && chromeApi.notifications.create.zuriFirefoxRenewal ? chromeApi : browserApi;
     }
   `);
 }
@@ -295,22 +295,22 @@ export function readPopover(session) {
 export function sidebarState(session) {
   return session.extension("background", `
     const api = view.chrome;
-    const diagnostics = view.qzFirefoxSidebar ? JSON.parse(JSON.stringify(view.qzFirefoxSidebar)) : null;
+    const diagnostics = view.zuriFirefoxSidebar ? JSON.parse(JSON.stringify(view.zuriFirefoxSidebar)) : null;
     const badge = await api.action.getBadgeText(Cu.cloneInto({}, content));
     const title = await api.action.getTitle(Cu.cloneInto({}, content));
     const notifications = Object.keys(await api.notifications.getAll());
-    return { diagnostics, badge, title, notifications, errors: [...(view.__qzTestErrors || [])] };
+    return { diagnostics, badge, title, notifications, errors: [...(view.__zuriTestErrors || [])] };
   `);
 }
 
-/** Record background console.error lines in view.__qzTestErrors. */
+/** Record background console.error lines in view.__zuriTestErrors. */
 export function captureBackgroundErrors(session) {
   return session.extension("background", `
-    if (!view.__qzTestErrors) {
-      view.__qzTestErrors = Cu.cloneInto([], view);
+    if (!view.__zuriTestErrors) {
+      view.__zuriTestErrors = Cu.cloneInto([], view);
       const original = view.console.error;
       view.console.error = Cu.exportFunction(function(...args) {
-        view.__qzTestErrors.push(args.map(String).join(" "));
+        view.__zuriTestErrors.push(args.map(String).join(" "));
         return original.call(view.console, ...args);
       }, view);
     }
@@ -340,7 +340,7 @@ export function refuseSidebarOpen(session) {
     let captured = null;
     api.notifications.create = Cu.exportFunction(function(notificationId, options) {
       const value = Cu.waiveXrays(options) || options || {};
-      if (notificationId === "qz-open-sidebar") {
+      if (notificationId === "zuri-open-sidebar") {
         captured = {
           message: value.message || "",
           title: value.title || "",
@@ -372,21 +372,21 @@ export function refuseSidebarOpen(session) {
 export function addNotificationOpener(session, notificationId) {
   return session.extension("background", `
     const api = view.chrome;
-    view.__qzTestOpens = Cu.cloneInto([], view);
+    view.__zuriTestOpens = Cu.cloneInto([], view);
     api.notifications.onClicked.addListener(Cu.exportFunction(function(id) {
       if (id !== ${JSON.stringify(notificationId)}) return;
       api.sidePanel.open(Cu.cloneInto({}, view)).then(
-        Cu.exportFunction(() => { view.__qzTestOpens.push("opened"); }, view),
-        Cu.exportFunction(error => { view.__qzTestOpens.push(String(error && error.message || error)); }, view),
+        Cu.exportFunction(() => { view.__zuriTestOpens.push("opened"); }, view),
+        Cu.exportFunction(error => { view.__zuriTestOpens.push(String(error && error.message || error)); }, view),
       );
     }, view));
-    await api.notifications.create(${JSON.stringify(notificationId)}, Cu.cloneInto({ type: "basic", title: "qz", message: "done" }, content));
+    await api.notifications.create(${JSON.stringify(notificationId)}, Cu.cloneInto({ type: "basic", title: "zuri", message: "done" }, content));
     return true;
   `);
 }
 
 export function notificationOpens(session) {
-  return session.extension("background", `return [...(view.__qzTestOpens || [])];`);
+  return session.extension("background", `return [...(view.__zuriTestOpens || [])];`);
 }
 
 /**

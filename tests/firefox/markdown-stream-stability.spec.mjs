@@ -9,10 +9,10 @@ import { imageTranscript } from "../support/markdown-stream-fixture.mjs";
 test("expanded image tools and streamed Markdown keep a stable tail in the Firefox sidebar", async ({}, testInfo) => {
   const extensionDir = testInfo.outputPath("extension");
   await mkdir(extensionDir, { recursive: true });
-  await cp(process.env.QINGZHOU_FIREFOX_EXTENSION_DIR, extensionDir, { recursive: true });
+  await cp(process.env.ZURI_FIREFOX_EXTENSION_DIR, extensionDir, { recursive: true });
   await prepareBenchmarkAssets(extensionDir, join(extensionDir, "sidepanel"), { extensionUrlPrefix: "" });
   const hook = join(extensionDir, "sidepanel/benchmark-test-hook.js");
-  await writeFile(hook, `globalThis.__QZ_CONVERSATION_BENCHMARK__ = true;\n${await readFile(hook, "utf8")}`);
+  await writeFile(hook, `globalThis.__ZURI_CONVERSATION_BENCHMARK__ = true;\n${await readFile(hook, "utf8")}`);
   const session = await openFirefoxSidebar({ extensionDir, profile: testInfo.outputPath("profile") });
   try {
     await openFromToolbar(session);
@@ -21,7 +21,7 @@ test("expanded image tools and streamed Markdown keep a stable tail in the Firef
       const started = Date.now();
       while (Date.now() - started < 12000) {
         content.document.querySelector("[data-consent-accept]")?.click();
-        if (view.qingzhouConversationBenchmark && !content.document.querySelector("#app")?.hasAttribute("data-consent-pending")) return true;
+        if (view.zuriConversationBenchmark && !content.document.querySelector("#app")?.hasAttribute("data-consent-pending")) return true;
         await new Promise(resolve => content.setTimeout(resolve, 100));
       }
       return false;
@@ -31,7 +31,7 @@ test("expanded image tools and streamed Markdown keep a stable tail in the Firef
       const result = await session.extension("sidebar", `
         const transcript = view.JSON.parse(${JSON.stringify(JSON.stringify(imageTranscript()))});
         const final = transcript.at(-1), runId = final.runId, sessionId = "firefox-markdown";
-        const bench = view.qingzhouConversationBenchmark, doc = content.document;
+        const bench = view.zuriConversationBenchmark, doc = content.document;
         const wait = ms => new Promise(resolve => content.setTimeout(resolve, ms));
         const frame = () => new Promise(resolve => content.requestAnimationFrame(resolve));
         await bench.runLiveReplay(view.JSON.parse(JSON.stringify({ sessionId, baseTranscript: transcript.slice(0, -1), events: [] })), view.JSON.parse(JSON.stringify({ runId })));

@@ -48,7 +48,7 @@ For the standalone CLI package, run `npm test -- services --match node` and
 `npm test -- release --match npm-package`. The package check uses the public npm registry to
 install the packed artifact in two clean temporary directories. It exercises the installed bin,
 MCP handshake, tools, daemon reuse across install paths, and shutdown on a temporary port.
-It uses isolated npm configuration, cache, and qz state, and cleans up its own service and files.
+It uses isolated npm configuration, cache, and zuri state, and cleans up its own service and files.
 Use `node tests/release/npm-package.mjs --help` to retain or test a specific tarball.
 The **npm package** workflow runs these checks with Node.js 22 and 24 on Linux, macOS, and Windows,
 plus Node.js 22.0.0 on Linux to cover the minimum supported runtime.
@@ -64,15 +64,15 @@ after other work. Each lane runs ready commands while dependent commands wait; b
 checks use the general lane. Use `npm test -- --all --jobs 1` to diagnose resource contention.
 With two jobs, the auxiliary slot finishes ready general work, then runs isolated extension checks
 alongside Playwright. Each extension check owns its profile; timing measurements still run alone.
-`QINGZHOU_TEST_CONCURRENCY` and `QINGZHOU_PLAYWRIGHT_WORKERS` override their respective pools; suite
+`ZURI_TEST_CONCURRENCY` and `ZURI_PLAYWRIGHT_WORKERS` override their respective pools; suite
 ownership stays in [`runner/suites.mjs`](runner/suites.mjs).
 
 The Chromium runner uses the locked Chromium, including its full headless mode for Playwright page tests.
 The Firefox suite uses Mozilla Firefox selected by `FIREFOX_EXECUTABLE`, `PATH`, or
 `npx playwright install firefox`, and does not reuse that Chromium. `npx playwright install-deps firefox`
-installs the system libraries. The suite is headless unless `QINGZHOU_FIREFOX_HEADED=1`.
+installs the system libraries. The suite is headless unless `ZURI_FIREFOX_HEADED=1`.
 Native keyboard, clipboard and control fixtures retain Chromium Headless Shell.
-Page tests can select `QINGZHOU_PLAYWRIGHT_CHANNEL=chrome`;
+Page tests can select `ZURI_PLAYWRIGHT_CHANNEL=chrome`;
 other browser entries accept `CHROME_EXECUTABLE`. Keep the browser version fixed for comparisons.
 Session exchange runs headless by default; set `SESSION_EXCHANGE_HEADLESS=0` to open a browser
 window for debugging.
@@ -191,7 +191,7 @@ Keep expected results with the test.
 
 Shared facilities in `support/` build isolated extensions, serve compiled assets and manage local
 services. `/extension/*` serves compiled assets. The runner shares a temporary build through
-`QINGZHOU_TEST_EXTENSION_DIR`; tests own and clean up extra resources they create. When bypassing
+`ZURI_TEST_EXTENSION_DIR`; tests own and clean up extra resources they create. When bypassing
 the runner for a Node test, load both its bootstrap and TypeScript loader:
 
 ```bash
@@ -210,7 +210,7 @@ Run the real-browser connection checks with:
 npm test -- e2e --match mcp-resilience
 npm test -- e2e --match mcp-user-input
 npm test -- e2e --match mcp-resources
-QINGZHOU_MCP_IDLE_MS=300000 npm test -- e2e --match mcp-resilience
+ZURI_MCP_IDLE_MS=300000 npm test -- e2e --match mcp-resilience
 ```
 
 The default idle window is 125 seconds. During that window, Chrome runs without a side panel or
@@ -239,7 +239,7 @@ Results, Chrome versions, process logs, protocol dispatch/result metadata, netwo
 320px Settings screenshots are saved under `tests/results/multi-browser/<timestamp>/`. A failure
 captures screenshots and health before cleanup. The minimum run is five minutes; this entry is
 excluded from default CI. Linux containers running as root use test-only `--no-sandbox`;
-`QZ_TEST_NO_SANDBOX=1` enables it explicitly on Linux. `CHROME_EXECUTABLE` selects another binary.
+`ZURI_TEST_NO_SANDBOX=1` enables it explicitly on Linux. `CHROME_EXECUTABLE` selects another binary.
 
 Run the shorter [pairing edge test](background/mcp-pairing-edges-e2e.mjs) with:
 
@@ -311,7 +311,7 @@ Use `npm test -- report` to open `tests/results/playwright-report/`. Trace files
 error context are under `tests/results/playwright/`. Page exceptions and `console.error` fail a
 test; traces are retained on failure.
 
-Default traces include API calls and network events. Set `QINGZHOU_TEST_TRACE_SNAPSHOTS=1` to also
+Default traces include API calls and network events. Set `ZURI_TEST_TRACE_SNAPSHOTS=1` to also
 record DOM snapshots, screencasts and sources for visual debugging. Failure screenshots, layout
 assertions, locale/viewport matrices and coverage collection run in both modes.
 
@@ -342,7 +342,7 @@ npm test -- live multi-browser
 through CLI and MCP in one isolated Chrome profile. Its 30-minute clock starts after setup; individual
 task failures are recorded and cancelled before the next task. It saves transcripts, downloads,
 acceptance results, and redacted provider request metadata under `tests/results/mcp-bridge/`.
-Set `QINGZHOU_DEEPSEEK_MODEL` to select a model. Use `--cases id,id` or
+Set `ZURI_DEEPSEEK_MODEL` to select a model. Use `--cases id,id` or
 `--task-timeout-seconds 360` to narrow a follow-up run. While that isolated run is active,
 `npm test -- live cli-mcp-supplement --report <live-soak-report.json>` checks MCP-created input
 through CLI responses and compares resource exports across the two interfaces.
@@ -351,7 +351,7 @@ through CLI responses and compares resource exports across the two interfaces.
 three independent Chrome processes and temporary profiles. It uses real DeepSeek responses through
 CLI and MCP, answers the cases' explicit form/confirmation requests, follows up an existing task,
 disconnects one profile, restarts its isolated service, and checks cross-profile task ownership.
-It builds one production extension outside `dist/extension`; set `QINGZHOU_TEST_EXTENSION_DIR` to
+It builds one production extension outside `dist/extension`; set `ZURI_TEST_EXTENSION_DIR` to
 reuse an existing production build. Use `--task-timeout-seconds 450` to bound each task,
 `--cases id,id` for a focused follow-up, and `--output <directory>` to choose the evidence directory. Full CLI output, MCP progress, provider
 request bodies/SSE, snapshots, CSV data and browser diagnostics are retained with credentials
@@ -373,57 +373,57 @@ opens, navigation, same-URL reloads and redirects. These cases require every fir
 after navigation to return the new document.
 
 To check model-generated opening and reading in one tool batch, run
-`QINGZHOU_LIVE_CASES=pageBatch npm test -- live deepseek`. Three isolated Sessions read two local
+`ZURI_LIVE_CASES=pageBatch npm test -- live deepseek`. Three isolated Sessions read two local
 pages with distinct product codes. Each trial verifies both answers and a single `tool_calls` array
 containing two `open_tab` aliases and their two `read_article` references. The report records actual
 model/tool turns and elapsed time, including any additional verification calls. Set
-`QZ_PAGE_BATCH_EXPECT_BINDINGS=0` when measuring an older extension without this contract; answer
+`ZURI_PAGE_BATCH_EXPECT_BINDINGS=0` when measuring an older extension without this contract; answer
 checks remain enabled. This case is selected explicitly and uses the normal live credential rules.
 
-`QINGZHOU_LIVE_CASES=streamUi npm test -- live deepseek` runs product comparison, image collection,
+`ZURI_LIVE_CASES=streamUi npm test -- live deepseek` runs product comparison, image collection,
 public MDN research and timeout recovery through the real model, tools and Side Panel. Set
-`QINGZHOU_LIVE_REPORT` to a JSON path in an existing output directory to retain each task's prompt,
-model/tool transcript, UI frames and screenshots. `QINGZHOU_LIVE_UI_CASES` accepts comma-separated
+`ZURI_LIVE_REPORT` to a JSON path in an existing output directory to retain each task's prompt,
+model/tool transcript, UI frames and screenshots. `ZURI_LIVE_UI_CASES` accepts comma-separated
 case IDs: `product-comparison`, `image-collection`, `public-documentation`, `timeout-recovery`.
 The cases use 360/430/560px viewports and both themes, expand actual tool results, read earlier
 content while output arrives and return to the live tail. Assertions cover persisted records,
 tool errors and result order, completed Markdown, reading position and backward scroll movement.
 Product/image fixtures are local; the documentation case visits public MDN pages. Use
-`QINGZHOU_TEST_EXTENSION_DIR` to exercise an unpacked production ZIP without rebuilding it.
+`ZURI_TEST_EXTENSION_DIR` to exercise an unpacked production ZIP without rebuilding it.
 
-`QINGZHOU_LIVE_CASES=tableReveal npm test -- live deepseek` reads public Python, MDN and national
+`ZURI_LIVE_CASES=tableReveal npm test -- live deepseek` reads public Python, MDN and national
 park pages for research and design tasks. It uses the same viewport interactions
 and records every completed table's opacity and dimensions. Each table must fade once, keep its
 column widths and height, and stay visible during later output. The `streamUi` table cases use this
 probe too. Reports preserve public-page errors separately from per-task UI outcomes; a successful
 UI check does not make a run with unexpected console errors pass.
 For tasks in the native Firefox sidebar, select
-`QINGZHOU_LIVE_FIREFOX_TABLES=1 npm test -- live firefox-ui` with the Firefox build and live credentials.
+`ZURI_LIVE_FIREFOX_TABLES=1 npm test -- live firefox-ui` with the Firefox build and live credentials.
 These read public documentation for accessibility, scheduling and astronomy, exercise
 summary clicks and scripted wheel/scroll events, and retain trajectories and frame measurements.
-If an HTTPS test proxy supplies a CA, set `QINGZHOU_FIREFOX_CA_FILE` to that public certificate
+If an HTTPS test proxy supplies a CA, set `ZURI_FIREFOX_CA_FILE` to that public certificate
 and install `certutil`. The runner imports it only into its disposable profile; TLS validation
 stays enabled.
 
 Five additional public-site tasks exercise article extraction with streaming UI. Select
-`QINGZHOU_LIVE_UI_CASES=public-clipboard-design,public-national-parks,public-archive-import`
+`ZURI_LIVE_UI_CASES=public-clipboard-design,public-national-parks,public-archive-import`
 with the Chrome `tableReveal` runner, and
-`QINGZHOU_LIVE_UI_CASES=firefox-media-accessibility,firefox-space-observatories`
+`ZURI_LIVE_UI_CASES=firefox-media-accessibility,firefox-space-observatories`
 with the Firefox table runner. These cover a Clipboard API feature design, three persisted park
 records, archive processing, accessible video deliverables and a multiwavelength astronomy lesson.
 Firefox retains public-page console diagnostics and rejects page exceptions during these reads.
 
-`QINGZHOU_LIVE_CASES=tabReferences npm test -- live deepseek` runs five additional tasks: a
+`ZURI_LIVE_CASES=tabReferences npm test -- live deepseek` runs five additional tasks: a
 conference train plan, warehouse replenishment, an interactive shipping quote, Python JSON/CSV
 documentation research, and a lecture schedule update. Preparatory messages create real follow-up
 runs in the same Session. The cases verify alias reuse across turns, one deliberate duplicate-name
 rejection, UID/alias agreement, numeric `tabRef`, and alias reuse after closure. The form case checks
 the actual page quote; the warehouse case reads back persisted rows. Other tool errors fail the
 test. These cases share the streaming viewport probes, native wheel interactions, Markdown checks,
-screenshots and trajectory evidence above. `QINGZHOU_LIVE_UI_CASES` can select their case IDs from
+screenshots and trajectory evidence above. `ZURI_LIVE_UI_CASES` can select their case IDs from
 [the task definitions](live/tab-reference-journeys.mjs).
 
-`QINGZHOU_LIVE_CASES=tabReferencesDiverse npm test -- live deepseek` adds public weather JSON,
+`ZURI_LIVE_CASES=tabReferencesDiverse npm test -- live deepseek` adds public weather JSON,
 network-backed invoice pagination, mobile accessibility inspection, poster image collection, and
 redirected return-policy research. The same output and case selectors apply. Assertions check live
 forecast dates, requested invoice pages, mode changes on one alias, three persisted image assets,
@@ -435,21 +435,21 @@ local navigation until the tool returns a partial timeout, checks the incomplete
 verifies a later read by its persistent alias returns the page's random code without opening it again. A multi-page task
 tests repeated header/footer collapse while the next model request is paused, then checks the
 final answer. It also pairs the current CLI bridge and lists both tasks through the real CLI/MCP
-path. Set `QINGZHOU_FIREFOX_EXTENSION_DIR` to a built Firefox extension, `FIREFOX_EXECUTABLE` to
-a supported Firefox, and `QINGZHOU_LIVE_REPORT` for the JSON evidence. A test-only loopback
+path. Set `ZURI_FIREFOX_EXTENSION_DIR` to a built Firefox extension, `FIREFOX_EXECUTABLE` to
+a supported Firefox, and `ZURI_LIVE_REPORT` for the JSON evidence. A test-only loopback
 forwarder uses Node's network configuration to reach DeepSeek, preserving request payloads and
 forwarding upstream SSE chunks. Production packages contain neither forwarding nor probe scripts.
 
 For the extended session-management checks, run `live deepseek` with
-`QINGZHOU_LIVE_SESSION_MANAGEMENT=1 QINGZHOU_LIVE_SESSION_MANAGEMENT_EXTENDED=1`. The ordinary
-lifecycle run and this management run use separate temporary profiles. Set `QINGZHOU_LIVE_REPORT` to
+`ZURI_LIVE_SESSION_MANAGEMENT=1 ZURI_LIVE_SESSION_MANAGEMENT_EXTENDED=1`. The ordinary
+lifecycle run and this management run use separate temporary profiles. Set `ZURI_LIVE_REPORT` to
 an output JSON path for `live deepseek` or `live rate` to retain success and failure evidence; the
 parent directory must already exist.
 
-Use `QINGZHOU_LIVE_CASES=workerRestart` to run a four-turn conversation, close the panel and stop
+Use `ZURI_LIVE_CASES=workerRestart` to run a four-turn conversation, close the panel and stop
 the Worker during the third turn, then verify checkpoint recovery and continue the same chat.
 The report includes recovered transcripts, request counts, and screenshots when
-`QINGZHOU_LIVE_REPORT` is set.
+`ZURI_LIVE_REPORT` is set.
 
 Key precedence is an explicit key file (`--ak-file` / `--key-file` or the corresponding file
 variable), the provider environment variable, then root `.env.local`. The explicit live invocation
@@ -477,7 +477,7 @@ node --import tsx tests/live/deepseek-vision.mjs
 node --import tsx tests/live/deepseek-vision.mjs --steps 30
 ```
 
-It uses `deepseek-flash` by default (`QINGZHOU_DEEPSEEK_MODEL` overrides it). The default nine-step
+It uses `deepseek-flash` by default (`ZURI_DEEPSEEK_MODEL` overrides it). The default nine-step
 run checks the first image-window eviction; `--steps 30` exercises repeated evictions in one Agent
 run. Every step requires a fresh screenshot and a correct visual click, with the 2560×1440 →
 2048×1152 coordinate mapping and 2 MiB image limit checked independently. The canvas uses a fixed
@@ -493,15 +493,15 @@ a DeepSeek key in `.env.local`. Build the current production extension first, th
 directory:
 
 ```bash
-QINGZHOU_TEST_EXTENSION_DIR="$PWD/dist/extension" npm test -- live pi-multi-browser
+ZURI_TEST_EXTENSION_DIR="$PWD/dist/extension" npm test -- live pi-multi-browser
 ```
 
-`PI_EXECUTABLE` selects the Pi executable; `QINGZHOU_DEEPSEEK_MODEL` selects the model used by
-Pi and qz. Pi receives only `read` and `bash`, loads the repository Skill, and opens pairing URLs
+`PI_EXECUTABLE` selects the Pi executable; `ZURI_DEEPSEEK_MODEL` selects the model used by
+Pi and zuri. Pi receives only `read` and `bash`, loads the repository Skill, and opens pairing URLs
 through the browser executable in three isolated Profiles. Chrome runs with visible windows and
 requires a local graphical session. It starts three browser tasks
 concurrently, renames one connection by URL, and follows up in the same task. The harness supplies
-first-use consent and model settings, plus the current repository CLI as `qz` on an isolated PATH;
+first-use consent and model settings, plus the current repository CLI as `zuri` on an isolated PATH;
 this checks current source rather than a published npm release.
 
 Reports, native Pi session JSONL and an HTML export, CLI responses, task snapshots, screenshots,
@@ -512,7 +512,7 @@ To check independent calling agents, run the [concurrent Pi test](live/pi-concur
 with the same prerequisites:
 
 ```bash
-QINGZHOU_TEST_EXTENSION_DIR="$PWD/dist/extension" npm test -- live pi-concurrent-browsers
+ZURI_TEST_EXTENSION_DIR="$PWD/dist/extension" npm test -- live pi-concurrent-browsers
 ```
 
 First, three separate Pi processes use supplied Profile paths and unique browser identifiers to
@@ -540,7 +540,7 @@ unless `--include-explicit` is requested with the needed authorization and crede
 dependencies fail the gate. Reports go to `tests/results/behavior/latest.json`; `evidence-passed`
 means the selected tests passed, while coverage maturity remains the index's separate assessment.
 
-Behavior runs use one Playwright worker by default; `QINGZHOU_BEHAVIOR_PLAYWRIGHT_WORKERS` allows up
+Behavior runs use one Playwright worker by default; `ZURI_BEHAVIOR_PLAYWRIGHT_WORKERS` allows up
 to four for deliberate concurrency checks. Benchmark evidence retains its own performance gates.
 
 ## Release checks
@@ -585,19 +585,19 @@ Coverage assertions require real inputs and changing content during the observed
 
 ```bash
 npm test -- playwright tests/browser/assistant-viewport-stability-fuzz.spec.mjs
-QINGZHOU_ASSISTANT_FUZZ_SEED_OFFSET=100000 npm test -- playwright \
+ZURI_ASSISTANT_FUZZ_SEED_OFFSET=100000 npm test -- playwright \
   tests/browser/assistant-viewport-stability-fuzz.spec.mjs --repeat-each=3
 ```
 
 Failure attachments contain the seed, chunk plan, native inputs and frame geometry. The optional
-`QINGZHOU_FUZZ_MARKDOWN_MODULE` points to a local compiled ESM renderer for negative-control runs;
+`ZURI_FUZZ_MARKDOWN_MODULE` points to a local compiled ESM renderer for negative-control runs;
 normal verification always loads the current renderer. Keep baseline modules in ignored output.
 
 To replay private samples in the tool-anchor matrix, place a JSON array of paths in the ignored
 `tests/results/corpus.json`:
 
 ```bash
-QINGZHOU_FUZZ_CORPUS=tests/results/corpus.json npm test -- playwright \
+ZURI_FUZZ_CORPUS=tests/results/corpus.json npm test -- playwright \
   tests/browser/viewport-stability-fuzz.spec.mjs --repeat-each=3 --workers=1
 ```
 

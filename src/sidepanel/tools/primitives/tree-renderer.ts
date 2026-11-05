@@ -135,7 +135,7 @@ function formatTreeNodeMeta(node: Data = {}) {
 function renderTreeLine(line: TreeLine) {
   const depth = Math.max(0, Number(line.depth) || 0);
   const toggle = line.hasChildren
-    ? `<button class="qz-tree-toggle tool-tree-toggle" type="button" aria-expanded="true" title="${tHtml("toggleExpanded")}">▾</button>`
+    ? `<button class="zuri-tree-toggle tool-tree-toggle" type="button" aria-expanded="true" title="${tHtml("toggleExpanded")}">▾</button>`
     : `<span class="tool-tree-toggle-spacer"></span>`;
   return `
     <div class="tool-tree-line" data-tree-index="${line.index}" data-depth="${depth}" data-expanded="true" data-has-children="${line.hasChildren ? "true" : "false"}" style="--depth:${depth}">

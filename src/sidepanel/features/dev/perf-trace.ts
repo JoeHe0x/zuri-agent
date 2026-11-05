@@ -1,6 +1,6 @@
 type TraceMetadata = Record<string, unknown>;
 export interface PerfTraceEntry { at: string; name: string; ms: number; meta: TraceMetadata }
-declare global { var __qingzhouPerf: PerfTraceEntry[] | undefined }
+declare global { var __zuriPerf: PerfTraceEntry[] | undefined }
 interface PerfTraceOptions { thresholdMs?: number; bufferLimit?: number; isBenchmark?(): boolean; isEnabled?(): boolean }
 
 export function createPerfTrace(options: PerfTraceOptions = {}) {
@@ -62,21 +62,21 @@ export function createPerfTrace(options: PerfTraceOptions = {}) {
     if (target.length > bufferLimit) target.splice(0, target.length - bufferLimit);
     const isDataTrace = String(name || "").startsWith("data.");
     if (options.isEnabled?.() === true && (isDataTrace || entry.ms >= thresholdMs || meta.error)) {
-      console.debug("[轻舟 perf]", name, `${entry.ms.toFixed(1)}ms`, meta);
+      console.debug("[Zuri perf]", name, `${entry.ms.toFixed(1)}ms`, meta);
     }
   }
 
   function dataGrid(stage: string, payload: TraceMetadata = {}) {
     if (options.isEnabled?.() !== true) return;
     try {
-      console.debug("[轻舟 data-grid]", stage, payload);
+      console.debug("[Zuri data-grid]", stage, payload);
     } catch (_error) {}
   }
 
   function buffer() {
     const host = typeof window !== "undefined" ? window : globalThis;
-    if (!Array.isArray(host.__qingzhouPerf)) host.__qingzhouPerf = [];
-    return host.__qingzhouPerf;
+    if (!Array.isArray(host.__zuriPerf)) host.__zuriPerf = [];
+    return host.__zuriPerf;
   }
 
   return {

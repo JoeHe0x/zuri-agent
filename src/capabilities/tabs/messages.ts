@@ -15,7 +15,7 @@ export default defineMessages("tabs", {
   "tab": { "zh-CN": "标签页 {tabId}", en: "Tab {tabId}" },
   "current": { "zh-CN": "当前", en: "Current" },
   "window": { "zh-CN": "窗口 {windowId}", en: "Window {windowId}" },
-  "qingzhouTask": { "zh-CN": "Zuri 任务", en: "Zuri task" },
+  "zuriTask": { "zh-CN": "Zuri 任务", en: "Zuri task" },
   "organizedInto": { "zh-CN": "已整理到「{name}」", en: "Organized into “{name}”" },
   "namedTabCount": { "zh-CN": "{count} 个标签页 · {name}", en: "Tabs: {count} · {name}" },
   "groupedTabs": { "zh-CN": "{count} 个标签页已归组", en: "Grouped tabs: {count}" },

@@ -16,7 +16,7 @@ test("the firefox keepalive pings from the event page and leaves session automat
   const suspendListeners = [];
   const intervals = [];
   const browser = {
-    qzSessionAutomationsEnabled: false,
+    zuriSessionAutomationsEnabled: false,
     alarms: {
       create() { throw new Error("keepalive must not create an alarm"); },
       onAlarm: { addListener(fn) { alarmListeners.push(fn); } },
@@ -41,16 +41,16 @@ test("the firefox keepalive pings from the event page and leaves session automat
   try {
     installFirefoxMcpWake(browser);
     installFirefoxMcpWake(browser);
-    assert.equal(browser.qzFirefoxMcpWake, true);
-    assert.equal(browser.qzSessionAutomationsEnabled, false);
+    assert.equal(browser.zuriFirefoxMcpWake, true);
+    assert.equal(browser.zuriSessionAutomationsEnabled, false);
     assert.equal(alarmListeners.length, 1);
     assert.equal(suspendListeners.length, 1);
     assert.equal(pings.length, 0);
     assert.equal(intervals.length, 0);
 
-    browser.qzFirefoxMcpWakeHandlers.noteEnabled(false);
-    browser.qzFirefoxMcpWakeHandlers.noteEnabled(true);
-    browser.qzFirefoxMcpWakeHandlers.noteEnabled(true);
+    browser.zuriFirefoxMcpWakeHandlers.noteEnabled(false);
+    browser.zuriFirefoxMcpWakeHandlers.noteEnabled(true);
+    browser.zuriFirefoxMcpWakeHandlers.noteEnabled(true);
     assert.equal(pings.length, 1);
     assert.equal(intervals.length, 1);
     assert.equal(intervals[0].ms, FIREFOX_MCP_KEEPALIVE_MS);
@@ -59,22 +59,22 @@ test("the firefox keepalive pings from the event page and leaves session automat
     assert.equal(pings.length, 2);
 
     alarmListeners[0]({ name: AUTOMATION_SCHEDULER_ALARM });
-    assert.equal(browser.qzFirefoxMcpWakePending, undefined);
+    assert.equal(browser.zuriFirefoxMcpWakePending, undefined);
     alarmListeners[0]({ name: RECONNECT_ALARM });
-    assert.equal(browser.qzFirefoxMcpWakePending, true);
+    assert.equal(browser.zuriFirefoxMcpWakePending, true);
     let woke = 0;
     let suspended = 0;
-    browser.qzFirefoxMcpWakePending = false;
-    browser.qzFirefoxMcpWakeHandlers.onAlarm = () => { woke += 1; };
-    browser.qzFirefoxMcpWakeHandlers.onSuspend = () => { suspended += 1; };
+    browser.zuriFirefoxMcpWakePending = false;
+    browser.zuriFirefoxMcpWakeHandlers.onAlarm = () => { woke += 1; };
+    browser.zuriFirefoxMcpWakeHandlers.onSuspend = () => { suspended += 1; };
     alarmListeners[0]({ name: RECONNECT_ALARM });
     suspendListeners[0]();
     assert.equal(woke, 1);
     assert.equal(suspended, 1);
-    assert.equal(browser.qzFirefoxMcpWakePending, false);
+    assert.equal(browser.zuriFirefoxMcpWakePending, false);
 
-    browser.qzFirefoxMcpWakeHandlers.noteEnabled(false);
-    browser.qzFirefoxMcpWakeHandlers.noteEnabled(false);
+    browser.zuriFirefoxMcpWakeHandlers.noteEnabled(false);
+    browser.zuriFirefoxMcpWakeHandlers.noteEnabled(false);
     assert.equal(intervals[0].cleared, true);
     assert.equal(intervals.length, 1);
   } finally {
@@ -93,26 +93,26 @@ test("the firefox host arms mcp wake without arming session automations", async 
       onAlarm: { addListener(fn) { listeners.push(fn); } },
     },
     runtime: {
-      id: "qz-browser-agent@heleifz.github.io",
+      id: "zuri-agent@heleifz.github.io",
       getURL: path => `moz-extension://uuid/${path}`,
       getPlatformInfo() { return Promise.resolve({ os: "mac" }); },
     },
   };
   installFirefoxHost(browser);
-  assert.equal(browser.qzSessionAutomationsEnabled, false);
-  assert.equal(browser.qzFirefoxMcpWake, true);
+  assert.equal(browser.zuriSessionAutomationsEnabled, false);
+  assert.equal(browser.zuriFirefoxMcpWake, true);
   assert.equal(listeners.length, 1);
   await browser.alarms.create(AUTOMATION_SCHEDULER_ALARM, { periodInMinutes: 1 });
   await browser.alarms.create(RECONNECT_ALARM, { periodInMinutes: 0.5 });
   assert.deepEqual(created, [{ name: RECONNECT_ALARM, info: { periodInMinutes: 0.5 } }]);
   listeners[0]({ name: RECONNECT_ALARM });
-  assert.equal(browser.qzFirefoxMcpWakePending, true);
+  assert.equal(browser.zuriFirefoxMcpWakePending, true);
 });
 
 test("chrome service worker does not import the firefox mcp wake", () => {
   const worker = readFileSync(join(repoRoot, "src/background/service-worker.ts"), "utf8");
   const wake = readFileSync(join(repoRoot, "src/background/firefox/mcp-wake.ts"), "utf8");
-  assert.equal(worker.includes("qzFirefoxMcpWake"), false);
+  assert.equal(worker.includes("zuriFirefoxMcpWake"), false);
   assert.equal(worker.includes("mcp-wake"), false);
   assert.match(worker, /offscreenKeepalive/);
   assert.equal(wake.includes(AUTOMATION_SCHEDULER_ALARM), false);

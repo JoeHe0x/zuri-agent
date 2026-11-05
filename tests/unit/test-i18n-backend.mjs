@@ -12,7 +12,7 @@ import { providerRecoveryHint } from "../../src/background/llm/provider-recovery
 import { createSessionCompletionNotifier } from "../../src/background/services/chrome-notifications.js";
 import { createSessionListSummaryFromFirstMessage, formatSessionListSummaryText, createSessionListSummaryFromAgentEvent } from "../../src/shared/session/session-list-summary.js";
 import { describeAutomationSchedule, computeNextRunAt } from "../../src/shared/automation-store.js";
-import { qingzhouTabGroupPatch, ensureQingzhouTabGroupForWindow } from "../../src/shared/tab-groups.js";
+import { zuriTabGroupPatch, ensureZuriTabGroupForWindow } from "../../src/shared/tab-groups.js";
 import { formatBeijingDateTime, parseBeijingDateTime } from "../../src/shared/time-utils.js";
 import { t as contentText } from "../../src/content/i18n.js";
 import { appendErrorSection } from "../../src/sidepanel/tools/generic-result-renderer.js";
@@ -213,16 +213,16 @@ test("schedule display localizes without changing Beijing-time persistence or sc
 });
 
 
-for (const title of ["Zuri 任务", "轻舟任务", "Qingzhou task", "Zuri task"]) test(`tab groups reuse ${title} after the brand change`, async () => {
+for (const title of ["Zuri 任务", "Zuri任务", "Zuri task", "Zuri task"]) test(`tab groups reuse ${title} after the brand change`, async () => {
   await inLanguage("en", async () => {
-    assert.equal(qingzhouTabGroupPatch().title, "Zuri task");
+    assert.equal(zuriTabGroupPatch().title, "Zuri task");
     const patches = [];
     globalThis.chrome = {
       ...globalThis.chrome,
       tabs: { get: async id => ({ id, windowId: 1 }), query: async () => [{ id: 7 }], group: async () => { throw new Error("must reuse the existing group"); } },
       tabGroups: { query: async () => [{ id: 8, windowId: 1, title }], update: async (id, patch) => { patches.push(patch); return { id, windowId: 1, ...patch }; } },
     };
-    const result = await ensureQingzhouTabGroupForWindow([7]);
+    const result = await ensureZuriTabGroupForWindow([7]);
     assert.equal(result.groupId, 8);
     assert.equal(patches.at(-1).title, "Zuri task");
   });

@@ -80,7 +80,7 @@ export function createDecisionDialogFeature(options: { root?: Document | Element
     if (config.message) ui.dialog.setAttribute("aria-describedby", ui.message.id);
     ui.cancel.textContent = config.cancelLabel;
     ui.confirm.textContent = config.confirmLabel;
-    ui.confirm.className = `qz-btn ${config.tone === "danger" ? "qz-btn--danger" : "qz-btn--primary"} qz-btn--sm`;
+    ui.confirm.className = `zuri-btn ${config.tone === "danger" ? "zuri-btn--danger" : "zuri-btn--primary"} zuri-btn--sm`;
     ui.confirm.classList.toggle("hidden", config.mode === "choice");
     renderChoices(ui, config.choices);
     ui.options.classList.toggle("hidden", config.mode !== "choice");
@@ -102,7 +102,7 @@ export function createDecisionDialogFeature(options: { root?: Document | Element
       requestFrame(() => {
         if (active?.config !== config || active.settling) return;
         const target = config.mode === "choice"
-          ? ui.options.querySelector<HTMLElement>(".qz-decision-option")
+          ? ui.options.querySelector<HTMLElement>(".zuri-decision-option")
           : config.mode === "input" ? ui.input
           : config.tone === "danger" ? ui.cancel : ui.confirm;
         target?.focus?.({ preventScroll: true });
@@ -114,38 +114,38 @@ export function createDecisionDialogFeature(options: { root?: Document | Element
   function ensureElements(): Elements {
     if (elements?.dialog?.isConnected) return elements;
     const dialog = documentRef.createElement("dialog");
-    dialog.id = "qz-decision-dialog";
-    dialog.className = "qz-decision-dialog";
-    dialog.setAttribute("aria-labelledby", "qz-decision-title");
+    dialog.id = "zuri-decision-dialog";
+    dialog.className = "zuri-decision-dialog";
+    dialog.setAttribute("aria-labelledby", "zuri-decision-title");
     dialog.innerHTML = `
-      <section class="qz-decision-panel">
-        <header class="qz-decision-copy">
-          <h3 id="qz-decision-title" data-qz-decision-title></h3>
-          <p id="qz-decision-message" data-qz-decision-message></p>
+      <section class="zuri-decision-panel">
+        <header class="zuri-decision-copy">
+          <h3 id="zuri-decision-title" data-zuri-decision-title></h3>
+          <p id="zuri-decision-message" data-zuri-decision-message></p>
         </header>
-        <div id="qz-decision-options" class="qz-decision-options hidden" role="group" aria-label="${tHtml("availableActions")}" data-qz-decision-options></div>
-        <label class="qz-decision-input hidden" data-qz-decision-input-group>
-          <span class="qz-field-label" data-qz-decision-input-label></span>
-          <input class="qz-field qz-field--sm" type="text" autocomplete="off" data-qz-decision-input>
+        <div id="zuri-decision-options" class="zuri-decision-options hidden" role="group" aria-label="${tHtml("availableActions")}" data-zuri-decision-options></div>
+        <label class="zuri-decision-input hidden" data-zuri-decision-input-group>
+          <span class="zuri-field-label" data-zuri-decision-input-label></span>
+          <input class="zuri-field zuri-field--sm" type="text" autocomplete="off" data-zuri-decision-input>
         </label>
-        <footer class="qz-decision-actions">
-          <button id="qz-decision-cancel" class="qz-btn qz-btn--ghost qz-btn--sm" type="button" data-qz-decision-cancel>${tHtml("cancel")}</button>
-          <button id="qz-decision-confirm" class="qz-btn qz-btn--primary qz-btn--sm" type="button" data-qz-decision-confirm>${tHtml("confirm")}</button>
+        <footer class="zuri-decision-actions">
+          <button id="zuri-decision-cancel" class="zuri-btn zuri-btn--ghost zuri-btn--sm" type="button" data-zuri-decision-cancel>${tHtml("cancel")}</button>
+          <button id="zuri-decision-confirm" class="zuri-btn zuri-btn--primary zuri-btn--sm" type="button" data-zuri-decision-confirm>${tHtml("confirm")}</button>
         </footer>
       </section>
     `;
     documentRef.body.append(dialog);
     elements = {
       dialog,
-      panel: dialog.querySelector<HTMLElement>(".qz-decision-panel")!,
-      title: dialog.querySelector<HTMLElement>("[data-qz-decision-title]")!,
-      message: dialog.querySelector<HTMLElement>("[data-qz-decision-message]")!,
-      options: dialog.querySelector<HTMLElement>("[data-qz-decision-options]")!,
-      inputGroup: dialog.querySelector<HTMLElement>("[data-qz-decision-input-group]")!,
-      inputLabel: dialog.querySelector<HTMLElement>("[data-qz-decision-input-label]")!,
-      input: dialog.querySelector<HTMLInputElement>("[data-qz-decision-input]")!,
-      cancel: dialog.querySelector<HTMLButtonElement>("[data-qz-decision-cancel]")!,
-      confirm: dialog.querySelector<HTMLButtonElement>("[data-qz-decision-confirm]")!,
+      panel: dialog.querySelector<HTMLElement>(".zuri-decision-panel")!,
+      title: dialog.querySelector<HTMLElement>("[data-zuri-decision-title]")!,
+      message: dialog.querySelector<HTMLElement>("[data-zuri-decision-message]")!,
+      options: dialog.querySelector<HTMLElement>("[data-zuri-decision-options]")!,
+      inputGroup: dialog.querySelector<HTMLElement>("[data-zuri-decision-input-group]")!,
+      inputLabel: dialog.querySelector<HTMLElement>("[data-zuri-decision-input-label]")!,
+      input: dialog.querySelector<HTMLInputElement>("[data-zuri-decision-input]")!,
+      cancel: dialog.querySelector<HTMLButtonElement>("[data-zuri-decision-cancel]")!,
+      confirm: dialog.querySelector<HTMLButtonElement>("[data-zuri-decision-confirm]")!,
     };
     const ui = elements;
     ui.cancel.addEventListener("click", () => settle(null));
@@ -176,8 +176,8 @@ export function createDecisionDialogFeature(options: { root?: Document | Element
     for (const choice of choices) {
       const button = documentRef.createElement("button");
       button.type = "button";
-      button.className = `qz-btn qz-btn--ghost qz-decision-option${choice.tone === "danger" ? " qz-btn--danger" : ""}`;
-      button.dataset.qzDecisionValue = choice.value;
+      button.className = `zuri-btn zuri-btn--ghost zuri-decision-option${choice.tone === "danger" ? " zuri-btn--danger" : ""}`;
+      button.dataset.zuriDecisionValue = choice.value;
       const label = documentRef.createElement("strong");
       label.textContent = choice.label;
       button.append(label);

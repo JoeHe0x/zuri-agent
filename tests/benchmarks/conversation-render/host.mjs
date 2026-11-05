@@ -176,7 +176,7 @@ function normalizeSessionId(value) {
 }
 
 // Loaded by the local test server before the application module. Never distributed with the extension.
-globalThis.__QZ_INSTALL_CONVERSATION_BENCHMARK__ = ({ root, workspace, chat, sessionState, perf, getCurrentSessionId, resetNavigation, nowTimestamp }) => {
+globalThis.__ZURI_INSTALL_CONVERSATION_BENCHMARK__ = ({ root, workspace, chat, sessionState, perf, getCurrentSessionId, resetNavigation, nowTimestamp }) => {
   const host = createConversationBenchmarkHost({
     root, chatTab: "chat", getPages: workspace.ui.getPages,
     messagesEl: chat.elements.messagesEl, inputEl: chat.elements.inputEl,

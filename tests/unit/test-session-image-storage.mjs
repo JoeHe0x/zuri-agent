@@ -130,7 +130,7 @@ test("restore replays byte-identical uploaded/tool images and exports self-conta
   assert.ok(html.includes(`<img src="${image}">`));
   assert.ok(html.includes(`<img src="${toolImage}">`));
   assert.ok(html.includes('"url":"' + image + '"'), "portable exchange also contains the original bytes");
-  assert.ok(!html.includes("qz-history-image:"));
+  assert.ok(!html.includes("zuri-history-image:"));
   assert.ok(!html.includes('src="blob:'));
   const oldChrome = globalThis.chrome;
   globalThis.chrome = { storage: { local: f.storage } };
@@ -187,7 +187,7 @@ test("gallery GC cannot evict history; deleting the last Session reference recla
 
 test("missing images degrade gracefully; failed saves retry and revoked leases never publish references", async t => {
   const f = fixture(t);
-  const missing = "qz-history-image:v1:" + "a".repeat(64);
+  const missing = "zuri-history-image:v1:" + "a".repeat(64);
   await f.storage.set({ [activeKey]: serializeConversation([user(missing)]) });
   await f.agent.hydrateFromStore();
   assert.ok(!wire(f.agent.messages).includes(missing));
@@ -227,7 +227,7 @@ test("a transient asset read failure cannot hydrate an empty Agent over intact h
 });
 
 test("history reads overlap at most four payloads, preserve order, and stop after a failed batch", async () => {
-  const refs = Array.from({ length: 9 }, (_, index) => "qz-history-image:v1:" + index.toString(16).padStart(64, "0"));
+  const refs = Array.from({ length: 9 }, (_, index) => "zuri-history-image:v1:" + index.toString(16).padStart(64, "0"));
   const gate = Promise.withResolvers();
   let active = 0, peak = 0, loads = 0;
   const reading = resolveSessionImages([...refs, refs[0]], async reference => {

@@ -288,17 +288,17 @@
 }
 
 .queued-followup-steer {
-  --qz-control-height: 24px;
-  --qz-control-padding: 6px;
-  --qz-control-gap: 4px;
-  --qz-control-border: transparent;
-  --qz-control-border-hover: transparent;
-  --qz-control-border-focus: transparent;
-  --qz-control-bg: transparent;
-  --qz-control-bg-hover: var(--control-hover-fill);
-  --qz-control-bg-pressed: var(--control-active-fill);
-  --qz-control-color: var(--text-muted);
-  --qz-control-color-hover: var(--text-primary);
+  --zuri-control-height: 24px;
+  --zuri-control-padding: 6px;
+  --zuri-control-gap: 4px;
+  --zuri-control-border: transparent;
+  --zuri-control-border-hover: transparent;
+  --zuri-control-border-focus: transparent;
+  --zuri-control-bg: transparent;
+  --zuri-control-bg-hover: var(--control-hover-fill);
+  --zuri-control-bg-pressed: var(--control-active-fill);
+  --zuri-control-color: var(--text-muted);
+  --zuri-control-color-hover: var(--text-primary);
   flex: 0 0 auto;
   min-width: 50px;
   white-space: nowrap;
@@ -315,13 +315,13 @@
 }
 
 .queued-followup-delete {
-  --qz-control-size: 24px;
-  --qz-control-icon-size: 14px;
-  --qz-control-color: color-mix(in srgb, var(--text-muted) 78%, transparent);
-  --qz-control-color-hover: var(--text-secondary);
-  --qz-control-border-hover: transparent;
-  --qz-control-bg-hover: var(--control-hover-fill);
-  --qz-control-bg-pressed: var(--control-active-fill);
+  --zuri-control-size: 24px;
+  --zuri-control-icon-size: 14px;
+  --zuri-control-color: color-mix(in srgb, var(--text-muted) 78%, transparent);
+  --zuri-control-color-hover: var(--text-secondary);
+  --zuri-control-border-hover: transparent;
+  --zuri-control-bg-hover: var(--control-hover-fill);
+  --zuri-control-bg-pressed: var(--control-active-fill);
   opacity: 0.72;
 }
 
@@ -415,7 +415,7 @@
 
 .goal-clear-btn {
   border: none;
-  --qz-control-color: var(--text-muted);
+  --zuri-control-color: var(--text-muted);
 }
 
 .input-wrapper {
@@ -510,11 +510,11 @@
   background: var(--bg-primary);
 }
 
-.input-attachment .qz-icon-btn {
-  --qz-control-size: 18px;
-  --qz-control-icon-size: 10px;
-  --qz-control-border: var(--border);
-  --qz-control-bg: var(--bg-secondary);
+.input-attachment .zuri-icon-btn {
+  --zuri-control-size: 18px;
+  --zuri-control-icon-size: 10px;
+  --zuri-control-border: var(--border);
+  --zuri-control-bg: var(--bg-secondary);
   position: absolute;
   top: 3px;
   right: 3px;
@@ -555,16 +555,16 @@
 }
 
 .document-attachment-remove {
-  --qz-control-size: 24px;
-  --qz-control-icon-size: 10px;
-  --qz-control-border: transparent;
-  --qz-control-bg: transparent;
-  --qz-control-color: var(--text-muted);
+  --zuri-control-size: 24px;
+  --zuri-control-icon-size: 10px;
+  --zuri-control-border: transparent;
+  --zuri-control-bg: transparent;
+  --zuri-control-color: var(--text-muted);
 }
 
 .input-slash-menu {
-  --qz-menu-padding: 6px;
-  --qz-popover-radius: var(--radius-md);
+  --zuri-menu-padding: 6px;
+  --zuri-popover-radius: var(--radius-md);
   position: absolute;
   left: 12px;
   right: 12px;
@@ -904,8 +904,8 @@
 }
 
 .element-picker-btn {
-  --qz-control-size: 30px;
-  --qz-control-icon-size: 16px;
+  --zuri-control-size: 30px;
+  --zuri-control-icon-size: 16px;
   flex: 0 0 30px;
 }
 
@@ -1099,7 +1099,7 @@
 }
 
 .composer-plus-btn {
-  --qz-control-size: 32px;
+  --zuri-control-size: 32px;
   flex: 0 0 32px;
   border: 0;
   background: var(--control-hover-fill);
@@ -1122,14 +1122,14 @@
 }
 
 .composer-plus-menu {
-  --qz-menu-padding: 4px;
-  --qz-popover-radius: 12px;
+  --zuri-menu-padding: 4px;
+  --zuri-popover-radius: 12px;
   right: auto;
   /* Constant across the more/fewer-tabs states; follows the resizable side panel (left inset is 12px). */
   width: min(320px, calc(100% - 24px));
 }
 
-.composer-plus-menu .qz-menu-item {
+.composer-plus-menu .zuri-menu-item {
   display: flex;
   width: 100%;
   align-items: center;
@@ -1167,18 +1167,18 @@
   background: var(--border);
 }
 
-.composer-plus-menu .qz-menu-item .composer-menu-chevron {
+.composer-plus-menu .zuri-menu-item .composer-menu-chevron {
   margin-inline-start: auto;
 }
 
-.composer-plus-menu .qz-menu-item svg {
+.composer-plus-menu .zuri-menu-item svg {
   width: 16px;
   height: 16px;
   flex: none;
   color: var(--text-muted);
 }
 
-.composer-plus-menu .qz-menu-item:hover svg {
+.composer-plus-menu .zuri-menu-item:hover svg {
   color: var(--text-primary);
 }
 
@@ -1203,6 +1203,6 @@
   font-size: 10px;
 }
 
-.composer-plus-menu .qz-menu-item .composer-menu-hint + .composer-menu-chevron {
+.composer-plus-menu .zuri-menu-item .composer-menu-hint + .composer-menu-chevron {
   margin-inline-start: 0;
 }

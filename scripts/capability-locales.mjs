@@ -59,7 +59,7 @@ export function capabilityLocaleAssets(sourceDir, { entries, includes = () => tr
       const destination = resolve(sourceDir, "_locales", pack.chromeLocale, "messages.json");
       const messages = existsSync(destination) ? readNativeMessages(destination) : { ...defaultMessages };
       if (existsSync(destination)) resources.add(destination);
-      messages.qz_language = { message: pack.language };
+      messages.zuri_language = { message: pack.language };
       const translated = new Map();
       if (pack.catalog) {
         if (pack.catalog.includes("\\") || !/^\.{1,2}\//.test(pack.catalog)) throw new Error(`Invalid language catalog path: ${pack.catalog} (${entry})`);

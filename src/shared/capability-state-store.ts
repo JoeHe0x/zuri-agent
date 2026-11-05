@@ -30,7 +30,7 @@ export function createCapabilityStateStore(owner: string, storage: CapabilitySto
     const operation = previous.then(async () => {
       lifetime.throwIfAborted();
       // Chrome writes already submitted cannot be undone; cancellation blocks queued work and late consumers.
-      const result = await action(`qingzhou_capability:${owner}:${key}`);
+      const result = await action(`zuri_capability:${owner}:${key}`);
       lifetime.throwIfAborted();
       return result;
     });

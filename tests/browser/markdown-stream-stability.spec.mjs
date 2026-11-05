@@ -8,12 +8,12 @@ test.use({ viewport: { width: 430, height: 760 }, launchOptions: { args: ["--ena
 for (const step of [5, 20]) {
   test(`expanded image timeline stays stable at the streaming tail, ${step} characters per update`, async ({ page }, testInfo) => {
     await page.emulateMedia({ colorScheme: step === 5 ? "dark" : "light" });
-    const data = process.env.QZ_SCROLL_TRACE
-      ? JSON.parse(readFileSync(process.env.QZ_SCROLL_TRACE, "utf8"))
+    const data = process.env.ZURI_SCROLL_TRACE
+      ? JSON.parse(readFileSync(process.env.ZURI_SCROLL_TRACE, "utf8"))
       : { session: { transcript: imageTranscript() } };
     await page.route("https://**/*", route => route.fulfill({ contentType: "image/svg+xml", body: '<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160"><rect width="160" height="160" fill="#638f87"/></svg>' }));
     await page.evaluate(async ({ transcript, step }) => {
-      const bench = window.qingzhouConversationBenchmark;
+      const bench = window.zuriConversationBenchmark;
       const final = transcript.at(-1), sessionId = "trace-scroll", runId = final.runId;
       await bench.runLiveReplay({ sessionId, baseTranscript: transcript.slice(0, -1), events: [] }, { runId });
       const maxSequence = Math.max(...transcript.map(e => Number(e.eventSeq) || 0));
@@ -147,7 +147,7 @@ test("footnote definition prefixes stay out of the body and source links finish 
 test("ending an unchanged stream restores unfinished literal Markdown", async ({ page }) => {
   const source = "正文结束。\n\n[未完成链接](https://example.com/unfinished";
   await page.evaluate(async source => {
-    const bench = window.qingzhouConversationBenchmark;
+    const bench = window.zuriConversationBenchmark;
     await bench.runLiveReplay({ sessionId: "literal-end", baseTranscript: [], events: [] }, { runId: "literal-run" });
     bench.dispatchBackgroundEvent({ type: "message_update", sessionId: "literal-end", runId: "literal-run",
       spanId: "literal-answer", eventSeq: 1, content: source });
@@ -155,7 +155,7 @@ test("ending an unchanged stream restores unfinished literal Markdown", async ({
   const answer = page.locator('.msg-assistant').last();
   await expect(answer).toHaveAttribute("data-content", source);
   await expect(answer.locator(".msg-content")).not.toContainText("https://");
-  await page.evaluate(source => window.qingzhouConversationBenchmark.dispatchBackgroundEvent({
+  await page.evaluate(source => window.zuriConversationBenchmark.dispatchBackgroundEvent({
     type: "message_end", sessionId: "literal-end", runId: "literal-run", spanId: "literal-answer", eventSeq: 2,
     message: { role: "assistant", content: source },
   }), source);

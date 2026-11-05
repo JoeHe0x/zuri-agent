@@ -10,7 +10,7 @@ for (const colorScheme of ["light", "dark"]) {
         config: { provider: "custom", model: "test-model", apiKey: "test-key", customEndpoint: "https://example.test/v1/chat/completions", contextWindow: 128000, vision: false },
       });
       await page.goto("/extension/sidepanel/sidepanel.html", { waitUntil: "domcontentloaded" });
-      await page.waitForFunction(() => Boolean(window.qingzhouConversationBenchmark));
+      await page.waitForFunction(() => Boolean(window.zuriConversationBenchmark));
       await expect(page.locator('button[data-tab="chat"]')).toHaveText("Chat");
       await expect(page.locator("#btn-settings")).toHaveAttribute("title", "Settings");
       await expect(page.locator("#btn-new")).toHaveAttribute("title", "New chat");
@@ -26,8 +26,8 @@ for (const colorScheme of ["light", "dark"]) {
         ],
       };
       const exported = await page.evaluate(async input => {
-        await window.qingzhouConversationBenchmark.runSnapshotRender(input, { debug: false, clearStorage: false });
-        return window.qingzhouConversationBenchmark.renderSessionDocument(input);
+        await window.zuriConversationBenchmark.runSnapshotRender(input, { debug: false, clearStorage: false });
+        return window.zuriConversationBenchmark.renderSessionDocument(input);
       }, snapshot);
       await expect(page.locator("#messages")).toContainText("用户正文保持原样");
       await expect(page.locator("#messages")).toContainText("模型回答保持原样");
@@ -48,10 +48,10 @@ for (const colorScheme of ["light", "dark"]) {
         await expect(offline.locator("#messages")).toContainText("用户正文保持原样");
         await expect(offline.locator(".chat-error-card")).toContainText("Unable to continue");
         expect(await offline.evaluate(() => window.pwned)).toBeUndefined();
-        await offline.evaluate(() => window.postMessage({ type: "qingzhou:session-export:result", action: "probe", installed: true }, "*"));
-        await expect(offline.locator("#qingzhou-session-cta")).toHaveText("Continue in qz");
-        await offline.evaluate(() => window.postMessage({ type: "qingzhou:session-export:result", action: "import", ok: false }, "*"));
-        await expect(offline.locator("#qingzhou-session-cta")).toHaveText("Try again");
+        await offline.evaluate(() => window.postMessage({ type: "zuri:session-export:result", action: "probe", installed: true }, "*"));
+        await expect(offline.locator("#zuri-session-cta")).toHaveText("Continue in zuri");
+        await offline.evaluate(() => window.postMessage({ type: "zuri:session-export:result", action: "import", ok: false }, "*"));
+        await expect(offline.locator("#zuri-session-cta")).toHaveText("Try again");
         expect(errors).toEqual([]);
       } finally { await recipient.close(); }
     });

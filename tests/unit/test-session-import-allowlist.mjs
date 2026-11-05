@@ -66,7 +66,7 @@ class MutationObserver { observe() {} disconnect() {} }
 const listeners = [];
 const script = new HTMLScriptElement();
 script.type = "application/json";
-script.textContent = JSON.stringify({ format: "qingzhou.session", version: 1 });
+script.textContent = JSON.stringify({ format: "zuri.session", version: 1 });
 const button = {
   hidden: true,
   attributes: new Map(),
@@ -78,8 +78,8 @@ const button = {
 const document = {
   documentElement: { lang: "en" },
   getElementById(id) {
-    if (id === "qingzhou-session-exchange") return script;
-    if (id === "qingzhou-session-cta") return button;
+    if (id === "zuri-session-exchange") return script;
+    if (id === "zuri-session-cta") return button;
     return null;
   },
   contains(node) { return node === script || node === button; },
@@ -92,10 +92,10 @@ const window = {
     if (type === "message") listeners.push(listener);
   },
   postMessage(data) {
-    if (data && data.type === "qingzhou:session-export:result" && data.action === "probe" && data.installed) {
+    if (data && data.type === "zuri:session-export:result" && data.action === "probe" && data.installed) {
       window.__importProbes += 1;
       button.hidden = false;
-      button.setAttribute("data-qingzhou-session-import", "");
+      button.setAttribute("data-zuri-session-import", "");
     }
     const event = { source: window, data };
     for (const listener of listeners.slice()) listener(event);
@@ -116,7 +116,7 @@ function installExportBridge(bundle, href) {
     location: new URL(href),
     chrome: {
       runtime: {
-        getManifest: () => ({ name: "qz", version: "0.0.0" }),
+        getManifest: () => ({ name: "zuri", version: "0.0.0" }),
         sendMessage: () => Promise.resolve({ ok: false }),
       },
     },
@@ -125,12 +125,12 @@ function installExportBridge(bundle, href) {
   vm.runInContext(PAGE_HARNESS, sandbox, { filename: "export-page-harness.js" });
   vm.runInContext(bundle, sandbox, { filename: "session-export-bridge.js" });
   vm.runInContext(
-    `window.postMessage({ type: "qingzhou:session-export:probe", requestId: "allowlist" });`,
+    `window.postMessage({ type: "zuri:session-export:probe", requestId: "allowlist" });`,
     sandbox,
   );
   return vm.runInContext(`({
-    importable: document.getElementById("qingzhou-session-cta").hasAttribute("data-qingzhou-session-import"),
-    hidden: document.getElementById("qingzhou-session-cta").hidden === true,
+    importable: document.getElementById("zuri-session-cta").hasAttribute("data-zuri-session-import"),
+    hidden: document.getElementById("zuri-session-cta").hidden === true,
     probes: window.__importProbes,
   })`, sandbox);
 }

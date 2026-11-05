@@ -27,8 +27,8 @@ a capability. These rules apply to every package.
   Tool replacements explicitly declare
   `replaces: "<original-package>/<same-tool-name>"` and provide the complete execution contract.
   Preserve result compatibility and the existing metadata registration when reusing a renderer.
-- Reuse [design-system](../../docs/design-system.md) tokens and `qz-*` controls. Prefer complete static
-  `qz:` utilities for template layout. Put complex states, third-party adaptations, and renderer rules
+- Reuse [design-system](../../docs/design-system.md) tokens and `zuri-*` controls. Prefer complete static
+  `zuri:` utilities for template layout. Put complex states, third-party adaptations, and renderer rules
   in the `components` layer of `ui.css`. The build imports the public skin. Check both color schemes
   and offline export.
 - Register embedded Skills through `skills` and `#sdk/shared/skill-definition`. The capability owns

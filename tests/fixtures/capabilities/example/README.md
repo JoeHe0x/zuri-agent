@@ -45,7 +45,7 @@ the actual source tree.
 the Chrome test above using only this package's synthetic data. To record it again:
 
 ```bash
-QINGZHOU_RECORD_DEMO=1 npm test -- playwright tests/browser/extension-example.spec.mjs --workers=1
+ZURI_RECORD_DEMO=1 npm test -- playwright tests/browser/extension-example.spec.mjs --workers=1
 ```
 
 Playwright saves `video.webm` under `tests/results/playwright/`. Convert it to a GIF at 8 fps and

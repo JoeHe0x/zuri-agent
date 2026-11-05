@@ -6,7 +6,7 @@ import { chromium } from 'playwright';
 import { ensureTestExtension } from '../support/extension-build.mjs';
 import { acceptDataDisclosure } from '../support/data-consent.mjs';
 const extension = await ensureTestExtension();
-const profile = await mkdtemp(join(tmpdir(), 'qz-image-conversion-'));
+const profile = await mkdtemp(join(tmpdir(), 'zuri-image-conversion-'));
 const context = await chromium.launchPersistentContext(profile, {
   locale: 'zh-CN',
   headless: true, executablePath: chromium.executablePath(),

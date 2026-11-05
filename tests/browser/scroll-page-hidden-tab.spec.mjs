@@ -12,9 +12,9 @@ const contentScriptUrl = testAssetUrl("extension/content/content-script.js");
 // Playwright force-enables focus emulation, which keeps background tabs visible and
 // lets smooth scrolling run. This regression needs a real hidden document.
 async function launchHiddenChrome() {
-  const profile = await mkdtemp(join(tmpdir(), "qz-scroll-hidden-"));
+  const profile = await mkdtemp(join(tmpdir(), "zuri-scroll-hidden-"));
   const executable = process.env.CHROME_EXECUTABLE || chromium.executablePath();
-  const noSandbox = process.platform === "linux" && (process.getuid?.() === 0 || process.env.QZ_TEST_NO_SANDBOX === "1");
+  const noSandbox = process.platform === "linux" && (process.getuid?.() === 0 || process.env.ZURI_TEST_NO_SANDBOX === "1");
   const logs = [];
   const child = spawn(executable, [
     `--user-data-dir=${profile}`,
@@ -161,7 +161,7 @@ async function installContentScript(session) {
     Object.defineProperty(window.chrome, "runtime", {
       configurable: true,
       value: {
-        getManifest: () => ({ name: "Qingzhou Test", version: "0.0.0" }),
+        getManifest: () => ({ name: "Zuri Test", version: "0.0.0" }),
         onMessage: {
           addListener(next) { listener = next; },
           removeListener() {},
@@ -180,7 +180,7 @@ async function installContentScript(session) {
       window.__scrollBehaviors.push({ method: "scrollIntoView", behavior: options && options.behavior });
       return originalScrollIntoView.call(this, options);
     };
-    window.__callQingzhouContent = (action, params = {}) => new Promise((resolve, reject) => {
+    window.__callZuriContent = (action, params = {}) => new Promise((resolve, reject) => {
       if (typeof listener !== "function") {
         reject(new Error("content-script listener is not installed"));
         return;
@@ -199,7 +199,7 @@ async function installContentScript(session) {
     script.onerror = () => reject(new Error("content script failed to load"));
     document.documentElement.append(script);
   })`);
-  await expect.poll(() => evaluate(session, "window.__QZ_CONTENT_READY === true")).toBe(true);
+  await expect.poll(() => evaluate(session, "window.__ZURI_CONTENT_READY === true")).toBe(true);
 }
 
 function waitForWindowScroll(session) {
@@ -215,7 +215,7 @@ function waitForWindowScroll(session) {
 async function scrollPage(session, params) {
   return evaluate(session, `(() => {
     const scroller = document.querySelector("#scroller");
-    const run = window.__callQingzhouContent("scrollPage", ${JSON.stringify(params)});
+    const run = window.__callZuriContent("scrollPage", ${JSON.stringify(params)});
     return Promise.resolve(run).then((result) => ({
       result,
       scrollY: window.scrollY,

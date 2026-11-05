@@ -29,7 +29,7 @@ from sklearn.model_selection import GroupKFold
 HERE = Path(__file__).resolve().parent
 READABILITY_PATH = HERE / "study-tree-dp-readability.py"
 SPEC = importlib.util.spec_from_file_location(
-    "qingzhou_content_obligation_base", READABILITY_PATH
+    "zuri_content_obligation_base", READABILITY_PATH
 )
 if SPEC is None or SPEC.loader is None:
     raise RuntimeError(f"cannot load {READABILITY_PATH}")
@@ -455,7 +455,7 @@ def main() -> int:
         print(json.dumps({"fold": fold, "summary": summary}, ensure_ascii=False), flush=True)
 
     report = {
-        "schema": "qingzhou.tree-dp-content-obligation-study.v1",
+        "schema": "zuri.tree-dp-content-obligation-study.v1",
         "protocol": {
             "trainingSplits": ["base", "train"],
             "grouping": "siteFamily GroupKFold",

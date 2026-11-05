@@ -1,5 +1,5 @@
 {
-  "format": "qingzhou.plugin",
+  "format": "zuri.plugin",
   "schemaVersion": 1,
   "id": "result-selection-example",
   "displayName": "Opportunity shortlist",

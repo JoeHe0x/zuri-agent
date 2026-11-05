@@ -64,11 +64,11 @@ test('connected queue bounds all message types and resumes FIFO after a failed t
     await assert.rejects(client.request(type, { sessionId: 's1' }), { code: 'TRANSPORT_BUSY' });
   }
   assert.deepEqual(controller.current.sent.map(frame => frame.type || frame.op), ['hello']);
-  receive(controller, { __qz_transport__: 1, op: 'ready' });
+  receive(controller, { __zuri_transport__: 1, op: 'ready' });
   await tick();
   const begin = controller.current.sent.find(frame => frame.op === 'begin');
   assert.ok(begin);
-  receive(controller, { __qz_transport__: 1, op: 'cancel', id: begin.id, code: 'TRANSPORT_BUSY' });
+  receive(controller, { __zuri_transport__: 1, op: 'cancel', id: begin.id, code: 'TRANSPORT_BUSY' });
   await failed; await waiting;
   assert.equal(controller.current.sent.at(-1).type, 'sync_composer_draft');
   assert.equal(client.getSnapshot().bufferedBytes, 0);
@@ -215,11 +215,11 @@ test('a native chunk failure disposes work already assigned to that connection w
   const { client, controller } = fixture(t, {}, { failPostMessage: message => failChunks && message.op === 'chunk' });
   const active = client.send(large()).catch(error => error);
   const waiting = client.request('waiting_on_connection', {}, null).catch(error => error);
-  receive(controller, { __qz_transport__: 1, op: 'ready' });
+  receive(controller, { __zuri_transport__: 1, op: 'ready' });
   await tick();
   const begin = controller.current.sent.find(message => message.op === 'begin');
   assert.ok(begin);
-  receive(controller, { __qz_transport__: 1, op: 'ack', id: begin.id, seq: -1 });
+  receive(controller, { __zuri_transport__: 1, op: 'ack', id: begin.id, seq: -1 });
   await tick();
   assert.equal((await active).code, 'PORT_SEND_FAILED');
   assert.equal((await waiting).code, 'PORT_DISCONNECTED');

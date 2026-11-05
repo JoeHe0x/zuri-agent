@@ -18,7 +18,7 @@ export function shellArgument(value, shell = defaultShell()) {
   return /^[A-Za-z0-9_.:-]+$/.test(text) && !(shell === "powershell" && text.startsWith("-")) ? text : shellQuote(text, shell);
 }
 
-/** npm's qz.ps1 must pass the terminator through to Node's argument parser. */
+/** npm's zuri.ps1 must pass the terminator through to Node's argument parser. */
 export function optionTerminator(shell = defaultShell()) {
   return shell === "powershell" ? "'--'" : "--";
 }

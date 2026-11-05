@@ -15,7 +15,7 @@ for (const language of ["zh-CN", "en-US"]) {
           } } },
         });
         await page.goto("/extension/sidepanel/sidepanel.html", { waitUntil: "domcontentloaded" });
-        await page.waitForFunction(() => Boolean(window.qingzhouConversationBenchmark));
+        await page.waitForFunction(() => Boolean(window.zuriConversationBenchmark));
         await page.locator("#btn-settings").click();
         await expect(page.locator("#btn-save-settings")).toHaveText(english ? "Save" : "保存配置");
         await expect(page.locator('#model-preset-switcher [data-i18n="core.close"]')).toHaveText(english ? "Close" : "关闭");
@@ -86,7 +86,7 @@ for (const scenario of [
       });
       if (!scenario.uiLanguage) await page.addInitScript(() => { delete window.chrome.i18n; });
       await page.goto("/extension/sidepanel/sidepanel.html", { waitUntil: "domcontentloaded" });
-      await page.waitForFunction(() => Boolean(window.qingzhouConversationBenchmark));
+      await page.waitForFunction(() => Boolean(window.zuriConversationBenchmark));
       await expect(page.locator("#btn-settings")).toHaveAttribute("title", scenario.english ? "Settings" : "设置");
       await page.locator("#btn-settings").click();
       await expect(page.locator("#cfg-model-parameters-label")).toHaveText(scenario.english ? "Custom parameters" : "自定义参数");

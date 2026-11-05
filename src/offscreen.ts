@@ -18,8 +18,8 @@ setInterval(() => {
   });
 }, 10_000);
 
-const HOST_SOURCE = "qz-inner-runner-host";
-const SANDBOX_SOURCE = "qz-inner-runner-sandbox";
+const HOST_SOURCE = "zuri-inner-runner-host";
+const SANDBOX_SOURCE = "zuri-inner-runner-sandbox";
 const SANDBOX_URL = chrome.runtime.getURL("runner-sandbox.html");
 
 let sandboxFrame: HTMLIFrameElement | null = null;

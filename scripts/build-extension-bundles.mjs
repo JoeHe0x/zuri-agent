@@ -202,12 +202,12 @@ function describeOutput(item) {
 export function stableDebugSourceMap(contents, sourceRoot, mapDirectory) {
   const map = JSON.parse(contents);
   map.sources = map.sources.map(path => {
-    if (/^qingzhou:\/\/(?:extension|npm)\//.test(path)) return path;
+    if (/^zuri:\/\/(?:extension|npm)\//.test(path)) return path;
     const absolute = originalSourceMapPath(path, mapDirectory, map.sourceRoot || "");
     const modules = resolve(REPO_ROOT, "node_modules");
-    if (isPathInside(modules, absolute)) return `qingzhou://npm/${encodeSourceMapPath(relative(modules, absolute))}`;
+    if (isPathInside(modules, absolute)) return `zuri://npm/${encodeSourceMapPath(relative(modules, absolute))}`;
     if (!isPathInside(sourceRoot, absolute)) throw new Error(`debug source escaped extension root: ${path}`);
-    return `qingzhou://extension/${encodeSourceMapPath(relative(sourceRoot, absolute))}`;
+    return `zuri://extension/${encodeSourceMapPath(relative(sourceRoot, absolute))}`;
   });
   delete map.sourceRoot;
   if (map.file) map.file = basename(map.file);

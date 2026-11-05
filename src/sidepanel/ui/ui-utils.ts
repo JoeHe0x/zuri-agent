@@ -102,7 +102,7 @@ export function appendHtmlSection(parent: HTMLElement, className: string, html: 
 
 export function createCodeCopyButton(label = t("copyCode")) {
   const button = document.createElement("button");
-  button.className = "qz-icon-btn qz-icon-btn--xs code-copy-btn";
+  button.className = "zuri-icon-btn zuri-icon-btn--xs code-copy-btn";
   button.type = "button";
   button.title = label;
   button.setAttribute("aria-label", label);

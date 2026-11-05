@@ -88,9 +88,9 @@ def load_study_pages(
         raise ValueError(f"training export is incomplete: {export_report_path} is missing")
     export_report = json.loads(export_report_path.read_text(encoding="utf8"))
     expected_schema = (
-        "qingzhou.article-extraction-tree-dp-training-export.v2"
+        "zuri.article-extraction-tree-dp-training-export.v2"
         if corpus == "zh"
-        else "qingzhou.wcxb-tree-dp-training-export.v1"
+        else "zuri.wcxb-tree-dp-training-export.v1"
     )
     if export_report.get("schema") != expected_schema:
         raise ValueError(f"unexpected {corpus} export schema: {export_report.get('schema')}")
@@ -512,7 +512,7 @@ def main() -> int:
             args.root_prior_mode,
         )
     report = {
-        "schema": "qingzhou.tree-dp-readability-study.v1",
+        "schema": "zuri.tree-dp-readability-study.v1",
         "protocol": {
             "featureNames": FEATURE_NAMES,
             "baseScorer": "shipped-v6b-fixed-offset",
@@ -584,7 +584,7 @@ def main() -> int:
                 "candidateRoots": candidate.roots,
             }
         masks = {
-            "schema": "qingzhou.tree-dp-readability-oof-mask-delta.v1",
+            "schema": "zuri.tree-dp-readability-oof-mask-delta.v1",
             "protocol": report["protocol"],
             "hyperparameters": report["hyperparameters"],
             "pages": changed,
@@ -613,7 +613,7 @@ def main() -> int:
                 "candidateAvailable": candidate.available,
             }
         masks = {
-            "schema": "qingzhou.tree-dp-readability-wcxb-holdout-mask-delta.v1",
+            "schema": "zuri.tree-dp-readability-wcxb-holdout-mask-delta.v1",
             "protocol": report["protocol"],
             "hyperparameters": report["hyperparameters"],
             "pages": changed,
@@ -642,7 +642,7 @@ def main() -> int:
                 "candidateAvailable": candidate.available,
             }
         masks = {
-            "schema": "qingzhou.tree-dp-readability-validation-mask-delta.v1",
+            "schema": "zuri.tree-dp-readability-validation-mask-delta.v1",
             "protocol": report["protocol"],
             "hyperparameters": report["hyperparameters"],
             "pages": changed,

@@ -42,7 +42,7 @@ def load_module(name: str, path: Path):
 
 
 GLOBAL_DISTILL_PATH = HERE / "study-tree-dp-global-distillation.py"
-GLOBAL_DISTILL = load_module("qingzhou_contextual_root_data", GLOBAL_DISTILL_PATH)
+GLOBAL_DISTILL = load_module("zuri_contextual_root_data", GLOBAL_DISTILL_PATH)
 DISTILL = GLOBAL_DISTILL.DISTILL
 MLP = GLOBAL_DISTILL.MLP
 GLOBAL = MLP.GLOBAL
@@ -147,7 +147,7 @@ def load_wmb_pages(directory: Path) -> list[object]:
     if not report_path.exists():
         raise ValueError(f"WebMainBench export is incomplete: {report_path} is missing")
     report = json.loads(report_path.read_text(encoding="utf8"))
-    if report.get("schema") != "qingzhou.webmainbench-tree-dp-training-export.v1":
+    if report.get("schema") != "zuri.webmainbench-tree-dp-training-export.v1":
         raise ValueError(f"unexpected WebMainBench export schema: {report.get('schema')}")
     paths = sorted(directory.glob("*.json.gz"))
     if report.get("exported") != len(paths):
@@ -288,7 +288,7 @@ def main() -> int:
         kind: GLOBAL_DISTILL.summary(values) for kind, values in rows.items()
     }
     report = {
-        "schema": "qingzhou.tree-dp-contextual-root-study.v1",
+        "schema": "zuri.tree-dp-contextual-root-study.v1",
         "protocol": {
             "trainingSplits": ["base", "train"],
             "grouping": "siteFamily",

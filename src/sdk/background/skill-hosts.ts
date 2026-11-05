@@ -10,4 +10,4 @@ export type SkillHostDefinition = {
   target?: never; execute(args: Record<string, unknown>, context: SkillHostContext): Promise<unknown>;
 });
 export interface SkillHostExtensionAPI { registerSkillHost(definition: SkillHostDefinition): void }
-export type SkillHostExtension = (qz: SkillHostExtensionAPI) => void;
+export type SkillHostExtension = (zuri: SkillHostExtensionAPI) => void;

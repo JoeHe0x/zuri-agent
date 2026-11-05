@@ -42,7 +42,7 @@ def load_module(name: str, path: Path):
 
 
 GLOBAL_DISTILL_PATH = HERE / "study-tree-dp-global-distillation.py"
-GLOBAL_DISTILL = load_module("qingzhou_calibrated_root_data", GLOBAL_DISTILL_PATH)
+GLOBAL_DISTILL = load_module("zuri_calibrated_root_data", GLOBAL_DISTILL_PATH)
 DISTILL = GLOBAL_DISTILL.DISTILL
 MLP = GLOBAL_DISTILL.MLP
 GLOBAL = MLP.GLOBAL
@@ -387,7 +387,7 @@ def main() -> int:
 
     summaries = {kind: GLOBAL_DISTILL.summary(value) for kind, value in rows.items()}
     report = {
-        "schema": "qingzhou.tree-dp-calibrated-root-study.v1",
+        "schema": "zuri.tree-dp-calibrated-root-study.v1",
         "protocol": {
             "trainingSplits": ["base", "train"],
             "grouping": "siteFamily",

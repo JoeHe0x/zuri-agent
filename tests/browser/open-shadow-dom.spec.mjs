@@ -19,7 +19,7 @@ async function install(page, markup = html) {
     Object.defineProperty(window.chrome, "runtime", {
       configurable: true,
       value: {
-        getManifest: () => ({ name: "Qingzhou Test", version: "0.0.0" }),
+        getManifest: () => ({ name: "Zuri Test", version: "0.0.0" }),
         onMessage: {
           addListener(next) { listener = next; },
           removeListener() { listener = null; },
@@ -27,7 +27,7 @@ async function install(page, markup = html) {
         sendMessage: async () => ({ ok: true }),
       },
     });
-    window.__callQingzhouContent = (action, params = {}) => new Promise((resolve, reject) => {
+    window.__callZuriContent = (action, params = {}) => new Promise((resolve, reject) => {
       if (typeof listener !== "function") {
         reject(new Error("content-script listener is not installed"));
         return;
@@ -42,12 +42,12 @@ async function install(page, markup = html) {
   for (const script of contentScripts) {
     await page.addScriptTag({ url: testAssetUrl(script) });
   }
-  await expect.poll(() => page.evaluate(() => window.__QZ_CONTENT_READY)).toBe(true);
+  await expect.poll(() => page.evaluate(() => window.__ZURI_CONTENT_READY)).toBe(true);
 }
 
 async function call(page, action, params) {
   return page.evaluate(
-    ({ nextAction, nextParams }) => window.__callQingzhouContent(nextAction, nextParams),
+    ({ nextAction, nextParams }) => window.__callZuriContent(nextAction, nextParams),
     { nextAction: action, nextParams: params },
   );
 }
@@ -104,9 +104,9 @@ test("shadow locations cannot borrow identical light markup and references keep 
     expect(hit).not.toHaveProperty('line');
     expect(hit).not.toHaveProperty('lineRange');
     const inspected = await page.evaluate(async token => {
-      const node = await window.__qzInvoke(null, { action: 'resolveFindElement', elementRef: token });
-      const inspection = await window.__qzInvoke(node, { action: 'inspectElement' });
-      const consumed = await window.__qzInvoke(null, { action: 'resolveFindElement', elementRef: token });
+      const node = await window.__zuriInvoke(null, { action: 'resolveFindElement', elementRef: token });
+      const inspection = await window.__zuriInvoke(node, { action: 'inspectElement' });
+      const consumed = await window.__zuriInvoke(null, { action: 'resolveFindElement', elementRef: token });
       return { inspection, consumed };
     }, hit._elementRef);
     expect(inspected.inspection.text).toBe(hit.text);
@@ -115,7 +115,7 @@ test("shadow locations cannot borrow identical light markup and references keep 
   }
   const fresh = await call(page, 'findElements', { pattern: 'Shadow only', roles: ['button'] });
   await page.evaluate(() => document.querySelector('#host').shadowRoot.lastElementChild.remove());
-  expect(await page.evaluate(token => window.__qzInvoke(null, { action: 'resolveFindElement', elementRef: token }), fresh.results[0]._elementRef)).toBeNull();
+  expect(await page.evaluate(token => window.__zuriInvoke(null, { action: 'resolveFindElement', elementRef: token }), fresh.results[0]._elementRef)).toBeNull();
 });
 
 test("light-DOM find results retain their pre-fix JSON bytes and field order", async ({ page }) => {

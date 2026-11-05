@@ -41,7 +41,7 @@ function createHarness(options = {}) {
           warnings: [],
           sheets: [
             { name: "Apps", columns: ["name", "status"], rows: [{ name: "A", status: "ok" }] },
-            { name: "Owners", columns: ["name"], rows: [{ name: "Qingzhou" }] },
+            { name: "Owners", columns: ["name"], rows: [{ name: "Zuri" }] },
           ],
         };
       }
@@ -85,8 +85,8 @@ test("Skill DOCX/PDF resources use the document model pipeline and reuse the cac
   assert.equal(first.contentFormat, "markdown");
   assert.equal(Object.hasOwn(first, "blocks"), false);
   assert.equal(first.document.docModelId.startsWith("model_skill_"), true);
-  assert.equal(first.next.loadSkill, "qingzhou-documents");
-  assert.equal(first.next.tool, "qingzhou_documents__document_read_chunk");
+  assert.equal(first.next.loadSkill, "zuri-documents");
+  assert.equal(first.next.tool, "zuri_documents__document_read_chunk");
   assert.deepEqual(first.next.args, { docModelId: first.document.docModelId, chunkIndex: 1 });
   assert.equal(harness.files[0].sourceTool, "load_skill_resource");
   assert.equal(harness.files[0].sessionId, "session-docs");
@@ -241,7 +241,7 @@ test("bundled DOCX, XLSX and PDF bytes are accepted by the real document parsers
   const xlsxBytes = await createDocumentBytes({
     format: "xlsx",
     title: "Bundled workbook",
-    sheets: [{ name: "Data", columns: ["name"], rows: [{ name: "Qingzhou" }] }],
+    sheets: [{ name: "Data", columns: ["name"], rows: [{ name: "Zuri" }] }],
   });
   const pdfBytes = new TextEncoder().encode("%PDF-1.4\n/Type /Page\n(Bundled PDF reference content is readable.) Tj\n%%EOF");
 
@@ -269,6 +269,6 @@ test("bundled DOCX, XLSX and PDF bytes are accepted by the real document parsers
     console.warn = originalWarn;
   }
   assert.match(docx.content, /Word instructions/);
-  assert.deepEqual(xlsx.rows, [{ name: "Qingzhou" }]);
+  assert.deepEqual(xlsx.rows, [{ name: "Zuri" }]);
   assert.match(pdf.content, /Bundled PDF reference content/);
 });

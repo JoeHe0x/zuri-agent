@@ -126,8 +126,8 @@ test("settings model suggestions render in a viewport popover without growing th
   const css = readStylesheetSource(new URL("../../src/sidepanel/sidepanel.css", import.meta.url)) + readProjectFile("src/capabilities/settings/ui.css");
 
   assert.match(html, /id="cfg-model-options"[^>]*popover="manual"/u);
-  assert.match(css, /#cfg-model-options\.qz-combobox-menu\s*\{[^}]*position:\s*fixed;/su);
-  assert.match(css, /#cfg-model-options\.qz-combobox-menu\.open-upward\s*\{[^}]*bottom:\s*var\(--model-menu-bottom/su);
+  assert.match(css, /#cfg-model-options\.zuri-combobox-menu\s*\{[^}]*position:\s*fixed;/su);
+  assert.match(css, /#cfg-model-options\.zuri-combobox-menu\.open-upward\s*\{[^}]*bottom:\s*var\(--model-menu-bottom/su);
   assert.match(settingsFeature, /function positionModelSuggestions\(\)/u);
   assert.match(settingsFeature, /spaceBelow < 144 && spaceAbove > spaceBelow/u);
   assert.match(settingsFeature, /menu\.showPopover\(\)/u);
@@ -161,8 +161,8 @@ test("Skill settings are manifest-driven and use conventional credential inputs"
   assert.doesNotMatch(settingsFeature, /data-skill-setting-clear=/, "the form should not add a special clear-secret checkbox");
   assert.doesNotMatch(settingsFeature, /settingsSaveState\?\.classList\.toggle\("hidden", nextTab === "skills"\)/, "the settings footer should remain shared across all tabs");
   assert.doesNotMatch(settingsFeature, /odps|accessKey|secretAccessKey/i, "the core settings UI must not contain service-specific fields");
-  assert.match(css, /\.skill-settings-card\s*\{[\s\S]*var\(--border\)[\s\S]*var\(--radius-md\)/, "Skill cards should reuse Qingzhou design tokens");
-  assert.match(css, /\.skill-settings-section\s*\{[\s\S]*var\(--border\)[\s\S]*var\(--radius-sm\)/, "generic sections should reuse Qingzhou surface tokens");
+  assert.match(css, /\.skill-settings-card\s*\{[\s\S]*var\(--border\)[\s\S]*var\(--radius-md\)/, "Skill cards should reuse Zuri design tokens");
+  assert.match(css, /\.skill-settings-section\s*\{[\s\S]*var\(--border\)[\s\S]*var\(--radius-sm\)/, "generic sections should reuse Zuri surface tokens");
   assert.match(css, /\.settings-tabs\s*\{[^}]*grid-auto-columns:\s*minmax\(max-content, 1fr\)[^}]*overflow-x:\s*auto/, "settings navigation preserves complete labels and scrolls when contributions exceed its width");
   assert.match(css, /\.settings-body\s*\{[\s\S]*padding-right:\s*0/, "Skill cards and tab bar should share the same horizontal bounds");
 });
@@ -177,7 +177,7 @@ test("preset selection only stages fields and waits for save", () => {
   const html = readProjectFile("src/sidepanel/sidepanel.html") + readProjectFile("src/capabilities/settings/ui.html");
   const settingsFeature = readSettingsFeature();
   const handler = extractPresetChangeHandler(settingsFeature);
-  assert.match(html, /<label class="qz-field-label"[^>]*>当前<\/label>[\s\S]*?<option value=""[^>]*>新配置<\/option>/u, "the settings selector should describe current and newly edited configurations");
+  assert.match(html, /<label class="zuri-field-label"[^>]*>当前<\/label>[\s\S]*?<option value=""[^>]*>新配置<\/option>/u, "the settings selector should describe current and newly edited configurations");
   assert.match(settingsFeature, /<option value="">\$\{escapeHtml\(t\("newConfiguration"\)\)\}<\/option>/u, "rerendering presets should preserve the new-configuration label");
   assert.match(handler, /applyPresetToSettingsFields\(preset\)/, "preset selection should fill settings fields");
   assert.match(handler, /updateSettingsSaveState\(\)/, "preset selection should refresh save button state");
@@ -201,12 +201,12 @@ test("settings security policy lives under advanced and uses one save action", (
   );
   assert.match(
     html,
-    /<div id="cfg-trim-old-tool-results-field" class="hidden" aria-hidden="true">[\s\S]*?<input id="cfg-trim-old-tool-results" class="qz-checkbox" type="checkbox">[\s\S]*?<\/div>/,
+    /<div id="cfg-trim-old-tool-results-field" class="hidden" aria-hidden="true">[\s\S]*?<input id="cfg-trim-old-tool-results" class="zuri-checkbox" type="checkbox">[\s\S]*?<\/div>/,
     "context trimming should remain wired but hidden from advanced settings",
   );
   assert.match(
     html,
-    /<select id="cfg-context-preset" class="qz-field qz-select context-window-select"[^>]*aria-label="上下文长度"[^>]*><\/select>/,
+    /<select id="cfg-context-preset" class="zuri-field zuri-select context-window-select"[^>]*aria-label="上下文长度"[^>]*><\/select>/,
     "context window presets should render as a compact dropdown",
   );
   assert.match(
@@ -214,7 +214,7 @@ test("settings security policy lives under advanced and uses one save action", (
     /<input id="cfg-context-window" type="text" class="[^"]*\bqz-field\b[^"]*\bcontext-window-input\b[^"]*\bhidden\b[^"]*"/,
     "custom context window input should stay collapsed until selected",
   );
-  assertClassTokens(html, "context-window-input", ["qz:h-8.5"], "custom context field preserves its 34px control height");
+  assertClassTokens(html, "context-window-input", ["zuri:h-8.5"], "custom context field preserves its 34px control height");
   assert.doesNotMatch(html, /context-window-presets/, "context window settings should not use the old preset button grid");
   assert.doesNotMatch(html, /cfg-context-hint/, "context window hints should not add a separate settings row");
   assert.doesNotMatch(html, /限制 Agent 访问特定站点或 URL。/, "security policy should not spend vertical space on redundant explanatory copy");
@@ -254,8 +254,8 @@ test("settings security policy lives under advanced and uses one save action", (
   // The real get/save runtime's security-policy and catalog projection is covered
   // by test-background-services; the UI contract below owns the single save action.
   assert.match(css, /\.settings-save-status\s*\{[\s\S]*overflow-wrap:\s*anywhere/, "long settings errors should wrap inside the save bar");
-  assertClassTokens(html, "settings-save-status", ["qz:grid", "qz:grid-cols-[6px_minmax(0,1fr)]"], "settings status dot should not force a single-line flex layout");
-  assertClassTokens(html, "settings-content", ["qz:grid", "qz:grid-rows-[auto_auto_minmax(0,1fr)_auto]", "qz:overflow-hidden"], "settings shell should keep scrolling inside tab content");
+  assertClassTokens(html, "settings-save-status", ["zuri:grid", "zuri:grid-cols-[6px_minmax(0,1fr)]"], "settings status dot should not force a single-line flex layout");
+  assertClassTokens(html, "settings-content", ["zuri:grid", "zuri:grid-rows-[auto_auto_minmax(0,1fr)_auto]", "zuri:overflow-hidden"], "settings shell should keep scrolling inside tab content");
   assert.match(css, /\.settings-content\s*\{[\s\S]*border-radius:\s*var\(--radius-lg\)/, "settings shell should clip all four rounded corners consistently");
   assert.match(css, /\.settings-body\s*\{[\s\S]*overflow-y:\s*auto/, "settings tab body should own vertical scrolling");
   assert.match(css, /\.settings-body::-webkit-scrollbar\s*\{[\s\S]*width:\s*4px/, "settings body scrollbar should stay narrow");
@@ -590,7 +590,7 @@ test("GPT-5.6 Codex models use the current multimodal 272K profile", async () =>
     assert.equal(match.contextWindow, 272000, model);
     assert.equal(match.maxOutputTokens, 128 * 1024, model);
     assert.equal(match.vision, true, model);
-    assert.equal(match.source, "qz-openai-codex-provider-metadata", model);
+    assert.equal(match.source, "zuri-openai-codex-provider-metadata", model);
   }
 });
 
@@ -808,7 +808,7 @@ test("custom OpenAI chat sends provider-safe tool schema fields only", async () 
           id: "call_plugin",
           type: "function",
           index: 0,
-          _qingzhouPlugin: { pluginId: "plugin-a" },
+          _zuriPlugin: { pluginId: "plugin-a" },
           function: {
             name: "plugin_lookup",
             arguments: { query: "demo" },
@@ -831,7 +831,7 @@ test("custom OpenAI chat sends provider-safe tool schema fields only", async () 
         },
         extraFunctionField: "internal",
       },
-      _qingzhouPlugin: { pluginId: "plugin-a", skillName: "插件", localName: "lookup" },
+      _zuriPlugin: { pluginId: "plugin-a", skillName: "插件", localName: "lookup" },
       renderer: { type: "grid" },
     }],
   );
@@ -839,7 +839,7 @@ test("custom OpenAI chat sends provider-safe tool schema fields only", async () 
   const body = JSON.parse(fetchCalls[0].body);
   assert.deepEqual(Object.keys(body.tools[0]).sort(), ["function", "type"]);
   assert.deepEqual(Object.keys(body.tools[0].function).sort(), ["description", "name", "parameters"]);
-  assert.equal(body.tools[0]._qingzhouPlugin, undefined);
+  assert.equal(body.tools[0]._zuriPlugin, undefined);
   assert.equal(body.tools[0].renderer, undefined);
   assert.equal(body.tools[0].function.extraFunctionField, undefined);
   assert.deepEqual(body.tools[0].function.parameters.properties.query, { type: "string" });
@@ -847,7 +847,7 @@ test("custom OpenAI chat sends provider-safe tool schema fields only", async () 
   const toolCall = body.messages[0].tool_calls[0];
   assert.deepEqual(Object.keys(toolCall).sort(), ["function", "id", "type"]);
   assert.deepEqual(Object.keys(toolCall.function).sort(), ["arguments", "name"]);
-  assert.equal(toolCall._qingzhouPlugin, undefined);
+  assert.equal(toolCall._zuriPlugin, undefined);
   assert.equal(toolCall.function.input, undefined);
   assert.deepEqual(JSON.parse(toolCall.function.arguments), { query: "demo" });
 });
@@ -1497,7 +1497,7 @@ test("model parameter validation rejects kernel fields before storage changes", 
   const storedBefore = JSON.stringify(storageData.llmConfig);
   await assert.rejects(
     () => llm.saveConfig({ modelParameters: { messages: [], temperature: 0.7 } }),
-    /messages 由轻舟管理/,
+    /messages 由Zuri管理/,
   );
   assert.equal(JSON.stringify(storageData.llmConfig), storedBefore);
 });

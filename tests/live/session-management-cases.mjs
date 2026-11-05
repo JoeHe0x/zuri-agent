@@ -21,34 +21,34 @@ export async function runSessionManagementCases(h) {
   }
   try {
     const afterCreate = await eventCount(page);
-    const created = await manage({ action: "create", title: "live managed child", firstMessage: "不要调用工具。只回复 QZ_CREATED。" });
+    const created = await manage({ action: "create", title: "live managed child", firstMessage: "不要调用工具。只回复 ZURI_CREATED。" });
     const child = created.session.id;
     children.push(child);
     await done(child, afterCreate);
     pass("create child with firstMessage");
     for (const mode of ["follow_up", "steer"]) {
       const after = await eventCount(page);
-      const receipt = await manage({ action: "send_message", sessionId: child, message: `不要调用工具。只回复 QZ_IDLE_${mode}。`, mode });
+      const receipt = await manage({ action: "send_message", sessionId: child, message: `不要调用工具。只回复 ZURI_IDLE_${mode}。`, mode });
       assert.equal(receipt.accepted, true);
       assert.equal(receipt.disposition, "started");
       await done(child, after);
-      assert.ok((await historyMessages(page, child)).some(m => m.role === "assistant" && messageText(m).includes(`QZ_IDLE_${mode}`)));
+      assert.ok((await historyMessages(page, child)).some(m => m.role === "assistant" && messageText(m).includes(`ZURI_IDLE_${mode}`)));
       pass(`idle ${mode} starts a new run`);
     }
     // wait_for_user provides a stable real tool boundary while the parent submits messages.
     const afterWait = await eventCount(page);
-    await manage({ action: "send_message", sessionId: child, message: "必须调用一次 wait_for_user，message 为 QZ_MANAGEMENT_GATE。等用户继续后回复 QZ_GATE_DONE。", mode: "follow_up" });
+    await manage({ action: "send_message", sessionId: child, message: "必须调用一次 wait_for_user，message 为 ZURI_MANAGEMENT_GATE。等用户继续后回复 ZURI_GATE_DONE。", mode: "follow_up" });
     const waiting = await waitEvent(page, { type: "waiting_for_user", sessionId: child }, afterWait, 180000);
-    for (const [mode, marker] of [["follow_up", "QZ_QUEUED"], ["steer", "QZ_STEERED"]]) {
+    for (const [mode, marker] of [["follow_up", "ZURI_QUEUED"], ["steer", "ZURI_STEERED"]]) {
       const receipt = await manage({ action: "send_message", sessionId: child, message: `不要再调用工具或等待。只回复 ${marker}。`, mode });
       assert.equal(receipt.disposition, "queued");
     }
     const queued = await state(child);
     assert.deepEqual(queued.runtime.pendingFollowUps.map(item => ({ text: item.text, index: item.index })), [
-      { text: "不要再调用工具或等待。只回复 QZ_QUEUED。", index: 0 },
+      { text: "不要再调用工具或等待。只回复 ZURI_QUEUED。", index: 0 },
     ]);
     assert.deepEqual(queued.runtime.pendingSteerings.map(item => ({ text: item.text, index: item.index })), [
-      { text: "不要再调用工具或等待。只回复 QZ_STEERED。", index: 0 },
+      { text: "不要再调用工具或等待。只回复 ZURI_STEERED。", index: 0 },
     ]);
     pass("running follow_up and steer enter separate queues");
     const afterResume = await eventCount(page);
@@ -59,14 +59,14 @@ export async function runSessionManagementCases(h) {
     await waitEvent(page, { type: "agent_end", sessionId: child, runId: next.runId }, afterResume, 180000);
     const history = await historyMessages(page, child);
     const text = history.filter(m => m.role === "assistant").map(messageText).join("\n");
-    assert.match(text, /QZ_STEERED/);
-    assert.match(text, /QZ_QUEUED/);
-    assert.ok(text.indexOf("QZ_STEERED") < text.indexOf("QZ_QUEUED"), "steering must be answered before follow-up");
+    assert.match(text, /ZURI_STEERED/);
+    assert.match(text, /ZURI_QUEUED/);
+    assert.ok(text.indexOf("ZURI_STEERED") < text.indexOf("ZURI_QUEUED"), "steering must be answered before follow-up");
     assert.deepEqual((await state(child)).runtime.pendingFollowUps, []);
     pass("steer resumes current run, follow_up starts the next run");
 
     const afterStopGate = await eventCount(page);
-    await manage({ action: "send_message", sessionId: child, message: "必须调用 wait_for_user，message 为 QZ_STOP_GATE，然后等用户。" });
+    await manage({ action: "send_message", sessionId: child, message: "必须调用 wait_for_user，message 为 ZURI_STOP_GATE，然后等用户。" });
     await waitEvent(page, { type: "waiting_for_user", sessionId: child }, afterStopGate, 180000);
     const stop = await manage({ action: "stop", sessionId: child });
     assert.equal(stop.stopped, true);
@@ -76,22 +76,22 @@ export async function runSessionManagementCases(h) {
     assert.equal(secondStop.stopped, false);
     pass("stop is repeatable on an idle task");
     const afterRestart = await eventCount(page);
-    await manage({ action: "send_message", sessionId: child, message: "不要调用工具。只回复 QZ_AFTER_STOP。" });
+    await manage({ action: "send_message", sessionId: child, message: "不要调用工具。只回复 ZURI_AFTER_STOP。" });
     await done(child, afterRestart);
     pass("send_message restarts a stopped child");
     if (h.extended) {
       const gateStart = await eventCount(page);
-      await manage({ action: "send_message", sessionId: child, message: "必须调用一次 wait_for_user，message 为 QZ_PRESERVE_GATE，然后等用户。" });
+      await manage({ action: "send_message", sessionId: child, message: "必须调用一次 wait_for_user，message 为 ZURI_PRESERVE_GATE，然后等用户。" });
       await waitEvent(page, { type: "waiting_for_user", sessionId: child }, gateStart, 180000);
-      await manage({ action: "send_message", sessionId: child, message: "不要调用工具。只回复 QZ_PRESERVED_STEER。", mode: "steer" });
-      await manage({ action: "send_message", sessionId: child, message: "不要调用工具。只回复 QZ_PRESERVED_FOLLOW。", mode: "follow_up" });
+      await manage({ action: "send_message", sessionId: child, message: "不要调用工具。只回复 ZURI_PRESERVED_STEER。", mode: "steer" });
+      await manage({ action: "send_message", sessionId: child, message: "不要调用工具。只回复 ZURI_PRESERVED_FOLLOW。", mode: "follow_up" });
       const afterStop = await eventCount(page);
       const stopped = await manage({ action: "stop", sessionId: child });
       assert.deepEqual(stopped.runtime.pendingSteerings.map(item => ({ text: item.text, index: item.index })), [
-        { text: "不要调用工具。只回复 QZ_PRESERVED_STEER。", index: 0 },
+        { text: "不要调用工具。只回复 ZURI_PRESERVED_STEER。", index: 0 },
       ]);
       assert.deepEqual(stopped.runtime.pendingFollowUps.map(item => ({ text: item.text, index: item.index })), [
-        { text: "不要调用工具。只回复 QZ_PRESERVED_FOLLOW。", index: 0 },
+        { text: "不要调用工具。只回复 ZURI_PRESERVED_FOLLOW。", index: 0 },
       ]);
       const first = await waitEvent(page, { type: "agent_start", sessionId: child }, afterStop, 180000);
       await waitEvent(page, { type: "agent_end", sessionId: child, runId: first.runId }, afterStop, 180000);
@@ -104,24 +104,24 @@ export async function runSessionManagementCases(h) {
       }
       await waitEvent(page, { type: "agent_end", sessionId: child, runId: second.runId }, afterStop, 180000);
       const restored = (await historyMessages(page, child)).filter(m => m.role === "assistant").map(messageText).join("\n");
-      assert.match(restored, /QZ_PRESERVED_STEER/);
-      assert.match(restored, /QZ_PRESERVED_FOLLOW/);
-      assert.ok(restored.indexOf("QZ_PRESERVED_STEER") < restored.indexOf("QZ_PRESERVED_FOLLOW"), "preserved steering must be answered before follow-up");
+      assert.match(restored, /ZURI_PRESERVED_STEER/);
+      assert.match(restored, /ZURI_PRESERVED_FOLLOW/);
+      assert.ok(restored.indexOf("ZURI_PRESERVED_STEER") < restored.indexOf("ZURI_PRESERVED_FOLLOW"), "preserved steering must be answered before follow-up");
       pass("stop preserves both queues and resumes steering before follow_up");
 
       const otherStart = await eventCount(page);
-      const otherCreated = await manage({ action: "create", title: "isolated sibling", firstMessage: "必须调用 wait_for_user，message 为 QZ_SIBLING_GATE，然后等待用户。" });
+      const otherCreated = await manage({ action: "create", title: "isolated sibling", firstMessage: "必须调用 wait_for_user，message 为 ZURI_SIBLING_GATE，然后等待用户。" });
       const other = otherCreated.session.id;
       children.push(other);
       await waitEvent(page, { type: "waiting_for_user", sessionId: other }, otherStart, 180000);
       const childStart = await eventCount(page);
-      await manage({ action: "send_message", sessionId: child, message: "不要调用工具。只回复 QZ_ISOLATED。" });
+      await manage({ action: "send_message", sessionId: child, message: "不要调用工具。只回复 ZURI_ISOLATED。" });
       await done(child, childStart);
       await manage({ action: "stop", sessionId: child });
       assert.equal((await state(other)).status, "waiting_user");
       pass("send and stop do not affect a sibling session");
       const last = await manage({ action: "last_messages", sessionId: child, num: 3 });
-      assert.match(JSON.stringify(last), /QZ_ISOLATED/);
+      assert.match(JSON.stringify(last), /ZURI_ISOLATED/);
       await manage({ action: "wait", sessionId: child, timeout: 5 });
       pass("last_messages and wait can collect the continued task result");
       await manage({ action: "stop", sessionId: other });

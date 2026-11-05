@@ -4,7 +4,7 @@ interface BootstrapOptions { windowsApi?: { getCurrent(): Promise<{ id?: number 
 
 export const WORKSPACE_VIEW_VERSION = 2;
 
-const WORKSPACE_VIEW_KEY_PREFIX = "qingzhou:workspace-view:";
+const WORKSPACE_VIEW_KEY_PREFIX = "zuri:workspace-view:";
 
 export function defaultWorkspaceView(): WorkspaceView {
   return { v: WORKSPACE_VIEW_VERSION, page: "chat", state: { sessionId: null } };

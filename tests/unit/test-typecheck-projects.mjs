@@ -69,7 +69,7 @@ test("context projects preserve browser globals without leaking DOM into Backgro
 });
 
 async function fixture(t) {
-  const root = await mkdtemp(join(tmpdir(), "qingzhou typecheck "));
+  const root = await mkdtemp(join(tmpdir(), "zuri typecheck "));
   t.after(() => rm(root, { recursive: true, force: true }));
   return root;
 }

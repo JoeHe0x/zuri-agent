@@ -33,7 +33,7 @@ await runtime.commitSkillToolRegistryCandidate(
   { reason: "test_llm_facing_time_units" },
 );
 const schemas = new Map(tools.getToolSchemas({
-  loadedPluginSkillNames: [managementSkill.BUILTIN_QINGZHOU_MANAGEMENT_SKILL_NAME],
+  loadedPluginSkillNames: [managementSkill.BUILTIN_ZURI_MANAGEMENT_SKILL_NAME],
 }).map(item => [item.function.name, item.function]));
 
 function props(toolName) {
@@ -79,8 +79,8 @@ assert.match(
 );
 
 assertSecondsProperty("manage_goal", "timeout");
-assertSecondsProperty("qingzhou_management__manage_guardrails", "minOpenIntervalSeconds");
-assert.equal(Object.prototype.hasOwnProperty.call(props("qingzhou_management__manage_guardrails"), "minOpenIntervalMs"), false, "manage_guardrails should not expose minOpenIntervalMs");
+assertSecondsProperty("zuri_management__manage_guardrails", "minOpenIntervalSeconds");
+assert.equal(Object.prototype.hasOwnProperty.call(props("zuri_management__manage_guardrails"), "minOpenIntervalMs"), false, "manage_guardrails should not expose minOpenIntervalMs");
 
 assertSecondsProperty("browse_history", "startTime");
 assertSecondsProperty("browse_history", "endTime");

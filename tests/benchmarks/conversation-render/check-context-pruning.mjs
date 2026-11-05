@@ -16,7 +16,7 @@ import { parseExportHtmlFixture } from "./tools/export-html-fixture.mjs";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
 const FIXTURE_DIR = resolve(ROOT, "tests/benchmarks/conversation-render/fixtures");
-const CONTEXT_WINDOW = positiveNumber(process.env.QINGZHOU_PRUNE_CONTEXT_WINDOW, 262000);
+const CONTEXT_WINDOW = positiveNumber(process.env.ZURI_PRUNE_CONTEXT_WINDOW, 262000);
 const RESERVE_TOKENS = 16000;
 const RECENT_ROUNDS = 2;
 

@@ -5,7 +5,7 @@ test.describe("user message delivery", () => {
 
   test("keeps failed bubbles inline and retries the same message identity", async ({ page }) => {
     await page.evaluate(async () => {
-      await window.qingzhouConversationBenchmark.runSnapshotRender({
+      await window.zuriConversationBenchmark.runSnapshotRender({
         sessionId: "message-delivery-session",
         transcript: [
           {
@@ -27,7 +27,7 @@ test.describe("user message delivery", () => {
     await expect(bubble.locator(".msg-user-delivery")).toHaveCount(0);
 
     const result = await page.evaluate(() => {
-      const prompt = window.__qzPostedMessages.find(message => message.type === "prompt");
+      const prompt = window.__zuriPostedMessages.find(message => message.type === "prompt");
       const transcriptNodes = [...document.querySelectorAll("#messages > [data-transcript-key]")];
       return {
         prompt,
@@ -48,7 +48,7 @@ test.describe("user message delivery", () => {
 
   test("does not decorate pending bubbles with loading chrome", async ({ page }) => {
     await page.evaluate(async () => {
-      await window.qingzhouConversationBenchmark.runSnapshotRender({
+      await window.zuriConversationBenchmark.runSnapshotRender({
         sessionId: "pending-delivery-session",
         transcript: [{
           type: "user",
@@ -66,7 +66,7 @@ test.describe("user message delivery", () => {
 
   test("keeps a failed bubble while a later message is accepted", async ({ page }) => {
     await page.evaluate(async () => {
-      await window.qingzhouConversationBenchmark.runSnapshotRender({
+      await window.zuriConversationBenchmark.runSnapshotRender({
         sessionId: "later-message-session",
         transcript: [{
           type: "user",
@@ -86,11 +86,11 @@ test.describe("user message delivery", () => {
 
   test("reconciles a stale idle presentation when Background queues the message", async ({ page }) => {
     await page.evaluate(async () => {
-      await window.qingzhouConversationBenchmark.runSnapshotRender({
+      await window.zuriConversationBenchmark.runSnapshotRender({
         sessionId: "atomic-admission-session",
         transcript: [{ type: "assistant", content: "上一轮已经展示结束。" }],
       });
-      window.__qzPromptAcceptance = {
+      window.__zuriPromptAcceptance = {
         disposition: "queued",
         duplicate: false,
         pendingSteerings: [],
@@ -100,7 +100,7 @@ test.describe("user message delivery", () => {
     await page.locator("#input").fill("交接窗口里的下一条消息");
     await page.locator("#input").press("Enter");
     const clientMessageId = await page.evaluate(() => (
-      window.__qzPostedMessages.findLast(message => message.type === "prompt")?.clientMessageId || ""
+      window.__zuriPostedMessages.findLast(message => message.type === "prompt")?.clientMessageId || ""
     ));
     expect(clientMessageId).not.toBe("");
 
@@ -109,13 +109,13 @@ test.describe("user message delivery", () => {
     await expect(page.locator(`.msg-user[data-client-message-id="${clientMessageId}"]`)).toHaveCount(0);
 
     await page.evaluate(({ sessionId, clientMessageId: messageId }) => {
-      window.qingzhouConversationBenchmark.dispatchBackgroundEvent({
+      window.zuriConversationBenchmark.dispatchBackgroundEvent({
         type: "agent_start",
         sessionId,
         runId: "atomic-admission-run",
         eventSeq: 1,
       });
-      window.qingzhouConversationBenchmark.dispatchBackgroundEvent({
+      window.zuriConversationBenchmark.dispatchBackgroundEvent({
         type: "message_start",
         sessionId,
         runId: "atomic-admission-run",

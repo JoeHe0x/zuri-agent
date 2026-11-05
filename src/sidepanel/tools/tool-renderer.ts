@@ -137,7 +137,7 @@ function rememberToolEventView(root: HTMLElement, view: ToolEventView) {
 
 function renderToolSummaryHtml(view: ToolEventView) {
   return `
-    <button class="qz-chiphead tool-summary" type="button" aria-expanded="false">
+    <button class="zuri-chiphead tool-summary" type="button" aria-expanded="false">
       <span class="dot ${view.statusClass}" title="${escapeHtml(view.statusTitle)}"></span>
       <span class="tool-name">${escapeHtml(view.label)}</span>
       <span class="tool-args-preview">${escapeHtml(view.argsPreview)}</span>
@@ -441,9 +441,9 @@ function appendToolEventFooter(details: HTMLElement) {
   footer.className = "tool-event-footer";
   footer.innerHTML = `
     <div class="tool-event-footer-row">
-      <button class="qz-btn qz-btn--ghost qz-btn--inline tool-event-raw-btn ${rawDetails ? "" : "hidden"}" type="button" aria-expanded="false">${tHtml("viewRawData")}</button>
+      <button class="zuri-btn zuri-btn--ghost zuri-btn--inline tool-event-raw-btn ${rawDetails ? "" : "hidden"}" type="button" aria-expanded="false">${tHtml("viewRawData")}</button>
       <span class="tool-event-footer-spacer"></span>
-      <button class="qz-btn qz-btn--ghost qz-btn--inline tool-event-collapse-btn" type="button">${tHtml("collapse")}</button>
+      <button class="zuri-btn zuri-btn--ghost zuri-btn--inline tool-event-collapse-btn" type="button">${tHtml("collapse")}</button>
     </div>
     <div class="tool-event-raw-panel hidden"></div>
   `;

@@ -30,12 +30,12 @@ export async function createAxViewportHarness({ baseline = false } = {}) {
     if (!ref?.backendNodeId) {
       if (ref && !ref.selector) throw new Error('STALE_ELEMENT_UID');
       if (ref) Object.assign(payload, { selector: ref.selector, index: ref.index || 0 });
-      return evaluate(`new Promise(resolve => globalThis.__QZ_CONTENT_MESSAGE_LISTENER(${JSON.stringify(payload)}, {}, resolve))`);
+      return evaluate(`new Promise(resolve => globalThis.__ZURI_CONTENT_MESSAGE_LISTENER(${JSON.stringify(payload)}, {}, resolve))`);
     }
     const { object } = await send('DOM.resolveNode', { backendNodeId: ref.backendNodeId, executionContextId: world, objectGroup: 'ax-test' });
     try {
       const result = await send('Runtime.callFunctionOn', { objectId: object.objectId,
-        functionDeclaration: 'function(payload) { return globalThis.__qzInvoke(this, payload); }',
+        functionDeclaration: 'function(payload) { return globalThis.__zuriInvoke(this, payload); }',
         arguments: [{ value: payload }], returnByValue: true, awaitPromise: true });
       return result.result.value;
     } finally { await send('Runtime.releaseObjectGroup', { objectGroup: 'ax-test' }); }
@@ -84,7 +84,7 @@ export async function createAxViewportHarness({ baseline = false } = {}) {
       // Public sites may replace the document during startup. Bind Content only after that settles.
       if (settleMs) await page.waitForTimeout(settleMs);
       const { frameTree } = await send('Page.getFrameTree');
-      world = (await send('Page.createIsolatedWorld', { frameId: frameTree.frame.id, worldName: 'qz-ax-test' })).executionContextId;
+      world = (await send('Page.createIsolatedWorld', { frameId: frameTree.frame.id, worldName: 'zuri-ax-test' })).executionContextId;
       await evaluate(`globalThis.chrome = { runtime: { onMessage: { addListener() {}, removeListener() {} } } }; ${content}`);
       return { status: response?.status(), url: page.url() };
     },

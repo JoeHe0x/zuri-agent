@@ -471,7 +471,7 @@ registerTool({
 });
 
 function getSkillDistributionRuntime(context: ToolContext = {}, capability = "") {
-  if (context?.source !== "plugin_host" || context?.pluginId !== "qingzhou-skill-author") {
+  if (context?.source !== "plugin_host" || context?.pluginId !== "zuri-skill-author") {
     throw new ToolExecutionError(
       "TOOL_FORBIDDEN_BY_RUN_PROFILE",
       t("distributionInternalOnly", { capability: capability || "Skill distribution" }),

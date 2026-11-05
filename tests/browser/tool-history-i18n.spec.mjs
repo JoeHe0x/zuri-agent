@@ -32,9 +32,9 @@ for (const [language, chromeLocale] of languages) {
     page.on("request", request => { if (request.url().includes("/_locales/")) requestedPacks.push(request.url()); });
     await page.addInitScript(installBenchmarkChromeStub, { uiLanguage: language, localeMessages });
     await page.goto("/extension/sidepanel/sidepanel.html", { waitUntil: "domcontentloaded" });
-    await page.waitForFunction(() => Boolean(window.qingzhouConversationBenchmark));
+    await page.waitForFunction(() => Boolean(window.zuriConversationBenchmark));
     const expected = await page.evaluate(async histories => {
-      await window.qingzhouConversationBenchmark.runSnapshotRender({ sessionId: "tool-history-language", transcript: [{ type: "user", text: "History" }] });
+      await window.zuriConversationBenchmark.runSnapshotRender({ sessionId: "tool-history-language", transcript: [{ type: "user", text: "History" }] });
       const { renderToolEvent, disposeRendererTree } = await import("/extension/sidepanel/tools/tool-renderer.js");
       const { createToolTimelineGroupElement } = await import("/extension/sidepanel/tools/tool-timeline-renderer.js");
       const { getToolMetadataCatalog } = await import("/extension/shared/tools/tool-metadata.js");

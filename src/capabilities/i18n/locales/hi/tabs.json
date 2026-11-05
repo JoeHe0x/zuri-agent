@@ -3,7 +3,7 @@
   "tabs.tab": "टैब {tabId}",
   "tabs.current": "मौजूदा",
   "tabs.window": "विंडो {windowId}",
-  "tabs.qingzhouTask": "qz कार्य",
+  "tabs.zuriTask": "zuri कार्य",
   "tabs.organizedInto": "“{name}” में व्यवस्थित किया गया",
   "tabs.namedTabCount": "टैब: {count} · {name}",
   "tabs.groupedTabs": "समूह में टैब: {count}",

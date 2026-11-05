@@ -148,7 +148,7 @@ export class BridgeState {
   forgetBrowser(selector) {
     return this.serializeRegistration(async () => {
       const entry = this.registry.get(selector);
-      if (!entry) throw pairingError("BRIDGE_CLIENT_NOT_FOUND", `No registered browser named ${selector}. Use qz browsers to list names and UUIDs.`);
+      if (!entry) throw pairingError("BRIDGE_CLIENT_NOT_FOUND", `No registered browser named ${selector}. Use zuri browsers to list names and UUIDs.`);
       if (this.liveClients().some(client => client.id === entry.clientId)) {
         throw pairingError("BRIDGE_CLIENT_IN_USE", "Disconnect this browser in its extension settings before forgetting its registration.");
       }
@@ -198,12 +198,12 @@ export class BridgeState {
       const selected = target && clients.find(client => client.id === target);
       if (selected) return returnConnection ? selected : selected.id;
       if (clientId && (registered || this.clients.has(target) || Date.now() >= deadline)) throw new BridgeError(registered || this.clients.has(target) ? "BRIDGE_CLIENT_OFFLINE" : "BRIDGE_CLIENT_NOT_FOUND",
-        `Browser ${clientId} is ${registered || this.clients.has(target) ? "offline" : "not registered"}. Use qz browsers to inspect browser names and UUIDs.`);
+        `Browser ${clientId} is ${registered || this.clients.has(target) ? "offline" : "not registered"}. Use zuri browsers to inspect browser names and UUIDs.`);
       if (!clientId && clients.length === 1) return returnConnection ? clients[0] : clients[0].id;
       if (!clientId && clients.length > 1) throw new BridgeError("BRIDGE_CLIENT_REQUIRED",
-        `Multiple qz browsers are connected. Pass clientId from qingzhou_bridge_status: ${clients.map(client => `${client.name || client.id} (${client.id})`).sort().join(", ")}`);
+        `Multiple zuri browsers are connected. Pass clientId from zuri_bridge_status: ${clients.map(client => `${client.name || client.id} (${client.id})`).sort().join(", ")}`);
       if (Date.now() >= deadline) throw new BridgeError("BRIDGE_NOT_CONNECTED",
-        `No active qz extension${clientId ? ` (${clientId})` : ""}. Run qz connect, then confirm the connection in the extension. Install qz: ${INSTALL_URL}`);
+        `No active zuri extension${clientId ? ` (${clientId})` : ""}. Run zuri connect, then confirm the connection in the extension. Install zuri: ${INSTALL_URL}`);
       await this.waitForChange(deadline - Date.now(), signal);
     }
   }
@@ -211,7 +211,7 @@ export class BridgeState {
   async poll(client, { timeoutMs = 30000, maxBatch = 4, signal } = {}) {
     const info = await this.serializeRegistration(() => {
       this.signal(signal).throwIfAborted();
-      if (client.pairingVersion !== 1) throw pairingError("BRIDGE_PAIRING_REQUIRED", "Update qz to use the supported pairing protocol.");
+      if (client.pairingVersion !== 1) throw pairingError("BRIDGE_PAIRING_REQUIRED", "Update zuri to use the supported pairing protocol.");
       const info = this.authenticatedClient(client);
       this.touchClient(info, client, timeoutMs);
       return info;
@@ -245,7 +245,7 @@ export class BridgeState {
     if (this.clients.get(target) !== client || !this.liveClients().includes(client)) throw pairingError("BRIDGE_CLIENT_OFFLINE", "The selected browser disconnected before the request could start.");
     client.controller.signal.throwIfAborted();
     return new Promise((resolve, reject) => {
-      const id = `qz_${Date.now()}_${randomUUID()}`;
+      const id = `zuri_${Date.now()}_${randomUUID()}`;
       const finish = (error, result) => {
         clearTimeout(timer);
         this.pending.delete(id);
@@ -268,7 +268,7 @@ export class BridgeState {
     let client;
     try { client = this.authenticatedClient(payload); } catch { return false; }
     if (client !== request.client) return false;
-    if (payload.ok === false) request.finish(new BridgeError(payload.code || "BRIDGE_TOOL_ERROR", String(payload.error || "qz bridge request failed"), payload.details));
+    if (payload.ok === false) request.finish(new BridgeError(payload.code || "BRIDGE_TOOL_ERROR", String(payload.error || "zuri bridge request failed"), payload.details));
     else request.finish(null, payload.result);
     return true;
   }
@@ -300,7 +300,7 @@ export class BridgeState {
   getJob(jobId, includeResult = true) {
     this.pruneJobs();
     const job = this.jobs.get(String(jobId || "").trim());
-    if (!job) throw new BridgeError("JOB_NOT_FOUND", `Unknown qz bridge job: ${jobId}`);
+    if (!job) throw new BridgeError("JOB_NOT_FOUND", `Unknown zuri bridge job: ${jobId}`);
     return this.serializeJob(job, includeResult);
   }
 

@@ -1,11 +1,11 @@
-# Contributing to qz
+# Contributing to zuri
 
 Bug fixes, examples, translations, and documentation improvements are welcome. Open an issue to
 discuss a new API or a large change; small fixes can go straight to a pull request.
 
 ## Report a bug
 
-Include the qz version or commit, Chrome version, reproduction steps, and expected and actual
+Include the zuri version or commit, Chrome version, reproduction steps, and expected and actual
 results. A small example page or screenshot helps. Remove credentials, private URLs, and personal
 data from shared evidence.
 

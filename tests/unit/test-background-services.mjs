@@ -254,21 +254,21 @@ async function completionNotifierHandlesRootsSuppressionDeduplicationAndClicks()
   ]);
   assert.equal(opened[1].id, "root");
 
-  assert.equal(await notifier.handleClick("qz_alert_session_root_123_notice"), true);
-  assert.equal(await notifier.handleClick("qz_auto_root_run-2"), true, "automation IDs should survive a worker restart without the in-memory map");
-  assert.equal(await notifier.handleClick("qz_completed_root_run-6"), true, "completion IDs should restore their Session without the in-memory map");
+  assert.equal(await notifier.handleClick("zuri_alert_session_root_123_notice"), true);
+  assert.equal(await notifier.handleClick("zuri_auto_root_run-2"), true, "automation IDs should survive a worker restart without the in-memory map");
+  assert.equal(await notifier.handleClick("zuri_completed_root_run-6"), true, "completion IDs should restore their Session without the in-memory map");
   assert.deepEqual(cleared, [
     "automation-notice",
     created[0].id,
-    "qz_alert_session_root_123_notice",
-    "qz_auto_root_run-2",
-    "qz_completed_root_run-6",
+    "zuri_alert_session_root_123_notice",
+    "zuri_auto_root_run-2",
+    "zuri_completed_root_run-6",
   ]);
 
   revealAllowed = false;
-  assert.equal(await notifier.handleClick("qz_alert_session_missing_124_notice"), false);
-  assert.equal(cleared.includes("qz_alert_session_missing_124_notice"), false, "an unaddressed notification must stay visible");
-  assert.equal(await notifier.handleClick("qz_alert_1234_legacy"), false, "legacy alerts without a Session destination stay inert");
+  assert.equal(await notifier.handleClick("zuri_alert_session_missing_124_notice"), false);
+  assert.equal(cleared.includes("zuri_alert_session_missing_124_notice"), false, "an unaddressed notification must stay visible");
+  assert.equal(await notifier.handleClick("zuri_alert_1234_legacy"), false, "legacy alerts without a Session destination stay inert");
   assert.equal(await notifier.handleClick("unknown"), false);
 }
 

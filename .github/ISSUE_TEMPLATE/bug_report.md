@@ -13,7 +13,7 @@ Include a small example we can try. Screenshots and error messages help.
 
 ## Environment
 
-- qz version or commit:
+- zuri version or commit:
 - Chrome version and operating system:
 - Model provider and model, if relevant:
 

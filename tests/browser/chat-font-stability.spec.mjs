@@ -14,9 +14,9 @@ for (const [language, locale] of languages) for (const colorScheme of ["light", 
     const localeMessages = JSON.parse(await readFile(resolve(await ensureTestExtension(), `_locales/${locale}/messages.json`), "utf8"));
     await page.addInitScript(installBenchmarkChromeStub, { uiLanguage: language, localeMessages });
     await page.goto("/extension/sidepanel/sidepanel.html");
-    await page.waitForFunction(() => Boolean(window.qingzhouConversationBenchmark));
+    await page.waitForFunction(() => Boolean(window.zuriConversationBenchmark));
     await page.evaluate(async () => {
-      await window.qingzhouConversationBenchmark.runSnapshotRender({
+      await window.zuriConversationBenchmark.runSnapshotRender({
         sessionId: "font-stability",
         transcript: [
           { type: "user", text: "Compare the weather in major cities.", clientMessageId: "question" },
@@ -29,7 +29,7 @@ for (const [language, locale] of languages) for (const colorScheme of ["light", 
     cdp.on("LayerTree.layerTreeDidChange", event => { layers = event.layers || []; });
     await cdp.send("LayerTree.enable");
     const samples = await page.evaluate(async preview => {
-      const api = window.qingzhouConversationBenchmark;
+      const api = window.zuriConversationBenchmark;
       const stable = document.querySelector(".msg-assistant .msg-content");
       const styles = () => {
         const css = getComputedStyle(stable);

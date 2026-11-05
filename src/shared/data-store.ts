@@ -28,7 +28,7 @@ interface RowWriteOptions { columns?: unknown; position?: string; dedupField?: u
 interface DataQuery { table?: unknown; limit?: unknown; offset?: unknown; filter?: unknown }
 interface StoreTrace { at: string; name: string; ms: number; meta: Record<string, unknown> }
 
-const DB_NAME = "qz-browser-agent-data";
+const DB_NAME = "zuri-agent-data";
 const DB_VERSION = 2;
 const RECORDS_STORE = "records";
 const TABLES_STORE = "tables";
@@ -847,9 +847,9 @@ function recordDataStoreTrace(name: string, ms: number, meta: Record<string, unk
 }
 
 function getDataStoreTraceBuffer() {
-  const host = globalThis as typeof globalThis & { __qingzhouDataStorePerf?: StoreTrace[] };
-  if (!Array.isArray(host.__qingzhouDataStorePerf)) host.__qingzhouDataStorePerf = [];
-  return host.__qingzhouDataStorePerf;
+  const host = globalThis as typeof globalThis & { __zuriDataStorePerf?: StoreTrace[] };
+  if (!Array.isArray(host.__zuriDataStorePerf)) host.__zuriDataStorePerf = [];
+  return host.__zuriDataStorePerf;
 }
 
 function dataStorePerfNow() {

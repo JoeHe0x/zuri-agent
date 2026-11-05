@@ -99,7 +99,7 @@ Judge a task at four levels:
 ### H01 · Set up a model and send the first message
 
 - **Role**: Human
-- **Task**: Open qz for the first time, connect a model, and receive a useful answer.
+- **Task**: Open zuri for the first time, connect a model, and receive a useful answer.
 - **Preconditions**: A fresh extension profile ready for model setup.
 - **Steps**: Open the Side Panel → agree to the data disclosure → open model settings → choose a Provider or custom endpoint → authorize or enter the endpoint, model, and API key → save → return to chat and send a clear task.
 - **Expected outcome**: Configuration is saved once; the composer becomes usable immediately; the task starts in the current Session; the user sees streaming progress, the answer, and an error recovery action if needed.
@@ -248,7 +248,7 @@ extension E2E and live tests for persistence and real-model behavior.
 - **Role**: Human
 - **Task**: Clarify a requirement or personally complete login, CAPTCHA, authorization, or local file selection.
 - **Preconditions**: The Agent called `ask_user` or `wait_for_user`, or first requested `get_location`, and the Session is waiting.
-- **Steps**: Read and answer a structured question, or complete the action on the target page → return to qz and continue.
+- **Steps**: Read and answer a structured question, or complete the action on the target page → return to zuri and continue.
 - **Expected outcome**: Answers reach only the initiating run. The Agent observes the page again after continuation. The wait card names the target and action. Submitted answers remain bound to the initiating task. Location is collected only after the first explicit approval; later calls and Worker restarts reuse that recorded consent.
 - **Failure and recovery**: Cancel, stop, and delete end the wait. Worker restart interrupts pending waits for user recovery. A closed target tab prompts context recovery.
 - **Evidence**: [Location service unit](unit/test-location-service.mjs), [Location approval browser](browser/waiting-card.spec.mjs), [Extension E2E](background/extension-e2e.mjs), [decision dialog browser](browser/decision-dialog.spec.mjs), [wait defaults unit](unit/test-wait-form-default-values.mjs), [Session supervisor unit](unit/test-session-supervisor.mjs)
@@ -394,10 +394,10 @@ extension E2E and live tests for persistence and real-model behavior.
 - **Role**: Agent
 - **Task**: Parse PDF/XLSX/DOCX/text, read chunks, and create new documents or spreadsheets.
 - **Preconditions**: A document id in the message capsule, a remote URL, or a Skill resource.
-- **Steps**: Load the built-in document Skill from an attachment capsule. For remote files, call `qingzhou_documents__document_fetch({url})` → `qingzhou_documents__document_parse({fileId})` → `qingzhou_documents__document_read_chunk({docModelId,chunkIndex})` or `qingzhou_documents__document_read_chunk({docModelId,tableId|sheetName,offset,limit})` → `qingzhou_documents__document_create({format,filename?,docModelId|blocks|sheets,download})`. Download with `qingzhou_documents__document_download({artifactId})` only if needed; verify with `qingzhou_documents__document_list_artifacts({limit})`.
+- **Steps**: Load the built-in document Skill from an attachment capsule. For remote files, call `zuri_documents__document_fetch({url})` → `zuri_documents__document_parse({fileId})` → `zuri_documents__document_read_chunk({docModelId,chunkIndex})` or `zuri_documents__document_read_chunk({docModelId,tableId|sheetName,offset,limit})` → `zuri_documents__document_create({format,filename?,docModelId|blocks|sheets,download})`. Download with `zuri_documents__document_download({artifactId})` only if needed; verify with `zuri_documents__document_list_artifacts({limit})`.
 - **Expected outcome**: Long documents are read in bounded text and table chunks. Text and table projections are correct. Files, document models, and artifacts have stable identities. Downloading requires an explicit request.
 - **Failure and recovery**: Format and parser failures are explicit. Chunk positions allow continuation. Existing database versions are preserved. Invalid creation input preserves parsed content for retry.
-- **Evidence**: [Document Agent regression](background/agent-behavior-regression.py), [documents skill unit](unit/test-qingzhou-documents-skill.mjs), [read projection unit](unit/test-document-read-projection.mjs), [documents E2E](qingzhou-documents/e2e-check.py)
+- **Evidence**: [Document Agent regression](background/agent-behavior-regression.py), [documents skill unit](unit/test-zuri-documents-skill.mjs), [read projection unit](unit/test-document-read-projection.mjs), [documents E2E](zuri-documents/e2e-check.py)
 - **Coverage**: Strong
 - **Next test**: With real models, process a long PDF, a multi-sheet XLSX, DOCX tables, and code text; check extracted facts and generated artifact contents consistently.
 
@@ -476,9 +476,9 @@ extension E2E and live tests for persistence and real-model behavior.
 ### A15 · Read or change settings, safety rules, and Skill configuration
 
 - **Role**: Agent
-- **Task**: Read or change qz configuration at the user's explicit request.
-- **Preconditions**: Load `qingzhou-management` first with `load_skill({name:"qingzhou-management"})`; changes are authorized.
-- **Steps**: Use `qingzhou_management__manage_settings({action:"get"|"update_config"|"apply_preset",...})` for model settings and `qingzhou_management__manage_guardrails(...)` for safety rules. List Skill settings with `qingzhou_management__manage_skill_settings({action:"list"})`, then use its `get({settingId})`/`update({settingId,values})` operations.
+- **Task**: Read or change zuri configuration at the user's explicit request.
+- **Preconditions**: Load `zuri-management` first with `load_skill({name:"zuri-management"})`; changes are authorized.
+- **Steps**: Use `zuri_management__manage_settings({action:"get"|"update_config"|"apply_preset",...})` for model settings and `zuri_management__manage_guardrails(...)` for safety rules. List Skill settings with `zuri_management__manage_skill_settings({action:"list"})`, then use its `get({settingId})`/`update({settingId,values})` operations.
 - **Expected outcome**: The Agent and UI call the same service. Setting ids are stable. Secret reads expose only `hasValue`; updates merge changed fields. Validation details reach the Agent. Success events refresh the settings UI.
 - **Failure and recovery**: Validation rejects invalid types and ranges. Failed registry/settings transactions preserve the old state and report failure. Missing Skill settings return actionable guidance.
 - **Evidence**: [manage settings unit](unit/test-manage-settings-tool.mjs), [plugin settings unit](unit/test-plugin-settings.mjs), [security guardrails unit](unit/test-security-guardrails.mjs), [Validation recovery Agent journey](background/agent-behavior-regression.py), [Task-judge counterexamples](integration/test-agent-behavior-acceptance.py)
@@ -489,8 +489,8 @@ extension E2E and live tests for persistence and real-model behavior.
 
 - **Role**: Agent
 - **Task**: Find an appropriate tool on a configured MCP server, inspect its arguments, and call it.
-- **Preconditions**: Load `qingzhou-mcp` first with `load_skill({name:"qingzhou-mcp"})`; the bridge/server is available.
-- **Steps**: Call `qingzhou_mcp__mcp_list_tools({limit})` or `qingzhou_mcp__mcp_search_tools({query,limit})` → inspect with `qingzhou_mcp__mcp_inspect_server({url,headers?})` if needed. Use `qingzhou_mcp__mcp_call_tool({url,tool,args,validate?})` only for one-off validation of an unregistered server. For registered tools, load the owning Skill and call the returned `pluginTool.name`.
+- **Preconditions**: Load `zuri-mcp` first with `load_skill({name:"zuri-mcp"})`; the bridge/server is available.
+- **Steps**: Call `zuri_mcp__mcp_list_tools({limit})` or `zuri_mcp__mcp_search_tools({query,limit})` → inspect with `zuri_mcp__mcp_inspect_server({url,headers?})` if needed. Use `zuri_mcp__mcp_call_tool({url,tool,args,validate?})` only for one-off validation of an unregistered server. For registered tools, load the owning Skill and call the returned `pluginTool.name`.
 - **Expected outcome**: Advertised capabilities match dispatch. Call identity retains server/tool information. Error codes and recovery are stable. Results use shared artifact/timeline protocols.
 - **Failure and recovery**: Offline servers, missing tools, invalid arguments, and timeouts are diagnosable. Verify the called tool's business result. External writes still respect confirmation and safety rules.
 - **Evidence**: [MCP probe Agent regression](background/agent-behavior-regression.py), [MCP tools unit](unit/test-mcp-tools.mjs), [MCP runtime unit](unit/test-mcp-runtime.mjs), [connection service](unit/test-node-mcp-bridge.mjs), [CLI lifecycle](unit/test-node-mcp-cli.mjs)
@@ -689,7 +689,7 @@ regression](browser/screen-action-runtime.spec.mjs).
 - **Steps**: Within one serial boundary, prepare the registry → reconcile/migrate/prune settings → commit the registry → emit one `plugin_registry_update`. Readers await readiness and use the last successful snapshot.
 - **Expected outcome**: Registry changes share one refresh path. Renaming migrates settings; deletion removes them. Changed field constraints prune invalid old values. Running tools retain snapshot identities.
 - **Failure and recovery**: Failed reconciliation preserves the previous registry and reports failure. Dirty state remains retryable on a subsequent read. The previous registry stays usable.
-- **Evidence**: [registry refresh unit](unit/test-plugin-registry-refresh.mjs), [plugin settings unit](unit/test-plugin-settings.mjs), [plugin contract unit](unit/test-qingzhou-plugin.mjs)
+- **Evidence**: [registry refresh unit](unit/test-plugin-registry-refresh.mjs), [plugin settings unit](unit/test-plugin-settings.mjs), [plugin contract unit](unit/test-zuri-plugin.mjs)
 - **Coverage**: Strong
 - **Next test**: Restart the Worker after prepare, during settings reconciliation, and before commit. Recovery must expose only a complete old or new state.
 

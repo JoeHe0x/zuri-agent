@@ -65,7 +65,7 @@ POSTS = {
 
 
 class FixtureHandler(BaseHTTPRequestHandler):
-    server_version = "QingzhouAgentRegression/1.0"
+    server_version = "ZuriAgentRegression/1.0"
     navigation_counts: dict[tuple[str, str], int] = {}
     navigation_lock = threading.Lock()
     visual_ui_states: dict[str, dict[str, str]] = {}
@@ -98,7 +98,7 @@ class FixtureHandler(BaseHTTPRequestHandler):
             # Hold response headers so reading the previous/blank document is observable.
             time.sleep(3)
             return self.respond_html(f"<!doctype html><title>Navigation {page}</title>"
-                f"<article><h1>Navigation receipt</h1><p>receipt: QZ-{page}-{generation}</p></article>")
+                f"<article><h1>Navigation receipt</h1><p>receipt: ZURI-{page}-{generation}</p></article>")
         if path in {"/", "/index.html"}:
             return self.respond_html(self.home())
         if path in {"/news", "/news/index.html"}:
@@ -155,7 +155,7 @@ class FixtureHandler(BaseHTTPRequestHandler):
         if path == "/library":
             return self.respond_html(self.library())
         if path == "/files/journey-report.txt":
-            return self.respond_text("Qingzhou journey report\nstatus=verified\nrows=3\n")
+            return self.respond_text("Zuri journey report\nstatus=verified\nrows=3\n")
         if path == "/visual/canvas":
             return self.respond_html(self.visual_canvas())
         if path == "/visual/ui":
@@ -219,10 +219,10 @@ class FixtureHandler(BaseHTTPRequestHandler):
         return """
 <!doctype html>
 <html>
-<head><title>Qingzhou Regression Fixture</title></head>
+<head><title>Zuri Regression Fixture</title></head>
 <body>
   <main id="main">
-    <h1>Qingzhou Regression Fixture</h1>
+    <h1>Zuri Regression Fixture</h1>
     <nav>
       <a id="news-link" href="/news?page=1">News fixture</a>
       <a id="catalog-link" href="/catalog?page=1">Catalog fixture</a>
@@ -697,12 +697,12 @@ class FixtureHandler(BaseHTTPRequestHandler):
 """
 
     def sample_doc(self) -> str:
-        return """Qingzhou document fixture
+        return """Zuri document fixture
 
 This deterministic document verifies document_fetch, document_parse, document_read_chunk, and document_create.
 
 Facts:
-- owner: qingzhou-agent-regression
+- owner: zuri-agent-regression
 - rows: 3
 - purpose: base suite document family coverage
 """
@@ -867,7 +867,7 @@ context.strokeStyle = '#a1a1a6'; context.lineWidth = 8; context.beginPath(); con
       const x = state.dropped ? 425 : state.dragX;
       const y = state.dropped ? 175 : state.dragY;
       rounded(x, y, 146, 72, 14).fillStyle = '#eeeafd'; ctx.fill(); ctx.strokeStyle = palette.purple; ctx.lineWidth = 2; ctx.stroke();
-      text('QZ-27', x + 73, y + 36, 19, palette.purple, 750, 'center');
+      text('ZURI-27', x + 73, y + 36, 19, palette.purple, 750, 'center');
       button('APPLY', 432, 310, 174, 58, state.dropped && !state.pending);
       drawResult(386);
     };
@@ -946,7 +946,7 @@ context.strokeStyle = '#a1a1a6'; context.lineWidth = 8; context.beginPath(); con
         if (hit(p, { x: 34, y: 146, w: 572, h: 66 })) { sink.focus(); return; }
         if (hit(p, { x: 432, y: 244, w: 174, h: 58 }) && state.text === 'Kimi Visual 73') finish('form-kimi-visual-73');
       }
-      if (mode === 'drag' && hit(p, { x: 432, y: 310, w: 174, h: 58 }) && state.dropped) finish('drag-qz27-archive');
+      if (mode === 'drag' && hit(p, { x: 432, y: 310, w: 174, h: 58 }) && state.dropped) finish('drag-zuri27-archive');
       if (mode === 'scroll' && hit(p, { x: 394, y: 1205, w: 164, h: 60 })) finish('scroll-alpha-73');
     });
     draw();
@@ -960,7 +960,7 @@ context.strokeStyle = '#a1a1a6'; context.lineWidth = 8; context.beginPath(); con
 @contextlib.contextmanager
 def fixture_server() -> Any:
     server = LoopbackHTTPServer(("127.0.0.1", 0), FixtureHandler)
-    thread = threading.Thread(target=server.serve_forever, name="qingzhou-agent-fixture", daemon=True)
+    thread = threading.Thread(target=server.serve_forever, name="zuri-agent-fixture", daemon=True)
     thread.start()
     try:
         host, port = server.server_address

@@ -6,7 +6,7 @@ for (const ending of ["boundary", "end"]) for (const reducedMotion of ["no-prefe
     await page.emulateMedia({ colorScheme: ending === "end" ? "dark" : "light", reducedMotion });
     const source = "| 景点 | 图片尺寸 |\n|---|---|\n| 湖边楼阁 | 1365×2048 |\n| 木造舞台 | 1452×969 |";
     await page.evaluate(async source => {
-      const bench = window.qingzhouConversationBenchmark;
+      const bench = window.zuriConversationBenchmark;
       await bench.runLiveReplay({ sessionId: "table-reveal", baseTranscript: [
         { type: "user", text: "比较图片尺寸" },
         { type: "assistant", spanId: "history-table", content: source },
@@ -18,7 +18,7 @@ for (const ending of ["boundary", "end"]) for (const reducedMotion of ["no-prefe
     await expect(answer).toHaveAttribute("data-content", source);
     await expect(answer.locator(".markdown-table-pending")).toBeVisible();
     const result = await page.evaluate(async ({ source, ending }) => {
-      const bench = window.qingzhouConversationBenchmark;
+      const bench = window.zuriConversationBenchmark;
       const history = document.querySelector('[data-stream-trace-id="history-table"] table');
       const answer = document.querySelector('[data-stream-trace-id="new-table"]');
       const frames = [], transitions = [];

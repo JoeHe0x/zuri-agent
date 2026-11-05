@@ -25,9 +25,9 @@ the shared suites and does not launch a browser. `npm run verify:chrome` loads t
 | Toolbar and shortcut | `action.default_area` is `navbar`, which is Firefox's toolbar. The suggested key that Chrome puts on `_execute_action` moves to the reserved command `_execute_sidebar_action`. Its description is the extension name. The model-preset command stays. The toolbar click calls `sidebarAction.toggle()` during the user gesture. | Firefox rejects two commands with the same suggested key, so `_execute_action` is not also declared. The extension does not add a `menus` item: the sidebar menu already lists a `sidebar_action`, and an extra `menus` permission would be a second entry point. |
 | Permissions | `sidePanel`, `debugger`, `offscreen`, and optional `desktopCapture` are omitted. `webNavigation`, `webRequest`, and `webRequestBlocking` are added. There is no `update_url`. | A store review can still reject `webRequestBlocking`. If that permission is removed, response bodies are unavailable. Add-ons Manager owns updates for a signed package. A temporary add-on does not update itself. |
 | Storage | Sessions, settings, and Skills use `storage.local` and the extension origin, the same repository calls as Chrome. `unlimitedStorage` stays. | The data lives in the Firefox profile for this add-on. It does not follow a Chrome profile or a Google account. |
-| Identity | `browser_specific_settings.gecko.id` is `qz-browser-agent@heleifz.github.io`. `strict_min_version` is `154.0`. The Chrome `key` is omitted. | The id is provisional. Changing it later changes stored data. The minimum is 154 because `sandbox` / `content_security_policy.sandbox` require Firefox 154; `data_collection_permissions` needs 140. |
+| Identity | `browser_specific_settings.gecko.id` is `zuri-agent@heleifz.github.io`. `strict_min_version` is `154.0`. The Chrome `key` is omitted. | The id is provisional. Changing it later changes stored data. The minimum is 154 because `sandbox` / `content_security_policy.sandbox` require Firefox 154; `data_collection_permissions` needs 140. |
 | Data collection | `data_collection_permissions.required` is `websiteContent` and `browsingActivity`. `optional` is `locationInfo` and `bookmarksInfo`. | The field is Firefox-only. `none` is not declared: tab URLs/titles and page content go to the configured model in the main flow. Location and bookmarks request Firefox's built-in optional data-collection consent when those features are used. |
-| Appearance | `sidepanel/firefox-sidebar.css` sets `color-scheme: light dark` and replaces the shared tokens with `--qz-ff-*` tokens. Their base is Firefox's default sidebar: white or `#1c1b22`, `#15141a` or `#f9f9fa` text, and the violet accent `#764edd` or `#b89cff`. `sidepanel/firefox/theme.ts` recolors them from the active theme. See [Sidebar skin](#sidebar-skin). | Built-in Default, Light, Dark, and System themes return no colors (`colors: null`), so the Firefox defaults apply. On Linux the default theme draws the toolbar with GTK colors, which an extension cannot read; qz keeps the Firefox defaults there. The controls are still the shared widgets: Firefox does not give an extension its XUL widgets, and the sidebar title and close button are Firefox chrome outside this document. `browser_style` is not set; Firefox warns that it is deprecated. |
+| Appearance | `sidepanel/firefox-sidebar.css` sets `color-scheme: light dark` and replaces the shared tokens with `--zuri-ff-*` tokens. Their base is Firefox's default sidebar: white or `#1c1b22`, `#15141a` or `#f9f9fa` text, and the violet accent `#764edd` or `#b89cff`. `sidepanel/firefox/theme.ts` recolors them from the active theme. See [Sidebar skin](#sidebar-skin). | Built-in Default, Light, Dark, and System themes return no colors (`colors: null`), so the Firefox defaults apply. On Linux the default theme draws the toolbar with GTK colors, which an extension cannot read; zuri keeps the Firefox defaults there. The controls are still the shared widgets: Firefox does not give an extension its XUL widgets, and the sidebar title and close button are Firefox chrome outside this document. `browser_style` is not set; Firefox warns that it is deprecated. |
 
 ## Sidebar
 
@@ -46,23 +46,23 @@ only for events declared with `inputHandling: true`: `browserAction.onClicked`,
 declares `notifications.onClicked` without it, so a notification click is not user input on any
 platform. Focusing the window first with `windows.update({ focused: true })` does not change that
 flag. A content-script message is not user input either, so the session-import jump and
-"Continue in qz" cannot open the sidebar on that turn. The import still stores the session.
+"Continue in zuri" cannot open the sidebar on that turn. The import still stores the session.
 
 When Firefox refuses an open, the wrapper does the following:
 
-1. It logs `[轻舟] firefox sidebarAction failed (<source>): <Firefox message>` with
+1. It logs `[Zuri] firefox sidebarAction failed (<source>): <Firefox message>` with
    `console.error` in the background console. `<source>` is `api`, `notification`, or `toolbar`.
-2. It updates the `qzFirefoxSidebar` counters on the background global.
+2. It updates the `zuriFirefoxSidebar` counters on the background global.
 3. It rejects with `Firefox opens the sidebar only from the toolbar button, the sidebar shortcut,
    or a menu item.` followed by Firefox's message.
 4. When `sidebarAction.isOpen({})` reports that the sidebar is closed, it sets the toolbar badge
-   to `!` and the tooltip to `qz: click to open the sidebar` (`轻舟：点击打开侧边栏`). An open
+   to `!` and the tooltip to `zuri: click to open the sidebar` (`Zuri：点击打开侧边栏`). An open
    sidebar already shows the result, so it gets no badge.
-5. The first refusal in a cycle also creates notification `qz-open-sidebar` with
-   `Click the qz icon in the toolbar to view.` (`点击工具栏中的轻舟图标查看。`). A refusal that
+5. The first refusal in a cycle also creates notification `zuri-open-sidebar` with
+   `Click the zuri icon in the toolbar to view.` (`点击工具栏中的Zuri图标查看。`). A refusal that
    started inside a notification click never creates a notification.
 
-Clicking `qz-open-sidebar` still calls `sidebarAction.open()` once. A future Firefox that marks
+Clicking `zuri-open-sidebar` still calls `sidebarAction.open()` once. A future Firefox that marks
 the click as user input would open the sidebar. On Firefox 158 the click logs the real error with
 source `notification`, closes the notification, focuses the last browser window, and leaves the
 badge on the toolbar button.
@@ -85,15 +85,15 @@ manual navigation.
 | Feature | Firefox behavior | Known limitation |
 | --- | --- | --- |
 | Opening | `open()` runs inside the user-gesture turn and is not preceded by `windows.update`. `setPanel` records the sidebar document for that tab and is not awaited, so the gesture is still current when `open()` runs. The toolbar path calls `toggle()` when Firefox provides it. A refused call follows the steps above. | Firefox draws one sidebar for the window and chooses the side. `open()` cannot target a tab or a window. A refused call is not retried and does not open a tab. A notification click cannot open the sidebar on Firefox 158. |
-| Diagnostics | `qzFirefoxSidebar` in the background console holds `attempts`, `opened`, `refused`, `prompts`, `notified`, `notificationClicks`, `lastSource`, `lastError`, and `lastAt`. Every refusal is also logged with `console.error`. No debug flag is needed. | The counters reset when Firefox restarts the event page. |
+| Diagnostics | `zuriFirefoxSidebar` in the background console holds `attempts`, `opened`, `refused`, `prompts`, `notified`, `notificationClicks`, `lastSource`, `lastError`, and `lastAt`. Every refusal is also logged with `console.error`. No debug flag is needed. | The counters reset when Firefox restarts the event page. |
 | Per-tab panel | `setPanel({ tabId, panel })` is Firefox's tab-scoped panel URL. Other tabs keep the default panel. The package does not call `setPanel` with an empty string. | The open or closed state is still one per window. Firefox 158 has no API that opens the sidebar for one tab and leaves it closed in another. Switching tabs can show that tab's panel document, which for this package is the same `sidepanel.html`. |
 | Focus | Composer focus still uses `visibilitychange` and `focus`. | There is no `sidePanel.onOpened`. |
 | Closing | A programmatic open does not close a sidebar that is already open. The toolbar button toggles, which matches Firefox's toolbar convention and Chrome's `openPanelOnActionClick` toggle. | Chrome's side panel and Firefox's sidebar are different frames. |
 
 ## Exported conversations
 
-An exported conversation shows **Continue in qz** when `content/session-export-bridge.js` finds
-its `qingzhou-session-exchange` payload. `isAllowedSessionExchangeLocation` accepts `file:`,
+An exported conversation shows **Continue in zuri** when `content/session-export-bridge.js` finds
+its `zuri-session-exchange` payload. `isAllowedSessionExchangeLocation` accepts `file:`,
 loopback HTTP, and the HTTPS allowlist in both browsers. The click imports the session, then asks
 for the sidebar as described in [Sidebar](#sidebar).
 
@@ -110,7 +110,7 @@ handling still need a Mac. Load the package and read the background console:
 1. Run `npm run build:firefox`, open `about:debugging#/runtime/this-firefox`, choose
    **Load Temporary Add-on**, and select `dist/extension-firefox/manifest.json`.
 2. Allow notifications for Firefox in macOS System Settings → Notifications.
-3. Choose **Inspect** next to qz. Close the sidebar, then run this in the console:
+3. Choose **Inspect** next to zuri. Close the sidebar, then run this in the console:
 
    ```js
    setTimeout(() => chrome.sidePanel.open({}).then(
@@ -119,22 +119,22 @@ handling still need a Mac. Load the package and read the background console:
    ), 0);
    ```
 
-   The console prints `[轻舟] firefox sidebarAction failed (api): …` and `PROBE refused: …`. The
+   The console prints `[Zuri] firefox sidebarAction failed (api): …` and `PROBE refused: …`. The
    toolbar icon shows `!` and the hint notification appears.
-4. Click the hint notification, then run `qzFirefoxSidebar`. `notificationClicks` grows by one,
+4. Click the hint notification, then run `zuriFirefoxSidebar`. `notificationClicks` grows by one,
    `lastSource` is `notification`, and `lastError` is Firefox's own message. `notified` does not
    change, and no second notification appears.
-5. Check the click without qz code in the path:
+5. Check the click without zuri code in the path:
 
    ```js
    browser.notifications.onClicked.addListener(id => {
-     if (id !== "qz-probe") return;
+     if (id !== "zuri-probe") return;
      browser.sidebarAction.open().then(
        () => console.log("PROBE notification opened"),
        error => console.error("PROBE notification refused:", error.message),
      );
    });
-   browser.notifications.create("qz-probe", { type: "basic", title: "qz probe", message: "Click me" });
+   browser.notifications.create("zuri-probe", { type: "basic", title: "zuri probe", message: "Click me" });
    ```
 
    Click the notification and copy the console line. `refused` with
@@ -145,7 +145,7 @@ handling still need a Mac. Load the package and read the background console:
 7. With the macOS accent set to blue and the default theme, the primary button and the send button
    stay Firefox violet, `#764edd` in light and `#b89cff` in dark, with a 4.5:1 label. With an empty
    composer, the send button is gray with a not-allowed cursor.
-8. Switch to Spark in `about:addons` → Themes, then switch macOS between Light and Dark. The qz
+8. Switch to Spark in `about:addons` → Themes, then switch macOS between Light and Dark. The zuri
    sidebar matches the Bookmarks sidebar (Cmd+B) each time without a reload.
 
 ## Offscreen work
@@ -157,7 +157,7 @@ run. The same `offscreen.js` keepalive, SVG conversion, and sandbox iframe run i
 
 | Feature | Firefox behavior | Known limitation |
 | --- | --- | --- |
-| Hidden frame | `hasDocument` stays false until the iframe loads `offscreen.html`. An `about:blank` load does not count. Overlapping `createDocument` calls share that load. A load error removes the frame, so the next `ensure()` can try again. A document that is still loading waits for `DOMContentLoaded` before the frame is created. | The minimized popup is used only when the event page has no document. That window can flash. The log line is `[轻舟] firefox offscreen uses a minimized window`. |
+| Hidden frame | `hasDocument` stays false until the iframe loads `offscreen.html`. An `about:blank` load does not count. Overlapping `createDocument` calls share that load. A load error removes the frame, so the next `ensure()` can try again. A document that is still loading waits for `DOMContentLoaded` before the frame is created. | The minimized popup is used only when the event page has no document. That window can flash. The log line is `[Zuri] firefox offscreen uses a minimized window`. |
 | Lifetime | The iframe's 10-second ping is the same message the Chrome offscreen document sends. Firefox does not treat that message as a background parent-API call, so it does not reset the event-page idle timer. | Discarding the event page drops the frame until the next `ensure()`. The CLI keepalive is the separate parent-API ping in [MCP keepalive and reconnect](#mcp-keepalive-and-reconnect). |
 | Sandbox runner | The manifest still declares `runner-sandbox.html` and the sandbox CSP. | Firefox documents those sandbox keys from version 154. This approximation was not executed against a live page in the temporary-load check. |
 
@@ -187,7 +187,7 @@ the Mozilla-signed path, and the comment there marks the option as not standardi
 | Feature | Firefox behavior | Known limitation |
 | --- | --- | --- |
 | Viewport | A capture without a clip returns the visible tab as base64, without a data-URL prefix. | The image is a tab capture, not a Chrome compositor surface. Device pixel ratio and zoom can differ from Chrome. |
-| Element and overflow clips | An in-viewport clip is cropped where it sits. A larger clip tries one document rect. The scroll fallback keeps the rectangle that is actually visible, then repeats across and down for up to 8 captures, and restores the scroll position. | The page can jump while the pieces are taken. When the 8-capture budget stops the clip early, the background logs `[轻舟] firefox screenshot kept 8 viewport pieces; the rest of the clip was omitted`. A failed rect capture does not fall through to `captureVisibleTab`. |
+| Element and overflow clips | An in-viewport clip is cropped where it sits. A larger clip tries one document rect. The scroll fallback keeps the rectangle that is actually visible, then repeats across and down for up to 8 captures, and restores the scroll position. | The page can jump while the pieces are taken. When the 8-capture budget stops the clip early, the background logs `[Zuri] firefox screenshot kept 8 viewport pieces; the rest of the clip was omitted`. A failed rect capture does not fall through to `captureVisibleTab`. |
 | Background tabs | `captureTab` can capture a tab that is not focused. | When `captureTab` fails and no rect was requested, the fallback focuses the tab and its window. |
 
 ## Accessibility tree
@@ -235,7 +235,7 @@ Remote Agent.
 
 | Feature | Firefox behavior | Known limitation |
 | --- | --- | --- |
-| Output | The result is `{ data }` with base64 PDF bytes, which is the shape the document tool already reads. A full-document capture is one page and has no truncation note. | The PDF is a raster. Text is not selectable. CSS page size, headers, and margins are ignored. Content below 8 viewport slices adds a last page whose text is `Firefox kept N of M viewport pages. Content below that was omitted.` The background also logs `[轻舟] firefox pdf kept N of M viewport pages; content below that was omitted`. `printBackground` is whatever the pixels contain. A sliced capture is one viewport wide. |
+| Output | The result is `{ data }` with base64 PDF bytes, which is the shape the document tool already reads. A full-document capture is one page and has no truncation note. | The PDF is a raster. Text is not selectable. CSS page size, headers, and margins are ignored. Content below 8 viewport slices adds a last page whose text is `Firefox kept N of M viewport pages. Content below that was omitted.` The background also logs `[Zuri] firefox pdf kept N of M viewport pages; content below that was omitted`. `printBackground` is whatever the pixels contain. A sliced capture is one viewport wide. |
 | `data:` documents | The tool opens an inactive tab and prints it through this command. | Capturing a `data:` tab was not checked in Firefox. If scripting or capture is blocked there, PDF creation fails. |
 
 ## Network and console
@@ -270,7 +270,7 @@ URLs stay with the parent. An origin of `"null"` is treated as cross-origin.
 ## Header rules
 
 Kimi, DashScope, ChatGPT, and OpenCode session rules set `initiatorDomains` to `runtime.id` so
-the `qz-agent/1.0.0` user agent is added to the extension's own requests. On Firefox `runtime.id`
+the `zuri-agent/1.0.0` user agent is added to the extension's own requests. On Firefox `runtime.id`
 is the email-shaped gecko id, which is not a hostname. `declarativeNetRequest.updateSessionRules`
 and `updateDynamicRules` rewrite an initiator domain equal to that id into the hostname of
 `runtime.getURL("/")`. An update that does not include `addRules` is passed through unchanged, so
@@ -294,9 +294,9 @@ which returns the Chrome sentence unless the caller is a Firefox extension page.
 
 | Feature | Firefox behavior | Known limitation |
 | --- | --- | --- |
-| File access | The Firefox package tells the user to open qz in `about:addons`, open Permissions, and enable local-file access. English and Simplified Chinese omit that key in Chrome and use the shared bundle sentence, so the Firefox package adds the key. The loader prefers the catalog. The English source and the Chrome package still name `chrome://extensions`. | The sentence does not deep-link to the checkbox. |
+| File access | The Firefox package tells the user to open zuri in `about:addons`, open Permissions, and enable local-file access. English and Simplified Chinese omit that key in Chrome and use the shared bundle sentence, so the Firefox package adds the key. The loader prefers the catalog. The English source and the Chrome package still name `chrome://extensions`. | The sentence does not deep-link to the checkbox. |
 | Shortcuts | A sidebar `tabs.create` URL that starts with `chrome://extensions` opens `about:addons`. The button label comes from the rewritten catalog. | Firefox has no equivalent of `chrome://extensions/shortcuts` in this package. Shortcuts are edited from the Add-ons Manager gear menu, **Manage Extension Shortcuts**. |
-| Downloads and prompts | Download hints name `about:downloads` and Firefox. Permission instructions name the sidebar and Firefox's permission prompt. | The local `qz` command process is not an extension page. Its terminal text still says "side panel". |
+| Downloads and prompts | Download hints name `about:downloads` and Firefox. Permission instructions name the sidebar and Firefox's permission prompt. | The local `zuri` command process is not an extension page. Its terminal text still says "side panel". |
 | Page mode | The tool description in the Firefox catalog says an Android layout. The user agent sent to the page stays the Chrome compatibility string above. | A site can still tell that the engine is Gecko. |
 
 ## Case recording
@@ -332,18 +332,18 @@ system dismissal does not renew. The toast still disappears on Firefox's own tim
 
 A completion-notification click calls `chrome.sidePanel.open` like Chrome. Firefox 158 does not
 treat `notifications.onClicked` as user input, so that open is refused. If the sidebar is closed,
-the click leaves badge `!` and the toolbar tooltip. It does not create `qz-open-sidebar`, so one
+the click leaves badge `!` and the toolbar tooltip. It does not create `zuri-open-sidebar`, so one
 click never produces a second notification. See [Sidebar](#sidebar).
 
 ## Session automations
 
 The Firefox package does not run session automations. The event page can be discarded, and
 `sidebarAction.open()` runs only during a user gesture, so an unattended task cannot rely on
-the sidebar or a long-lived background. On Firefox, qz is a chat and CLI assistant.
+the sidebar or a long-lived background. On Firefox, zuri is a chat and CLI assistant.
 
 `background/firefox-boot.js` installs the host before `background/service-worker.js`. The host
-sets `chrome.qzSessionAutomationsEnabled` to false, clears the alarm
-`qingzhou.automation.scheduler`, and ignores a later `alarms.create` for that name. The shared
+sets `chrome.zuriSessionAutomationsEnabled` to false, clears the alarm
+`zuri.automation.scheduler`, and ignores a later `alarms.create` for that name. The shared
 runtime sees the flag and does not schedule, tick, or start a stored automation. Records already
 in `storage.local` stay there.
 
@@ -352,7 +352,7 @@ editor. A restored task view stays on ordinary tasks. `manage_sessions` omits th
 actions. A call that still names one returns `AUTOMATION_DISABLED`. The model prompt for this
 package says scheduled tasks are unavailable.
 
-The MCP reconnect alarm `qingzhou-mcp-bridge-reconnect` is separate. Its `periodInMinutes: 0.5`
+The MCP reconnect alarm `zuri-mcp-bridge-reconnect` is separate. Its `periodInMinutes: 0.5`
 behavior and the keepalive boundary are in [MCP keepalive and reconnect](#mcp-keepalive-and-reconnect).
 
 ## MCP keepalive and reconnect
@@ -364,17 +364,17 @@ lifetime that remains.
 
 While the CLI connection is enabled and the bridge is not paused, the event page calls
 `runtime.getPlatformInfo` every 10 seconds. That call is the keepalive. The log line is
-`[轻舟] firefox mcp keepalive armed`. Disconnect, or a paused permanent failure, clears the
-timer. The log line is `[轻舟] firefox mcp keepalive stopped`.
+`[Zuri] firefox mcp keepalive armed`. Disconnect, or a paused permanent failure, clears the
+timer. The log line is `[Zuri] firefox mcp keepalive stopped`.
 
-`storage.local` holds the bridge record `_qingzhou_mcp_bridge` and the client id
-`_qingzhou_mcp_bridge_client_id`. On Firefox the record also stores `connectionId`. A wake reads
+`storage.local` holds the bridge record `_zuri_mcp_bridge` and the client id
+`_zuri_mcp_bridge_client_id`. On Firefox the record also stores `connectionId`. A wake reads
 that id, the pairing token, and the service instance id, then pairs with the same connection id.
 The daemon accepts the new poll for this profile's existing lease. The add-on does not need a
 reload. `runtime.onSuspend` writes the connection id again if a discard starts before the latest
 state write.
 
-The alarm `qingzhou-mcp-bridge-reconnect` uses `periodInMinutes: 0.5`. The boot script registers
+The alarm `zuri-mcp-bridge-reconnect` uses `periodInMinutes: 0.5`. The boot script registers
 its listener while the event page is still starting. A transport failure keeps that alarm armed
 and restores the retry budget. `BRIDGE_CLIENT_IN_USE` still pauses after its one lease wait. An
 incompatible bridge, a rejected pairing token, a name conflict, or missing data consent still
@@ -384,18 +384,18 @@ pauses until the user connects again.
 | --- | --- |
 | With the sidebar closed, an enabled CLI connection stays loaded across the default 30-second idle timeout. | An idle timeout below 10 seconds can still discard the page between pings. The alarm is the recovery, about 30 seconds after the last schedule. |
 | After a discard, the alarm loads the event page and the stored lease pairs again. | A crash can drop tool calls and run state that had not been written. The alarm restores the CLI connection on the next fire. |
-| Session automations stay disabled. `qzSessionAutomationsEnabled` stays false and `qingzhou.automation.scheduler` stays cleared. | This keepalive is not a scheduler. An unattended multi-step page task still has no sidebar gesture and no automation alarm. |
+| Session automations stay disabled. `zuriSessionAutomationsEnabled` stays false and `zuri.automation.scheduler` stays cleared. | This keepalive is not a scheduler. An unattended multi-step page task still has no sidebar gesture and no automation alarm. |
 
 Probe it on a temporary load:
 
 1. Run `npm run build:firefox` and load `dist/extension-firefox/manifest.json` from
    `about:debugging#/runtime/this-firefox`. A root-manifest zip of that directory loads the same
    package.
-2. Pair with `npm run qz -- connect`, or open the pairing URL the command prints.
-3. Run `npm run qz -- browsers --json` and confirm this browser is online.
+2. Pair with `npm run zuri -- connect`, or open the pairing URL the command prints.
+3. Run `npm run zuri -- browsers --json` and confirm this browser is online.
 4. Close the sidebar. Leave Firefox open for at least a minute.
-5. Run `npm run qz -- browsers --json` again. The same browser is online. The background console
-   shows `[轻舟] firefox mcp keepalive armed` while the connection stays enabled.
+5. Run `npm run zuri -- browsers --json` again. The same browser is online. The background console
+   shows `[Zuri] firefox mcp keepalive armed` while the connection stays enabled.
 6. In `about:debugging`, terminate the background script. Within about a minute the browser is
    online again. Reloading the add-on is not required.
 
@@ -410,13 +410,13 @@ available API opens a dialog or a privileged path this package does not use.
 | Browser accessibility tree | The tree is the DOM and ARIA walk above, including open shadow trees and same-origin frame documents. Firefox 158 ships no extension accessibility namespace. |
 | Vector PDF | The PDF is JPEG pages. `tabs.saveAsPDF` opens a file picker. `tabs.print` opens the print UI. There is no `tabs.printToPDF`. |
 | Per-tab side panel | `setPanel({ tabId })` selects that tab's panel document. `open()` and `toggle()` take no window or tab argument and affect the active window's one sidebar. |
-| Open from a notification or a page | `notifications.onClicked` and content-script messages are not user input, so `sidebarAction.open()` is refused there. The badge, tooltip, and `qz-open-sidebar` hint point to the toolbar button. |
+| Open from a notification or a page | `notifications.onClicked` and content-script messages are not user input, so `sidebarAction.open()` is refused there. The badge, tooltip, and `zuri-open-sidebar` hint point to the toolbar button. |
 | Local export pages | Firefox runs content scripts on `file:` pages only after the user turns on **Access local files on your computer** for the add-on in `about:addons` → Permissions. That switch grants `internal:fileSchemeAllowed` while `extensions.webextensions.fileSchemeAccess.requireOptIn` is true, which is the Firefox 158 default. An extension cannot grant it to itself. |
 | Notification priority | Ignored. |
 | `Runtime.terminateExecution` | Returns `{}` and does not stop script. |
 | MCP settings sender | `assertMcpSettingsSender` accepts `chrome-extension://<extension id>/` and a `moz-extension://<host>/` page. Firefox's host is an internal UUID, and `sender.id` must still be this extension. A web page URL is still rejected. |
-| MCP bridge origin | The daemon allows `chrome-extension://` plus 32 characters from `a` to `p`, and `moz-extension://` plus a lowercase UUID. That UUID is the profile-local host in `extensions.webextensions.uuids` for gecko id `qz-browser-agent@heleifz.github.io`. `runtime.id` remains the gecko id. The first pair from an allowed origin issues or checks the pairing token. Later poll and result calls require it. A web origin receives `403`. `/mcp` rejects every Origin. The process still listens on loopback. Steps are in [Load qz in Firefox](cli.md#load-qz-in-firefox). |
-| Session automations | Disabled. The boot does not arm `qingzhou.automation.scheduler`, and stored definitions do not start. The sidebar has no create, edit, or run control. See [Session automations](#session-automations). |
+| MCP bridge origin | The daemon allows `chrome-extension://` plus 32 characters from `a` to `p`, and `moz-extension://` plus a lowercase UUID. That UUID is the profile-local host in `extensions.webextensions.uuids` for gecko id `zuri-agent@heleifz.github.io`. `runtime.id` remains the gecko id. The first pair from an allowed origin issues or checks the pairing token. Later poll and result calls require it. A web origin receives `403`. `/mcp` rejects every Origin. The process still listens on loopback. Steps are in [Load zuri in Firefox](cli.md#load-zuri-in-firefox). |
+| Session automations | Disabled. The boot does not arm `zuri.automation.scheduler`, and stored definitions do not start. The sidebar has no create, edit, or run control. See [Session automations](#session-automations). |
 | Half-minute alarm | The MCP reconnect alarm stays `periodInMinutes: 0.5`. Firefox 158.0.1 does not clamp that value: the shipped alarm implementation stores it and schedules `periodInMinutes * 60` seconds. A temporary add-on that created `{ periodInMinutes: 0.5 }` read back `periodInMinutes` `0.5` and a first fire 30047 ms later. That alarm loads a discarded event page and resumes the stored CLI lease. It is not a session automation. |
 | Geolocation prompt | The in-app consent card is unchanged. Whether Firefox also shows its own location prompt was not checked. |
 | Tab groups | The same `tabGroups` calls run. The group chrome is Firefox's. `TabGroup.shared` is unsupported and unused. |
@@ -431,17 +431,17 @@ as the header, and keeps `scrollbar-gutter: stable both-edges`. The shared skin 
 
 | Token | Source | Use |
 | --- | --- | --- |
-| `--qz-ff-sidebar`, `--qz-ff-sidebar-text` | Firefox's `#ffffff` and `#15141a` in light, `#1c1b22` and `#f9f9fa` in dark; theme surface and ink, see [Theme derivation](#theme-derivation) | Surface and body text |
-| `--qz-ff-text-deemphasized`, `--qz-ff-text-muted` | 72% and 60% of the text over the surface, raised by the palette | Inactive tabs, secondary and muted text |
-| `--qz-ff-hairline`, `--qz-ff-border` | 12% and 24% of the text color; theme `sidebar_border` | 1px dividers and field borders |
-| `--qz-ff-row-hover`, `--qz-ff-fill`, `--qz-ff-selected`, `--qz-ff-fill-hover`, `--qz-ff-fill-active` | 6%, 7%, 11%, 14%, and 21% of the text color | Row hover, neutral buttons, selected tab, hover, pressed |
-| `--qz-ff-box`, `--qz-ff-box-hover`, `--qz-ff-box-active` | 3% (5% dark), 8%, and 12% of the text over the surface | Task rows and code blocks |
-| `--qz-ff-accent`, `--qz-ff-accent-text` | Firefox's `#764edd` under white in light, `#b89cff` under `#252428` in dark; theme `sidebar_highlight`, `sidebar_highlight_text` | Palette input |
-| `--qz-ff-primary`, `-hover`, `-active`, `-text` | Palette. Fallback: Firefox's `#764edd`, `#5939a8`, `#3e2976` under white in light, and `#b89cff`, `#d4c1ff`, `#eaddff` under `#252428` in dark | Primary and send buttons, checked switches |
-| `--qz-ff-accent-ink`, `--qz-ff-focus` | Palette; theme `focus_outline`, raised to 3:1 on the surface | Links, code accent, 2px focus ring |
-| `--qz-ff-field`, `-field-text`, `-field-border` | The surface in light, 18% black over it in dark; theme `toolbar_field`, `toolbar_field_text`, `toolbar_field_border` | Composer and inputs |
-| `--qz-ff-popup`, `-popup-text`, `-popup-border` | Theme `popup`, `popup_text`, `popup_border` | Popovers and menus |
-| `--qz-ff-success`, `-warning`, `-critical` | Light and dark pairs, raised by the palette on a theme surface | Status text and 12% tints |
+| `--zuri-ff-sidebar`, `--zuri-ff-sidebar-text` | Firefox's `#ffffff` and `#15141a` in light, `#1c1b22` and `#f9f9fa` in dark; theme surface and ink, see [Theme derivation](#theme-derivation) | Surface and body text |
+| `--zuri-ff-text-deemphasized`, `--zuri-ff-text-muted` | 72% and 60% of the text over the surface, raised by the palette | Inactive tabs, secondary and muted text |
+| `--zuri-ff-hairline`, `--zuri-ff-border` | 12% and 24% of the text color; theme `sidebar_border` | 1px dividers and field borders |
+| `--zuri-ff-row-hover`, `--zuri-ff-fill`, `--zuri-ff-selected`, `--zuri-ff-fill-hover`, `--zuri-ff-fill-active` | 6%, 7%, 11%, 14%, and 21% of the text color | Row hover, neutral buttons, selected tab, hover, pressed |
+| `--zuri-ff-box`, `--zuri-ff-box-hover`, `--zuri-ff-box-active` | 3% (5% dark), 8%, and 12% of the text over the surface | Task rows and code blocks |
+| `--zuri-ff-accent`, `--zuri-ff-accent-text` | Firefox's `#764edd` under white in light, `#b89cff` under `#252428` in dark; theme `sidebar_highlight`, `sidebar_highlight_text` | Palette input |
+| `--zuri-ff-primary`, `-hover`, `-active`, `-text` | Palette. Fallback: Firefox's `#764edd`, `#5939a8`, `#3e2976` under white in light, and `#b89cff`, `#d4c1ff`, `#eaddff` under `#252428` in dark | Primary and send buttons, checked switches |
+| `--zuri-ff-accent-ink`, `--zuri-ff-focus` | Palette; theme `focus_outline`, raised to 3:1 on the surface | Links, code accent, 2px focus ring |
+| `--zuri-ff-field`, `-field-text`, `-field-border` | The surface in light, 18% black over it in dark; theme `toolbar_field`, `toolbar_field_text`, `toolbar_field_border` | Composer and inputs |
+| `--zuri-ff-popup`, `-popup-text`, `-popup-border` | Theme `popup`, `popup_text`, `popup_border` | Popovers and menus |
+| `--zuri-ff-success`, `-warning`, `-critical` | Light and dark pairs, raised by the palette on a theme surface | Status text and 12% tints |
 
 Radii are 4px for tabs, icon buttons, and chips, 6px for buttons and code, and 8px for rows,
 popovers, and cards. Icon buttons have no border or fill until hover. The selected tab is a pill
@@ -451,7 +451,7 @@ deemphasized text, and a `not-allowed` cursor instead of opacity.
 `sidepanel/firefox/theme.ts` resolves the accent, sidebar, popup, and field colors through a
 hidden probe element and writes these values on `:root`:
 
-- Primary. The label candidates are `--qz-ff-accent-text`, white, and `#15141a`. A light label
+- Primary. The label candidates are `--zuri-ff-accent-text`, white, and `#15141a`. A light label
   darkens the fill until the label reaches 4.6:1 at rest; hover and active darken 12% and 22%
   more, so they only gain contrast. A dark label lightens the fill until the label reaches 4.6:1
   on the active fill. The candidate that needs the smallest change wins. The macOS blue `#007aff`
@@ -502,7 +502,7 @@ perceived brightness at most 127 counting as dark. A theme with `properties.colo
 Firefox's own dark blocks use the same swap: under Spark, the dark sidebar `#250e0b` is the light
 block's `sidebar_text`, and the dark text `#f8f0ec` is the light block's `frame`. A theme switch
 or an appearance change repaints the sidebar without a reload. On Linux, the default theme uses
-GTK colors for the toolbar. The sidebar document cannot read them, so qz shows Firefox's default
+GTK colors for the toolbar. The sidebar document cannot read them, so zuri shows Firefox's default
 sidebar colors there.
 
 ## Native feel
@@ -514,7 +514,7 @@ call would be a non-Firefox argument, a warning, or a second menu.
 | --- | --- |
 | `sidebarAction.open()` takes no arguments | Firefox 158's schema has an empty parameter list. An extra `windowId` is non-standard. |
 | Toolbar uses `toggle()` | That is Firefox's toolbar behavior, and Chrome's action click toggles the side panel too. A notification open still only opens, so it does not close a sidebar the user already has open. |
-| Import jump points at the toolbar | A page message and a notification click cannot satisfy `requireUserInput` in Firefox 158. The badge, tooltip, and `qz-open-sidebar` name the toolbar button, which is user input. The session is already stored. |
+| Import jump points at the toolbar | A page message and a notification click cannot satisfy `requireUserInput` in Firefox 158. The badge, tooltip, and `zuri-open-sidebar` name the toolbar button, which is user input. The session is already stored. |
 | `_execute_sidebar_action` owns the shortcut | Firefox toggles a sidebar from that reserved command. `_execute_action` would not. |
 | No custom context menu | The sidebar menu and the toolbar button are already Firefox's. A `menus` permission would add a warning and a second entry. |
 | `open_at_install: false` | Firefox would otherwise open the sidebar during install. The Chrome task does not. |

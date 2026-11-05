@@ -17,7 +17,7 @@ for (const colorScheme of ["light", "dark"]) {
     test.use({ colorScheme, viewport: { width: 390, height: 900 }, sidepanelChromeOptions: { uiLanguage: "en" } });
 
     test("assistant and event failures share reading size through streaming, rebuild and export", async ({ page, browser }, testInfo) => {
-      await page.evaluate(input => window.qingzhouConversationBenchmark.runSnapshotRender(input), fixture);
+      await page.evaluate(input => window.zuriConversationBenchmark.runSnapshotRender(input), fixture);
       await expect(page.locator(".msg-assistant-error .chat-error-card")).toHaveCount(1);
       await expect(page.locator(".msg-error .chat-error-card")).toHaveCount(1);
 
@@ -28,7 +28,7 @@ for (const colorScheme of ["light", "dark"]) {
 
       // A later error arriving after tool execution must keep the existing cards' size.
       await page.evaluate(() => {
-        const dispatch = event => window.qingzhouConversationBenchmark.dispatchBackgroundEvent({
+        const dispatch = event => window.zuriConversationBenchmark.dispatchBackgroundEvent({
           sessionId: "error-typography", runId: "retry", ...event,
         });
         dispatch({ type: "agent_start" });
@@ -38,14 +38,14 @@ for (const colorScheme of ["light", "dark"]) {
       await expectCardSizes(page, 3, 18);
 
       const complete = { ...fixture, transcript: [...fixture.transcript, { type: "error", text: "The retry failed. Check the model connection." }] };
-      await page.evaluate(input => window.qingzhouConversationBenchmark.runSnapshotRender(input), complete);
+      await page.evaluate(input => window.zuriConversationBenchmark.runSnapshotRender(input), complete);
       await page.locator("#messages").evaluate(element => { element.dataset.chatTextSize = "xlarge"; });
       await expectCardSizes(page, 3, 18);
       await page.locator("#messages").evaluate(element => { element.scrollTop = 0; });
       await page.screenshot({ path: testInfo.outputPath(`errors-${colorScheme}.png`) });
 
       // Exports use the skin's default size, independently of the panel preference.
-      const exported = await page.evaluate(input => window.qingzhouConversationBenchmark.renderSessionDocument(input), complete);
+      const exported = await page.evaluate(input => window.zuriConversationBenchmark.renderSessionDocument(input), complete);
       const context = await browser.newContext({ colorScheme, viewport: { width: 390, height: 900 } });
       try {
         await context.setOffline(true);

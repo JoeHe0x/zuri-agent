@@ -701,7 +701,7 @@ const typed = await definitions.get("act_on_screen").execute({
   returnScreenshot: true,
   x: 500,
   y: 400,
-  text: "轻舟",
+  text: "Zuri",
   replace: true,
 }, undefined, screenContext);
 assert.equal(typed.feedbackAvailable, true);
@@ -713,7 +713,7 @@ assert.equal(typeCalls.some(([, method, params]) => (
   && params.modifiers === 4
   && params.commands?.includes("selectAll")
 )), true, "replace typing should derive Meta from the same macOS fact exposed in the run profile");
-assert.equal(typeCalls.some(([, method, params]) => method === "Input.insertText" && params.text === "轻舟"), true);
+assert.equal(typeCalls.some(([, method, params]) => method === "Input.insertText" && params.text === "Zuri"), true);
 
 const callsBeforeExplicitSelectAll = cdpCalls.length;
 await definitions.get("act_on_screen").execute({

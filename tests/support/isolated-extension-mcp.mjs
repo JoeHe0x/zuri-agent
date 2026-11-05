@@ -13,7 +13,7 @@ export const PROJECT_ROOT = dirname(TEST_ROOT);
 export const EXTENSION_PATH = await ensureTestExtension();
 
 export async function launchIsolatedExtensionMcp({
-  profilePrefix = "qingzhou-mcp-e2e-",
+  profilePrefix = "zuri-mcp-e2e-",
   headless = true,
   requestTimeoutSeconds = 300,
   downloadDirectory,
@@ -45,7 +45,7 @@ export async function launchIsolatedExtensionMcp({
     await context.route("http://127.0.0.1:18765/**", route => route.abort());
     attachWorkerDiagnostics(context, diagnostics);
     context.on("request", request => {
-      if (new URL(request.url()).pathname === "/v1/qingzhou/poll") {
+      if (new URL(request.url()).pathname === "/v1/zuri/poll") {
         pollRequests.push({ at: Date.now(), url: request.url() });
       }
     });
@@ -58,13 +58,13 @@ export async function launchIsolatedExtensionMcp({
     await page.goto(`chrome-extension://${extensionId}/sidepanel/sidepanel.html`);
     await page.locator("[data-consent-accept]").waitFor({ state: "visible" });
     const fresh = await page.evaluate(async () =>
-      (await chrome.storage.local.get("_qingzhou_mcp_bridge"))._qingzhou_mcp_bridge);
+      (await chrome.storage.local.get("_zuri_mcp_bridge"))._zuri_mcp_bridge);
     assert.ok(!fresh || (fresh.schemaVersion === 2 && !fresh.enabled && !fresh.authorizationId),
       "a fresh browser must have no CLI authorization injected by the fixture");
     const connectionPage = await context.newPage();
     connectionPage.on("pageerror", error => diagnostics.push(String(error)));
     await connectionPage.goto(bridge.connectUrl);
-    await connectionPage.locator('[data-qz-connection-code="DATA_CONSENT_REQUIRED"]').waitFor();
+    await connectionPage.locator('[data-zuri-connection-code="DATA_CONSENT_REQUIRED"]').waitFor();
     const beforeConsent = await (await fetch(bridge.healthUrl)).json();
     assert.equal(beforeConsent.status.clientCount, 0, "bridge must stay disconnected until data consent");
     assert.equal(pollRequests.length, 0, "the extension must not poll or scan before consent");
@@ -72,7 +72,7 @@ export async function launchIsolatedExtensionMcp({
     await page.waitForFunction(() => !document.querySelector("#app")?.hasAttribute("data-workspace-booting"));
     const connect = async () => {
       await connectionPage.goto(bridge.connectUrl);
-      await connectionPage.locator('[data-qz-connection-state="connected"]').waitFor();
+      await connectionPage.locator('[data-zuri-connection-state="connected"]').waitFor();
       return waitForBridgeClient(bridge.healthUrl, 20_000);
     };
     const status = await connect();
@@ -186,7 +186,7 @@ async function startIsolatedMcpBridge({ requestTimeoutSeconds }) {
     get endpoint() { return endpoint; },
     get mcpUrl() { return `${endpoint}/mcp`; },
     get healthUrl() { return `${endpoint}/health`; },
-    get connectUrl() { return `${endpoint}/qz-connect`; },
+    get connectUrl() { return `${endpoint}/zuri-connect`; },
     logs,
     get process() { return child; },
     close: () => stopChild(child),

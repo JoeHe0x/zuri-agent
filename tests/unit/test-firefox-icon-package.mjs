@@ -36,7 +36,7 @@ test("a firefox package without the toolbar glyph fails and leaves no output", a
 });
 
 async function fixture(t) {
-  const work = await mkdtemp(join(tmpdir(), "qingzhou-firefox-icon-"));
+  const work = await mkdtemp(join(tmpdir(), "zuri-firefox-icon-"));
   t.after(() => rm(work, { recursive: true, force: true }));
   const sourceDir = join(work, "source");
   await put(sourceDir, "manifest.json", JSON.stringify({

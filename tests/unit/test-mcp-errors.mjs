@@ -15,7 +15,7 @@ async function bridgeFixture(t) {
 
 test("typed extension errors keep recovery metadata through a real MCP client without replay", async t => {
   const bridge = await bridgeFixture(t);
-  const pending = callTool(bridge.endpoint, "qingzhou_export_data_table", { table: "results" });
+  const pending = callTool(bridge.endpoint, "zuri_export_data_table", { table: "results" });
   const rejected = assert.rejects(pending, error => {
     assert.equal(error.code, "DOWNLOAD_INTERRUPTED");
     assert.match(error.message, /interrupted/);
@@ -39,7 +39,7 @@ test("MCP typed errors have an explicit JSON envelope and omit arbitrary provide
   const client = new Client({ name: "errors-test", version: "1" });
   await client.connect(new StreamableHTTPClientTransport(new URL(`${bridge.endpoint}/mcp`)));
   t.after(() => client.close());
-  const pending = client.callTool({ name: "qingzhou_update_settings", arguments: { config: { language: "en" } } });
+  const pending = client.callTool({ name: "zuri_update_settings", arguments: { config: { language: "en" } } });
   const [request] = await pollBrowser(bridge.state, { id: "browser" }, { timeoutMs: 1000 });
   completeBrowser(bridge.state, request.id, {
     ok: false, code: "SETTINGS_PARTIALLY_UPDATED", error: "Model settings were saved; language failed.",
@@ -55,8 +55,8 @@ test("MCP typed errors have an explicit JSON envelope and omit arbitrary provide
 test("Skill missing-resource results become actionable MCP errors while generic tool results stay data", async t => {
   const bridge = await bridgeFixture(t);
   for (const [name, args, result, details] of [
-    ["qingzhou_get_skill", { name: "missing" }, { error: "Skill not found", code: "SKILL_NOT_FOUND", details: { name: "missing" }, available: ["existing"] }, { name: "missing", available: ["existing"] }],
-    ["qingzhou_get_skill_resource", { name: "existing", path: "missing.txt" }, { error: "Resource not found", code: "SKILL_RESOURCE_NOT_FOUND", details: { name: "existing", path: "missing.txt" }, resources: [{ path: "scripts/run.js" }] }, { name: "existing", path: "missing.txt", available: ["scripts/run.js"] }],
+    ["zuri_get_skill", { name: "missing" }, { error: "Skill not found", code: "SKILL_NOT_FOUND", details: { name: "missing" }, available: ["existing"] }, { name: "missing", available: ["existing"] }],
+    ["zuri_get_skill_resource", { name: "existing", path: "missing.txt" }, { error: "Resource not found", code: "SKILL_RESOURCE_NOT_FOUND", details: { name: "existing", path: "missing.txt" }, resources: [{ path: "scripts/run.js" }] }, { name: "existing", path: "missing.txt", available: ["scripts/run.js"] }],
   ]) {
     const pending = callTool(bridge.endpoint, name, args);
     const rejected = assert.rejects(pending, error => {
@@ -69,7 +69,7 @@ test("Skill missing-resource results become actionable MCP errors while generic 
     await rejected;
   }
   const result = { error: "Data column named error", code: "DATA" };
-  const pending = callTool(bridge.endpoint, "qingzhou_execute_tool", { name: "inspect_page", sessionId: "task" });
+  const pending = callTool(bridge.endpoint, "zuri_execute_tool", { name: "inspect_page", sessionId: "task" });
   const [request] = await pollBrowser(bridge.state, { id: "browser" }, { timeoutMs: 1000 });
   completeBrowser(bridge.state, request.id, { ok: true, result });
   assert.deepEqual(await pending, result);
@@ -78,7 +78,7 @@ test("Skill missing-resource results become actionable MCP errors while generic 
 test("untyped tool errors preserve their message", async t => {
   const bridge = await bridgeFixture(t);
   bridge.state.callExtension = async () => { throw new Error("Tool execution failed"); };
-  await assert.rejects(callTool(bridge.endpoint, "qingzhou_get_settings", {}), error => {
+  await assert.rejects(callTool(bridge.endpoint, "zuri_get_settings", {}), error => {
     assert.equal(error.code, "tool_error");
     assert.equal(error.message, "Tool execution failed");
     assert.deepEqual(error.details, { result: "Tool execution failed" });

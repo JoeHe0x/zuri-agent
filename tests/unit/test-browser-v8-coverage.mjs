@@ -16,7 +16,7 @@ const compiledIdentity = await transform(readFileSync(
 const toolIdentitySource = compiledIdentity.code;
 
 test("browser V8 coverage keeps local production scripts and merges worker ranges", async t => {
-  const coverageDir = mkdtempSync(join(tmpdir(), "qingzhou-browser-coverage-"));
+  const coverageDir = mkdtempSync(join(tmpdir(), "zuri-browser-coverage-"));
   t.after(() => rmSync(coverageDir, { recursive: true, force: true }));
   const extensionDir = join(coverageDir, "extension");
   mkdirSync(join(extensionDir, "shared/tools"), { recursive: true });
@@ -52,7 +52,7 @@ test("browser V8 coverage stays inactive outside a c8 run", async () => {
 });
 
 test("compiled browser coverage remaps through c8 to the TypeScript source", async t => {
-  const directory = mkdtempSync(join(tmpdir(), "qingzhou-ts-coverage-"));
+  const directory = mkdtempSync(join(tmpdir(), "zuri-ts-coverage-"));
   t.after(() => rmSync(directory, { recursive: true, force: true }));
   const original = resolve("src/capabilities/sessions/goal-tools.ts");
   const extensionDir = join(directory, "extension");
@@ -82,7 +82,7 @@ test("compiled browser coverage remaps through c8 to the TypeScript source", asy
 });
 
 test("classic entry coverage keeps first-party sources beside bundled npm code", async t => {
-  const directory = mkdtempSync(join(tmpdir(), "qingzhou-content-coverage-"));
+  const directory = mkdtempSync(join(tmpdir(), "zuri-content-coverage-"));
   t.after(() => rmSync(directory, { recursive: true, force: true }));
   const extensionDir = join(directory, "extension");
   const generated = join(extensionDir, "content/content-script.js");

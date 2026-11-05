@@ -1,5 +1,5 @@
 {
-  "schema": "qingzhou.article-extraction-sites.v1",
+  "schema": "zuri.article-extraction-sites.v1",
   "sampleTarget": 300,
   "samplesPerSite": 12,
   "sites": [

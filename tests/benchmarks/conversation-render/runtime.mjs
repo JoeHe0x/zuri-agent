@@ -1,6 +1,6 @@
 export function installConversationBenchmark(host, globalObject = globalThis) {
   if (!host || typeof host !== "object") throw new Error("conversation benchmark host is required");
-  if (globalObject.qingzhouConversationBenchmark) return globalObject.qingzhouConversationBenchmark;
+  if (globalObject.zuriConversationBenchmark) return globalObject.zuriConversationBenchmark;
 
   const api = {
     reset,
@@ -17,8 +17,8 @@ export function installConversationBenchmark(host, globalObject = globalThis) {
     exportSessionDocument: host.exportSessionDocument,
     renderSessionDocument: host.renderSessionDocument,
   };
-  globalObject.qingzhouConversationBenchmark = api;
-  globalObject.dispatchEvent?.(new CustomEvent("qingzhou-conversation-benchmark-ready"));
+  globalObject.zuriConversationBenchmark = api;
+  globalObject.dispatchEvent?.(new CustomEvent("zuri-conversation-benchmark-ready"));
   return api;
 
   async function reset(options = {}) {
@@ -645,7 +645,7 @@ export function installConversationBenchmark(host, globalObject = globalThis) {
   }
 
   function resetLongTasks() {
-    if (Array.isArray(globalObject.__qzBenchLongTasks)) globalObject.__qzBenchLongTasks.length = 0;
+    if (Array.isArray(globalObject.__zuriBenchLongTasks)) globalObject.__zuriBenchLongTasks.length = 0;
   }
 
   function expandToolTimelines(options = {}) {

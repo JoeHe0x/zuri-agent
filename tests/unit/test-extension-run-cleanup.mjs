@@ -9,10 +9,10 @@ import { join } from "node:path";
 const ROOT = fileURLToPath(new URL("../../", import.meta.url));
 
 test("one failing extension cleanup cannot skip later cleanups or retain the run's debugger lease", async t => {
-  const previous = new Map(["chrome", "__qzCleanupCalls", "__qzDebug"].map(key => [key, globalThis[key]]));
+  const previous = new Map(["chrome", "__zuriCleanupCalls", "__zuriDebug"].map(key => [key, globalThis[key]]));
   t.after(() => { for (const [key, value] of previous) { if (value === undefined) delete globalThis[key]; else globalThis[key] = value; } });
   const debuggerCalls = [], cleanupCalls = [], events = [];
-  globalThis.__qzCleanupCalls = { push(event) { cleanupCalls.push(event); events.push(event); } };
+  globalThis.__zuriCleanupCalls = { push(event) { cleanupCalls.push(event); events.push(event); } };
   globalThis.chrome = {
     storage: { local: { get: async () => ({}) } },
     tabs: { get: async id => ({ id, url: "https://example.test/", title: "Example" }) },
@@ -31,17 +31,17 @@ test("one failing extension cleanup cannot skip later cleanups or retain the run
     plugins: [{ name: "cleanup-extension-fixture", setup(builder) {
       builder.onResolve({ filter: /^#capabilities\/tools$/ }, () => ({ path: "tools", namespace: "cleanup-fixture" }));
       builder.onLoad({ filter: /.*/, namespace: "cleanup-fixture" }, () => ({ contents: `export default [
-        { id: "first", setup: qz => {
-          qz.registerTool({ name: 'cleanup_probe', description: 'Acquire one run-owned debugger lease',
+        { id: "first", setup: zuri => {
+          zuri.registerTool({ name: 'cleanup_probe', description: 'Acquire one run-owned debugger lease',
             parameters: { type: 'object', properties: {} },
-            execute: (_args, _signal, context) => qz.withDebugger(7, (_target, send) => send('Page.enable'), context) });
-          return { releaseRun(sessionId, runId) { globalThis.__qzCleanupCalls.push(['first', sessionId, runId]); throw new Error('extension cleanup failed'); } };
+            execute: (_args, _signal, context) => zuri.withDebugger(7, (_target, send) => send('Page.enable'), context) });
+          return { releaseRun(sessionId, runId) { globalThis.__zuriCleanupCalls.push(['first', sessionId, runId]); throw new Error('extension cleanup failed'); } };
         } },
-        { id: "second", setup: () => ({ releaseRun(sessionId, runId) { globalThis.__qzCleanupCalls.push(['second', sessionId, runId]); } }) },
+        { id: "second", setup: () => ({ releaseRun(sessionId, runId) { globalThis.__zuriCleanupCalls.push(['second', sessionId, runId]); } }) },
       ];`, loader: "js" }));
     } }],
   });
-  const directory = await mkdtemp(join(tmpdir(), "qz-cleanup-host-"));
+  const directory = await mkdtemp(join(tmpdir(), "zuri-cleanup-host-"));
   t.after(() => rm(directory, { recursive: true, force: true }));
   const bundle = join(directory, "host.mjs");
   await writeFile(bundle, result.outputFiles[0].text);

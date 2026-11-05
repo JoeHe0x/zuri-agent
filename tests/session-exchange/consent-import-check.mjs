@@ -10,11 +10,11 @@ import { serializeConversation } from "../../src/shared/session/session-codec.js
 import { createSessionExchangePayload, renderSessionExchangeScript } from "../../src/shared/session/session-exchange.js";
 import { ensureTestExtension } from "../support/extension-build.mjs";
 
-const IDLE_SCREENSHOT = "/tmp/qingzhou-consent-import-idle.png";
-const PANEL_SCREENSHOT = "/tmp/qingzhou-consent-panel.png";
-const DONE_SCREENSHOT = "/tmp/qingzhou-consent-import-done.png";
-const CONSENTED_SCREENSHOT = "/tmp/qingzhou-consent-import-already.png";
-const REPEAT_SCREENSHOT = "/tmp/qingzhou-import-repeat-panel.png";
+const IDLE_SCREENSHOT = "/tmp/zuri-consent-import-idle.png";
+const PANEL_SCREENSHOT = "/tmp/zuri-consent-panel.png";
+const DONE_SCREENSHOT = "/tmp/zuri-consent-import-done.png";
+const CONSENTED_SCREENSHOT = "/tmp/zuri-consent-import-already.png";
+const REPEAT_SCREENSHOT = "/tmp/zuri-import-repeat-panel.png";
 const headless = process.env.CONSENT_IMPORT_HEADLESS !== "0";
 
 const [extension, runtime] = await Promise.all([
@@ -43,7 +43,7 @@ const server = createServer((request, response) => {
 await new Promise(resolveListen => server.listen(0, "127.0.0.1", resolveListen));
 const { port } = server.address();
 const origin = `http://127.0.0.1:${port}`;
-const profile = await mkdtemp(join(tmpdir(), "qz-consent-import-"));
+const profile = await mkdtemp(join(tmpdir(), "zuri-consent-import-"));
 const executablePath = chromeExecutable();
 const logs = [];
 const context = await chromium.launchPersistentContext(profile, {
@@ -57,43 +57,43 @@ const context = await chromium.launchPersistentContext(profile, {
 
 try {
   await context.addInitScript(() => {
-    window.__qzImportResults = [];
+    window.__zuriImportResults = [];
     window.addEventListener("message", event => {
       const data = event.data;
-      if (!data || data.type !== "qingzhou:session-export:result" || data.action !== "import") return;
-      window.__qzImportResults.push({ status: data.status, ok: data.ok, error: data.error || "" });
+      if (!data || data.type !== "zuri:session-export:result" || data.action !== "import") return;
+      window.__zuriImportResults.push({ status: data.status, ok: data.ok, error: data.error || "" });
     });
   });
   const worker = await extensionWorker(context);
   worker.on("console", message => logs.push(`${message.type()}: ${message.text()}`));
-  await worker.evaluate(() => chrome.storage.local.set({ _qingzhou_mcp_bridge: { enabled: false } }));
+  await worker.evaluate(() => chrome.storage.local.set({ _zuri_mcp_bridge: { enabled: false } }));
   assert.deepEqual(await sidePanelContexts(worker), [], "a fresh profile has no side panel");
 
   const english = await openExport(context, `${origin}/english.html`);
-  const englishButton = await waitUntil("english page label", () => buttonState(english.page), state => state.text === "Continue in qz");
-  assert.equal(englishButton.text, "Continue in qz");
-  await english.page.evaluate(() => window.postMessage({ type: "qingzhou:session-export:result", action: "import", status: "working" }, "*"));
+  const englishButton = await waitUntil("english page label", () => buttonState(english.page), state => state.text === "Continue in zuri");
+  assert.equal(englishButton.text, "Continue in zuri");
+  await english.page.evaluate(() => window.postMessage({ type: "zuri:session-export:result", action: "import", status: "working" }, "*"));
   await waitUntil("english importing", () => buttonState(english.page), state => state.text === "Importing");
-  await english.page.evaluate(() => window.postMessage({ type: "qingzhou:session-export:result", action: "import", ok: true, sessionId: "english-session" }, "*"));
+  await english.page.evaluate(() => window.postMessage({ type: "zuri:session-export:result", action: "import", ok: true, sessionId: "english-session" }, "*"));
   const englishDone = await waitUntil("english imported", () => buttonState(english.page), state => state.text === "Imported" && state.imported === "english-session");
   assert.equal(englishDone.text, "Imported");
-  await english.page.screenshot({ path: "/tmp/qingzhou-import-english-cta.png" });
+  await english.page.screenshot({ path: "/tmp/zuri-import-english-cta.png" });
 
   const nolang = await openExport(context, `${origin}/nolang.html`);
   assert.equal(await nolang.page.locator("html").getAttribute("lang"), null);
   const uiLanguage = await worker.evaluate(() => chrome.i18n.getUILanguage());
-  const extensionLabel = /^zh/i.test(uiLanguage) ? "导入轻舟继续对话" : "Continue in qz";
+  const extensionLabel = /^zh/i.test(uiLanguage) ? "导入Zuri继续对话" : "Continue in zuri";
   const extensionLanguage = await waitUntil(`extension language ${uiLanguage}`, () => buttonState(nolang.page), state => state.text === extensionLabel);
   assert.equal(extensionLanguage.text, extensionLabel);
 
   const pending = await openExport(context, `${origin}/pending.html`);
-  const before = await waitUntil("localized idle", () => buttonState(pending.page), state => state.text === "导入轻舟继续对话");
-  assert.equal(before.text, "导入轻舟继续对话");
+  const before = await waitUntil("localized idle", () => buttonState(pending.page), state => state.text === "导入Zuri继续对话");
+  assert.equal(before.text, "导入Zuri继续对话");
   assert.equal(before.disabled, false);
   assert.deepEqual(before.results, []);
   assert.deepEqual(await sessionTitles(worker), []);
 
-  await pending.page.locator("#qingzhou-session-cta").click();
+  await pending.page.locator("#zuri-session-cta").click();
   const opened = await waitUntil("side panel consent", () => consentSnapshot(context, worker), snapshot => (
     snapshot.contexts.some(url => url.includes("sidepanel/sidepanel.html"))
     && snapshot.consent?.accept === true
@@ -116,7 +116,7 @@ try {
     assert.deepEqual(await sessionTitles(worker), []);
     await new Promise(resolveDelay => setTimeout(resolveDelay, 200));
   }
-  await pending.page.locator("#qingzhou-session-cta").click();
+  await pending.page.locator("#zuri-session-cta").click();
   const imported = await waitUntil("import after the second click", () => buttonState(pending.page), state => {
     if (state.text === "重试导入") throw new Error(`import failed: ${state.title} ${JSON.stringify(state.results)}`);
     return state.text === "已导入" && state.imported;
@@ -133,13 +133,13 @@ try {
   await pending.page.screenshot({ path: DONE_SCREENSHOT });
 
   const consented = await openExport(context, `${origin}/consented.html`);
-  const ready = await waitUntil("consented idle", () => buttonState(consented.page), state => state.text === "导入轻舟继续对话");
-  assert.equal(ready.text, "导入轻舟继续对话");
+  const ready = await waitUntil("consented idle", () => buttonState(consented.page), state => state.text === "导入Zuri继续对话");
+  assert.equal(ready.text, "导入Zuri继续对话");
   assert.equal(ready.disabled, false);
   assert.deepEqual(ready.results, []);
   const stillConsented = await consentSnapshot(context, worker);
   assert.equal(stillConsented.consent?.accept, false, "an accepted profile does not show the consent card again");
-  await consented.page.locator("#qingzhou-session-cta").click();
+  await consented.page.locator("#zuri-session-cta").click();
   const direct = await waitUntil("already consented import", () => buttonState(consented.page), state => {
     if (state.text === "重试导入") throw new Error(`consented import failed: ${state.title} ${JSON.stringify(state.results)}`);
     return state.text === "已导入" && state.imported;
@@ -161,10 +161,10 @@ try {
   await closeSidePanel(context);
   await waitUntil("side panel closed", () => sidePanelContexts(worker), contexts => contexts.length === 0, 8000);
   await consented.page.reload({ waitUntil: "domcontentloaded" });
-  await consented.page.locator("#qingzhou-session-cta[data-qingzhou-session-import]").waitFor({ timeout: 10000 });
-  const reloaded = await waitUntil("reloaded idle", () => buttonState(consented.page), state => state.text === "导入轻舟继续对话");
-  assert.equal(reloaded.text, "导入轻舟继续对话");
-  await consented.page.locator("#qingzhou-session-cta").click();
+  await consented.page.locator("#zuri-session-cta[data-zuri-session-import]").waitFor({ timeout: 10000 });
+  const reloaded = await waitUntil("reloaded idle", () => buttonState(consented.page), state => state.text === "导入Zuri继续对话");
+  assert.equal(reloaded.text, "导入Zuri继续对话");
+  await consented.page.locator("#zuri-session-cta").click();
   const repeated = await waitUntil("repeat import", () => buttonState(consented.page), state => {
     if (state.text === "重试导入") throw new Error(`repeat import failed: ${state.title} ${JSON.stringify(state.results)}`);
     return state.text === "已导入" && state.imported && state.imported !== existingId;
@@ -205,7 +205,7 @@ function exportHtml(title, sourceId, content, lang = "zh-CN") {
     exportedAt: "2026-07-12 12:00:00",
   });
   const messages = {
-    importQingzhou: "导入轻舟",
+    importZuri: "导入Zuri",
     importing: "正在导入",
     imported: "已导入",
     retryImport: "重试导入",
@@ -218,8 +218,8 @@ function exportHtml(title, sourceId, content, lang = "zh-CN") {
   const langAttr = lang ? ` lang="${lang}"` : "";
   return `<!DOCTYPE html><html${langAttr}><head><meta charset="utf-8"><title>${title}</title></head><body>
     ${renderSessionExchangeScript(payload)}
-    <script type="application/json" id="qingzhou-export-messages">${JSON.stringify(messages)}</script>
-    <button id="qingzhou-session-cta" type="button" hidden></button>
+    <script type="application/json" id="zuri-export-messages">${JSON.stringify(messages)}</script>
+    <button id="zuri-session-cta" type="button" hidden></button>
     <script>${script}</script>
   </body></html>`;
 }
@@ -247,26 +247,26 @@ async function openExport(context, url) {
   const errors = [];
   page.on("pageerror", error => errors.push(String(error)));
   await page.goto(url, { waitUntil: "domcontentloaded" });
-  await page.locator("#qingzhou-session-cta[data-qingzhou-session-import]").waitFor({ timeout: 10000 });
+  await page.locator("#zuri-session-cta[data-zuri-session-import]").waitFor({ timeout: 10000 });
   return { page, errors };
 }
 
 async function buttonState(page) {
   return page.evaluate(() => {
-    const cta = document.getElementById("qingzhou-session-cta");
+    const cta = document.getElementById("zuri-session-cta");
     return {
       text: cta?.textContent || "",
       disabled: cta instanceof HTMLButtonElement ? cta.disabled : true,
       busy: cta?.getAttribute("aria-busy") || "",
-      imported: cta?.getAttribute("data-qingzhou-imported-session-id") || "",
+      imported: cta?.getAttribute("data-zuri-imported-session-id") || "",
       title: cta?.getAttribute("title") || "",
-      results: window.__qzImportResults || [],
+      results: window.__zuriImportResults || [],
     };
   });
 }
 
 function assertIdle(state, label) {
-  assert.equal(state.text, "导入轻舟继续对话", label);
+  assert.equal(state.text, "导入Zuri继续对话", label);
   assert.equal(state.disabled, false, label);
   assert.equal(state.busy, "", label);
   assert.equal(state.imported, "", label);
@@ -334,8 +334,8 @@ async function sidePanelContexts(worker) {
 
 async function consentStored(worker) {
   return worker.evaluate(async () => {
-    const data = await chrome.storage.local.get("qz_data_consent");
-    const consent = data.qz_data_consent;
+    const data = await chrome.storage.local.get("zuri_data_consent");
+    const consent = data.zuri_data_consent;
     return Boolean(consent && consent.version === 1 && consent.acceptedAt > 0);
   });
 }

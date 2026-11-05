@@ -14,7 +14,7 @@ export function createMcpConnectPage(deps: ConnectDependencies) {
     deps.assertConsent();
     const url = connectionUrl(sender.url);
     if (sender.id !== deps.extensionId || sender.frameId !== 0 || !Number.isInteger(sender.tab?.id) || !url) {
-      throw failure("MCP_CONNECTION_PAGE_REQUIRED", "Open the connection page using qz connect.");
+      throw failure("MCP_CONNECTION_PAGE_REQUIRED", "Open the connection page using zuri connect.");
     }
     const tabId = sender.tab!.id!;
     const assertCurrent = async () => {
@@ -29,7 +29,7 @@ export function createMcpConnectPage(deps: ConnectDependencies) {
     }
     const status = await deps.connect({ endpoint: url.origin, name: name ?? "" }, assertCurrent);
     if (status.state !== "connected") throw failure(status.lastError?.code || "MCP_CONNECTION_UNAVAILABLE",
-      status.lastError?.message || "The connection is pending. Run qz status to check it.");
+      status.lastError?.message || "The connection is pending. Run zuri status to check it.");
     return { connected: true, status };
   };
 }
@@ -38,7 +38,7 @@ function connectionUrl(value: string | undefined) {
   try {
     const url = new URL(value || "");
     return url.protocol === "http:" && ["127.0.0.1", "localhost"].includes(url.hostname)
-      && url.pathname === "/qz-connect" && !url.username && !url.password ? url : null;
+      && url.pathname === "/zuri-connect" && !url.username && !url.password ? url : null;
   } catch { return null; }
 }
 
@@ -55,6 +55,6 @@ export function assertMcpSettingsSender(sender: chrome.runtime.MessageSender, ex
   const url = sender.url ?? "";
   const ownChromePage = url.startsWith(`chrome-extension://${extensionId}/`);
   if (sender.id !== extensionId || (!ownChromePage && !isMozExtensionPage(url))) {
-    throw failure("MCP_CONNECTION_PAGE_REQUIRED", "Manage the connection from qz Settings.");
+    throw failure("MCP_CONNECTION_PAGE_REQUIRED", "Manage the connection from zuri Settings.");
   }
 }

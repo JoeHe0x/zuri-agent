@@ -31,7 +31,7 @@ export interface ImageAssetOptions {
 
 import { nowBeijingDateTime } from "./time-utils.js";
 
-const DB_NAME = "qz-browser-agent-assets";
+const DB_NAME = "zuri-agent-assets";
 const DB_VERSION = 2;
 const IMAGE_ASSETS_STORE = "image_assets";
 const DEFAULT_MAX_IMAGES = 2000;
@@ -40,7 +40,7 @@ const DEFAULT_THUMB_MAX_SIZE = 512;
 // Durable Session payloads are not a cache: image GC and explicit gallery deletion
 // must never evict them. Keep the exact URL spelling for lossless model replay.
 const HISTORY_IMAGES_STORE = "history_images";
-export const HISTORY_IMAGE_PREFIX = "qz-history-image:v1:";
+export const HISTORY_IMAGE_PREFIX = "zuri-history-image:v1:";
 const assetConnections = new WeakMap<IDBFactory, Promise<IDBDatabase>>();
 
 export async function saveHistoryImage(dataUrl: string): Promise<string> {

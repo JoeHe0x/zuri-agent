@@ -4,7 +4,7 @@ const EDGE_MARGIN = 6;
 /** Replaces the native `title` bubble with a pill. The title moves to `data-tip` while hovered so the browser stays quiet. */
 export function installTooltipFeature(root: Document = document) {
   const pill = root.createElement("div");
-  pill.className = "qz-tooltip";
+  pill.className = "zuri-tooltip";
   pill.setAttribute("role", "tooltip");
   root.body.append(pill);
   let target: HTMLElement | null = null;

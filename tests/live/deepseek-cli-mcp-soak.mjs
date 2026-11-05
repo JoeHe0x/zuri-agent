@@ -22,13 +22,13 @@ assert.ok(Number.isFinite(durationSeconds) && durationSeconds >= 1 && durationSe
 assert.ok(Number.isFinite(taskTimeoutSeconds) && taskTimeoutSeconds >= 30 && taskTimeoutSeconds <= 600);
 const selected = values.cases ? CASES.filter(item => values.cases.split(",").includes(item.id)) : CASES;
 assert.ok(selected.length, "No live cases selected");
-const apiKey = readTestApiKey("deepseek", { keyFile: process.env.QINGZHOU_DEEPSEEK_AK_FILE || "" });
-const model = process.env.QINGZHOU_DEEPSEEK_MODEL || "deepseek-flash";
+const apiKey = readTestApiKey("deepseek", { keyFile: process.env.ZURI_DEEPSEEK_AK_FILE || "" });
+const model = process.env.ZURI_DEEPSEEK_MODEL || "deepseek-flash";
 const stamp = new Date().toISOString().replace(/[:.]/g, "-");
 const reportDirectory = join(PROJECT_ROOT, "tests/results/mcp-bridge");
 mkdirSync(reportDirectory, { recursive: true });
 const reportPath = join(reportDirectory, `deepseek-live-soak-${stamp}.json`);
-const downloads = mkdtempSync(join(tmpdir(), "qz-live-soak-downloads-"));
+const downloads = mkdtempSync(join(tmpdir(), "zuri-live-soak-downloads-"));
 const report = { ok: false, phase: "setup", provider: "deepseek", model, requestedDurationSeconds: durationSeconds, runnerPid: process.pid,
   environment: "Real DeepSeek API, public websites, isolated real Chrome extension/service, real CLI subprocesses and MCP SDK. No synthetic provider or canned model responses.",
   tasks: [], operations: [], network: [], health: [], failures: [], tabCleanup: [], cliProcesses: 0, mcpCalls: 0, connectionGenerations: 0 };
@@ -37,7 +37,7 @@ const activeSessions = new Set();
 let environment, client, transport, clientId, heartbeat, startedAt, stopRequested = false;
 process.on("SIGUSR2", () => { stopRequested = true; });
 try {
-  environment = await launchIsolatedExtensionMcp({ profilePrefix: "qz-deepseek-live-soak-", requestTimeoutSeconds: 60, downloadDirectory: downloads });
+  environment = await launchIsolatedExtensionMcp({ profilePrefix: "zuri-deepseek-live-soak-", requestTimeoutSeconds: 60, downloadDirectory: downloads });
   // Preserve the filenames produced by Chrome downloads instead of Playwright's UUID renaming.
   const downloadSession = await environment.context.newCDPSession(environment.page);
   await downloadSession.send("Browser.setDownloadBehavior", { behavior: "allow", downloadPath: downloads, eventsEnabled: true });
@@ -92,7 +92,7 @@ try {
     const timer = setTimeout(() => { child.kill("SIGKILL"); resolve(); }, 2000); timer.unref();
   })));
   const cleanupErrors = [];
-  for (const sessionId of activeSessions) await mcp("qingzhou_stop_session", { sessionId }).catch(error => cleanupErrors.push(redact(error.message)));
+  for (const sessionId of activeSessions) await mcp("zuri_stop_session", { sessionId }).catch(error => cleanupErrors.push(redact(error.message)));
   await transport?.terminateSession().catch(() => {});
   await client?.close().catch(() => {});
   await environment?.close().catch(error => cleanupErrors.push(redact(error.message)));
@@ -113,7 +113,7 @@ function persist() {
 function contentText(value) { return typeof value === "string" ? value : Array.isArray(value) ? value.filter(part => part.type === "text").map(part => part.text).join("\n") : ""; }
 function assistantText(snapshot) { return (snapshot.transcript || []).filter(entry => entry.type === "assistant").map(entry => contentText(entry.content)).join("\n"); }
 async function connectMcp() {
-  client = new Client({ name: "qz-deepseek-live-soak", version: "1.0.0" });
+  client = new Client({ name: "zuri-deepseek-live-soak", version: "1.0.0" });
   transport = new StreamableHTTPClientTransport(new URL(environment.bridge.mcpUrl), { fetch: localFetch,
     reconnectionOptions: { maxRetries: 0, maxReconnectionDelay: 0, initialReconnectionDelay: 0, reconnectionDelayGrowFactor: 1 } });
   await client.connect(transport);
@@ -135,7 +135,7 @@ async function mcp(name, args = {}, options = {}) {
 function observeMcp(name, args) {
   const state = { settled: false, updates: [], value: null, error: null, created: null };
   const pending = mcp(name, { ...args, stream: true, waitTimeoutSeconds: taskTimeoutSeconds }, { onprogress: value => {
-    const event = value._meta?.["qz/task-event"];
+    const event = value._meta?.["zuri/task-event"];
     if (!event) return; state.updates.push(event); if (event.type === "created") state.created = event;
   } }).then(value => { state.value = value; }, error => { state.error = error; }).finally(() => { state.settled = true; });
   state.finish = async () => { await pending; if (state.error) throw state.error; return state.value; };
@@ -171,7 +171,7 @@ function startCli(args, { timeoutSeconds = taskTimeoutSeconds } = {}) {
   return state;
 }
 async function cli(args, options) { return startCli(args, options).finish(); }
-async function snapshot(sessionId) { return mcp("qingzhou_get_session_snapshot", { sessionId, compact: false, tail: false, includeArtifacts: true }); }
+async function snapshot(sessionId) { return mcp("zuri_get_session_snapshot", { sessionId, compact: false, tail: false, includeArtifacts: true }); }
 async function until(predicate, label, timeout = 45_000) {
   const end = Date.now() + timeout;
   while (Date.now() < end) { const value = await predicate(); if (value) return value; await delay(500); }
@@ -193,7 +193,7 @@ async function runCase(original, iteration) {
   const entry = { id: test.id, iteration, prompt: test.prompt, channel: iteration % 2 ? "cli" : "mcp", startedAt: new Date().toISOString(), ok: false, inputs: [], followUps: [] };
   report.current = { id: test.id, iteration, startedAt: entry.startedAt };
   const observer = entry.channel === "cli" ? startCli(["create", test.prompt, "--title", `Live ${iteration}: ${test.id}`, "--stream"])
-    : observeMcp("qingzhou_create_session", { title: `Live ${iteration}: ${test.id}`, firstMessage: test.prompt });
+    : observeMcp("zuri_create_session", { title: `Live ${iteration}: ${test.id}`, firstMessage: test.prompt });
   let sessionId;
   try {
     const created = await until(() => { if (observer.error) throw observer.error; if (observer.settled && !observer.created) throw new Error("Creation ended before exposing a task ID"); return observer.created; }, "task admission");
@@ -202,7 +202,7 @@ async function runCase(original, iteration) {
     if (test.kind === "steer") {
       await delay(2000);
       const message = test.steer || "Focus on practical free options and cite the sources.";
-      const steered = await (entry.channel === "cli" ? mcp("qingzhou_send_message", { sessionId, text: message, steer: true }) : cli(["send", sessionId, message, "--steer"]));
+      const steered = await (entry.channel === "cli" ? mcp("zuri_send_message", { sessionId, text: message, steer: true }) : cli(["send", sessionId, message, "--steer"]));
       assert.equal(steered.accepted, true); assert.equal(steered.deliveryMode, "steer"); entry.steer = { message, clientMessageId: steered.clientMessageId };
     }
     if (test.kind === "cancel") {
@@ -222,7 +222,7 @@ async function runCase(original, iteration) {
         const action = current.kind === "form" ? "submit" : "approve";
         const answers = action === "submit" ? formAnswers(current.form, test) : undefined;
         entry.inputs.push({ kind: current.kind, waitId: current.waitId, fields: current.form?.fields, answers, action, message: current.message });
-        if (entry.channel === "cli") await mcp("qingzhou_respond_to_user_input", { ...current.responseTemplate, action, ...(answers ? { answers } : {}) });
+        if (entry.channel === "cli") await mcp("zuri_respond_to_user_input", { ...current.responseTemplate, action, ...(answers ? { answers } : {}) });
         else await cli([action, sessionId, ...(answers ? [JSON.stringify(answers)] : []), "--wait-id", current.waitId]);
         persist();
       }
@@ -254,7 +254,7 @@ async function runCase(original, iteration) {
         stage = "followup";
         assert.ok(remainingSeconds() >= 15, "Insufficient remaining task budget for follow-up");
         const followStarted = Date.now();
-        const follow = await (entry.channel === "cli" ? mcp("qingzhou_send_message", { sessionId, text: test.followUp, wait: true, waitTimeoutSeconds: remainingSeconds() })
+        const follow = await (entry.channel === "cli" ? mcp("zuri_send_message", { sessionId, text: test.followUp, wait: true, waitTimeoutSeconds: remainingSeconds() })
           : cli(["send", sessionId, test.followUp, "--wait"], { timeoutSeconds: remainingSeconds() }));
         assert.equal(follow.snapshot.status, "completed");
         assert.equal(follow.snapshot.transcript.filter(item => item.clientMessageId === follow.clientMessageId).length, 1);

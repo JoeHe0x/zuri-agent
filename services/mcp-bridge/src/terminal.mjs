@@ -29,7 +29,7 @@ function resourceArgument(value, placeholder, shell) {
 }
 function resourceCommand(command, value, client = "", placeholder = "NAME", shell) {
   const argument = resourceArgument(value, placeholder, shell);
-  return String(value).startsWith("-") ? `qz ${command}${client} ${optionTerminator(shell)} ${argument}` : `qz ${command} ${argument}${client}`;
+  return String(value).startsWith("-") ? `zuri ${command}${client} ${optionTerminator(shell)} ${argument}` : `zuri ${command} ${argument}${client}`;
 }
 function answerArgument(answers, shell) {
   const json = JSON.stringify(answers).replace(/[\u007f-\u009f\u061c\u200e\u200f\u202a-\u202e\u2066-\u2069]/gu,
@@ -98,7 +98,7 @@ function output({ color = false, width = 80, shell = defaultShell() } = {}) {
     shellNote() {
       if (shell !== "powershell" || shellShown) return;
       shellShown = true;
-      this.line("Copy commands into PowerShell 7.3+ (pwsh), using npm's qz.ps1 launcher.", "muted");
+      this.line("Copy commands into PowerShell 7.3+ (pwsh), using npm's zuri.ps1 launcher.", "muted");
     },
     command(command) { this.shellNote(); this.line(`  ${command}`, "accent"); },
     script(command) { this.shellNote(); lines.push(tint(`  ${clean(command)}`, "accent")); },
@@ -122,8 +122,8 @@ function tone(status) {
 function taskCommands(out, id, { cancel = true, client = "" } = {}) {
   if (!id) return;
   out.line();
-  out.script(`qz show ${commandArgument(id, "TASK_ID")}${client}`);
-  if (cancel) out.script(`qz cancel ${commandArgument(id, "TASK_ID")}${client}`);
+  out.script(`zuri show ${commandArgument(id, "TASK_ID")}${client}`);
+  if (cancel) out.script(`zuri cancel ${commandArgument(id, "TASK_ID")}${client}`);
 }
 function latestResponse(snapshot) {
   const events = snapshot?.transcript?.length ? snapshot.transcript : snapshot?.tail || [];
@@ -176,19 +176,19 @@ function inputView(out, input, { heading = true, clientId = "" } = {}) {
   out.line();
   if (native) {
     const instructions = Array.isArray(input.instructions) ? input.instructions.join("\n") : input.instructions;
-    out.line(instructions || "Open the qz side panel to review and grant this permission.", "waiting");
+    out.line(instructions || "Open the zuri side panel to review and grant this permission.", "waiting");
     if (input.taskUrl) out.field("Open", input.taskUrl);
   } else if (input.kind === "form" || form.fields?.length) {
     const answers = template?.answers || Object.fromEntries((form.fields || []).map(field => [field.id,
       field.defaultValue ?? field.defaultValues ?? (field.type === "multi_choice" ? ["<option value>"]
         : field.type === "single_choice" ? "<option value>" : "<text>") ]));
     out.line("Edit the template below, then run it in another terminal. Use option values for choices.");
-    out.script(`qz submit ${id} ${answerArgument(answers, out.shell)}${wait}${client} --wait`);
+    out.script(`zuri submit ${id} ${answerArgument(answers, out.shell)}${wait}${client} --wait`);
   } else {
     out.line("After reviewing this request, approve in another terminal:");
-    out.script(`qz approve ${id}${wait}${client} --wait`);
+    out.script(`zuri approve ${id}${wait}${client} --wait`);
   }
-  out.script(`qz reject ${id}${wait}${client}`);
+  out.script(`zuri reject ${id}${wait}${client}`);
 }
 
 /** Pending notices go to stderr while stdout is reserved for the final JSON. */
@@ -216,7 +216,7 @@ function snapshotView(out, snapshot, { streamed = false, clientId = "" } = {}) {
 
 function taskList(out, sessions, client = "") {
   out.line(`Tasks · ${sessions.length}`, "accent");
-  if (!sessions.length) { out.line("No tasks yet."); out.script(`qz create "Summarize the current page."${client}`); return; }
+  if (!sessions.length) { out.line("No tasks yet."); out.script(`zuri create "Summarize the current page."${client}`); return; }
   out.line();
   const idWidth = Math.max(2, ...sessions.map(task => measure(single(task.id || task.sessionId))));
   const titleWidth = out.width - idWidth - 18;
@@ -232,7 +232,7 @@ function taskList(out, sessions, client = "") {
       out.field("ID", task.id || task.sessionId);
     });
   }
-  out.line(); out.script(`qz show TASK_ID${client}`);
+  out.line(); out.script(`zuri show TASK_ID${client}`);
 }
 
 function resourceList(out, command, result, client) {
@@ -303,8 +303,8 @@ function settingsView(out, result, client) {
       out.line(`${item.id} · ${item.label}${auth}`);
     }
   }
-  out.line(); out.script(`qz settings set KEY VALUE${client}`);
-  out.line("Read a JSON patch from stdin for credentials:"); out.script(`qz settings set -${client}`);
+  out.line(); out.script(`zuri settings set KEY VALUE${client}`);
+  out.line("Read a JSON patch from stdin for credentials:"); out.script(`zuri settings set -${client}`);
 }
 
 /** Human output only. Machine output retains the original data in the CLI. */
@@ -329,7 +329,7 @@ export function renderResult(parsed, result, options = {}) {
         const name = result?.name || parsed.id, path = result?.path || parsed.options?.path;
         const args = `${resourceArgument(name, "NAME", out.shell)} ${resourceArgument(path, "PATH", out.shell)}`;
         const flags = ` --start ${result.end} --limit ${parsed.options?.limit || 20000}${client}`;
-        out.script(String(name).startsWith("-") || String(path).startsWith("-") ? `qz skills read${flags} ${optionTerminator(out.shell)} ${args}` : `qz skills read ${args}${flags}`);
+        out.script(String(name).startsWith("-") || String(path).startsWith("-") ? `zuri skills read${flags} ${optionTerminator(out.shell)} ${args}` : `zuri skills read ${args}${flags}`);
       }
     } else if (action === "tools") {
       const plugins = result?.plugins || [];
@@ -364,7 +364,7 @@ export function renderResult(parsed, result, options = {}) {
       out.field("Automation", result?.run?.automationId || parsed.id);
       out.field("Run", result?.run?.id);
       out.field("Task", result?.run?.sessionId);
-      if (result?.run?.sessionId) out.script(`qz watch ${commandArgument(result.run.sessionId, "TASK_ID")}${client} --stream`);
+      if (result?.run?.sessionId) out.script(`zuri watch ${commandArgument(result.run.sessionId, "TASK_ID")}${client} --stream`);
     } else {
       const items = result?.automations || [];
       out.line(`Automations · ${items.length}`, "accent");
@@ -383,7 +383,7 @@ export function renderResult(parsed, result, options = {}) {
       out.field("Task", result?.sessionId || parsed.id);
       if (result?.message) out.line(result.message);
       if (result?.input?.waiting) inputView(out, result.input, { clientId });
-      else out.script(`qz watch ${commandArgument(result?.sessionId || parsed.id, "TASK_ID")}${client} --stream`);
+      else out.script(`zuri watch ${commandArgument(result?.sessionId || parsed.id, "TASK_ID")}${client} --stream`);
     }
   }
   else if (["submit", "approve", "reject"].includes(command)) {
@@ -391,14 +391,14 @@ export function renderResult(parsed, result, options = {}) {
     else if (result?.requiresUserAction) {
       out.line("Action needed in Chrome", "waiting");
       out.field("Task", result.sessionId || parsed.id);
-      out.line(result.message || "Open the qz side panel and review the permission request.");
+      out.line(result.message || "Open the zuri side panel and review the permission request.");
       if (result.taskUrl) out.field("Open", result.taskUrl);
       if (result.input) { out.line(); inputView(out, result.input, { clientId }); }
-      else out.script(`qz show ${commandArgument(result.sessionId || parsed.id, "TASK_ID")}${client}`);
+      else out.script(`zuri show ${commandArgument(result.sessionId || parsed.id, "TASK_ID")}${client}`);
     } else if (result?.accepted === true) {
       out.line(command === "reject" ? "Input rejected" : command === "submit" ? "Answers submitted" : "Task continued", "accent");
       out.field("Task", result.sessionId || parsed.id);
-      out.script(`qz watch ${commandArgument(result.sessionId || parsed.id, "TASK_ID")}${client} --stream`);
+      out.script(`zuri watch ${commandArgument(result.sessionId || parsed.id, "TASK_ID")}${client} --stream`);
     } else {
       out.line("Input was not accepted", "waiting");
       if (result?.message) out.line(result.message);
@@ -406,7 +406,7 @@ export function renderResult(parsed, result, options = {}) {
       const errors = result?.fieldErrors || result?.errors;
       if (errors) out.line(JSON.stringify(errors, null, 2));
       if (result?.input) { out.line(); inputView(out, result.input, { clientId }); }
-      else out.script(`qz show ${commandArgument(result?.sessionId || parsed.id, "TASK_ID")}${client}`);
+      else out.script(`zuri show ${commandArgument(result?.sessionId || parsed.id, "TASK_ID")}${client}`);
     }
   } else if (command === "tasks") {
     if (action === "list" || !action) taskList(out, result?.sessions || [], client);
@@ -431,22 +431,22 @@ export function renderResult(parsed, result, options = {}) {
       const browsers = result.browsers || [];
       out.line(`Browsers · ${browsers.length}`, "accent");
       for (const browser of browsers) { out.line(); out.field("Name", browser.name); out.field("UUID", browser.clientId); out.field("Status", browser.online ? "Connected" : "Offline"); }
-      out.line(); out.command('qz create "TASK" --client NAME');
+      out.line(); out.command('zuri create "TASK" --client NAME');
     }
   } else if (command === "connect" && result?.url) {
     out.line(result.opened ? "Browser binding page opened" : "Browser binding URL ready", "accent");
     out.field("URL", result.url);
     out.line("Open this URL in the browser profile you want to connect.");
-    out.command("qz browsers");
+    out.command("zuri browsers");
   } else if (command === "connect") {
-    out.line(result?.connected ? "Connected to qz" : "Waiting for qz", result?.connected ? "accent" : "waiting");
+    out.line(result?.connected ? "Connected to zuri" : "Waiting for zuri", result?.connected ? "accent" : "waiting");
     const selected = result?.clients?.find(browser => browser.clientId === clientId);
     out.field("Browser", selected?.name);
     out.field("UUID", clientId);
     out.field("MCP", result?.mcpUrl);
-    if (result?.connected) out.script(`qz create "Summarize the current page."${client}`);
+    if (result?.connected) out.script(`zuri create "Summarize the current page."${client}`);
   } else if (command === "status") {
-    out.line(result?.connected ? "Connected to qz" : result?.running ? "Service running · browser disconnected" : "Local service stopped", result?.connected ? "accent" : "waiting");
+    out.line(result?.connected ? "Connected to zuri" : result?.running ? "Service running · browser disconnected" : "Local service stopped", result?.connected ? "accent" : "waiting");
     out.field("Service", result?.endpoint);
     if (result?.connected) {
       out.field("Browsers", result.clientCount ?? result.clients?.length ?? 1);
@@ -457,15 +457,15 @@ export function renderResult(parsed, result, options = {}) {
       out.line(result.hint);
     } else if (result?.updateAvailable) {
       out.line("Service update available. Restart when your current work is finished:", "waiting");
-      out.command("qz stop && qz connect");
-    } else if (!result?.connected) out.command("qz connect");
+      out.command("zuri stop && zuri connect");
+    } else if (!result?.connected) out.command("zuri connect");
   } else if (command === "install") {
-    out.line(result?.opened ? "Chrome Web Store opened" : "Install qz from the Chrome Web Store", "accent");
+    out.line(result?.opened ? "Chrome Web Store opened" : "Install zuri from the Chrome Web Store", "accent");
     if (!result?.opened) out.line(result?.url);
-    out.line("Click Add to Chrome, then connect:"); out.command("qz connect");
+    out.line("Click Add to Chrome, then connect:"); out.command("zuri connect");
   } else if (command === "stop") {
     out.line(result?.stopped ? "Local service stopped" : "Local service is already stopped", "accent");
-    out.command("qz connect");
+    out.command("zuri connect");
   } else {
     out.line(JSON.stringify(result ?? null, null, 2));
   }
@@ -477,19 +477,19 @@ export function renderHelp(topic = "", options = {}) {
   if (COMMANDS[topic]?.help) {
     const [usage, description, ...details] = COMMANDS[topic].help;
     out.line(usage, "accent"); out.line(); out.line(description);
-    for (const detail of details) { out.line(); out.line(detail, detail.startsWith("qz ") ? "accent" : undefined); }
+    for (const detail of details) { out.line(); out.line(detail, detail.startsWith("zuri ") ? "accent" : undefined); }
   } else {
-    out.line("qz · Your browser, from the terminal", "accent");
-    out.line("Run tasks with the qz browser agent, manage results, and connect via MCP.");
+    out.line("zuri · Your browser, from the terminal", "accent");
+    out.line("Run tasks with the zuri browser agent, manage results, and connect via MCP.");
     out.line();
     for (const { help, summary: description } of Object.values(COMMANDS)) {
       if (!help) continue;
-      const name = help[0].replace(/^qz /, "").replace(/ \[.*$/, "");
+      const name = help[0].replace(/^zuri /, "").replace(/ \[.*$/, "");
       if (out.width >= 64) out.line(`  ${pad(name, 23)} ${description}`);
-      else { out.command(`qz ${name}`); out.line(`    ${description}`, "muted"); }
+      else { out.command(`zuri ${name}`); out.line(`    ${description}`, "muted"); }
     }
-    out.line(); out.command('qz create "Summarize this page." --stream');
-    out.command('qz create "Compare these tabs." --title Research --wait');
+    out.line(); out.command('zuri create "Summarize this page." --stream');
+    out.command('zuri create "Compare these tabs." --title Research --wait');
   }
   if (!topic || commandOptions(topic).includes("client")) {
     out.line(); out.line("Browser: --client NAME|UUID (-c)", "muted");
@@ -499,9 +499,9 @@ export function renderHelp(topic = "", options = {}) {
     out.line("Each connection request has its own timeout. Ctrl-C stops watching; the browser task continues.", "muted");
   }
   out.line(); out.line("Output: --json · --plain · --no-color", "muted");
-  out.line("Help: qz COMMAND --help", "muted");
-  out.line("Version: qz --version (-v)", "muted");
-  out.line("npm: npm run qz -- COMMAND [options]", "muted");
+  out.line("Help: zuri COMMAND --help", "muted");
+  out.line("Version: zuri --version (-v)", "muted");
+  out.line("npm: npm run zuri -- COMMAND [options]", "muted");
   out.shellNote();
   return out.finish();
 }
@@ -510,7 +510,7 @@ export function renderError(payload, options = {}) {
   const out = output(options);
   const error = payload?.error || payload || {};
   const waiting = error.code === "connection_pending";
-  out.line(waiting ? "Waiting for Chrome" : "qz error", waiting ? "waiting" : "error");
+  out.line(waiting ? "Waiting for Chrome" : "zuri error", waiting ? "waiting" : "error");
   out.line(error.message || "The command could not be completed.");
   if (error.url) { out.line(); out.line(error.url, "accent"); }
   if (error.hint) { out.line(); out.line(error.hint); }

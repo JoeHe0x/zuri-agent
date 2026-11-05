@@ -20,7 +20,7 @@ import { getMcpSdk } from "#mcp-sdk";
 
 const DEFAULT_MCP_TIMEOUT_MS = 30000;
 const MCP_SESSION_NOT_FOUND_STATUS = 404;
-const MCP_METADATA_CACHE_STORAGE_KEY = "_qingzhou_mcp_metadata_cache_v1";
+const MCP_METADATA_CACHE_STORAGE_KEY = "_zuri_mcp_metadata_cache_v1";
 const MCP_METADATA_CACHE_VERSION = 1;
 const MCP_METADATA_CACHE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
 const MCP_METADATA_CACHE_MAX_ENTRIES = 200;
@@ -249,7 +249,7 @@ async function connectMcpState(state: McpState, { signal = null }: McpOptions = 
     },
   });
   const client: Client = new Client({
-    name: "qz-browser-agent",
+    name: "zuri-agent",
     version: "0.2.9",
   }, {
     // MV3 forbids Ajv's generated functions; keep output validation without runtime code generation.

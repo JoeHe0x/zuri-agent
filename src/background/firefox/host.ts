@@ -10,8 +10,8 @@ import { installFirefoxTabNavigation } from "./tab-navigation.js";
 /** Patch Firefox APIs before the shared background graph reads them. */
 export function installFirefoxHost(chromeApi: unknown = globalThis.chrome): void {
   const browser = chromeApi as HostChrome | undefined;
-  if (!browser || browser.qzFirefoxHost) return;
-  browser.qzFirefoxHost = true;
+  if (!browser || browser.zuriFirefoxHost) return;
+  browser.zuriFirefoxHost = true;
   installFirefoxTabNavigation(browser as Parameters<typeof installFirefoxTabNavigation>[0]);
   disableFirefoxSessionAutomations(browser);
   installFirefoxMcpWake(browser as Parameters<typeof installFirefoxMcpWake>[0]);
@@ -20,18 +20,18 @@ export function installFirefoxHost(chromeApi: unknown = globalThis.chrome): void
   installOffscreenHost(browser as Parameters<typeof installOffscreenHost>[0]);
   installInitiatorRewrite(browser as Parameters<typeof installInitiatorRewrite>[0]);
   installNotificationRenewal(browser as Parameters<typeof installNotificationRenewal>[0]);
-  console.info("[轻舟] firefox host installed");
+  console.info("[Zuri] firefox host installed");
 }
 
 installFirefoxHost();
 
 interface HostChrome {
-  qzFirefoxHost?: boolean;
-  qzSessionAutomationsEnabled?: boolean;
+  zuriFirefoxHost?: boolean;
+  zuriSessionAutomationsEnabled?: boolean;
   alarms?: {
     create?: (name: string, info?: chrome.alarms.AlarmCreateInfo) => Promise<void> | void;
     clear?: (name?: string) => Promise<boolean> | boolean;
-    qzSessionAutomationAlarmBlocked?: boolean;
+    zuriSessionAutomationAlarmBlocked?: boolean;
   };
   debugger?: { sendCommand?: unknown };
   runtime?: { id?: string; getURL?(path: string): string; onMessage?: { addListener(listener: (...args: never[]) => void): void } };

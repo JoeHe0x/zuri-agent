@@ -3,7 +3,7 @@
   "tabs.tab": "Pestaña {tabId}",
   "tabs.current": "Actual",
   "tabs.window": "Ventana {windowId}",
-  "tabs.qingzhouTask": "Tarea de qz",
+  "tabs.zuriTask": "Tarea de zuri",
   "tabs.organizedInto": "Organizadas en «{name}»",
   "tabs.namedTabCount": "Pestañas: {count} · {name}",
   "tabs.groupedTabs": "Pestañas agrupadas: {count}",

@@ -15,9 +15,9 @@ for (const [language, chromeLocale] of languages) {
     const messages = JSON.parse(await readFile(resolve(await ensureTestExtension(), `_locales/${chromeLocale}/messages.json`), "utf8"));
     await page.addInitScript(installBenchmarkChromeStub, { uiLanguage: language, localeMessages: messages });
     await page.goto("/extension/sidepanel/sidepanel.html", { waitUntil: "domcontentloaded" });
-    await page.waitForFunction(() => Boolean(window.qingzhouConversationBenchmark));
+    await page.waitForFunction(() => Boolean(window.zuriConversationBenchmark));
     await page.evaluate(async () => {
-      await window.qingzhouConversationBenchmark.runSnapshotRender({ sessionId: "compact-tools", transcript: [{ type: "user", text: "Tool labels" }] });
+      await window.zuriConversationBenchmark.runSnapshotRender({ sessionId: "compact-tools", transcript: [{ type: "user", text: "Tool labels" }] });
       const { createToolTimelineGroupElement, ensureToolTimelineActiveSlot } = await import("/extension/sidepanel/tools/tool-timeline-renderer.js");
       const { getToolMetadataCatalog } = await import("/extension/shared/tools/tool-metadata.js");
       const { disposeRendererTree } = await import("/extension/sidepanel/tools/tool-renderer.js");

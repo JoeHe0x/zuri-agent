@@ -4,7 +4,7 @@ test("Data row IDs preserve existing records without an IndexedDB upgrade", asyn
   await page.goto("/__test_health");
 
   const result = await page.evaluate(async () => {
-    const dbName = "qz-browser-agent-data";
+    const dbName = "zuri-agent-data";
     const table = "清水河:男生宿舍";
     const legacyId = `table:${encodeURIComponent(table)}:row:ba92bccb-0f76-4dfa-9848-c5a0a043c7c9`;
     const requestValue = request => new Promise((resolve, reject) => {

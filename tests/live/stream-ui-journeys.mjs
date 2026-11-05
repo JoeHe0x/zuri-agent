@@ -47,7 +47,7 @@ export async function runStreamUiJourneys({ page, createSession, deleteSession, 
       prompt:`阅读 https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API、https://developer.mozilla.org/en-US/docs/Web/API/AbortController 和 https://developer.mozilla.org/en-US/docs/Web/API/ReadableStream 的官方资料，比较它们如何配合实现可取消的流式请求。首次打开页面启用 watchNetwork=true。${longAnswer} 请另附一段实际可用的 JavaScript 示例，以及吞吐率公式 $r=\\frac{B}{t}$ 和块级公式 $$T=\\frac{B}{r}$$。` },
     { id:'timeout-recovery', width:430, theme:'light', required:[codes[3]], tools:['open_tab','read_article'], timeout:true,
       prompt:`先用 open_tab 打开 ${origin}/slow，设置 timeout=1、watchNetwork=true。若工具提示仍加载中，用 read_article 读取同一个 tabId，不要重新开页，读到页面的校验码后原样输出，并解释此次加载经历。` },
-  ]).filter(item => !process.env.QINGZHOU_LIVE_UI_CASES || process.env.QINGZHOU_LIVE_UI_CASES.split(',').includes(item.id));
+  ]).filter(item => !process.env.ZURI_LIVE_UI_CASES || process.env.ZURI_LIVE_UI_CASES.split(',').includes(item.id));
   try {
     for (const scenario of cases) {
       const sessionId = await createSession(page, `Live UI · ${scenario.id}`);
@@ -59,7 +59,7 @@ export async function runStreamUiJourneys({ page, createSession, deleteSession, 
         await page.locator('.tab-btn[data-tab="sessions"]').click();
         await page.locator(`.session-card[data-id="${sessionId}"]`).click();
         await page.locator('#input').waitFor({state:'visible'});
-        const after = await page.evaluate(() => window.__qzLiveHarness.count());
+        const after = await page.evaluate(() => window.__zuriLiveHarness.count());
         record.preparations=[];
         for (const prompt of scenario.prepare || []) record.preparations.push(await runPrompt(page, sessionId, prompt, {timeoutMs:180000}));
         await page.evaluate(installViewportProbe);
@@ -68,7 +68,7 @@ export async function runStreamUiJourneys({ page, createSession, deleteSession, 
         pending = runPrompt(page, sessionId, scenario.prompt, {timeoutMs:240000});
         pending.then(() => { finished = true; }, () => { finished = true; });
         if (scenario.timeout) {
-          await page.waitForFunction(({sessionId,after}) => window.__qzLiveHarness.eventsSince(after).some(e=>e.sessionId===sessionId && e.type==='tool_execution_end' && e.result?.incomplete), {sessionId,after}, {timeout:90000});
+          await page.waitForFunction(({sessionId,after}) => window.__zuriLiveHarness.eventsSince(after).some(e=>e.sessionId===sessionId && e.type==='tool_execution_end' && e.result?.incomplete), {sessionId,after}, {timeout:90000});
           assert.ok(slowResponse, 'slow navigation reached the server');
           slowResponse.end(html('加载恢复', `<p>商品校验码：${codes[3]}</p><p>页面已准备完成。</p>`)); slowResponse = null;
           // The following read can already be active in a collapsed timeline.
@@ -125,7 +125,7 @@ export async function runStreamUiJourneys({ page, createSession, deleteSession, 
         await page.waitForTimeout(400);
         record.elapsedMs=Date.now()-start;
         record.answer=result.assistantText; record.updateCount=result.updateCount;
-        const events=await page.evaluate(({after,sessionId})=>window.__qzLiveHarness.eventsSince(after).filter(e=>e.sessionId===sessionId),{after,sessionId});
+        const events=await page.evaluate(({after,sessionId})=>window.__zuriLiveHarness.eventsSince(after).filter(e=>e.sessionId===sessionId),{after,sessionId});
         const messages=await historyMessages(page,sessionId);
         const frames=await page.evaluate(()=>{window.__liveViewport.stop=true;return window.__liveViewport.frames;});
         const stability=analyzeAssistantStreamFrames(frames);
@@ -166,14 +166,14 @@ export async function runStreamUiJourneys({ page, createSession, deleteSession, 
         record.error=String(error.stack||error);
         const probe=await page.evaluate(()=>{const p=window.__liveViewport,m=document.querySelector('#messages');return {frames:p?.frames||[],wheels:p?.wheels||[],scroll:{top:m?.scrollTop,height:m?.scrollHeight,client:m?.clientHeight,rect:m?.getBoundingClientRect().toJSON()}};});
         await writeFile(join(output,`${scenario.id}-failure-frames.json`),JSON.stringify(probe));
-        const observed=await page.evaluate(()=>window.__qzLiveHarness.eventsSince(0));
+        const observed=await page.evaluate(()=>window.__zuriLiveHarness.eventsSince(0));
         await writeFile(join(output,`${scenario.id}-failure-events.json`),JSON.stringify(observed.filter(e=>e.sessionId===sessionId),null,2));
         await page.screenshot({path:join(output,`${scenario.id}-failure.png`)}).catch(()=>{});
         console.log(`FAIL live UI ${scenario.id}: ${String(error.message).slice(0,250)}`);
       } finally {
         await page.evaluate(()=>window.__liveTables?.stop()).catch(()=>{});
         await page.evaluate(()=>{if(window.__liveViewport)window.__liveViewport.stop=true;}).catch(()=>{});
-        if(!finished) await page.evaluate(sessionId=>window.__qzLiveHarness.request('stop_session',{sessionId},'state',20000),sessionId).catch(()=>{});
+        if(!finished) await page.evaluate(sessionId=>window.__zuriLiveHarness.request('stop_session',{sessionId},'state',20000),sessionId).catch(()=>{});
         slowResponse?.end('cancelled'); slowResponse=null;
         await pending?.catch(()=>{});
         await deleteSession(page,sessionId);

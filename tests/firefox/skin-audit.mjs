@@ -61,7 +61,7 @@ const AUDIT_SCRIPT = `
     const action = visible(".onboarding-action");
     add("task title", "text", action && action.querySelector("span"), ["", ":hover", ":active"], { lock: action });
     add("task description", "text", action && action.querySelector("small"), ["", ":hover", ":active"], { lock: action });
-    const primary = visible("#onboarding-primary-btn") || visible(".qz-btn--primary");
+    const primary = visible("#onboarding-primary-btn") || visible(".zuri-btn--primary");
     add("primary", "text", primary, ["", ":hover", ":active", ":focus-visible"]);
     if (primary) {
       const was = primary.disabled;
@@ -87,9 +87,9 @@ const AUDIT_SCRIPT = `
   const rootStyle = win.getComputedStyle(doc.documentElement);
   const palette = {};
   for (const name of [
-    "--qz-ff-primary", "--qz-ff-primary-hover", "--qz-ff-primary-active", "--qz-ff-primary-text", "--qz-ff-accent-ink",
-    "--qz-ff-text-deemphasized", "--qz-ff-text-muted", "--qz-ff-popup-text-deemphasized", "--qz-ff-popup-text-muted",
-    "--qz-ff-field-text-deemphasized", "--qz-ff-field-placeholder",
+    "--zuri-ff-primary", "--zuri-ff-primary-hover", "--zuri-ff-primary-active", "--zuri-ff-primary-text", "--zuri-ff-accent-ink",
+    "--zuri-ff-text-deemphasized", "--zuri-ff-text-muted", "--zuri-ff-popup-text-deemphasized", "--zuri-ff-popup-text-muted",
+    "--zuri-ff-field-text-deemphasized", "--zuri-ff-field-placeholder",
   ]) {
     palette[name] = doc.documentElement.style.getPropertyValue(name).trim();
   }

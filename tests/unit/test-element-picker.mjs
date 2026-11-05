@@ -23,7 +23,7 @@ const tools = read("src/background/tools/runtime.js");
 const serviceWorker = read("src/background/service-worker.js");
 const platformCommands = read("src/background/services/platform-commands.js");
 const sidepanelTransport = read("src/background/transports/sidepanel.js");
-assert.match(content, /QZ_CONTENT_VERSION = "2026-10-28-shadow-find-target"/);
+assert.match(content, /ZURI_CONTENT_VERSION = "2026-10-28-shadow-find-target"/);
 const contentScripts = manifest.content_scripts?.find(entry => entry.js?.includes("content/content-script.js"))?.js;
 assert.deepEqual(contentScripts, ["content/article-extractor.js", "content/content-script.js"], "manifest needs only self-contained first-party entry points");
 assert.match(tools, /files:\s*\["content\/article-extractor\.js", "content\/content-script\.js"\]/);
@@ -31,11 +31,11 @@ for (const dependency of ["@mozilla/readability", "turndown", "turndown-plugin-g
   assert.ok(content.includes(`from "${dependency}"`), `${dependency} must be a compiler-resolved dependency`);
 }
 assert.match(articleExtractor, /from "@mozilla\/readability"/);
-assert.match(articleExtractor, /QingzhouArticleExtractor = Object\.freeze\(\{ extract \}\)/);
+assert.match(articleExtractor, /ZuriArticleExtractor = Object\.freeze\(\{ extract \}\)/);
 assert.match(content, /extractor\?\.extract\?\.\(document, \{ complete \}\)/);
 
 const pickerMarkup = html.match(/<button id="btn-pick-element"[\s\S]*?<\/button>/u)?.[0] || "";
-assert.match(pickerMarkup, /class="qz-icon-btn qz-icon-btn--sm element-picker-btn hidden"[\s\S]*aria-pressed="false"/);
+assert.match(pickerMarkup, /class="zuri-icon-btn zuri-icon-btn--sm element-picker-btn hidden"[\s\S]*aria-pressed="false"/);
 assert.match(pickerMarkup, /M12\.034 12\.681/, "picker should keep the dashed-box pointer icon");
 assert.doesNotMatch(pickerMarkup, /<circle cx="12" cy="12" r="3"/, "picker should not reuse the goal crosshair icon");
 assert.match(css, /\.input-wrapper\s*\{[\s\S]*?align-items:\s*center;/, "composer controls should share one vertical axis");

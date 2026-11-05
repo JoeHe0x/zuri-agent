@@ -31,7 +31,7 @@ export function hardenPdfSource(source, filename) {
         }
         if (method.key?.name === "_setupFakeWorkerGlobal") {
           replace(method.value.body, `{
-    // qz statically imports WorkerMessageHandler; never fetch or compile a Worker URL.
+    // zuri statically imports WorkerMessageHandler; never fetch or compile a Worker URL.
     const handler = this.#mainThreadWorkerMessageHandler;
     const ready = handler ? Promise.resolve(handler) : Promise.reject(new Error("Local PDF worker is not registered"));
     return shadow(this, "_setupFakeWorkerGlobal", ready);

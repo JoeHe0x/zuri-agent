@@ -1,7 +1,7 @@
 # Let users select Skill results
 
 Use a `selection` renderer when the next step depends on which candidates the user chooses. The
-Skill returns ordinary JSON; qz displays result cards and waits for confirmation. Start with the
+Skill returns ordinary JSON; zuri displays result cards and waits for confirmation. Start with the
 [runnable example](../tests/fixtures/skills/result-selection/README.md).
 
 Declare the renderer on the tool in `plugin.json`:
@@ -32,7 +32,7 @@ The script returns:
 ```
 
 After confirmation, the tool returns `selectedIds`, `selectedItems` (the original selected objects),
-and `totalItems`. The Agent can continue using those IDs and fields. qz keeps the candidate cards
+and `totalItems`. The Agent can continue using those IDs and fields. zuri keeps the candidate cards
 in the wait transcript and sends only selected records in the completed tool result. Each tool
 invocation creates a new selection; completed results are read-only in the transcript and exports.
 
@@ -60,5 +60,5 @@ timeout. Scripts supply candidate data and finish before the user chooses. Cance
 pending tool call. Browser or extension restart closes the old run's wait; rerun the tool to choose
 again.
 
-The cards use the shared `qz-*` design-system control and stack vertically in narrow panels. The
+The cards use the shared `zuri-*` design-system control and stack vertically in narrow panels. The
 same presentation is available to `ask_user` choice fields with `presentation: "cards"`.

@@ -239,7 +239,7 @@ async function snapshotPacket(page, sample, candidatesDir) {
     const kept = new Set([...semantic, ...generic]);
     const regionElements = allRegions.filter(element => kept.has(element));
     const regionIds = new Map(regionElements.map((element, index) => [element, `R${String(index + 1).padStart(4, "0")}`]));
-    for (const [element, id] of regionIds) element.setAttribute("data-qz-review-region", id);
+    for (const [element, id] of regionIds) element.setAttribute("data-zuri-review-region", id);
 
     const blockSelector = "h1,h2,h3,h4,h5,h6,p,li,blockquote,pre,figcaption,caption,td,th,dt,dd,time,[rel='author'],[itemprop='headline'],[itemprop='author'],[itemprop='datePublished'],[itemprop='description']";
     const allBlocks = [...document.querySelectorAll(blockSelector)].filter(element => (
@@ -251,7 +251,7 @@ async function snapshotPacket(page, sample, candidatesDir) {
         index * (allBlocks.length - 1) / 359,
       )]);
     const blockIds = new Map(blockElements.map((element, index) => [element, `B${String(index + 1).padStart(4, "0")}`]));
-    for (const [element, id] of blockIds) element.setAttribute("data-qz-review-block", id);
+    for (const [element, id] of blockIds) element.setAttribute("data-zuri-review-block", id);
 
     const nearestRegionId = element => {
       for (let node = element.parentElement; node; node = node.parentElement) {
@@ -315,7 +315,7 @@ async function snapshotPacket(page, sample, candidatesDir) {
     };
   });
 
-  const algorithms = ["legacy-readability", "qingzhou-current", "trafilatura-python"];
+  const algorithms = ["legacy-readability", "zuri-current", "trafilatura-python"];
   const order = stableOrder(sample, algorithms);
   const anonymous = {};
   const identities = {};
@@ -333,7 +333,7 @@ async function snapshotPacket(page, sample, candidatesDir) {
   }
   return {
     packet: {
-      schema: "qingzhou.article-extraction-review-packet.v1",
+      schema: "zuri.article-extraction-review-packet.v1",
       sample: {
         id: sample.id,
         inputSha256: sample.inputSha256,
@@ -373,8 +373,8 @@ async function materializeLabel(page, sample, seeded, identities, model, usage, 
       .replace(/[\u200b-\u200f\ufeff]/g, "")
       .replace(/\s+/g, " ")
       .trim();
-    const region = id => document.querySelector(`[data-qz-review-region="${CSS.escape(id)}"]`);
-    const block = id => document.querySelector(`[data-qz-review-block="${CSS.escape(id)}"]`);
+    const region = id => document.querySelector(`[data-zuri-review-region="${CSS.escape(id)}"]`);
+    const block = id => document.querySelector(`[data-zuri-review-block="${CSS.escape(id)}"]`);
     const missing = {
       include: includeIds.filter(id => !region(id)),
       exclude: excludeIds.filter(id => !region(id)),
@@ -417,7 +417,7 @@ async function materializeLabel(page, sample, seeded, identities, model, usage, 
     const fragments = selected.map(element => {
       const clone = element.cloneNode(true);
       for (const id of excludeIds) {
-        clone.querySelector(`[data-qz-review-region="${CSS.escape(id)}"]`)?.remove();
+        clone.querySelector(`[data-zuri-review-region="${CSS.escape(id)}"]`)?.remove();
       }
       clone.querySelectorAll("script,style,noscript,svg,canvas,iframe,template,[hidden],[aria-hidden='true']").forEach(node => node.remove());
       clone.querySelectorAll("[style]").forEach(node => {
@@ -428,9 +428,9 @@ async function materializeLabel(page, sample, seeded, identities, model, usage, 
       const comments = [];
       while (walker.nextNode()) comments.push(walker.currentNode);
       comments.forEach(node => node.remove());
-      clone.querySelectorAll("[data-qz-review-region],[data-qz-review-block]").forEach(node => {
-        node.removeAttribute("data-qz-review-region");
-        node.removeAttribute("data-qz-review-block");
+      clone.querySelectorAll("[data-zuri-review-region],[data-zuri-review-block]").forEach(node => {
+        node.removeAttribute("data-zuri-review-region");
+        node.removeAttribute("data-zuri-review-block");
       });
       return clone;
     });
@@ -440,7 +440,7 @@ async function materializeLabel(page, sample, seeded, identities, model, usage, 
     return {
       missing,
       selectionErrors,
-      orderedIncludeIds: selected.map(element => element.getAttribute("data-qz-review-region")),
+      orderedIncludeIds: selected.map(element => element.getAttribute("data-zuri-review-region")),
       mainText: normalize(fragments.map(fragment => fragment.textContent || "").join("\n")),
       requiredBlocks: uniqueText(requiredElements),
       noiseBlocks: uniqueText(forbiddenElements),
@@ -470,7 +470,7 @@ async function materializeLabel(page, sample, seeded, identities, model, usage, 
   if (strict && consistencyErrors.length) throw new Error(consistencyErrors[0]);
   const bestDraft = ["A", "B", "C"].includes(raw.bestDraft) ? raw.bestDraft : "none";
   return {
-    schema: "qingzhou.article-extraction-manual-label.v1",
+    schema: "zuri.article-extraction-manual-label.v1",
     sampleId: sample.id,
     inputSha256: sample.inputSha256,
     finalUrl: sample.finalUrl,
@@ -590,7 +590,7 @@ async function seedCommand() {
           lastError = error;
           if (attempt === 3) {
             writeJsonAtomic(labelPath, {
-              schema: "qingzhou.article-extraction-manual-label.v1",
+              schema: "zuri.article-extraction-manual-label.v1",
               sampleId: sample.id,
               inputSha256: sample.inputSha256,
               finalUrl: sample.finalUrl,
@@ -636,7 +636,7 @@ async function seedCommand() {
   }
   const labels = samples.map(sample => json(join(output, "labels", `${sample.id}.json`)));
   const summary = {
-    schema: "qingzhou.article-extraction-manual-label-set.v1",
+    schema: "zuri.article-extraction-manual-label-set.v1",
     corpus: join(corpus, "manifest.json"),
     corpusDigest: sha256(readFileSync(join(corpus, "manifest.json"))),
     model,
@@ -733,7 +733,7 @@ async function auditCommand() {
     const label = existsSync(labelPath) ? json(labelPath) : null;
     const comparisonPath = compareLabelsDir ? join(compareLabelsDir, "labels", `${sample.id}.json`) : "";
     const comparison = comparisonPath && existsSync(comparisonPath) ? json(comparisonPath) : null;
-    const names = ["legacy-readability", "qingzhou-current", "trafilatura-python"];
+    const names = ["legacy-readability", "zuri-current", "trafilatura-python"];
     const order = stableOrder(sample, names);
     const drafts = {};
     const identities = {};
@@ -758,7 +758,7 @@ async function auditCommand() {
     };
   });
   const audit = {
-    schema: "qingzhou.article-extraction-manual-audit.v1",
+    schema: "zuri.article-extraction-manual-audit.v1",
     generatedAt: new Date().toISOString(),
     corpus: join(corpus, "manifest.json"),
     labels: labelsDir,
@@ -864,7 +864,7 @@ async function finalizeCommand() {
   const manifest = JSON.parse(manifestBytes);
   manifest.samples.forEach(sample => assertReviewScreenshot(corpus, sample));
   const decisions = json(decisionsPath);
-  if (decisions.schema !== "qingzhou.article-extraction-manual-decisions.v1") {
+  if (decisions.schema !== "zuri.article-extraction-manual-decisions.v1") {
     throw new Error(`unsupported decisions schema: ${decisions.schema || "missing"}`);
   }
   const corpusDigest = sha256(manifestBytes);
@@ -974,7 +974,7 @@ async function finalizeCommand() {
     mkdirSync(join(temporary, "labels"), { recursive: true });
     for (const label of finalized) writeFileSync(join(temporary, "labels", `${label.sampleId}.json`), `${JSON.stringify(label, null, 2)}\n`);
     const summary = {
-      schema: "qingzhou.article-extraction-manual-label-set.v1",
+      schema: "zuri.article-extraction-manual-label-set.v1",
       corpus: manifestPath,
       corpusDigest,
       method: "human-reviewed-frozen-dom",

@@ -20,7 +20,7 @@ export async function multiBrowserFixture() {
       let raw = ""; for await (const chunk of request) raw += chunk;
       const body = JSON.parse(raw);
       const users = body.messages.filter(message => message.role === "user");
-      const marker = users.map(message => contentText(message.content).match(/QZ_MULTI_[A-Z]+_\d+_[A-Z]+/)?.[0]).filter(Boolean).at(-1) || "validation";
+      const marker = users.map(message => contentText(message.content).match(/ZURI_MULTI_[A-Z]+_\d+_[A-Z]+/)?.[0]).filter(Boolean).at(-1) || "validation";
       const results = body.messages.filter(message => message.role === "tool");
       const openId = `${marker}_open`, readId = `${marker}_read`;
       requests.push({ at: Date.now(), marker, stream: body.stream, toolIds: results.map(result => result.tool_call_id) });

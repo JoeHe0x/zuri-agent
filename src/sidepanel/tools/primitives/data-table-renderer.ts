@@ -61,7 +61,7 @@ export function createDataTableRenderer({ summarizeValue }: { summarizeValue: Su
             ${omittedRows ? `<span>${tHtml("firstRows", { count: visibleRows.length })}</span>` : ""}
             ${omittedColumns ? `<span>${tHtml("firstColumns", { count: columns.length })}</span>` : ""}
           </div>
-          <button class="qz-btn qz-btn--secondary qz-btn--sm tool-data-table-copy" type="button" title="${tHtml("copyTsvHint")}" aria-label="${tHtml("copyTableTsv")}">
+          <button class="zuri-btn zuri-btn--secondary zuri-btn--sm tool-data-table-copy" type="button" title="${tHtml("copyTsvHint")}" aria-label="${tHtml("copyTableTsv")}">
             <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="8" y="8" width="10" height="12" rx="2"/><path d="M6 16H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
             <span>${tHtml("copyTsv")}</span>
           </button>

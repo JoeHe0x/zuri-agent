@@ -5,7 +5,7 @@ for (const colorScheme of ["light", "dark"]) {
   test.describe(`model parameters editor · ${colorScheme}`, () => {
     test.use({ colorScheme, viewport: { width: 430, height: 900 } });
 
-    test("edits typed parameters with a compact Qingzhou suggestion menu", async ({ page }) => {
+    test("edits typed parameters with a compact Zuri suggestion menu", async ({ page }) => {
       await page.addInitScript(installBenchmarkChromeStub, {
         config: {
           provider: "deepseek",
@@ -20,7 +20,7 @@ for (const colorScheme of ["light", "dark"]) {
         },
       });
       await page.goto("/extension/sidepanel/sidepanel.html", { waitUntil: "domcontentloaded" });
-      await page.waitForFunction(() => Boolean(window.qingzhouConversationBenchmark));
+      await page.waitForFunction(() => Boolean(window.zuriConversationBenchmark));
       await page.locator("#btn-settings").click();
 
       const editor = page.locator(".model-parameters-editor");
@@ -42,10 +42,10 @@ for (const colorScheme of ["light", "dark"]) {
       const placement = await editor.evaluate((element) => {
         const visionElement = element.previousElementSibling;
         const vision = visionElement?.getBoundingClientRect();
-        const visionLabel = visionElement?.querySelector(".qz-field-label")?.getBoundingClientRect();
-        const visionControl = visionElement?.querySelector(".qz-field")?.getBoundingClientRect();
+        const visionLabel = visionElement?.querySelector(".zuri-field-label")?.getBoundingClientRect();
+        const visionControl = visionElement?.querySelector(".zuri-field")?.getBoundingClientRect();
         const editorRect = element.getBoundingClientRect();
-        const parameterLabel = element.querySelector(".qz-field-label")?.getBoundingClientRect();
+        const parameterLabel = element.querySelector(".zuri-field-label")?.getBoundingClientRect();
         const row = element.querySelector(".model-parameter-row")?.getBoundingClientRect();
         const add = element.querySelector("#btn-add-model-parameter")?.getBoundingClientRect();
         return {
@@ -100,7 +100,7 @@ for (const colorScheme of ["light", "dark"]) {
       const reservedRow = rows.nth(3);
       await reservedRow.locator('[data-model-parameter-field="key"]').fill("messages");
       await reservedRow.locator('[data-model-parameter-field="value"]').fill("[]");
-      await expect(page.locator("#settings-save-status")).toContainText("messages 由轻舟管理");
+      await expect(page.locator("#settings-save-status")).toContainText("messages 由Zuri管理");
       await expect(page.locator("#btn-save-settings")).toBeDisabled();
       await reservedRow.locator("[data-remove-model-parameter]").click();
       await expect(page.locator("#btn-save-settings")).toBeEnabled();
@@ -112,9 +112,9 @@ for (const colorScheme of ["light", "dark"]) {
       await expect(page.locator("#settings-panel")).toBeVisible();
 
       await page.locator("#btn-save-settings").click();
-      await page.waitForFunction(() => window.__qzPostedMessages.some(message => message.type === "save_config"));
+      await page.waitForFunction(() => window.__zuriPostedMessages.some(message => message.type === "save_config"));
       const saved = await page.evaluate(() => {
-        return window.__qzPostedMessages.filter(message => message.type === "save_config").at(-1)?.config;
+        return window.__zuriPostedMessages.filter(message => message.type === "save_config").at(-1)?.config;
       });
       expect(saved.modelParameters).toEqual({
         temperature: 0.7,
@@ -141,7 +141,7 @@ test("reveals the custom-parameter label only while parameters exist", async ({ 
     },
   });
   await page.goto("/extension/sidepanel/sidepanel.html", { waitUntil: "domcontentloaded" });
-  await page.waitForFunction(() => Boolean(window.qingzhouConversationBenchmark));
+  await page.waitForFunction(() => Boolean(window.zuriConversationBenchmark));
   await page.locator("#btn-settings").click();
 
   const label = page.locator("#cfg-model-parameters-label");

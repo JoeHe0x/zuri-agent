@@ -21,7 +21,7 @@ function setup({ tty = false, env = {}, ...rest } = {}) {
 test("TTY output is formatted; pipes and explicit JSON preserve the machine envelope", async () => {
   const tty = setup({ tty: true });
   assert.equal(await main(["status"], tty), 0);
-  assert.match(tty.stdout.text, /Connected to qz/);
+  assert.match(tty.stdout.text, /Connected to zuri/);
   assert.match(tty.stdout.text, /\u001b\[36m/);
   assert.equal(tty.stderr.text, "");
   for (const [args, terminal] of [[["status"], false], [["status", "--json"], true]]) {
@@ -40,7 +40,7 @@ test("plain forces readable text; color preferences never change the output form
   ]) {
     const deps = setup({ tty, env });
     await main(args, deps);
-    assert.match(deps.stdout.text, /Connected to qz/);
+    assert.match(deps.stdout.text, /Connected to zuri/);
     assert.doesNotMatch(deps.stdout.text, /\u001b/);
   }
   const pipe = setup({ env: { FORCE_COLOR: "1" } });
@@ -57,7 +57,7 @@ test("MCP always prints a bare URL except explicit JSON; help stays readable in 
   }
   const help = setup();
   await main(["create", "--help"], help);
-  assert.match(help.stdout.text, /qz create.*PROMPT/);
+  assert.match(help.stdout.text, /zuri create.*PROMPT/);
   const json = setup({ tty: true });
   await main(["create", "--help", "--json"], json);
   assert.match(JSON.parse(json.stdout.text).result.help, /--stream/);
@@ -73,13 +73,13 @@ test("human errors use stderr, JSON errors use stdout, argument errors exit 2", 
     assert.equal(json ? deps.stderr.text : deps.stdout.text, "");
     const text = json ? deps.stdout.text : deps.stderr.text;
     assert.match(text, /prompt/i);
-    assert.doesNotMatch(text, /qz install/);
+    assert.doesNotMatch(text, /zuri install/);
     if (json) assert.equal(JSON.parse(text).error.code, "invalid_arguments");
   }
   const tool = setup({ tty: true, callTool: async () => { throw Object.assign(new Error("Page failed"), { code: "tool_error" }); } });
   assert.equal(await main(["send", "task-1", "Read the article"], tool), 1);
   assert.match(tool.stderr.text, /Page failed/);
-  assert.doesNotMatch(tool.stderr.text, /qz install/);
+  assert.doesNotMatch(tool.stderr.text, /zuri install/);
 });
 
 test("stdin prompt is validated before discovery and is submitted only once", async () => {
@@ -87,7 +87,7 @@ test("stdin prompt is validated before discovery and is submitted only once", as
   const deps = setup({ readStdin: async () => "  Read this page\n", callTool: async (...args) => { calls.push(args); return created; } });
   assert.deepEqual((await runCli(["create", "-", "-t", "Research"], deps)).result, { ...created, clientId: "fixture" });
   assert.equal(calls.length, 1);
-  assert.equal(calls[0][1], "qingzhou_create_session");
+  assert.equal(calls[0][1], "zuri_create_session");
   assert.equal(calls[0][2].firstMessage, "  Read this page\n");
   assert.equal(calls[0][2].title, "Research");
   await assert.rejects(runCli(["create", "-"], { readStdin: async () => " \n", findDaemon: () => assert.fail("validate stdin first") }),
@@ -101,7 +101,7 @@ test("stream receives increments before completion and suppresses duplicate fina
     onTaskUpdate: event => updates.push(event),
     callTool: async (_endpoint, name, args, options) => {
       calls.push(name);
-      if (name === "qingzhou_create_session") return created;
+      if (name === "zuri_create_session") return created;
       assert.equal(args.compact, false);
       assert.equal(args.tail, false);
       assert.equal(args.includeArtifacts, false);
@@ -113,7 +113,7 @@ test("stream receives increments before completion and suppresses duplicate fina
       return snapshot("completed", "Hello world");
     } });
   assert.equal(await main(["create", "Say hello", "--stream", "--client", "fixture", "--timeout", "5"], deps), 0);
-  assert.equal(calls.filter(name => name === "qingzhou_create_session").length, 1);
+  assert.equal(calls.filter(name => name === "zuri_create_session").length, 1);
   assert.equal(deps.stdout.text.match(/Hello world/g)?.length, 1);
   assert.match(deps.stdout.text, /Completed/);
   assert.deepEqual(updates.filter(event => event.type === "text").map(event => event.text), ["Hello", " world"]);
@@ -121,7 +121,7 @@ test("stream receives increments before completion and suppresses duplicate fina
 
 test("wait returns final result; JSON stream produces exactly one complete document", async () => {
   for (const args of [["--wait", "--plain"], ["--stream", "--json"]]) {
-    const deps = setup({ tty: true, callTool: async (_endpoint, name) => name === "qingzhou_create_session" ? created : snapshot("completed", "Final response") });
+    const deps = setup({ tty: true, callTool: async (_endpoint, name) => name === "zuri_create_session" ? created : snapshot("completed", "Final response") });
     assert.equal(await main(["create", "Finish", ...args], deps), 0);
     if (args.includes("--json")) {
       assert.equal(JSON.parse(deps.stdout.text).result.snapshot.status, "completed");
@@ -142,7 +142,7 @@ test("waiting stays bound to the creating browser across connection changes", as
     callTool: async (_endpoint, name, args) => {
       methods.push(name);
       assert.equal(args.clientId, "creator");
-      if (name === "qingzhou_create_session") {
+      if (name === "zuri_create_session") {
         clients.splice(0, 1, { clientId: "another-profile" });
         return created;
       }
@@ -157,7 +157,7 @@ test("human wait and stream remain connected through repeated questions and resu
   for (const flag of ["--wait", "--stream"]) {
     let polls = 0;
     const waiting = setup({ tty: true, env: { NO_COLOR: "1" }, callTool: async (_endpoint, name) => {
-      if (name === "qingzhou_create_session") return created;
+      if (name === "zuri_create_session") return created;
       polls++;
       if (polls <= 2) return snapshot("waiting_user", "", { runtime: { status: "waiting_user", waitId: "city",
         waitTitle: "Choose a city", waitMessage: "Hangzhou or Shanghai?" } });
@@ -171,7 +171,7 @@ test("human wait and stream remain connected through repeated questions and resu
     assert.equal(await main(["create", "Ask a question", flag, "--timeout", "10"], waiting), 0);
     assert.equal(polls, 5);
     assert.match(waiting.stdout.text, /Waiting for you/);
-    assert.match(waiting.stdout.text, /qz approve task-1/);
+    assert.match(waiting.stdout.text, /zuri approve task-1/);
     assert.match(waiting.stdout.text, /Resumed/);
     assert.match(waiting.stdout.text, /Completed/);
     assert.equal(waiting.stdout.text.match(/Your itinerary is ready/g)?.length, 1);
@@ -199,7 +199,7 @@ test("JSON waits report actionable pauses only on stderr and emit the final docu
   assert.equal(deps.stdout.text.split("\n").filter(Boolean).length, 1);
   assert.match(deps.stderr.text, /Field ID  city/);
   assert.match(deps.stderr.text, /Value  "hz"/);
-  assert.match(deps.stderr.text, /qz submit task-1 '\{"city":"<option value>"\}' --wait-id wait-1 --client fixture --wait/);
+  assert.match(deps.stderr.text, /zuri submit task-1 '\{"city":"<option value>"\}' --wait-id wait-1 --client fixture --wait/);
   assert.match(deps.stderr.text, /Task resumed/);
   assert.doesNotMatch(deps.stderr.text, /Assistant text|Working\.|Finished\./);
 });
@@ -231,12 +231,12 @@ for (const argv of [["create", "Wait for a choice", "--stream"], ["watch", "task
         `${name} must receive a finite per-request timeout`);
       assert.ok(Number.isFinite(options.timeoutMs) && options.timeoutMs > 0 && options.timeoutMs <= 180_000);
       assert.equal(args.clientId, "fixture");
-      if (name === "qingzhou_create_session") return created;
-      if (name === "qingzhou_get_user_input") return pendingInput;
-      if (name === "qingzhou_respond_to_user_input") return {
+      if (name === "zuri_create_session") return created;
+      if (name === "zuri_get_user_input") return pendingInput;
+      if (name === "zuri_respond_to_user_input") return {
         accepted: true, sessionId: "task-1", runId: "run-1", waitId: "wait-1",
       };
-      assert.equal(name, "qingzhou_get_session_snapshot");
+      assert.equal(name, "zuri_get_session_snapshot");
       now += 120_000;
       if (++polls === 1) return snapshot("waiting_user", "", {
         runtime: { status: "waiting_user", runId: "run-1", waitId: "wait-2" },
@@ -254,9 +254,9 @@ for (const argv of [["create", "Wait for a choice", "--stream"], ["watch", "task
     assert.deepEqual(updates.filter(update => update.type === "status").map(update => update.status), ["waiting_user", "running", "completed"]);
     assert.match(deps.stderr.text, /Waiting for you/);
     assert.match(deps.stderr.text, /Task resumed/);
-    assert.equal(methods.filter(name => name === "qingzhou_create_session").length, argv[0] === "create" ? 1 : 0);
-    assert.equal(methods.filter(name => name === "qingzhou_respond_to_user_input").length, argv[0] === "submit" ? 1 : 0);
-    assert.equal(methods.includes("qingzhou_stop_session"), false);
+    assert.equal(methods.filter(name => name === "zuri_create_session").length, argv[0] === "create" ? 1 : 0);
+    assert.equal(methods.filter(name => name === "zuri_respond_to_user_input").length, argv[0] === "submit" ? 1 : 0);
+    assert.equal(methods.includes("zuri_stop_session"), false);
     assert.equal(deps.stdout.text.trim().split("\n").length, 1);
   });
 }
@@ -267,7 +267,7 @@ test("an explicit wait deadline reports observation timeout with same-task recov
   const methods = [];
   const deps = setup({ callTool: async (_endpoint, name, args, options) => {
     methods.push(name);
-    assert.equal(name, "qingzhou_get_session_snapshot");
+    assert.equal(name, "zuri_get_session_snapshot");
     assert.ok(args.timeoutSeconds > 0 && args.timeoutSeconds <= 5);
     assert.ok(options.timeoutMs > 0 && options.timeoutMs <= 5000);
     now += 6000;
@@ -279,9 +279,9 @@ test("an explicit wait deadline reports observation timeout with same-task recov
   assert.equal(error.sessionId, "task-1");
   assert.match(error.message, /Stopped watching.*--timeout/i);
   assert.equal(error.clientId, "fixture");
-  assert.match(error.command, /qz watch task-1.*--client fixture/);
-  assert.doesNotMatch(error.command, /qz (create|cancel)/);
-  assert.deepEqual(methods, ["qingzhou_get_session_snapshot"]);
+  assert.match(error.command, /zuri watch task-1.*--client fixture/);
+  assert.doesNotMatch(error.command, /zuri (create|cancel)/);
+  assert.deepEqual(methods, ["zuri_get_session_snapshot"]);
 });
 
 for (const scenario of [
@@ -297,7 +297,7 @@ for (const scenario of [
   const calls = [];
   const deps = setup({ signal: controller.signal, callTool: async (_endpoint, name, args, options) => {
     calls.push({ name, args, options });
-    if (name === "qingzhou_send_message") {
+    if (name === "zuri_send_message") {
       t.mock.timers.tick(scenario.elapsedMs);
       return { accepted: true, clientMessageId: "message-1" };
     }
@@ -316,12 +316,12 @@ for (const scenario of [
   const error = JSON.parse(deps.stdout.text).error;
   assert.equal(error.code, scenario.code);
   assert.equal(error.sessionId, "task-1");
-  assert.match(error.command, /qz watch task-1.*--client fixture/);
+  assert.match(error.command, /zuri watch task-1.*--client fixture/);
   assert.equal(read.options.signal.aborted, true);
   if (scenario.code === "interrupted") assert.equal(read.options.signal.reason, reason);
   else if (scenario.code === "timeout") assert.equal(read.options.signal.reason.name, "TimeoutError");
   else assert.equal(read.options.signal.reason.code, "request_timeout");
-  assert.deepEqual(calls.map(call => call.name), ["qingzhou_send_message", "qingzhou_get_session_snapshot"],
+  assert.deepEqual(calls.map(call => call.name), ["zuri_send_message", "zuri_get_session_snapshot"],
     "ending observation must neither stop the browser task nor replay its accepted message");
 });
 
@@ -343,14 +343,14 @@ test("a timed-out snapshot request is distinguished from the total wait deadline
     assert.equal(error.sessionId, "task-1");
     assert.match(error.message, /(?:request|task status).*timed out/i);
     assert.equal(error.clientId, "fixture");
-    assert.match(error.command, /qz watch task-1.*--client fixture/);
-    assert.doesNotMatch(error.command, /qz (create|cancel)/);
-    assert.deepEqual(methods, ["qingzhou_get_session_snapshot"]);
+    assert.match(error.command, /zuri watch task-1.*--client fixture/);
+    assert.doesNotMatch(error.command, /zuri (create|cancel)/);
+    assert.deepEqual(methods, ["zuri_get_session_snapshot"]);
   }
 });
 
 test("failed runs have a nonzero exit", async () => {
-  const failed = setup({ callTool: async (_endpoint, name) => name === "qingzhou_create_session" ? created : snapshot("error") });
+  const failed = setup({ callTool: async (_endpoint, name) => name === "zuri_create_session" ? created : snapshot("error") });
   assert.equal(await main(["create", "Fail", "--wait"], failed), 1);
   assert.equal(JSON.parse(failed.stdout.text).result.snapshot.status, "error");
 });
@@ -363,13 +363,13 @@ test("show includes the full form and submit binds its wait identity before send
   const calls = [];
   const deps = setup({ callTool: async (_endpoint, name, args) => {
     calls.push({ name, args });
-    if (name === "qingzhou_get_session_snapshot") return { ...snapshot("waiting_user"), input: pendingInput };
-    return name === "qingzhou_get_user_input" ? pendingInput : { accepted: true, sessionId: "task-1", runId: "run-1", waitId: args.waitId };
+    if (name === "zuri_get_session_snapshot") return { ...snapshot("waiting_user"), input: pendingInput };
+    return name === "zuri_get_user_input" ? pendingInput : { accepted: true, sessionId: "task-1", runId: "run-1", waitId: args.waitId };
   } });
   assert.deepEqual((await runCli(["show", "task-1"], deps)).result.input, pendingInput);
   const response = await runCli(["submit", "task-1", '{"city":"hangzhou"}'], deps);
   assert.equal(response.result.accepted, true);
-  assert.deepEqual(calls.map(call => call.name), ["qingzhou_get_session_snapshot", "qingzhou_get_user_input", "qingzhou_respond_to_user_input"]);
+  assert.deepEqual(calls.map(call => call.name), ["zuri_get_session_snapshot", "zuri_get_user_input", "zuri_respond_to_user_input"]);
   assert.deepEqual(calls.at(-1).args, { timeoutSeconds: 180, clientId: "fixture", sessionId: "task-1", waitId: "wait-1", action: "submit", answers: { city: "hangzhou" } });
 });
 
@@ -378,8 +378,8 @@ test("explicit wait IDs cannot silently rebind to a newer question; rejected inp
     const calls = [];
     const deps = setup({ callTool: async (_endpoint, name, args) => {
       calls.push({ name, args });
-      if (name === "qingzhou_get_user_input") return { ...pendingInput, kind: "location_consent", waitId: "new-wait", consentVersion: 2 };
-      assert.equal(name, "qingzhou_respond_to_user_input");
+      if (name === "zuri_get_user_input") return { ...pendingInput, kind: "location_consent", waitId: "new-wait", consentVersion: 2 };
+      assert.equal(name, "zuri_respond_to_user_input");
       return { accepted: false, stale: true, code: "STALE_WAIT", sessionId: args.sessionId, waitId: args.waitId };
     } });
     assert.equal(await main([command, "task-1", ...(command === "submit" ? ["{}"] : []), "--wait-id", "old-wait"], deps), 1);
@@ -400,7 +400,7 @@ test("form stdin is validated before discovery; missing input never sends a muta
   await assert.rejects(runCli(["approve", "task-1"], setup({ callTool: async (_endpoint, name) => {
     methods.push(name); return { sessionId: "task-1", waiting: false };
   } })), error => error.code === "not_waiting");
-  assert.deepEqual(methods, ["qingzhou_get_user_input"]);
+  assert.deepEqual(methods, ["zuri_get_user_input"]);
   const deps = setup({ readStdin: async () => '{"city":"hangzhou"}', callTool: async (_endpoint, _name, args) => {
     assert.deepEqual(args.answers, { city: "hangzhou" }); return { accepted: true };
   } });
@@ -413,14 +413,14 @@ test("approval waits through an old snapshot, stays in its browser, and emits on
   const deps = setup({ callTool: async (_endpoint, name, args) => {
     methods.push(name);
     assert.equal(args.clientId, "fixture");
-    if (name === "qingzhou_get_user_input") return { ...pendingInput, kind: "confirmation" };
-    if (name === "qingzhou_respond_to_user_input") return { accepted: true, sessionId: "task-1", runId: "run-1", waitId: "wait-1" };
+    if (name === "zuri_get_user_input") return { ...pendingInput, kind: "confirmation" };
+    if (name === "zuri_respond_to_user_input") return { accepted: true, sessionId: "task-1", runId: "run-1", waitId: "wait-1" };
     if (++polls === 1) return snapshot("waiting_user", "Previous question", { runtime: { status: "waiting_user", waitId: "wait-1" } });
     return snapshot("completed", "Done after approval");
   } });
   assert.equal(await main(["approve", "task-1", "--stream", "--timeout", "5"], deps), 0);
   assert.equal(polls, 2);
-  assert.equal(methods.filter(name => name === "qingzhou_respond_to_user_input").length, 1);
+  assert.equal(methods.filter(name => name === "zuri_respond_to_user_input").length, 1);
   assert.equal(JSON.parse(deps.stdout.text).result.snapshot.status, "completed");
   assert.equal(deps.stdout.text.split("\n").filter(Boolean).length, 1);
   assert.equal(deps.stderr.text, "");
@@ -432,17 +432,17 @@ test("native approvals stay connected with wait or stream until the user respond
     let polls = 0;
     const deps = setup({ tty: true, openBrowser: () => assert.fail("native permission must not open a page"), callTool: async (_endpoint, name) => {
       methods.push(name);
-      if (name === "qingzhou_get_user_input") return { ...pendingInput, kind: "browser_permission" };
-      if (name === "qingzhou_respond_to_user_input") return { accepted: false, requiresUserAction: true,
-        code: "BROWSER_PERMISSION_REQUIRED", sessionId: "task-1", runId: "run-1", message: "Confirm in the qz side panel." };
-      assert.equal(name, "qingzhou_get_session_snapshot");
+      if (name === "zuri_get_user_input") return { ...pendingInput, kind: "browser_permission" };
+      if (name === "zuri_respond_to_user_input") return { accepted: false, requiresUserAction: true,
+        code: "BROWSER_PERMISSION_REQUIRED", sessionId: "task-1", runId: "run-1", message: "Confirm in the zuri side panel." };
+      assert.equal(name, "zuri_get_session_snapshot");
       if (++polls <= 2) return snapshot("waiting_user", "", { runtime: { status: "waiting_user", waitId: "wait-1",
         waitTitle: "Allow history", waitForm: { browserPermission: "history" } } });
       assert.equal(deps.stdout.text.match(/review and grant this permission/g)?.length, 1);
       return snapshot("completed", "Permission granted in Chrome.");
     } });
     assert.equal(await main(["approve", "task-1", "--wait-id", "wait-1", flag, "--timeout", "5"], deps), 0);
-    assert.equal(methods.filter(name => name === "qingzhou_respond_to_user_input").length, 1);
+    assert.equal(methods.filter(name => name === "zuri_respond_to_user_input").length, 1);
     assert.equal(polls, 3);
     assert.match(deps.stdout.text, /Completed/);
     assert.doesNotMatch(deps.stdout.text, /Task continued|Answers submitted/);
@@ -454,15 +454,15 @@ test("native approval without waiting returns guidance and validation failures n
     const methods = [];
     const deps = setup({ callTool: async (_endpoint, name) => {
       methods.push(name);
-      if (name === "qingzhou_get_user_input") return pendingInput;
-      assert.equal(name, "qingzhou_respond_to_user_input");
+      if (name === "zuri_get_user_input") return pendingInput;
+      assert.equal(name, "zuri_respond_to_user_input");
       return { accepted: false, sessionId: "task-1", ...(native
         ? { requiresUserAction: true, code: "BROWSER_PERMISSION_REQUIRED" }
         : { code: "INVALID_ANSWERS", fieldErrors: [{ fieldId: "city", code: "required", message: "Choose a city." }] }) };
     } });
     const args = native ? ["approve", "task-1"] : ["submit", "task-1", "{}", "--wait"];
     assert.equal(await main(args, deps), native ? 0 : 1);
-    assert.deepEqual(methods, ["qingzhou_get_user_input", "qingzhou_respond_to_user_input"]);
+    assert.deepEqual(methods, ["zuri_get_user_input", "zuri_respond_to_user_input"]);
     assert.equal(JSON.parse(deps.stdout.text).result.accepted, false);
   }
 });
@@ -470,14 +470,14 @@ test("native approval without waiting returns guidance and validation failures n
 test("native JSON waits show pending guidance on stderr and return the observed final status", async () => {
   let polls = 0;
   const deps = setup({ callTool: async (_endpoint, name) => {
-    if (name === "qingzhou_get_user_input") return { ...pendingInput, kind: "browser_permission" };
-    if (name === "qingzhou_respond_to_user_input") return {
+    if (name === "zuri_get_user_input") return { ...pendingInput, kind: "browser_permission" };
+    if (name === "zuri_respond_to_user_input") return {
       accepted: false, requiresUserAction: true, code: "BROWSER_PERMISSION_REQUIRED", sessionId: "task-1", runId: "run-1",
     };
     assert.equal(deps.stdout.text, "");
     if (++polls === 1) return snapshot("waiting_user", "", { runtime: { status: "waiting_user", waitId: "wait-1",
       waitForm: { browserPermission: "history" } } });
-    assert.match(deps.stderr.text, /Open the qz side panel to review and grant this permission/);
+    assert.match(deps.stderr.text, /Open the zuri side panel to review and grant this permission/);
     return snapshot("completed", "Done.");
   } });
   assert.equal(await main(["approve", "task-1", "--wait", "--timeout", "5"], deps), 0);
@@ -498,7 +498,7 @@ test("location approval shows the current notice before mutation and binds its c
     const deps = setup({ tty: true, env: { NO_COLOR: "1" }, onUserInput: input => shown.push(input),
       callTool: async (_endpoint, name, args) => {
         methods.push(name);
-        if (name === "qingzhou_get_user_input") return notice;
+        if (name === "zuri_get_user_input") return notice;
         assert.equal(shown.length, 1, "the notice callback runs before accepting consent");
         assert.equal(deps.stdout.text.includes(notice.message), !json);
         assert.equal(args.consentVersion, 3);
@@ -507,7 +507,7 @@ test("location approval shows the current notice before mutation and binds its c
         return { accepted: true, sessionId: "task-1", runId: "run-1", waitId: "location-1" };
       } });
     assert.equal(await main(["approve", "task-1", "--wait-id", "location-1", ...(json ? ["--json"] : [])], deps), 0);
-    assert.deepEqual(methods, ["qingzhou_get_user_input", "qingzhou_respond_to_user_input"]);
+    assert.deepEqual(methods, ["zuri_get_user_input", "zuri_respond_to_user_input"]);
     if (json) {
       assert.equal(JSON.parse(deps.stdout.text).result.accepted, true);
       assert.equal(deps.stdout.text.split("\n").filter(Boolean).length, 1);
@@ -524,7 +524,7 @@ test("a missing consent version or an interrupted notice cannot grant location a
     await assert.rejects(runCli(["approve", "task-1"], setup({ callTool: async (_endpoint, name) => {
       methods.push(name); return { ...pendingInput, kind: "location_consent", consentVersion: version };
     } })), error => error.code === "invalid_response");
-    assert.deepEqual(methods, ["qingzhou_get_user_input"]);
+    assert.deepEqual(methods, ["zuri_get_user_input"]);
   }
   const controller = new AbortController();
   const methods = [];
@@ -532,7 +532,7 @@ test("a missing consent version or an interrupted notice cannot grant location a
     onUserInput: () => controller.abort(), callTool: async (_endpoint, name) => {
       methods.push(name); return { ...pendingInput, kind: "location_consent", consentVersion: 1 };
     } })), error => error.name === "AbortError");
-  assert.deepEqual(methods, ["qingzhou_get_user_input"]);
+  assert.deepEqual(methods, ["zuri_get_user_input"]);
 });
 
 test("watch observes an existing task without creating or resuming it", async () => {
@@ -543,7 +543,7 @@ test("watch observes an existing task without creating or resuming it", async ()
     return snapshot("completed", "Existing result");
   } });
   assert.equal(await main(["watch", "task-1", "--stream"], deps), 0);
-  assert.deepEqual(methods, ["qingzhou_get_session_snapshot"]);
+  assert.deepEqual(methods, ["zuri_get_session_snapshot"]);
   assert.equal(deps.stdout.text.match(/Existing result/g)?.length, 1);
   assert.match(deps.stdout.text, /Completed/);
 });
@@ -551,7 +551,7 @@ test("watch observes an existing task without creating or resuming it", async ()
 test("a failed response transport never retries approval or selects another wait", async () => {
   let mutations = 0;
   const deps = setup({ callTool: async (_endpoint, name) => {
-    if (name === "qingzhou_get_user_input") return pendingInput;
+    if (name === "zuri_get_user_input") return pendingInput;
     mutations++;
     throw Object.assign(new Error("Connection lost"), { code: "connection_error" });
   } });
@@ -565,8 +565,8 @@ test("timeout or interruption after an accepted answer preserves the task and ne
     const methods = [];
     const deps = setup({ signal: controller.signal, callTool: async (_endpoint, name) => {
       methods.push(name);
-      if (name === "qingzhou_get_user_input") return pendingInput;
-      if (name === "qingzhou_respond_to_user_input") {
+      if (name === "zuri_get_user_input") return pendingInput;
+      if (name === "zuri_respond_to_user_input") {
         if (interrupted) controller.abort();
         return { accepted: true, sessionId: "task-1", runId: "run-1", waitId: "wait-1" };
       }
@@ -576,8 +576,8 @@ test("timeout or interruption after an accepted answer preserves the task and ne
     const error = JSON.parse(deps.stdout.text).error;
     assert.equal(error.sessionId, "task-1");
     assert.equal(error.code, interrupted ? "interrupted" : "timeout");
-    assert.equal(methods.filter(name => name === "qingzhou_respond_to_user_input").length, 1);
-    assert.equal(methods.includes("qingzhou_stop_session"), false);
+    assert.equal(methods.filter(name => name === "zuri_respond_to_user_input").length, 1);
+    assert.equal(methods.includes("zuri_stop_session"), false);
   }
 });
 
@@ -587,17 +587,17 @@ test("timeout and interruption preserve the task ID and never resubmit or cancel
     const methods = [];
     const deps = setup({ signal: controller.signal,
       onTaskCreated: () => { if (cancel) controller.abort(); },
-      callTool: async (_endpoint, name) => { methods.push(name); return name === "qingzhou_create_session" ? created : snapshot("running"); },
+      callTool: async (_endpoint, name) => { methods.push(name); return name === "zuri_create_session" ? created : snapshot("running"); },
     });
     assert.equal(await main(["create", "Keep working", "--wait", "--timeout", "0.1"], deps), cancel ? 130 : 1);
     const error = JSON.parse(deps.stdout.text).error;
     assert.equal(error.code, cancel ? "interrupted" : "timeout");
     assert.equal(error.sessionId, "task-1");
     assert.equal(error.clientId, "fixture");
-    assert.match(error.command, /qz watch task-1.*--client fixture/);
-    assert.doesNotMatch(error.command, /qz (create|cancel)/);
-    assert.equal(methods.filter(method => method === "qingzhou_create_session").length, 1);
-    assert.equal(methods.includes("qingzhou_stop_session"), false);
+    assert.match(error.command, /zuri watch task-1.*--client fixture/);
+    assert.doesNotMatch(error.command, /zuri (create|cancel)/);
+    assert.equal(methods.filter(method => method === "zuri_create_session").length, 1);
+    assert.equal(methods.includes("zuri_stop_session"), false);
   }
 });
 

@@ -11,10 +11,10 @@ import { multiBrowserFixture } from "../support/multi-browser-fixture.mjs";
 
 // Manual entry: two real Chrome profiles with a deterministic model, plus explicit storage faults.
 // Pairing credentials remain in memory and the owned temporary profiles/registry only.
-const KEY = "_qingzhou_mcp_bridge", ID = "_qingzhou_mcp_bridge_client_id";
+const KEY = "_zuri_mcp_bridge", ID = "_zuri_mcp_bridge_client_id";
 const output = join(PROJECT_ROOT, "tests/results/multi-browser", `pairing-edges-${new Date().toISOString().replace(/[:.]/g, "-")}`);
 await mkdir(output, { recursive: true });
-const temporary = await mkdtemp(join(tmpdir(), "qz-pairing-edges-"));
+const temporary = await mkdtemp(join(tmpdir(), "zuri-pairing-edges-"));
 const registryPath = join(temporary, "browsers.json");
 const report = { ok: false, startedAt: new Date().toISOString(), scenarios: [], trace: [], cleanup: {},
   evidence: "Real independent Chrome processes, packaged extension, runtime messages, MCP and browser tasks. The model and web pages are deterministic local fixtures.",
@@ -43,7 +43,7 @@ async function scenario(name, run) {
 }
 function recordProtocol() {
   bridge.server.on("request", (request, response) => {
-    if (!request.url.startsWith("/v1/qingzhou/")) return;
+    if (!request.url.startsWith("/v1/zuri/")) return;
     const entry = { at: Date.now(), path: request.url }; report.trace.push(entry);
     let body = "";
     request.on("data", chunk => { body += chunk; });
@@ -77,11 +77,11 @@ async function identityKeys(browser) {
   return value;
 }
 async function ping(browser) {
-  await callTool(bridge.endpoint, "qingzhou_call", { method: "ping", clientId: browser.uuid, timeoutSeconds: 10 }, { timeoutMs: 15000 });
+  await callTool(bridge.endpoint, "zuri_call", { method: "ping", clientId: browser.uuid, timeoutSeconds: 10 }, { timeoutMs: 15000 });
 }
 async function task(browser, number) {
-  const marker = `QZ_MULTI_ALPHA_${number}_BROWSE`;
-  const created = await callTool(bridge.endpoint, "qingzhou_create_session", {
+  const marker = `ZURI_MULTI_ALPHA_${number}_BROWSE`;
+  const created = await callTool(bridge.endpoint, "zuri_create_session", {
     title: marker, firstMessage: `Read the test page and summarize it. [${marker}]`, clientId: browser.uuid,
     wait: true, waitTimeoutSeconds: 45, timeoutSeconds: 15,
   }, { timeoutMs: 50000 });
@@ -169,7 +169,7 @@ try {
     const nextName = "research-recovered", priorConnection = bridge.state.clients.get(b.uuid);
     let dropped = 0;
     const discardAck = (request, response) => {
-      if (request.method !== "POST" || request.url !== "/v1/qingzhou/rename") return;
+      if (request.method !== "POST" || request.url !== "/v1/zuri/rename") return;
       const end = response.end;
       response.end = function (chunk, ...args) {
         let value;

@@ -36,7 +36,7 @@ test("mobile tabs use mobile headers from the first request, persist across runs
   });
   await new Promise(resolve => server.listen(0, "127.0.0.1", resolve));
   const url = `http://127.0.0.1:${server.address().port}`;
-  const directory = await mkdtemp(join(tmpdir(), "qingzhou-page-mode-"));
+  const directory = await mkdtemp(join(tmpdir(), "zuri-page-mode-"));
   let browser;
   try {
     const extension = join(directory, "extension");

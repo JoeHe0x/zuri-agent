@@ -35,7 +35,7 @@ export interface DocumentArtifact extends DocumentOwnership {
 import { compareBeijingDateTimeDesc, nowBeijingDateTime } from "../time-utils.js";
 import { assertMessageDocumentOwnership } from "./document-attachments.js";
 
-const DB_NAME = "qz-browser-agent-documents";
+const DB_NAME = "zuri-agent-documents";
 const MIN_DB_VERSION = 1;
 const FILES_STORE = "files";
 const MODELS_STORE = "models";

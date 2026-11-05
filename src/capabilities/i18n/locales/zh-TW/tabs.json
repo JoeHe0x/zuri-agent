@@ -3,7 +3,7 @@
   "tabs.tab": "分頁 {tabId}",
   "tabs.current": "目前",
   "tabs.window": "視窗 {windowId}",
-  "tabs.qingzhouTask": "Zuri 任務",
+  "tabs.zuriTask": "Zuri 任務",
   "tabs.organizedInto": "已整理至「{name}」",
   "tabs.namedTabCount": "分頁：{count} · {name}",
   "tabs.groupedTabs": "已分組分頁：{count}",

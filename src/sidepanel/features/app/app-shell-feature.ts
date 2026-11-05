@@ -147,7 +147,7 @@ export function createAppShellFeature(options: AppShellOptions) {
         const existing = page.button || Array.from(root?.querySelectorAll?.<HTMLElement>(".tab-btn") || []).find(button => button.dataset.tab === page.id);
         const button = existing || root?.createElement?.("button");
         if (!button) continue;
-        if (!existing) { button.className = "qz-segment-item tab-btn"; button.textContent = page.title; button.setAttribute("type", "button"); }
+        if (!existing) { button.className = "zuri-segment-item tab-btn"; button.textContent = page.title; button.setAttribute("type", "button"); }
         button.dataset.tab = page.id;
         button.addEventListener("click", handleTabClick);
         entry = { button, created: !existing };

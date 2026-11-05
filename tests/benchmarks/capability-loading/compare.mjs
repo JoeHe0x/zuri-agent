@@ -91,7 +91,7 @@ async function run(name, colorScheme, visual) {
       const port = connect(...args), post = port.postMessage;
       port.postMessage = message => {
         post(message);
-        if (message.type === "create_ui_session") queueMicrotask(() => window.__qzEmitPortMessage({
+        if (message.type === "create_ui_session") queueMicrotask(() => window.__zuriEmitPortMessage({
           type: "create_ui_session_result", requestId: message.requestId,
           session: { id: message.id, title: "公式显示示例", parentSessionId: "root" },
         }));
@@ -143,13 +143,13 @@ async function run(name, colorScheme, visual) {
 
     await page.locator("#input").fill("公式显示示例");
     await page.locator("#btn-send").click();
-    await page.waitForFunction(() => window.__qzPostedMessages.some(item => item.type === "prompt"));
+    await page.waitForFunction(() => window.__zuriPostedMessages.some(item => item.type === "prompt"));
     await phase("formula", async () => {
       await page.evaluate(() => {
-        const sessionId = [...window.__qzPostedMessages].reverse().find(item => item.sessionId)?.sessionId;
+        const sessionId = [...window.__zuriPostedMessages].reverse().find(item => item.sessionId)?.sessionId;
         if (!sessionId) throw new Error("No active session identity");
         window.__auditPhaseStarted = performance.now();
-        window.__qzEmitPortMessage({ type: "messages", sessionId, transcript: [{ type: "assistant", content: "勾股定理：$a^2+b^2=c^2$\n\n$$\\int_0^1 x^2\\,dx = \\frac{1}{3}$$", timestamp: "2026-09-18 12:00:00" }] });
+        window.__zuriEmitPortMessage({ type: "messages", sessionId, transcript: [{ type: "assistant", content: "勾股定理：$a^2+b^2=c^2$\n\n$$\\int_0^1 x^2\\,dx = \\frac{1}{3}$$", timestamp: "2026-09-18 12:00:00" }] });
       });
       await page.locator("#messages mjx-container svg").first().waitFor({ state: "visible" });
       await page.waitForFunction(() => document.querySelectorAll("#messages mjx-container svg").length === 2);

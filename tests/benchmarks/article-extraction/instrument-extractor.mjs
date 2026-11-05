@@ -23,7 +23,7 @@ function replaceCodeAnchor(source, anchor, replacement, expected, label) {
   return source;
 }
 
-const EXPORT_ANCHOR = "host.QingzhouArticleExtractor = Object.freeze({ extract });";
+const EXPORT_ANCHOR = "host.ZuriArticleExtractor = Object.freeze({ extract });";
 const TREE_DP_FUNCTION_ANCHOR = `  function treeDpExtract(doc) {
     const body = doc?.body;`;
 const TREE_DP_DIAGNOSTICS_ANCHOR = `    let retainedTokens = 0;
@@ -74,55 +74,55 @@ const TOP_LEVEL_MATCHES_FUNCTION_ANCHOR = "  function topLevelMatches(doc, selec
 const CLONE_REWRITES = Object.freeze([
   {
     anchor: "    return doc.cloneNode(true);",
-    replacement: "    return qingzhouBenchmarkCloneNode(doc, true);",
+    replacement: "    return zuriBenchmarkCloneNode(doc, true);",
     expected: 1,
     label: "document clone",
   },
   {
     anchor: "    const metadata = safeQueryAll(doc, metadataSelector).map(element => element.cloneNode(true));",
-    replacement: "    const metadata = safeQueryAll(doc, metadataSelector).map(element => qingzhouBenchmarkCloneNode(element, true));",
+    replacement: "    const metadata = safeQueryAll(doc, metadataSelector).map(element => zuriBenchmarkCloneNode(element, true));",
     expected: 1,
     label: "metadata clone",
   },
   {
     anchor: "    const backup = root.cloneNode(true);",
-    replacement: "    const backup = qingzhouBenchmarkCloneNode(root, true);",
+    replacement: "    const backup = zuriBenchmarkCloneNode(root, true);",
     expected: 1,
     label: "pruning backup clone",
   },
   {
     anchor: "      wrapper.append(element.cloneNode(true));",
-    replacement: "      wrapper.append(qingzhouBenchmarkCloneNode(element, true));",
+    replacement: "      wrapper.append(zuriBenchmarkCloneNode(element, true));",
     expected: 2,
     label: "selected element clones",
   },
   {
     anchor: "    wrapper.append(...[...root.childNodes].map(node => node.cloneNode(true)));",
-    replacement: "    wrapper.append(...[...root.childNodes].map(node => qingzhouBenchmarkCloneNode(node, true)));",
+    replacement: "    wrapper.append(...[...root.childNodes].map(node => zuriBenchmarkCloneNode(node, true)));",
     expected: 1,
     label: "root child clones",
   },
   {
     anchor: "    const searchRoot = pruneSections(cleanedDoc.body?.cloneNode(true), { focus });",
-    replacement: "    const searchRoot = pruneSections(qingzhouBenchmarkCloneNode(cleanedDoc.body, true), { focus });",
+    replacement: "    const searchRoot = pruneSections(zuriBenchmarkCloneNode(cleanedDoc.body, true), { focus });",
     expected: 1,
     label: "recovery root clone",
   },
   {
     anchor: "    const clone = pageContentRoot(doc)?.cloneNode(true);",
-    replacement: "    const clone = qingzhouBenchmarkCloneNode(pageContentRoot(doc), true);",
+    replacement: "    const clone = zuriBenchmarkCloneNode(pageContentRoot(doc), true);",
     expected: 1,
     label: "central page clone",
   },
   {
     anchor: "      const candidate = pruneSections(node.cloneNode(true), { focus });",
-    replacement: "      const candidate = pruneSections(qingzhouBenchmarkCloneNode(node, true), { focus });",
+    replacement: "      const candidate = pruneSections(zuriBenchmarkCloneNode(node, true), { focus });",
     expected: 1,
     label: "rule root clone",
   },
   {
     anchor: "      const clone = nodes[rootIndex].element.cloneNode(true);",
-    replacement: "      const clone = qingzhouBenchmarkCloneNode(nodes[rootIndex].element, true);",
+    replacement: "      const clone = zuriBenchmarkCloneNode(nodes[rootIndex].element, true);",
     expected: 1,
     label: "Tree-DP root clone",
   },
@@ -138,8 +138,8 @@ export const INTERNAL_CANDIDATE_KEYS = Object.freeze([
 ]);
 
 const BENCHMARK_PROBE = `
-  const qingzhouProductExtract = extract;
-  const qingzhouBenchmarkReadabilityRegexps = Object.freeze({
+  const zuriProductExtract = extract;
+  const zuriBenchmarkReadabilityRegexps = Object.freeze({
     unlikely: /-ad-|ai2html|banner|breadcrumbs|combx|comment|community|cover-wrap|disqus|extra|footer|gdpr|header|legends|menu|related|remark|replies|rss|shoutbox|sidebar|skyscraper|social|sponsor|supplemental|ad-break|agegate|pagination|pager|popup|yom-remote/i,
     okMaybe: /and|article|body|column|content|main|shadow/i,
     positive: /article|body|content|entry|hentry|h-entry|main|page|pagination|post|text|blog|story/i,
@@ -148,24 +148,24 @@ const BENCHMARK_PROBE = `
     byline: /byline|author|dateline|writtenby|p-author/i,
     share: /(\\b|_)(share|sharedaddy)(\\b|_)/i,
   });
-  const qingzhouBenchmarkReadabilityRejectedRoles = new Set([
+  const zuriBenchmarkReadabilityRejectedRoles = new Set([
     "menu", "menubar", "complementary", "navigation", "alert", "alertdialog", "dialog",
   ]);
-  let qingzhouBenchmarkCandidates = new Map();
-  let qingzhouBenchmarkForcedCandidate = null;
-  let qingzhouBenchmarkLastExtractText = null;
-  const qingzhouBenchmarkNodeProvenance = new WeakMap();
-  const qingzhouBenchmarkCandidateProvenance = new WeakMap();
-  let qingzhouBenchmarkGoldTextState = new WeakMap();
-  let qingzhouBenchmarkProvenanceContext = null;
-  let qingzhouBenchmarkTrackCloneProvenance = false;
-  let qingzhouBenchmarkTrackGoldProvenance = false;
+  let zuriBenchmarkCandidates = new Map();
+  let zuriBenchmarkForcedCandidate = null;
+  let zuriBenchmarkLastExtractText = null;
+  const zuriBenchmarkNodeProvenance = new WeakMap();
+  const zuriBenchmarkCandidateProvenance = new WeakMap();
+  let zuriBenchmarkGoldTextState = new WeakMap();
+  let zuriBenchmarkProvenanceContext = null;
+  let zuriBenchmarkTrackCloneProvenance = false;
+  let zuriBenchmarkTrackGoldProvenance = false;
 
-  function qingzhouBenchmarkVisibleChars(value) {
+  function zuriBenchmarkVisibleChars(value) {
     return String(value || "").replace(/\\s/gu, "").length;
   }
 
-  function qingzhouBenchmarkAlignmentText(value) {
+  function zuriBenchmarkAlignmentText(value) {
     return String(value || "")
       .normalize("NFKC")
       .replace(/[\\u200b-\\u200f\\ufeff]/g, "")
@@ -173,19 +173,19 @@ const BENCHMARK_PROBE = `
       .trim();
   }
 
-  function qingzhouBenchmarkCloneNode(source, deep = false) {
+  function zuriBenchmarkCloneNode(source, deep = false) {
     if (!source || typeof source.cloneNode !== "function") return null;
     const clone = source.cloneNode(Boolean(deep));
-    if (!qingzhouBenchmarkTrackCloneProvenance && !qingzhouBenchmarkTrackGoldProvenance) return clone;
+    if (!zuriBenchmarkTrackCloneProvenance && !zuriBenchmarkTrackGoldProvenance) return clone;
     const stack = [[source, clone]];
     while (stack.length) {
       const [sourceNode, cloneNode] = stack.pop();
-      if (qingzhouBenchmarkTrackCloneProvenance) {
-        const provenance = qingzhouBenchmarkNodeProvenance.get(sourceNode);
-        if (provenance) qingzhouBenchmarkNodeProvenance.set(cloneNode, provenance);
+      if (zuriBenchmarkTrackCloneProvenance) {
+        const provenance = zuriBenchmarkNodeProvenance.get(sourceNode);
+        if (provenance) zuriBenchmarkNodeProvenance.set(cloneNode, provenance);
       }
-      if (qingzhouBenchmarkTrackGoldProvenance && qingzhouBenchmarkGoldTextState.has(sourceNode)) {
-        qingzhouBenchmarkGoldTextState.set(cloneNode, qingzhouBenchmarkGoldTextState.get(sourceNode));
+      if (zuriBenchmarkTrackGoldProvenance && zuriBenchmarkGoldTextState.has(sourceNode)) {
+        zuriBenchmarkGoldTextState.set(cloneNode, zuriBenchmarkGoldTextState.get(sourceNode));
       }
       if (!deep) continue;
       const sourceChildren = sourceNode.childNodes || [];
@@ -198,8 +198,8 @@ const BENCHMARK_PROBE = `
     return clone;
   }
 
-  function qingzhouBenchmarkBeginGoldSelection(doc, selection) {
-    qingzhouBenchmarkGoldTextState = new WeakMap();
+  function zuriBenchmarkBeginGoldSelection(doc, selection) {
+    zuriBenchmarkGoldTextState = new WeakMap();
     if (!selection) return null;
     const status = String(selection.status || "");
     if (status !== "extract" && status !== "exclude") {
@@ -236,14 +236,14 @@ const BENCHMARK_PROBE = `
           : inheritedValue;
         for (const child of element.childNodes || []) {
           if (child.nodeType === 3) {
-            if (!qingzhouBenchmarkVisibleChars(child.nodeValue || "")) continue;
+            if (!zuriBenchmarkVisibleChars(child.nodeValue || "")) continue;
             sourceTextUnits += 1;
             if (!ownValue) {
               unknownTextUnits += 1;
               continue;
             }
             const keep = requested.has(ownValue);
-            qingzhouBenchmarkGoldTextState.set(child, keep);
+            zuriBenchmarkGoldTextState.set(child, keep);
             if (keep) keptTextUnits += 1;
           } else if (child.nodeType === 1) {
             visit(child, ownValue);
@@ -252,7 +252,7 @@ const BENCHMARK_PROBE = `
       };
       if (doc.body) visit(doc.body);
       return Object.freeze({
-        schema: "qingzhou.article-extraction-annotation-gold-selection.v1",
+        schema: "zuri.article-extraction-annotation-gold-selection.v1",
         status,
         annotationAttribute,
         requestedValues: keptAnnotationValues.length,
@@ -284,7 +284,7 @@ const BENCHMARK_PROBE = `
       }
       return false;
     };
-    const visibleText = element => qingzhouBenchmarkAlignmentText(element?.innerText || "");
+    const visibleText = element => zuriBenchmarkAlignmentText(element?.innerText || "");
     const semanticRegionSelector = [
       "body", "main", "article", "[role='main']", "[role='article']", "[itemprop='articleBody']",
       "header", "nav", "aside", "footer", "dialog", "form", "figure",
@@ -335,9 +335,9 @@ const BENCHMARK_PROBE = `
       };
       for (const child of element.childNodes || []) {
         if (child.nodeType === 3) {
-          if (!qingzhouBenchmarkVisibleChars(child.nodeValue || "")) continue;
+          if (!zuriBenchmarkVisibleChars(child.nodeValue || "")) continue;
           const keep = status === "extract" && next.included && !next.excluded;
-          qingzhouBenchmarkGoldTextState.set(child, keep);
+          zuriBenchmarkGoldTextState.set(child, keep);
           sourceTextUnits += 1;
           if (keep) keptTextUnits += 1;
         } else if (child.nodeType === 1) {
@@ -346,7 +346,7 @@ const BENCHMARK_PROBE = `
       }
     })(doc.body, { included: false, excluded: false });
     return Object.freeze({
-      schema: "qingzhou.article-extraction-tree-dp-gold-selection.v1",
+      schema: "zuri.article-extraction-tree-dp-gold-selection.v1",
       status,
       requestedInclude: includeIds.length,
       resolvedInclude: included.length,
@@ -357,7 +357,7 @@ const BENCHMARK_PROBE = `
     });
   }
 
-  function qingzhouBenchmarkBeginProvenance(doc) {
+  function zuriBenchmarkBeginProvenance(doc) {
     const context = {
       elements: [],
       units: [],
@@ -449,21 +449,21 @@ const BENCHMARK_PROBE = `
       let readabilityNegativeHits = 0;
       for (const value of [className, id]) {
         if (!value) continue;
-        if (qingzhouBenchmarkReadabilityRegexps.negative.test(value)) {
+        if (zuriBenchmarkReadabilityRegexps.negative.test(value)) {
           readabilityClassWeight -= 25;
           readabilityNegativeHits += 1;
         }
-        if (qingzhouBenchmarkReadabilityRegexps.positive.test(value)) {
+        if (zuriBenchmarkReadabilityRegexps.positive.test(value)) {
           readabilityClassWeight += 25;
           readabilityPositiveHits += 1;
         }
       }
-      const readabilityOkMaybe = qingzhouBenchmarkReadabilityRegexps.okMaybe.test(classId);
+      const readabilityOkMaybe = zuriBenchmarkReadabilityRegexps.okMaybe.test(classId);
       const readabilityUnlikely = tag !== "body" && tag !== "a"
-        && qingzhouBenchmarkReadabilityRegexps.unlikely.test(\`\${className} \${id}\`)
-        && !qingzhouBenchmarkReadabilityRegexps.okMaybe.test(\`\${className} \${id}\`)
+        && zuriBenchmarkReadabilityRegexps.unlikely.test(\`\${className} \${id}\`)
+        && !zuriBenchmarkReadabilityRegexps.okMaybe.test(\`\${className} \${id}\`)
         && !element.parentElement?.closest?.("table,code");
-      const readabilityRoleRejected = qingzhouBenchmarkReadabilityRejectedRoles.has(
+      const readabilityRoleRejected = zuriBenchmarkReadabilityRejectedRoles.has(
         String(element.getAttribute?.("role") || "").toLowerCase(),
       );
       const sibling = siblingSignatureInfo(element);
@@ -492,9 +492,9 @@ const BENCHMARK_PROBE = `
           readabilityPositiveHits,
           readabilityNegativeHits,
           readabilityOkMaybe,
-          readabilityExtraneous: qingzhouBenchmarkReadabilityRegexps.extraneous.test(classId),
-          readabilityByline: qingzhouBenchmarkReadabilityRegexps.byline.test(classId),
-          readabilityShare: qingzhouBenchmarkReadabilityRegexps.share.test(classId),
+          readabilityExtraneous: zuriBenchmarkReadabilityRegexps.extraneous.test(classId),
+          readabilityByline: zuriBenchmarkReadabilityRegexps.byline.test(classId),
+          readabilityShare: zuriBenchmarkReadabilityRegexps.share.test(classId),
           readabilityUnlikely,
           readabilityRoleRejected,
           repeated: sibling.count,
@@ -525,14 +525,14 @@ const BENCHMARK_PROBE = `
             context.treeTextSegments.push([
               treeIndex,
               text,
-              qingzhouBenchmarkGoldTextState.has(node)
-                ? qingzhouBenchmarkGoldTextState.get(node)
+              zuriBenchmarkGoldTextState.has(node)
+                ? zuriBenchmarkGoldTextState.get(node)
                 : null,
             ]);
           }
-          const chars = qingzhouBenchmarkVisibleChars(text);
+          const chars = zuriBenchmarkVisibleChars(text);
           if (!chars) continue;
-          const alignedText = qingzhouBenchmarkAlignmentText(text);
+          const alignedText = zuriBenchmarkAlignmentText(text);
           const unit = Object.freeze({
             context,
             id: context.units.length,
@@ -542,8 +542,8 @@ const BENCHMARK_PROBE = `
             alignedText,
             chars,
             tokens: alignedText ? treeDpTokens(alignedText) : 0,
-            gold: qingzhouBenchmarkGoldTextState.has(node)
-              ? qingzhouBenchmarkGoldTextState.get(node)
+            gold: zuriBenchmarkGoldTextState.has(node)
+              ? zuriBenchmarkGoldTextState.get(node)
               : null,
           });
           context.units.push(unit);
@@ -552,7 +552,7 @@ const BENCHMARK_PROBE = `
             alignedText,
             (context.normalizedFrequency.get(alignedText) || 0) + 1,
           );
-          qingzhouBenchmarkNodeProvenance.set(node, unit);
+          zuriBenchmarkNodeProvenance.set(node, unit);
         } else if (node.nodeType === 1) {
           visit(
             node,
@@ -640,12 +640,12 @@ const BENCHMARK_PROBE = `
       element.baseScore = tokens * logit;
       Object.freeze(element);
     }
-    qingzhouBenchmarkProvenanceContext = context;
+    zuriBenchmarkProvenanceContext = context;
     return context;
   }
 
-  function qingzhouBenchmarkCaptureCandidateProvenance(candidate) {
-    const context = qingzhouBenchmarkProvenanceContext;
+  function zuriBenchmarkCaptureCandidateProvenance(candidate) {
+    const context = zuriBenchmarkProvenanceContext;
     if (!candidate?.root || !context) return;
     const retained = new Set();
     const duplicate = new Set();
@@ -657,10 +657,10 @@ const BENCHMARK_PROBE = `
     while (walker?.nextNode()) {
       const node = walker.currentNode;
       const value = String(node.nodeValue || "");
-      const chars = qingzhouBenchmarkVisibleChars(value);
+      const chars = zuriBenchmarkVisibleChars(value);
       if (!chars) continue;
       outputChars += chars;
-      const unit = qingzhouBenchmarkNodeProvenance.get(node);
+      const unit = zuriBenchmarkNodeProvenance.get(node);
       if (!unit || unit.context !== context || value !== unit.text) {
         unmappedChars += chars;
         if (unit?.context === context) changedSourceUnits += 1;
@@ -670,7 +670,7 @@ const BENCHMARK_PROBE = `
       if (retained.has(unit.id)) duplicate.add(unit.id);
       retained.add(unit.id);
     }
-    qingzhouBenchmarkCandidateProvenance.set(candidate, Object.freeze({
+    zuriBenchmarkCandidateProvenance.set(candidate, Object.freeze({
       context,
       retained: Object.freeze([...retained].sort((left, right) => left - right)),
       duplicateSourceUnits: duplicate.size,
@@ -681,7 +681,7 @@ const BENCHMARK_PROBE = `
     }));
   }
 
-  function qingzhouBenchmarkCompressRanges(ids) {
+  function zuriBenchmarkCompressRanges(ids) {
     const ranges = [];
     for (const id of ids || []) {
       const previous = ranges[ranges.length - 1];
@@ -691,19 +691,19 @@ const BENCHMARK_PROBE = `
     return ranges;
   }
 
-  function qingzhouBenchmarkPositiveAlignment(candidate) {
-    const context = qingzhouBenchmarkProvenanceContext;
+  function zuriBenchmarkPositiveAlignment(candidate) {
+    const context = zuriBenchmarkProvenanceContext;
     const strategy = String(candidate?.name || "");
     if (!candidate || !context) return { ids: [], chars: 0, reason: "candidate-unavailable" };
     if (strategy === "baseline-json" || strategy === "baseline-teaser") {
       return { ids: [], chars: 0, reason: "synthetic-metadata-candidate" };
     }
-    const output = qingzhouBenchmarkAlignmentText(candidate.text);
+    const output = zuriBenchmarkAlignmentText(candidate.text);
     if (!output) return { ids: [], chars: 0, reason: "empty-candidate-text" };
     const matches = [];
     for (const unit of context.units) {
       const needle = unit.alignedText;
-      if (qingzhouBenchmarkVisibleChars(needle) < 8) continue;
+      if (zuriBenchmarkVisibleChars(needle) < 8) continue;
       if (context.normalizedFrequency.get(needle) !== 1) continue;
       const start = output.indexOf(needle);
       if (start < 0 || output.indexOf(needle, start + 1) >= 0) continue;
@@ -728,9 +728,9 @@ const BENCHMARK_PROBE = `
     };
   }
 
-  function qingzhouBenchmarkCandidateProvenanceSnapshot(key, candidate) {
-    const context = qingzhouBenchmarkProvenanceContext;
-    const captured = candidate && qingzhouBenchmarkCandidateProvenance.get(candidate);
+  function zuriBenchmarkCandidateProvenanceSnapshot(key, candidate) {
+    const context = zuriBenchmarkProvenanceContext;
+    const captured = candidate && zuriBenchmarkCandidateProvenance.get(candidate);
     const current = captured?.context === context ? captured : null;
     const clonePreserving = key === "rules" || key === "recall" || key === "treedp";
     const exact = Boolean(clonePreserving
@@ -743,7 +743,7 @@ const BENCHMARK_PROBE = `
       && current.retained.length > 0);
     const positive = exact
       ? { ids: current.retained, chars: current.mappedChars, reason: "" }
-      : qingzhouBenchmarkPositiveAlignment(candidate);
+      : zuriBenchmarkPositiveAlignment(candidate);
     let reason = "";
     if (!candidate) reason = "candidate-unavailable";
     else if (positive.ids.length) reason = "unique-monotone-positive-evidence";
@@ -758,7 +758,7 @@ const BENCHMARK_PROBE = `
     const mappedChars = current?.mappedChars || 0;
     const exactRetained = exact ? current.retained : [];
     return {
-      schema: "qingzhou.article-extraction-candidate-provenance.v1",
+      schema: "zuri.article-extraction-candidate-provenance.v1",
       coordinate: "prepared-dom-nonempty-text-node-preorder-v1",
       rangeEncoding: "zero-based-half-open",
       exact,
@@ -770,9 +770,9 @@ const BENCHMARK_PROBE = `
       unmatchedUnitSemantics: exact ? "drop" : "unknown",
       sourceUnitCount: context?.units.length || 0,
       retainedUnitCount: exactRetained.length,
-      retainedRanges: qingzhouBenchmarkCompressRanges(exactRetained),
+      retainedRanges: zuriBenchmarkCompressRanges(exactRetained),
       positiveUnitCount: positive.ids.length,
-      positiveRanges: qingzhouBenchmarkCompressRanges(positive.ids),
+      positiveRanges: zuriBenchmarkCompressRanges(positive.ids),
       positiveChars: positive.chars,
       positiveCoverage: outputChars ? Math.min(1, positive.chars / outputChars) : 0,
       outputChars,
@@ -784,14 +784,14 @@ const BENCHMARK_PROBE = `
     };
   }
 
-  function qingzhouBenchmarkProvenanceSnapshot(candidates) {
-    const context = qingzhouBenchmarkProvenanceContext;
+  function zuriBenchmarkProvenanceSnapshot(candidates) {
+    const context = zuriBenchmarkProvenanceContext;
     const snapshots = {};
     for (const key of ${JSON.stringify(INTERNAL_CANDIDATE_KEYS)}) {
-      snapshots[key] = qingzhouBenchmarkCandidateProvenanceSnapshot(key, candidates.get(key));
+      snapshots[key] = zuriBenchmarkCandidateProvenanceSnapshot(key, candidates.get(key));
     }
     return {
-      schema: "qingzhou.article-extraction-provenance.v1",
+      schema: "zuri.article-extraction-provenance.v1",
       coordinate: "prepared-dom-nonempty-text-node-preorder-v1",
       rangeEncoding: "zero-based-half-open",
       sourceUnitCount: context?.units.length || 0,
@@ -851,7 +851,7 @@ const BENCHMARK_PROBE = `
     };
   }
 
-  function qingzhouBenchmarkStatusSnapshot(status) {
+  function zuriBenchmarkStatusSnapshot(status) {
     if (!status) return null;
     return {
       anchored: Boolean(status.anchored),
@@ -862,7 +862,7 @@ const BENCHMARK_PROBE = `
     };
   }
 
-  function qingzhouBenchmarkCandidateSnapshot(candidate, pageLength, includeText = false) {
+  function zuriBenchmarkCandidateSnapshot(candidate, pageLength, includeText = false) {
     if (!candidate) return null;
     const sourceText = String(candidate.text || "");
     return {
@@ -870,7 +870,7 @@ const BENCHMARK_PROBE = `
       strategy: candidate.name || "",
       rawOutputChars: candidate.length || 0,
       dirty: Boolean(candidate.dirty),
-      features: qingzhouBenchmarkCandidateFeatures(candidate, pageLength),
+      features: zuriBenchmarkCandidateFeatures(candidate, pageLength),
       ...(includeText ? {
         sourceText: sourceText.slice(0, 80_000),
         truncated: sourceText.length > 80_000,
@@ -878,7 +878,7 @@ const BENCHMARK_PROBE = `
     };
   }
 
-  function qingzhouBenchmarkBuildTreeDpDiagnostics({
+  function zuriBenchmarkBuildTreeDpDiagnostics({
     nodes, ownTokens, pageTokens, anchorShare, children, subtreeTokens,
     keep, free, keepChoice, includeRoots, excluded, retained, retainedTokens,
     selectedKind, selectedRoot, selectedScore, emptyScore, ordinaryAvailable,
@@ -937,7 +937,7 @@ const BENCHMARK_PROBE = `
       ? values.reduce((sum, value) => sum + value, 0) / values.length
       : null;
     return {
-      schema: "qingzhou.article-extraction-tree-dp-diagnostics.v1",
+      schema: "zuri.article-extraction-tree-dp-diagnostics.v1",
       nodeCount: nodes.length,
       pageTokens,
       pageAnchorShare: anchorShare,
@@ -976,7 +976,7 @@ const BENCHMARK_PROBE = `
     };
   }
 
-  function qingzhouBenchmarkTreeSelectorDiagnostics(
+  function zuriBenchmarkTreeSelectorDiagnostics(
     treeDp,
     legacy,
     doc,
@@ -1062,32 +1062,32 @@ const BENCHMARK_PROBE = `
     };
   }
 
-  function qingzhouBenchmarkProductDecisionSnapshot(trace, pageLength) {
+  function zuriBenchmarkProductDecisionSnapshot(trace, pageLength) {
     if (!trace) return null;
     return {
-      schema: "qingzhou.article-extraction-product-decision.v1",
+      schema: "zuri.article-extraction-product-decision.v1",
       completeRequested: trace.completeRequested,
-      preTreeLegacy: qingzhouBenchmarkCandidateSnapshot(trace.preTreeLegacy, pageLength, true),
+      preTreeLegacy: zuriBenchmarkCandidateSnapshot(trace.preTreeLegacy, pageLength, true),
       hanDominant: trace.hanDominant,
       visiblePageLength: trace.visiblePageLength,
       legacyVisiblePageShare: trace.legacyVisiblePageShare,
       preflightPassed: trace.preflightPassed,
-      legacyStatus: qingzhouBenchmarkStatusSnapshot(trace.legacyStatus),
+      legacyStatus: zuriBenchmarkStatusSnapshot(trace.legacyStatus),
       legacySafe: trace.legacySafe,
       treeAttempted: trace.treeAttempted,
-      treeCandidate: qingzhouBenchmarkCandidateSnapshot(trace.treeCandidate, pageLength),
-      treeCandidateStatus: qingzhouBenchmarkStatusSnapshot(trace.treeCandidateStatus),
+      treeCandidate: zuriBenchmarkCandidateSnapshot(trace.treeCandidate, pageLength),
+      treeCandidateStatus: zuriBenchmarkStatusSnapshot(trace.treeCandidateStatus),
       treeSelector: trace.treeSelector,
       treeSelected: trace.treeSelected,
       selectedBeforeCompleteStrategy: trace.selectedBeforeComplete?.name || "",
-      completeStatus: qingzhouBenchmarkStatusSnapshot(trace.completeStatus),
+      completeStatus: zuriBenchmarkStatusSnapshot(trace.completeStatus),
       completeFallbackStrategy: trace.fallback?.name || "",
       completeFallbackSelected: trace.completeFallbackSelected,
       finalStrategy: trace.result?.name || "",
     };
   }
 
-  function qingzhouBenchmarkCandidateFeatures(candidate, pageLength) {
+  function zuriBenchmarkCandidateFeatures(candidate, pageLength) {
     if (!candidate?.root) return null;
     const root = candidate.root;
     const blocks = safeQueryAll(root, "blockquote,h1,h2,h3,h4,h5,h6,li,p,pre,td,th")
@@ -1120,34 +1120,34 @@ const BENCHMARK_PROBE = `
     };
   }
 
-  function qingzhouBenchmarkCollect(doc, { readability, provenance = false, goldSelection = null } = {}) {
+  function zuriBenchmarkCollect(doc, { readability, provenance = false, goldSelection = null } = {}) {
     const provenanceEnabled = provenance === true;
     const gold = provenanceEnabled
-      ? qingzhouBenchmarkBeginGoldSelection(doc, goldSelection)
+      ? zuriBenchmarkBeginGoldSelection(doc, goldSelection)
       : null;
-    const previousGoldTracking = qingzhouBenchmarkTrackGoldProvenance;
-    qingzhouBenchmarkTrackGoldProvenance = Boolean(gold);
+    const previousGoldTracking = zuriBenchmarkTrackGoldProvenance;
+    zuriBenchmarkTrackGoldProvenance = Boolean(gold);
     try {
       doc = prepareDocument(doc);
     } finally {
-      qingzhouBenchmarkTrackGoldProvenance = previousGoldTracking;
+      zuriBenchmarkTrackGoldProvenance = previousGoldTracking;
     }
-    qingzhouBenchmarkProvenanceContext = null;
-    qingzhouBenchmarkTrackCloneProvenance = false;
+    zuriBenchmarkProvenanceContext = null;
+    zuriBenchmarkTrackCloneProvenance = false;
     if (provenanceEnabled) {
-      const context = qingzhouBenchmarkBeginProvenance(doc);
+      const context = zuriBenchmarkBeginProvenance(doc);
       context.goldSelection = gold;
     }
     if (readability === undefined) readability = parseReadability(doc);
-    qingzhouBenchmarkForcedCandidate = null;
-    qingzhouBenchmarkCandidates = new Map();
+    zuriBenchmarkForcedCandidate = null;
+    zuriBenchmarkCandidates = new Map();
     const collected = new Map();
     const errors = {};
     const elapsedMs = {};
     const attempt = (key, factory) => {
       const started = performance.now();
-      const previousTracking = qingzhouBenchmarkTrackCloneProvenance;
-      qingzhouBenchmarkTrackCloneProvenance = provenanceEnabled
+      const previousTracking = zuriBenchmarkTrackCloneProvenance;
+      zuriBenchmarkTrackCloneProvenance = provenanceEnabled
         && (key === "rules" || key === "recall" || key === "treedp");
       try {
         const candidate = factory();
@@ -1155,7 +1155,7 @@ const BENCHMARK_PROBE = `
       } catch (error) {
         errors[key] = \`\${error?.name || "Error"}: \${error?.message || error}\`;
       } finally {
-        qingzhouBenchmarkTrackCloneProvenance = previousTracking;
+        zuriBenchmarkTrackCloneProvenance = previousTracking;
         elapsedMs[key] = performance.now() - started;
       }
     };
@@ -1170,30 +1170,30 @@ const BENCHMARK_PROBE = `
     // stays ungated even though the product auto path gates it to Han-dominant pages.
     attempt("treedp", () => treeDpExtract(doc));
     let forcedTreeDpDiagnostics = null;
-    const previousTreeDiagnosticsActive = qingzhouBenchmarkTreeDiagnosticsActive;
-    qingzhouBenchmarkTreeDiagnosticsActive = true;
+    const previousTreeDiagnosticsActive = zuriBenchmarkTreeDiagnosticsActive;
+    zuriBenchmarkTreeDiagnosticsActive = true;
     try {
       // Replay only the shipped Tree-DP body after its isolated timing sample.
       // The heavier benchmark diagnostics must never enter product or candidate
       // timing, including compare-upstream's optional Tree-DP row.
       treeDpExtract(doc);
-      forcedTreeDpDiagnostics = qingzhouBenchmarkLastTreeDpDiagnostics;
+      forcedTreeDpDiagnostics = zuriBenchmarkLastTreeDpDiagnostics;
     } finally {
-      qingzhouBenchmarkTreeDiagnosticsActive = previousTreeDiagnosticsActive;
+      zuriBenchmarkTreeDiagnosticsActive = previousTreeDiagnosticsActive;
     }
-    qingzhouBenchmarkCandidates = collected;
+    zuriBenchmarkCandidates = collected;
 
     const pageLength = pageTextLength(doc);
     let currentStrategy = "";
     let currentError = "";
-    const previousProductDiagnosticsActive = qingzhouBenchmarkProductDiagnosticsActive;
-    qingzhouBenchmarkProductDiagnosticsActive = true;
+    const previousProductDiagnosticsActive = zuriBenchmarkProductDiagnosticsActive;
+    zuriBenchmarkProductDiagnosticsActive = true;
     try {
-      currentStrategy = qingzhouProductExtract(doc, { readability, complete: true })?.name || "";
+      currentStrategy = zuriProductExtract(doc, { readability, complete: true })?.name || "";
     } catch (error) {
       currentError = \`\${error?.name || "Error"}: \${error?.message || error}\`;
     } finally {
-      qingzhouBenchmarkProductDiagnosticsActive = previousProductDiagnosticsActive;
+      zuriBenchmarkProductDiagnosticsActive = previousProductDiagnosticsActive;
     }
     return {
       page: {
@@ -1208,14 +1208,14 @@ const BENCHMARK_PROBE = `
       currentStrategy,
       currentError,
       diagnostics: {
-        schema: "qingzhou.article-extraction-benchmark-diagnostics.v1",
+        schema: "zuri.article-extraction-benchmark-diagnostics.v1",
         candidateProvenanceEnabled: provenanceEnabled,
         forcedTreeDp: forcedTreeDpDiagnostics,
         ...(provenanceEnabled ? {
-          provenance: qingzhouBenchmarkProvenanceSnapshot(collected),
+          provenance: zuriBenchmarkProvenanceSnapshot(collected),
         } : {}),
-        productDecision: qingzhouBenchmarkProductDecisionSnapshot(
-          qingzhouBenchmarkLastProductDecision,
+        productDecision: zuriBenchmarkProductDecisionSnapshot(
+          zuriBenchmarkLastProductDecision,
           pageLength,
         ),
       },
@@ -1227,7 +1227,7 @@ const BENCHMARK_PROBE = `
           strategy: candidate?.name || "",
           error: errors[key] || "",
           elapsedMs: elapsedMs[key] || 0,
-          features: qingzhouBenchmarkCandidateFeatures(candidate, pageLength),
+          features: zuriBenchmarkCandidateFeatures(candidate, pageLength),
           rawOutputChars: candidate?.length || 0,
           readabilityRawChars: key === "readability" ? (rawReadability?.length || 0) : undefined,
         };
@@ -1235,30 +1235,30 @@ const BENCHMARK_PROBE = `
     };
   }
 
-  globalThis.__qingzhouArticleBenchmark = Object.freeze({
-    collect: qingzhouBenchmarkCollect,
+  globalThis.__zuriArticleBenchmark = Object.freeze({
+    collect: zuriBenchmarkCollect,
     force(key) {
-      qingzhouBenchmarkForcedCandidate = null;
-      const candidate = qingzhouBenchmarkCandidates.get(String(key || ""));
+      zuriBenchmarkForcedCandidate = null;
+      const candidate = zuriBenchmarkCandidates.get(String(key || ""));
       if (!candidate) throw new Error(\`article benchmark candidate is unavailable: \${key}\`);
-      qingzhouBenchmarkForcedCandidate = candidate;
+      zuriBenchmarkForcedCandidate = candidate;
       return { key, strategy: candidate.name };
     },
     clear() {
-      qingzhouBenchmarkForcedCandidate = null;
+      zuriBenchmarkForcedCandidate = null;
     },
     clearLastExtractText() {
-      qingzhouBenchmarkLastExtractText = null;
+      zuriBenchmarkLastExtractText = null;
     },
     lastExtractText() {
-      return qingzhouBenchmarkLastExtractText;
+      return zuriBenchmarkLastExtractText;
     },
   });
 
-  globalThis.QingzhouArticleExtractor = Object.freeze({
+  globalThis.ZuriArticleExtractor = Object.freeze({
     extract(...args) {
-      const result = qingzhouBenchmarkForcedCandidate || qingzhouProductExtract(...args);
-      qingzhouBenchmarkLastExtractText = result ? String(result.text || "") : null;
+      const result = zuriBenchmarkForcedCandidate || zuriProductExtract(...args);
+      zuriBenchmarkLastExtractText = result ? String(result.text || "") : null;
       return result;
     },
   });`;
@@ -1271,13 +1271,13 @@ export function instrumentArticleExtractorSource(source) {
   if (exportOccurrences !== 1) {
     throw new Error(`article extractor benchmark export anchor must occur exactly once; found ${exportOccurrences}`);
   }
-  let instrumented = replaceSingle(value, TREE_DP_FUNCTION_ANCHOR, `  let qingzhouBenchmarkLastTreeDpDiagnostics = null;
-  let qingzhouBenchmarkLastProductDecision = null;
-  let qingzhouBenchmarkTreeDiagnosticsActive = false;
-  let qingzhouBenchmarkProductDiagnosticsActive = false;
+  let instrumented = replaceSingle(value, TREE_DP_FUNCTION_ANCHOR, `  let zuriBenchmarkLastTreeDpDiagnostics = null;
+  let zuriBenchmarkLastProductDecision = null;
+  let zuriBenchmarkTreeDiagnosticsActive = false;
+  let zuriBenchmarkProductDiagnosticsActive = false;
 
   function treeDpExtract(doc) {
-    if (qingzhouBenchmarkTreeDiagnosticsActive) qingzhouBenchmarkLastTreeDpDiagnostics = null;
+    if (zuriBenchmarkTreeDiagnosticsActive) zuriBenchmarkLastTreeDpDiagnostics = null;
     const body = doc?.body;`, "Tree-DP function");
   instrumented = replaceSingle(instrumented, TREE_DP_DIAGNOSTICS_ANCHOR, `    let retainedTokens = 0;
     let retainedAnchorTokens = 0;
@@ -1288,8 +1288,8 @@ export function instrumentArticleExtractorSource(source) {
       if (nodes[index].anchor) retainedAnchorTokens += ownTokens[index];
       if (nodes[index].boilerplateHits) retainedBoilerplateTokens += ownTokens[index];
     }
-    if (qingzhouBenchmarkTreeDiagnosticsActive) {
-      qingzhouBenchmarkLastTreeDpDiagnostics = qingzhouBenchmarkBuildTreeDpDiagnostics({
+    if (zuriBenchmarkTreeDiagnosticsActive) {
+      zuriBenchmarkLastTreeDpDiagnostics = zuriBenchmarkBuildTreeDpDiagnostics({
         nodes, ownTokens, pageTokens, anchorShare, children, subtreeTokens,
         keep, free, keepChoice, includeRoots, excluded, retained, retainedTokens,
         selectedKind, selectedRoot, selectedScore, emptyScore, ordinaryAvailable,
@@ -1297,11 +1297,11 @@ export function instrumentArticleExtractorSource(source) {
     }
     if (retainedTokens < TREE_DP_GUARD_MIN_TOKENS) return null;`, "Tree-DP diagnostics");
   instrumented = replaceSingle(instrumented, EXTRACT_FUNCTION_ANCHOR, `  function extract(doc, { readability, complete = false } = {}) {
-    if (qingzhouBenchmarkProductDiagnosticsActive) qingzhouBenchmarkLastProductDecision = null;
+    if (zuriBenchmarkProductDiagnosticsActive) zuriBenchmarkLastProductDecision = null;
     if (!doc?.body) return null;`, "extract function");
   instrumented = replaceSingle(instrumented, EXTRACT_LEGACY_ANCHOR, `    const legacy = chosen || readable || custom || getBaseline();
     let selected = legacy;
-    const qingzhouBenchmarkDecision = qingzhouBenchmarkProductDiagnosticsActive ? {
+    const zuriBenchmarkDecision = zuriBenchmarkProductDiagnosticsActive ? {
       completeRequested: Boolean(complete),
       preTreeLegacy: legacy,
       hanDominant: null,
@@ -1321,31 +1321,31 @@ export function instrumentArticleExtractorSource(source) {
       completeFallbackSelected: false,
       result: null,
     } : null;
-    if (qingzhouBenchmarkDecision) qingzhouBenchmarkLastProductDecision = qingzhouBenchmarkDecision;`, "legacy decision");
-  instrumented = replaceSingle(instrumented, EXTRACT_HAN_GATE_ANCHOR, `    const qingzhouBenchmarkHanDominant = hanDominantDocument(doc);
-    if (qingzhouBenchmarkDecision) qingzhouBenchmarkDecision.hanDominant = qingzhouBenchmarkHanDominant;
-    if (qingzhouBenchmarkHanDominant) {
+    if (zuriBenchmarkDecision) zuriBenchmarkLastProductDecision = zuriBenchmarkDecision;`, "legacy decision");
+  instrumented = replaceSingle(instrumented, EXTRACT_HAN_GATE_ANCHOR, `    const zuriBenchmarkHanDominant = hanDominantDocument(doc);
+    if (zuriBenchmarkDecision) zuriBenchmarkDecision.hanDominant = zuriBenchmarkHanDominant;
+    if (zuriBenchmarkHanDominant) {
       // Reject obvious non-rescue cases before the more expensive structural
       // status walk. The selector still rechecks against the cleaned page text.
       const visiblePageLength = normalizedText(doc.body?.textContent || "").length;
       const legacyPageShare = legacy && visiblePageLength ? legacy.length / visiblePageLength : 0;
-      const qingzhouBenchmarkPreflightPassed = legacyPageShare <= TREE_DP_RESCUE_PREFLIGHT_MAX_LEGACY_PAGE_SHARE;
-      if (qingzhouBenchmarkDecision) {
-        qingzhouBenchmarkDecision.visiblePageLength = visiblePageLength;
-        qingzhouBenchmarkDecision.legacyVisiblePageShare = legacyPageShare;
-        qingzhouBenchmarkDecision.preflightPassed = qingzhouBenchmarkPreflightPassed;
+      const zuriBenchmarkPreflightPassed = legacyPageShare <= TREE_DP_RESCUE_PREFLIGHT_MAX_LEGACY_PAGE_SHARE;
+      if (zuriBenchmarkDecision) {
+        zuriBenchmarkDecision.visiblePageLength = visiblePageLength;
+        zuriBenchmarkDecision.legacyVisiblePageShare = legacyPageShare;
+        zuriBenchmarkDecision.preflightPassed = zuriBenchmarkPreflightPassed;
       }
-      if (qingzhouBenchmarkPreflightPassed) {`, "Han gate");
+      if (zuriBenchmarkPreflightPassed) {`, "Han gate");
   instrumented = replaceSingle(instrumented, EXTRACT_LEGACY_STATUS_ANCHOR, `        const legacyStatus = legacy
           ? pageCandidateStatus(legacy, doc, { requireCentralCollection: true })
           : null;
-        const qingzhouBenchmarkLegacySafe = legacyCandidateIsSafe(legacy, doc, legacyStatus);
-        if (qingzhouBenchmarkDecision) {
-          qingzhouBenchmarkDecision.legacyStatus = legacyStatus;
-          qingzhouBenchmarkDecision.legacySafe = qingzhouBenchmarkLegacySafe;
+        const zuriBenchmarkLegacySafe = legacyCandidateIsSafe(legacy, doc, legacyStatus);
+        if (zuriBenchmarkDecision) {
+          zuriBenchmarkDecision.legacyStatus = legacyStatus;
+          zuriBenchmarkDecision.legacySafe = zuriBenchmarkLegacySafe;
         }
-        if (!qingzhouBenchmarkLegacySafe) {`, "legacy status");
-  instrumented = replaceSingle(instrumented, EXTRACT_TREE_SELECTION_ANCHOR, `          if (qingzhouBenchmarkDecision) qingzhouBenchmarkDecision.treeAttempted = true;
+        if (!zuriBenchmarkLegacySafe) {`, "legacy status");
+  instrumented = replaceSingle(instrumented, EXTRACT_TREE_SELECTION_ANCHOR, `          if (zuriBenchmarkDecision) zuriBenchmarkDecision.treeAttempted = true;
           let treeDp = null;
           try {
             treeDp = treeDpExtract(doc);
@@ -1360,10 +1360,10 @@ export function instrumentArticleExtractorSource(source) {
             getPageLength,
             treeCandidateStatus,
           });
-          if (qingzhouBenchmarkDecision) {
-            qingzhouBenchmarkDecision.treeCandidate = treeDp;
-            qingzhouBenchmarkDecision.treeCandidateStatus = treeCandidateStatus;
-            qingzhouBenchmarkDecision.treeSelector = qingzhouBenchmarkTreeSelectorDiagnostics(
+          if (zuriBenchmarkDecision) {
+            zuriBenchmarkDecision.treeCandidate = treeDp;
+            zuriBenchmarkDecision.treeCandidateStatus = treeCandidateStatus;
+            zuriBenchmarkDecision.treeSelector = zuriBenchmarkTreeSelectorDiagnostics(
               treeDp,
               legacy,
               doc,
@@ -1371,7 +1371,7 @@ export function instrumentArticleExtractorSource(source) {
               getPageLength,
               { allowConfidenceOverride: complete },
             );
-            qingzhouBenchmarkDecision.treeSelected = Boolean(treeDp && selected === treeDp);
+            zuriBenchmarkDecision.treeSelected = Boolean(treeDp && selected === treeDp);
           }`, "Tree-DP selection");
   instrumented = replaceSingle(instrumented, EXTRACT_RESULT_ANCHOR, `    const status = complete && selected ? pageCandidateStatus(selected, doc) : null;
     const fallback = status && !status.complete
@@ -1381,23 +1381,23 @@ export function instrumentArticleExtractorSource(source) {
       fallback.length >= selected.length
       || (status.disjoint && fallback.length >= MIN_CONTENT_LENGTH)
     ) ? fallback : selected;
-    if (qingzhouBenchmarkDecision) {
-      qingzhouBenchmarkDecision.selectedBeforeComplete = selected;
-      qingzhouBenchmarkDecision.completeStatus = status;
-      qingzhouBenchmarkDecision.fallback = fallback;
-      qingzhouBenchmarkDecision.completeFallbackSelected = Boolean(fallback && result === fallback);
-      qingzhouBenchmarkDecision.result = result;
+    if (zuriBenchmarkDecision) {
+      zuriBenchmarkDecision.selectedBeforeComplete = selected;
+      zuriBenchmarkDecision.completeStatus = status;
+      zuriBenchmarkDecision.fallback = fallback;
+      zuriBenchmarkDecision.completeFallbackSelected = Boolean(fallback && result === fallback);
+      zuriBenchmarkDecision.result = result;
     }
     return withMetadata(result, readability);`, "final result");
   instrumented = replaceSingle(
     instrumented,
     MAKE_CANDIDATE_FUNCTION_ANCHOR,
-    "  function qingzhouProductMakeCandidate(name, root) {",
+    "  function zuriProductMakeCandidate(name, root) {",
     "candidate function",
   );
   instrumented = replaceSingle(instrumented, TOP_LEVEL_MATCHES_FUNCTION_ANCHOR, `  function makeCandidate(name, root) {
-    const candidate = qingzhouProductMakeCandidate(name, root);
-    if (candidate) qingzhouBenchmarkCaptureCandidateProvenance(candidate);
+    const candidate = zuriProductMakeCandidate(name, root);
+    if (candidate) zuriBenchmarkCaptureCandidateProvenance(candidate);
     return candidate;
   }
 

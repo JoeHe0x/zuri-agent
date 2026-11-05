@@ -26,7 +26,7 @@ export async function verifyTable({ environment, mcp, cli, table, minRows = 1, d
         expected.rows.map(row => expected.columns.map(key => String(row[key] ?? ""))), "CSV and XLSX contain the same values");
     } else expected = sheet;
     if (mcp) {
-      const known = await mcp("qingzhou_list_downloads", { id: result.downloadId });
+      const known = await mcp("zuri_list_downloads", { id: result.downloadId });
       assert.equal(known.downloads[0].state, "complete");
       assert.equal(known.downloads[0].filepath, file.filepath);
     }
@@ -39,7 +39,7 @@ export async function verifyTable({ environment, mcp, cli, table, minRows = 1, d
 export async function verifyDownloads({ environment, mcp, since, downloadDirectory, artifactDirectory }) {
   const lowerBound = typeof since === "number" ? since : Date.parse(since);
   assert.ok(Number.isFinite(lowerBound), "download verification needs the task start time");
-  const listed = await mcp("qingzhou_list_downloads", { limit: 100 });
+  const listed = await mcp("zuri_list_downloads", { limit: 100 });
   const downloads = [];
   for (const summary of listed.downloads) {
     if (!/\.(?:md|markdown|txt)$/i.test(summary.filename)) continue;

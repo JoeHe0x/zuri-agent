@@ -173,7 +173,7 @@ assert.match(reduceRuntimeBody, /const goal = deriveRuntimeGoal\(event, source, 
 assert.match(sidepanelHtml, /id="goal-strip"/, "sidepanel markup should include the goal strip");
 assert.match(sidepanelHtml, /id="goal-strip"[\s\S]*class="input-composer-frame(?:\s[^"]*)?"[\s\S]*id="queued-followups"[\s\S]*class="input-wrapper(?:\s[^"]*)?"/, "goal strip should live above the shared queue/composer surface");
 const goalTitleClasses = goalStripFeature.match(/class="goal-title\s([^"]*)"/)?.[1].split(/\s+/) || [];
-assert.ok(goalTitleClasses.includes("qz:min-w-0") && goalTitleClasses.includes("qz:truncate"), "long goal titles should retain bounded one-line layout");
+assert.ok(goalTitleClasses.includes("zuri:min-w-0") && goalTitleClasses.includes("zuri:truncate"), "long goal titles should retain bounded one-line layout");
 assert.match(sidepanelCss, /\.goal-pill/, "goal strip should have dedicated styling");
 assert.match(sidepanelCss, /\.session-goal-chip/, "session list should have compact goal pill styling");
 assert.match(sidepanelCss, /\.session-goal-dot/, "session list goal pill should include a colored status dot");

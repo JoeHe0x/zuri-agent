@@ -12,7 +12,7 @@ import { bytesToBase64, jpegsToPdf } from "./pdf-raster.js";
 import { cropDataUrl, decodeDataUrl, stitchTiles, stripDataUrl } from "./screenshot-image.js";
 import type { ImageClip } from "./screenshot-image.js";
 
-const MARK = Symbol.for("qz.firefox.debugger");
+const MARK = Symbol.for("zuri.firefox.debugger");
 const COMPAT_USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36";
 const PDF_PAGES = 8;
 const SCREENSHOT_TILES = 8;
@@ -38,7 +38,7 @@ export function installFirefoxDebugger(chromeApi: DebuggerChrome & NetworkChrome
   const network = createNetworkWatch(chromeApi, emit);
 
   chromeApi.runtime?.onMessage?.addListener((message, sender) => {
-    if (!message || message.type !== "qz-firefox-console") return;
+    if (!message || message.type !== "zuri-firefox-console") return;
     const tabId = Number(sender?.tab?.id);
     if (!runtimeEnabled.has(tabId)) return;
     publishConsole(tabId, message.record, emit);
@@ -405,7 +405,7 @@ export function installFirefoxDebugger(chromeApi: DebuggerChrome & NetworkChrome
     }
     await run(tabId, frameId, { op: "scroll", x: pageX, y: pageY }).catch(() => {});
     if (tiles >= SCREENSHOT_TILES && (coveredY + 0.5 < view.height || coveredX < view.width)) {
-      console.warn(`[轻舟] firefox screenshot kept ${tiles} viewport pieces; the rest of the clip was omitted`);
+      console.warn(`[Zuri] firefox screenshot kept ${tiles} viewport pieces; the rest of the clip was omitted`);
     }
     return { data: await stitchTiles(rows, view.scale, format) };
   }
@@ -431,7 +431,7 @@ export function installFirefoxDebugger(chromeApi: DebuggerChrome & NetworkChrome
     }
     await run(tabId, frameId, { op: "scroll", x: pageX, y: pageY }).catch(() => {});
     const truncated = pageCount > images.length;
-    if (truncated) console.warn(`[轻舟] firefox pdf kept ${images.length} of ${pageCount} viewport pages; content below that was omitted`);
+    if (truncated) console.warn(`[Zuri] firefox pdf kept ${images.length} of ${pageCount} viewport pages; content below that was omitted`);
     const note = truncated ? `Firefox kept ${images.length} of ${pageCount} viewport pages. Content below that was omitted.` : "";
     return { data: bytesToBase64(jpegsToPdf(images, note)) };
   }
@@ -547,7 +547,7 @@ function publishConsole(tabId: number, recordValue: ConsoleMessage | undefined, 
 }
 
 function stackFrame(stack: unknown) {
-  const line = String(stack || "").split("\n").map(item => item.trim()).find(item => item && !item.includes("data-qz-console"));
+  const line = String(stack || "").split("\n").map(item => item.trim()).find(item => item && !item.includes("data-zuri-console"));
   const firefox = /^(.*)@(.*):(\d+):(\d+)$/.exec(line || "");
   if (firefox) return { functionName: firefox[1], url: firefox[2], lineNumber: Number(firefox[3]) - 1, columnNumber: Number(firefox[4]) - 1 };
   const chrome = /at (.*?) \((.*?):(\d+):(\d+)\)/.exec(line || "");

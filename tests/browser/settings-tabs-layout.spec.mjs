@@ -56,7 +56,7 @@ async function mountSettings(page, language) {
     const records = labels.map(([id, title, order]) => {
       const element = document.createElement("section");
       const input = document.createElement("input");
-      input.className = "qz-field-input";
+      input.className = "zuri-field-input";
       input.setAttribute("aria-label", title);
       input.value = title;
       element.appendChild(input);

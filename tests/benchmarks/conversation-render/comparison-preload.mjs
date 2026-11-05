@@ -24,7 +24,7 @@ export function instrumentComparisonDriver(source) {
         const raw = single.querySelector(".tool-event-raw-btn:not(.hidden)");
         if (raw) { raw.click(); await settle(); }
         return { ok: Boolean(expanded) && (!raw || raw.getAttribute("aria-expanded") === "true"), reason: "single-tool",
-          expanded: window.qingzhouConversationBenchmark.collectMetrics({ phase: "single-tool-expanded" }) };
+          expanded: window.zuriConversationBenchmark.collectMetrics({ phase: "single-tool-expanded" }) };
       }
       return {
         ok: false,
@@ -37,7 +37,7 @@ export function instrumentComparisonDriver(source) {
   await page.mouse.move(0, 0);
   await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));`],
     ['page = await context.newPage();', `page = await context.newPage();
-  await page.clock.setFixedTime(new Date(process.env.QZ_COMPARISON_TIME));
+  await page.clock.setFixedTime(new Date(process.env.ZURI_COMPARISON_TIME));
   const comparisonResources = new Map((fixture.comparisonResources || []).map(item => [item.url, item]));
   await page.route("**/*", route => {
     const asset = comparisonResources.get(route.request().url());
@@ -74,9 +74,9 @@ export function instrumentComparisonDriver(source) {
   return source;
 }
 
-if (process.env.QZ_COMPARISON_DRIVER) {
-  const target = resolve(process.env.QZ_COMPARISON_DRIVER);
-  if (!Number.isFinite(Date.parse(process.env.QZ_COMPARISON_TIME))) throw new Error("Comparison requires a fixed wall-clock time");
+if (process.env.ZURI_COMPARISON_DRIVER) {
+  const target = resolve(process.env.ZURI_COMPARISON_DRIVER);
+  if (!Number.isFinite(Date.parse(process.env.ZURI_COMPARISON_TIME))) throw new Error("Comparison requires a fixed wall-clock time");
   registerHooks({ load(url, context, nextLoad) {
     const result = nextLoad(url, context);
     if (url.startsWith("file:") && fileURLToPath(url) === target) {

@@ -238,11 +238,11 @@ export function createSessionRepository({
         recordKey(id),
         transcriptCheckpointKey(id),
         `_session_import_dedup_${id}`, // Obsolete cache from older builds.
-      ])).catch(error => console.warn("[轻舟] deleted Session record cleanup failed", error));
-      await conversationQueues.run(id, () => storageArea.remove(activeConversationKey(id))).catch(error => console.warn("[轻舟] deleted Session conversation cleanup failed", error));
-      await deleteRuntime(id).catch(error => console.warn("[轻舟] deleted Session runtime cleanup failed", error));
+      ])).catch(error => console.warn("[Zuri] deleted Session record cleanup failed", error));
+      await conversationQueues.run(id, () => storageArea.remove(activeConversationKey(id))).catch(error => console.warn("[Zuri] deleted Session conversation cleanup failed", error));
+      await deleteRuntime(id).catch(error => console.warn("[Zuri] deleted Session runtime cleanup failed", error));
       imagePersistence.forgetSession(id);
-      await imagePersistence.sweep().catch(error => console.warn("[轻舟] deleted Session image cleanup failed", error));
+      await imagePersistence.sweep().catch(error => console.warn("[Zuri] deleted Session image cleanup failed", error));
       return { sessionId: id, deleted: true, existed };
     }).catch(error => {
       deletedSessionIds.delete(id);

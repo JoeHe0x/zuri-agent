@@ -3,7 +3,7 @@ import { readSessionImportLabels, sessionImportButtonText } from "../../../share
 /** Standalone exported HTML entry, compiled and embedded by build-extension. No extension APIs. */
 (() => {
   // Captured document labels stay with the export. Import-button labels from the extension bridge replace them.
-  const messages: Record<string, unknown> = JSON.parse(document.getElementById("qingzhou-export-messages")?.textContent || "{}");
+  const messages: Record<string, unknown> = JSON.parse(document.getElementById("zuri-export-messages")?.textContent || "{}");
   const t = (key: string): string => typeof messages[key] === "string" ? messages[key] : key;
   let imageLightbox: HTMLElement | null = null;
 
@@ -25,7 +25,7 @@ import { readSessionImportLabels, sessionImportButtonText } from "../../../share
     image.src = source;
     image.alt = alt || t("images");
     let close = document.createElement("button");
-    close.className = "qz-icon-btn qz-icon-btn--md image-lightbox-close";
+    close.className = "zuri-icon-btn zuri-icon-btn--md image-lightbox-close";
     close.type = "button";
     close.title = t("close");
     close.setAttribute("aria-label", t("close"));
@@ -190,9 +190,9 @@ import { readSessionImportLabels, sessionImportButtonText } from "../../../share
     if (event.key === "Escape") closeImageLightbox();
   });
 
-  let PROBE_TYPE = "qingzhou:session-export:probe";
-  let RESULT_TYPE = "qingzhou:session-export:result";
-  let cta: HTMLElement | null = document.getElementById("qingzhou-session-cta");
+  let PROBE_TYPE = "zuri:session-export:probe";
+  let RESULT_TYPE = "zuri:session-export:result";
+  let cta: HTMLElement | null = document.getElementById("zuri-session-cta");
   if (!cta) return;
 
   function useImportLabels(value: unknown) {
@@ -202,13 +202,13 @@ import { readSessionImportLabels, sessionImportButtonText } from "../../../share
   }
 
   function refreshImportButton() {
-    if (!(cta instanceof HTMLButtonElement) || !cta.hasAttribute("data-qingzhou-session-import")) return;
+    if (!(cta instanceof HTMLButtonElement) || !cta.hasAttribute("data-zuri-session-import")) return;
     cta.textContent = sessionImportButtonText({
       busy: cta.getAttribute("aria-busy") === "true",
-      imported: Boolean(cta.getAttribute("data-qingzhou-imported-session-id")),
+      imported: Boolean(cta.getAttribute("data-zuri-imported-session-id")),
       titled: Boolean(cta.title),
     }, {
-      importQingzhou: t("importQingzhou"),
+      importZuri: t("importZuri"),
       importing: t("importing"),
       imported: t("imported"),
       retryImport: t("retryImport"),
@@ -217,19 +217,19 @@ import { readSessionImportLabels, sessionImportButtonText } from "../../../share
   }
 
   function enableImport() {
-    if (!cta || cta.hasAttribute("data-qingzhou-session-import")) return;
+    if (!cta || cta.hasAttribute("data-zuri-session-import")) return;
     let button = document.createElement("button");
     button.id = cta.id;
     button.className = cta.className;
     button.type = "button";
-    button.setAttribute("data-qingzhou-session-import", "");
-    button.textContent = t("importQingzhou");
+    button.setAttribute("data-zuri-session-import", "");
+    button.textContent = t("importZuri");
     cta.replaceWith(button);
     cta = button;
   }
 
   function updateImportState(data: Record<string, unknown>) {
-    if (!(cta instanceof HTMLButtonElement) || !cta.hasAttribute("data-qingzhou-session-import")) return;
+    if (!(cta instanceof HTMLButtonElement) || !cta.hasAttribute("data-zuri-session-import")) return;
     if (data.status === "working") {
       cta.disabled = true;
       cta.setAttribute("aria-busy", "true");
@@ -240,7 +240,7 @@ import { readSessionImportLabels, sessionImportButtonText } from "../../../share
     if (data.ok) {
       cta.disabled = true;
       cta.textContent = t("imported");
-      cta.dataset.qingzhouImportedSessionId = String(data.sessionId || "");
+      cta.dataset.zuriImportedSessionId = String(data.sessionId || "");
       return;
     }
     cta.disabled = false;
@@ -264,6 +264,6 @@ import { readSessionImportLabels, sessionImportButtonText } from "../../../share
 
   window.postMessage({
     type: PROBE_TYPE,
-    requestId: "qz-export-" + Date.now().toString(36)
+    requestId: "zuri-export-" + Date.now().toString(36)
   }, "*");
 })();

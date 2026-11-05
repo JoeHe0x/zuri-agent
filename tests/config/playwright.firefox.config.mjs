@@ -3,7 +3,7 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const testsRoot = dirname(dirname(fileURLToPath(import.meta.url)));
-const workers = clampNumber(process.env.QINGZHOU_FIREFOX_PLAYWRIGHT_WORKERS, 1, 4, 1);
+const workers = clampNumber(process.env.ZURI_FIREFOX_PLAYWRIGHT_WORKERS, 1, 4, 1);
 
 console.log("browser=firefox package=dist/extension-firefox config=tests/config/playwright.firefox.config.mjs");
 
@@ -26,7 +26,7 @@ export default defineConfig({
       use: {
         browserName: "firefox",
         channel: "moz-firefox",
-        headless: process.env.QINGZHOU_FIREFOX_HEADED !== "1",
+        headless: process.env.ZURI_FIREFOX_HEADED !== "1",
       },
     },
   ],

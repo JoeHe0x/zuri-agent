@@ -1,5 +1,5 @@
 {
-  "schema": "qingzhou.article-extraction-diversity-policy.v1",
+  "schema": "zuri.article-extraction-diversity-policy.v1",
   "scope": "chinese-realworld-expansion-v3-plan",
   "minSamples": 1000,
   "minSites": 200,

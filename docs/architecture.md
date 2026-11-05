@@ -1,6 +1,6 @@
 # Architecture
 
-qz is a Manifest V3 Chrome extension. Background owns task state and persistence; Side Panel owns
+zuri is a Manifest V3 Chrome extension. Background owns task state and persistence; Side Panel owns
 presentation. Chrome contexts communicate through explicit protocols. The optional [MCP
 bridge](../services/mcp-bridge/README.md) exposes extension operations to external clients.
 Firefox temporary loading is in [Commands](commands.md#load-temporarily-in-firefox). Remaining

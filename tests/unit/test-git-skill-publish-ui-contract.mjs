@@ -36,9 +36,9 @@ for (const skin of skins) {
   const sheet = extractCssRule(skin.css, ".skill-git-publish-sheet");
   const path = extractCssRule(skin.css, ".skill-git-publish-target code");
   assert.match(button, /flex:\s*none/u, `${skin.name} should keep the Git command stable`);
-  assertClassTokens(html, "skill-git-publish-confirm", ["qz:absolute"], `${skin.name} should keep confirmation inside the workbench`);
-  assertClassTokens(html, "skill-git-publish-backdrop", ["qz:w-full", "qz:h-full"], `${skin.name} should cover the complete confirmation surface`);
-  assert.match(backdrop, /--qz-control-bg-hover:\s*var\(--modal-backdrop\)/u, `${skin.name} should keep the backdrop stable on hover`);
+  assertClassTokens(html, "skill-git-publish-confirm", ["zuri:absolute"], `${skin.name} should keep confirmation inside the workbench`);
+  assertClassTokens(html, "skill-git-publish-backdrop", ["zuri:w-full", "zuri:h-full"], `${skin.name} should cover the complete confirmation surface`);
+  assert.match(backdrop, /--zuri-control-bg-hover:\s*var\(--modal-backdrop\)/u, `${skin.name} should keep the backdrop stable on hover`);
   assert.match(sheet, /var\(--modal-card-surface\)/u, `${skin.name} should consume the shared modal surface`);
   assert.match(path, /text-overflow:\s*ellipsis/u, `${skin.name} should contain long target paths`);
   assert.doesNotMatch(sheet, /#[\da-f]{3,8}|rgb\(/iu, `${skin.name} should use design tokens only`);

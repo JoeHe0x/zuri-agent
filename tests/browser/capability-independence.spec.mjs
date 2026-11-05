@@ -95,14 +95,14 @@ test("a copied settings group saves through the complete app without mutating or
   await page.locator("#cfg-context-preset").selectOption("256K");
   await expect(page.locator("#settings-save-status")).toHaveText("有未保存修改");
   await saveExample(page, "independent setting");
-  expect(await page.evaluate(() => window.__qzPostedMessages.filter(item => item.type === "save_config"))).toEqual([]);
+  expect(await page.evaluate(() => window.__zuriPostedMessages.filter(item => item.type === "save_config"))).toEqual([]);
   await page.locator('[data-settings-tab="model"]').click();
   await expect(page.locator("#cfg-context-preset")).toHaveValue("256K");
   await expect(page.locator("#settings-save-status")).toHaveText("有未保存修改");
   await page.locator("#btn-save-settings").click();
-  const request = await page.evaluate(() => window.__qzPostedMessages.filter(item => item.type === "save_config").at(-1));
+  const request = await page.evaluate(() => window.__zuriPostedMessages.filter(item => item.type === "save_config").at(-1));
   expect(request.config.contextWindow).toBe("256K");
-  await page.evaluate(request => window.__qzEmitPortMessage({ type: "config_saved", requestId: request.requestId, config: request.config }), request);
+  await page.evaluate(request => window.__zuriEmitPortMessage({ type: "config_saved", requestId: request.requestId, config: request.config }), request);
   await expect(page.locator("#settings-panel")).toBeHidden();
   await page.locator("#btn-settings").click();
   await page.locator('[data-settings-tab="example-settings"]').click();
@@ -119,9 +119,9 @@ test("settings groups retain independent failed drafts and ignore a previous gro
   await expect(page.locator("#cfg-context-preset")).toHaveValue("256K");
   await expect(page.locator("#settings-save-status")).toHaveText("有未保存修改");
   await page.locator("#btn-save-settings").click();
-  const request = await page.evaluate(() => window.__qzPostedMessages.filter(item => item.type === "save_config").at(-1));
+  const request = await page.evaluate(() => window.__zuriPostedMessages.filter(item => item.type === "save_config").at(-1));
   await page.locator('[data-settings-tab="example-settings"]').click();
-  await page.evaluate(request => window.__qzEmitPortMessage({ type: "error", requestId: request.requestId, message: "stale model failure" }), request);
+  await page.evaluate(request => window.__zuriEmitPortMessage({ type: "error", requestId: request.requestId, message: "stale model failure" }), request);
   await expect(page.getByLabel("示例选项")).toHaveValue("retry this independent draft");
   await expect(page.locator("#settings-save-status")).toHaveText("保存失败，请重试。");
   await page.locator('[data-settings-tab="model"]').click();
@@ -142,10 +142,10 @@ const directoryConfig = {
     endpoint: "https://example.invalid/v1/chat/completions" }],
   presets: [],
 };
-const directoryRequests = page => page.evaluate(() => window.__qzPostedMessages.filter(message => message.type === "list_models"));
-const configRequestCount = page => page.evaluate(() => window.__qzPostedMessages.filter(message => message.type === "get_config").length);
+const directoryRequests = page => page.evaluate(() => window.__zuriPostedMessages.filter(message => message.type === "list_models"));
+const configRequestCount = page => page.evaluate(() => window.__zuriPostedMessages.filter(message => message.type === "get_config").length);
 async function replyWithModels(page, request, models) {
-  await page.evaluate(({ request, models }) => window.__qzEmitPortMessage({
+  await page.evaluate(({ request, models }) => window.__zuriEmitPortMessage({
     type: "models", requestId: request.requestId, provider: request.provider, models,
   }), { request, models });
 }
@@ -240,11 +240,11 @@ test("onboarding is reinserted after the complete app rebuilds the chat welcome 
 test("Skill tool identities remain available when the optional Skills workspace is omitted", async ({ page }) => {
   await openApp(page, ["skills"]);
   await expect(page.locator('[data-tab="skills"], #skills-panel')).toHaveCount(0);
-  await expect.poll(() => page.evaluate(() => window.__qzPostedMessages
+  await expect.poll(() => page.evaluate(() => window.__zuriPostedMessages
     .filter(message => message.type === "list_plugin_contributions").length)).toBeGreaterThan(0);
   const title = await page.evaluate(async () => {
     const registry = await import("/extension/sidepanel/tools/skill-tool-ui-registry.js");
-    window.__qzEmitPortMessage({ type: "plugin_registry_update", snapshot: {
+    window.__zuriEmitPortMessage({ type: "plugin_registry_update", snapshot: {
       plugins: [{ id: "optional-workspace-test", tools: [{ name: "standalone_skill_tool", title: "独立技能工具" }] }],
     } });
     return registry.getSkillToolUiMeta("standalone_skill_tool")?.tool.title;

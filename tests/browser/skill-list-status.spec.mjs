@@ -38,13 +38,13 @@ for (const colorScheme of ["light", "dark"]) {
       });
 
       const request = await page.waitForFunction(() => (
-        window.__qzPostedMessages.find(message => (
+        window.__zuriPostedMessages.find(message => (
           message.type === "import_workspace_skills"
           && message.skills[0].name === "silent-import"
         )) || null
       )).then(handle => handle.jsonValue());
       await page.evaluate(({ requestId, skills }) => {
-        window.__qzEmitPortMessage({
+        window.__zuriEmitPortMessage({
           type: "skill_workspace_imported",
           skills, installStates: {}, registryReady: true,
           requestId,

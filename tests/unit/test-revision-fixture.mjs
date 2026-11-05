@@ -7,7 +7,7 @@ import { parse } from "acorn";
 import { createRevisionFixtureAdapter } from "../tool-timeline/revision-fixture.mjs";
 
 async function revision(t, files) {
-  const root = await mkdtemp(join(tmpdir(), "qingzhou-revision-fixture-"));
+  const root = await mkdtemp(join(tmpdir(), "zuri-revision-fixture-"));
   t.after(() => rm(root, { recursive: true, force: true }));
   for (const file of files) {
     await mkdir(dirname(join(root, file)), { recursive: true });

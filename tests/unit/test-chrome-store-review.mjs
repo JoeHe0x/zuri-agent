@@ -447,7 +447,7 @@ test("the transcript card appears after the fifth completed root session, then d
   assert.equal(coreMessages.messages.storeReviewDismiss.en, "Dismiss");
   assert.equal(coreMessages.messages.storeReviewDismiss["zh-CN"], "不再显示");
   assert.match(coreMessages.messages.storeReviewPrompt.en, /Chrome Web Store/);
-  assert.match(coreMessages.messages.storeReviewPrompt["zh-CN"], /轻舟/);
+  assert.match(coreMessages.messages.storeReviewPrompt["zh-CN"], /Zuri/);
   assert.match(coreMessages.messages.storeReviewPrompt["zh-CN"], /Chrome 应用商店/);
 
   const hidden = await mountCard({
@@ -472,9 +472,9 @@ test("the transcript card appears after the fifth completed root session, then d
   const review = view.messages.querySelector("[data-store-review-action='review']");
   const dismiss = view.messages.querySelector("[data-store-review-action='dismiss']");
   assert.equal(review.textContent, "Leave a review");
-  assert.equal(review.className.includes("qz-btn--primary"), true);
+  assert.equal(review.className.includes("zuri-btn--primary"), true);
   assert.equal(dismiss.textContent, "Dismiss");
-  assert.equal(dismiss.className.includes("qz-btn--ghost"), true);
+  assert.equal(dismiss.className.includes("zuri-btn--ghost"), true);
   assert.equal(view.messages.lastElementChild, card);
 
   const result = view.doc.createElement("div");

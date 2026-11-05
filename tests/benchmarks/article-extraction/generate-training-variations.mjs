@@ -54,12 +54,12 @@ const args = process.argv.slice(2);
 
 const GENERATOR_VERSION = "deepseek-page-aware-variations-v2";
 const QA_POLICY_VERSION = "variation-evidence-qa-v8-strict-one-shot";
-const RECORD_SCHEMA = "qingzhou.web-extraction-variation-record.v1";
-const RESPONSE_SCHEMA = "qingzhou.web-extraction-variations-response.v1";
-const PACK_SCHEMA = "qingzhou.web-extraction-training-pack.v1";
+const RECORD_SCHEMA = "zuri.web-extraction-variation-record.v1";
+const RESPONSE_SCHEMA = "zuri.web-extraction-variations-response.v1";
+const PACK_SCHEMA = "zuri.web-extraction-training-pack.v1";
 const DEFAULT_MODEL = "deepseek-v4-flash";
 const DEFAULT_ENDPOINT = "https://api.deepseek.com/chat/completions";
-const CRITIC_SCHEMA = "qingzhou.web-extraction-variation-critic.v2";
+const CRITIC_SCHEMA = "zuri.web-extraction-variation-critic.v2";
 const TRAINING_DELIVERY_FIELDS = Object.freeze([
   "sample_id", "page_id", "url", "task_type", "instruction", "html", "output",
 ]);
@@ -481,7 +481,7 @@ function validateCriticResult(result, sampleId, expected = {}) {
 function criticPacket(sampleId, teacherResult, pageEvidence) {
   const teacherResultSha256 = sha256(JSON.stringify(teacherResult));
   const payload = {
-    schema: "qingzhou.web-extraction-variation-critic-request.v1",
+    schema: "zuri.web-extraction-variation-critic-request.v1",
     sampleId,
     teacherResultSha256,
     pageEvidence,
@@ -734,7 +734,7 @@ async function materializeTrainingPage(page, corpus, sample, label) {
     clone.querySelectorAll("*").forEach(element => {
       for (const attribute of [...element.attributes]) {
         const name = attribute.name.toLowerCase();
-        if (name.startsWith("on") || name.startsWith("data-qz-") || !allowedAttributes.has(name)) {
+        if (name.startsWith("on") || name.startsWith("data-zuri-") || !allowedAttributes.has(name)) {
           element.removeAttribute(attribute.name);
           continue;
         }
@@ -1033,7 +1033,7 @@ async function synthesizeSample({
   const allowedUrls = new Set(materialized.allowedUrls.map(url => canonicalUrl(url, sample.finalUrl)).filter(Boolean));
   const sourceBundle = variationSourceBundle({ ...materialized, allowedUrls: [...allowedUrls].sort() }, goldMarkdown);
   writeJsonAtomic(contextPath, {
-    schema: "qingzhou.web-extraction-variation-context.v1",
+    schema: "zuri.web-extraction-variation-context.v1",
     sampleId: sample.id,
     finalUrl: sample.finalUrl,
     pageText: materialized.visibleText,
@@ -1045,7 +1045,7 @@ async function synthesizeSample({
     approvedStructures: materialized.approved.structures,
   });
   const basePacket = {
-    schema: "qingzhou.web-extraction-variation-request.v1",
+    schema: "zuri.web-extraction-variation-request.v1",
     sample: {
       id: sample.id,
       url: sample.finalUrl,
@@ -1187,7 +1187,7 @@ async function synthesizeSample({
 function readCorpus(corpus) {
   const manifestPath = join(corpus, "manifest.json");
   const manifest = json(manifestPath);
-  if (manifest.schema !== "qingzhou.article-extraction-corpus.v1" || manifest.samples?.length !== 1500) {
+  if (manifest.schema !== "zuri.article-extraction-corpus.v1" || manifest.samples?.length !== 1500) {
     throw new Error("expected the finalized 1500-page corpus");
   }
   return {
@@ -1315,7 +1315,7 @@ async function synthesize({ corpus, output, keyFile, endpoint, model, workers, s
     await browser.close();
   }
   writeJsonAtomic(join(output, "synthesis-summary.json"), {
-    schema: "qingzhou.web-extraction-variation-synthesis.v1",
+    schema: "zuri.web-extraction-variation-synthesis.v1",
     complete: completed === samples.length,
     scope: requested.size ? "selected-smoke" : "full-corpus",
     samples: samples.length,
@@ -1717,7 +1717,7 @@ async function pack({ corpus, output, model, endpoint, systemPrompt }) {
   writeJsonAtomic(join(packOutput, "test_pages.json"), pageSplits.test.map(id => `evidence_html/${id}.html`));
   const catalog = taskCatalog(records);
   writeJsonAtomic(join(packOutput, "scripts", "task_catalog.json"), {
-    schema: "qingzhou.web-extraction-task-catalog.v1",
+    schema: "zuri.web-extraction-task-catalog.v1",
     generatorVersion: GENERATOR_VERSION,
     qaPolicyVersion: QA_POLICY_VERSION,
     formats: distribution(catalog.map(row => row.outputFormat)),
@@ -1801,7 +1801,7 @@ async function pack({ corpus, output, model, endpoint, systemPrompt }) {
   for (const path of [indexPath, ...Object.values(sftPaths), join(packOutput, "page_splits.json"), join(packOutput, "dev_pages.json"), join(packOutput, "test_pages.json")]) {
     manifest.files[basename(path)] = { bytes: statSync(path).size, sha256: await hashFileStreaming(path) };
   }
-  const readme = `# Qingzhou 1500-page extraction variation pack\n\n` +
+  const readme = `# Zuri 1500-page extraction variation pack\n\n` +
     `本包参考 raw_samples_pack 的目录和 10 个核心索引字段构建，共 1500 页、${taskCount} 条任务。每页始终保留 t0 人工边界校验后的完整 Markdown；只有通过全部重校验的页面才保留 t1/t2。失败或缺失的 custom record 直接丢弃，不修复、不重试，也不写入 SFT。\n\n` +
     `- html/：与 corpus inputSha256 一致的原始冻结 HTML 字节，仅用于 provenance，不进入训练 prompt。\n` +
     `- evidence_html/：未截断、未分片的整页 rendered visible compact DOM；它会移除脚本、样式、隐藏节点等非可见运行内容，teacher 合成与最终训练 prompt 都只使用这一表示。这里的 wholePage 指完整 compact DOM，不表示原始 HTML 的每个字节都进入模型。\n` +
@@ -1925,7 +1925,7 @@ async function createZipArtifact(output, zipPath) {
   };
   const sidecarPath = `${target}.sha256.json`;
   writeJsonAtomic(sidecarPath, {
-    schema: "qingzhou.web-extraction-training-pack-zip.v1",
+    schema: "zuri.web-extraction-training-pack-zip.v1",
     zipFile: basename(target),
     bytes: result.bytes,
     sha256: result.sha256,

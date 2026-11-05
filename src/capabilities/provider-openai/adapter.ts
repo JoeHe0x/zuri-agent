@@ -818,9 +818,9 @@ function isRecognizableProviderError(code = "", type = "", message = "") {
 let _fallbackSessionAffinity: string | null = null;
 function getSessionAffinityId(sessionId: unknown) {
   const normalized = normalizeHeaderToken(sessionId);
-  if (normalized) return `qz-${normalized}`;
+  if (normalized) return `zuri-${normalized}`;
   if (!_fallbackSessionAffinity) {
-    _fallbackSessionAffinity = `qz-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    _fallbackSessionAffinity = `zuri-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
   }
   return _fallbackSessionAffinity;
 }

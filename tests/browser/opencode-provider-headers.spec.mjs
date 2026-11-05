@@ -7,9 +7,9 @@ import { expect, test } from "./fixtures.mjs";
 import { ensureTestExtension } from "../support/extension-build.mjs";
 
 /** A real HTTPS receiver observes headers after Chrome's MV3 rules, not fetch arguments. */
-test("provider requests send qz client identity and preserve OpenCode conversation routing on the wire", async ({}, testInfo) => {
+test("provider requests send zuri client identity and preserve OpenCode conversation routing on the wire", async ({}, testInfo) => {
   test.setTimeout(60_000);
-  const directory = await mkdtemp(join(tmpdir(), "qingzhou-provider-headers-"));
+  const directory = await mkdtemp(join(tmpdir(), "zuri-provider-headers-"));
   const requests = [];
   let context;
   let receiver;
@@ -130,8 +130,8 @@ test("provider requests send qz client identity and preserve OpenCode conversati
     for (const request of requests) {
       const go = request.host === "opencode.ai" && request.path.startsWith("/zen/go/v1/");
       const scoped = scopedRequests.find(([url]) => url === `https://${request.host}${request.path}`)?.[1];
-      if (go || scoped) expect(request.headers["user-agent"], `${request.host}${request.path}`).toBe("qz-agent/1.0.0");
-      else expect(request.headers["user-agent"], `${request.host}${request.path}`).not.toBe("qz-agent/1.0.0");
+      if (go || scoped) expect(request.headers["user-agent"], `${request.host}${request.path}`).toBe("zuri-agent/1.0.0");
+      else expect(request.headers["user-agent"], `${request.host}${request.path}`).not.toBe("zuri-agent/1.0.0");
       if (!go) expect(request.headers["x-opencode-session"]).toBeUndefined();
     }
     expect(requests.filter(request => request.path.endsWith("/models"))).toEqual([]);

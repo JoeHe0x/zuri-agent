@@ -11,8 +11,8 @@ from extension_assets import ExtensionAssetHandler, serve_repository
 
 
 ROOT = Path(__file__).resolve().parents[2]
-SAMPLE_PATH = "/qingzhou-documents-runtime-sample.txt"
-SAMPLE_TEXT = "Qingzhou document runtime test\n\nThe document pipeline is complete.\n"
+SAMPLE_PATH = "/zuri-documents-runtime-sample.txt"
+SAMPLE_TEXT = "Zuri document runtime test\n\nThe document pipeline is complete.\n"
 
 
 def expect(condition, message):
@@ -45,23 +45,23 @@ def run():
         with sync_playwright() as playwright:
             browser = playwright.chromium.launch(
                 headless=True,
-                channel=os.environ.get("QINGZHOU_PLAYWRIGHT_CHANNEL", "chromium"),
+                channel=os.environ.get("ZURI_PLAYWRIGHT_CHANNEL", "chromium"),
             )
             page = browser.new_page(locale="zh-CN")
             page_errors = []
             page.on("pageerror", lambda error: page_errors.append(str(error)))
             page.add_init_script(
                 """
-                globalThis.__qzStorage = {};
-                globalThis.__qzPdfBase64 = btoa("%PDF-1.4\\n1 0 obj\\n<< /Type /Catalog >>\\nendobj\\n%%EOF");
-                globalThis.__qzTemporaryTabs = new Map();
-                globalThis.__qzLastPdfRenderUrl = "";
-                globalThis.__qzLastPdfRenderWindowId = null;
-                globalThis.__qzLastWindowTargetSource = null;
+                globalThis.__zuriStorage = {};
+                globalThis.__zuriPdfBase64 = btoa("%PDF-1.4\\n1 0 obj\\n<< /Type /Catalog >>\\nendobj\\n%%EOF");
+                globalThis.__zuriTemporaryTabs = new Map();
+                globalThis.__zuriLastPdfRenderUrl = "";
+                globalThis.__zuriLastPdfRenderWindowId = null;
+                globalThis.__zuriLastWindowTargetSource = null;
                 globalThis.chrome = {
                   storage: { local: {
                     async get(key) {
-                      const data = globalThis.__qzStorage;
+                      const data = globalThis.__zuriStorage;
                       if (Array.isArray(key)) return Object.fromEntries(key.map(item => [item, data[item]]));
                       if (typeof key === "string") return { [key]: data[key] };
                       if (key && typeof key === "object") {
@@ -69,9 +69,9 @@ def run():
                       }
                       return { ...data };
                     },
-                    async set(values) { Object.assign(globalThis.__qzStorage, values); },
+                    async set(values) { Object.assign(globalThis.__zuriStorage, values); },
                     async remove(key) {
-                      for (const item of (Array.isArray(key) ? key : [key])) delete globalThis.__qzStorage[item];
+                      for (const item of (Array.isArray(key) ? key : [key])) delete globalThis.__zuriStorage[item];
                     }
                   }},
                   debugger: {
@@ -79,7 +79,7 @@ def run():
                     async attach() {},
                     async detach() {},
                     async sendCommand(_target, method) {
-                      if (method === "Page.printToPDF") return { data: globalThis.__qzPdfBase64 };
+                      if (method === "Page.printToPDF") return { data: globalThis.__zuriPdfBase64 };
                       return {};
                     }
                   },
@@ -88,15 +88,15 @@ def run():
                     onUpdated: { addListener() {}, removeListener() {} },
                     async create(options) {
                       const tab = { id: 901, windowId: options.windowId, status: "complete", title: "PDF render", url: options.url };
-                      globalThis.__qzLastPdfRenderUrl = options.url;
-                      globalThis.__qzLastPdfRenderWindowId = options.windowId;
-                      globalThis.__qzTemporaryTabs.set(tab.id, tab);
+                      globalThis.__zuriLastPdfRenderUrl = options.url;
+                      globalThis.__zuriLastPdfRenderWindowId = options.windowId;
+                      globalThis.__zuriTemporaryTabs.set(tab.id, tab);
                       return tab;
                     },
                     async get(tabId) {
-                      return globalThis.__qzTemporaryTabs.get(tabId) || { id: tabId, status: "complete", url: "about:blank" };
+                      return globalThis.__zuriTemporaryTabs.get(tabId) || { id: tabId, status: "complete", url: "about:blank" };
                     },
-                    async remove(tabId) { globalThis.__qzTemporaryTabs.delete(tabId); }
+                    async remove(tabId) { globalThis.__zuriTemporaryTabs.delete(tabId); }
                   }
                 };
                 """
@@ -111,7 +111,7 @@ def run():
                   const runScriptRuntime = await import("/extension/background/tools/run-script-bridge.js");
                   const windowTarget = {
                     async resolveForNewTab({ sourceWindowId }) {
-                      globalThis.__qzLastWindowTargetSource = sourceWindowId;
+                      globalThis.__zuriLastWindowTargetSource = sourceWindowId;
                       return 81;
                     },
                   };
@@ -125,10 +125,10 @@ def run():
                     sessionId: "doc_browser_e2e",
                     runId: "run_1",
                     sourceWindowId: 81,
-                    loadedPluginSkillNames: ["qingzhou-documents"],
+                    loadedPluginSkillNames: ["zuri-documents"],
                   };
                   const call = (name, args, callContext = context) => toolRuntime.execute(
-                    `qingzhou_documents__${name}`,
+                    `zuri_documents__${name}`,
                     { timeout: 30, ...args },
                     null,
                     callContext,
@@ -149,7 +149,7 @@ def run():
                     docModelId: parsed.docModelId,
                     download: false,
                   });
-                  const modelPdfRenderHtml = decodeURIComponent(globalThis.__qzLastPdfRenderUrl.split(",").slice(1).join(","));
+                  const modelPdfRenderHtml = decodeURIComponent(globalThis.__zuriLastPdfRenderUrl.split(",").slice(1).join(","));
                   const listed = await call("document_list_artifacts", { limit: 10 });
                   const downloaded = await call("document_download", {
                     artifactId: created.artifactId,
@@ -242,7 +242,7 @@ def run():
                     { filename: "direct.csv" },
                   );
                   const directPdfPrefix = atob(directArtifacts.pdf.base64.slice(0, 16));
-                  const directPdfRenderHtml = decodeURIComponent(globalThis.__qzLastPdfRenderUrl.split(",").slice(1).join(","));
+                  const directPdfRenderHtml = decodeURIComponent(globalThis.__zuriLastPdfRenderUrl.split(",").slice(1).join(","));
 
                   const beforeInvalid = await call("document_list_artifacts", { limit: 100 });
                   const invalidCases = {
@@ -281,13 +281,13 @@ def run():
                       hasAgent: () => true,
                       getAbortSignal: () => null,
                     },
-                    getRuntime: () => ({ status: "running", loadedPluginSkillNames: ["qingzhou-documents"] }),
+                    getRuntime: () => ({ status: "running", loadedPluginSkillNames: ["zuri-documents"] }),
                     isTerminalRuntimeForRun: () => false,
                     canManageSessions: async () => true,
                     buildRunProfile: async () => ({}),
                     getRunToolContext: async () => ({
                       dynamicContext: { sourceWindowId: context.sourceWindowId },
-                      loadedPluginSkillNames: ["qingzhou-documents"],
+                      loadedPluginSkillNames: ["zuri-documents"],
                       runProfile: {},
                     }),
                     toolRuntime,
@@ -316,9 +316,9 @@ def run():
                     },
                   });
                   const listedFromScript = await scriptTools.$list();
-                  const documentCreateFromScriptSchema = listedFromScript.find(item => item.name === "qingzhou_documents__document_create");
+                  const documentCreateFromScriptSchema = listedFromScript.find(item => item.name === "zuri_documents__document_create");
                   const executeSyntheticInnerScript = new Function("tools", `
-                    return (async () => tools.qingzhou_documents__document_create({
+                    return (async () => tools.zuri_documents__document_create({
                       timeout: 30,
                       format: "html",
                       filename: "from-run-script.html",
@@ -337,7 +337,7 @@ def run():
                   const htmlFromScript = new TextDecoder().decode(documentUtils.base64ToBytes(artifactFromScript.base64));
                   const createdFormatsFromScript = { html: createdFromScript };
                   for (const format of ["txt", "docx", "pdf"]) {
-                    createdFormatsFromScript[format] = await scriptTools.qingzhou_documents__document_create({
+                    createdFormatsFromScript[format] = await scriptTools.zuri_documents__document_create({
                       timeout: 30,
                       format,
                       filename: `from-run-script.${format}`,
@@ -346,9 +346,9 @@ def run():
                       download: false,
                     });
                   }
-                  const runScriptPdfRenderHtml = decodeURIComponent(globalThis.__qzLastPdfRenderUrl.split(",").slice(1).join(","));
+                  const runScriptPdfRenderHtml = decodeURIComponent(globalThis.__zuriLastPdfRenderUrl.split(",").slice(1).join(","));
                   for (const format of ["xlsx", "csv"]) {
-                    createdFormatsFromScript[format] = await scriptTools.qingzhou_documents__document_create({
+                    createdFormatsFromScript[format] = await scriptTools.zuri_documents__document_create({
                       timeout: 30,
                       format,
                       filename: `from-run-script.${format}`,
@@ -360,7 +360,7 @@ def run():
                   const beforeInvalidFromScript = await call("document_list_artifacts", { limit: 100 });
                   let invalidFromScript = null;
                   try {
-                    await scriptTools.qingzhou_documents__document_create({
+                    await scriptTools.zuri_documents__document_create({
                       timeout: 30,
                       format: "pdf",
                       filename: "bad-from-script.pdf",
@@ -372,7 +372,7 @@ def run():
                   }
                   let missingFormatFromScript = null;
                   try {
-                    await scriptTools.qingzhou_documents__document_create({
+                    await scriptTools.zuri_documents__document_create({
                       timeout: 30,
                       filename: "missing-format-from-script.pdf",
                       blocks: directBlocks,
@@ -418,8 +418,8 @@ def run():
                     missingFormatFromScript,
                     invalidFromScriptArtifactCountBefore: beforeInvalidFromScript.length,
                     invalidFromScriptArtifactCountAfter: afterInvalidFromScript.length,
-                    pdfRenderWindowId: globalThis.__qzLastPdfRenderWindowId,
-                    windowTargetSource: globalThis.__qzLastWindowTargetSource,
+                    pdfRenderWindowId: globalThis.__zuriLastPdfRenderWindowId,
+                    windowTargetSource: globalThis.__zuriLastWindowTargetSource,
                   };
                 }""",
                 {"baseUrl": base_url, "samplePath": SAMPLE_PATH},
@@ -447,7 +447,7 @@ def run():
     expect(len(result["workbookFirst"].get("rows", [])) == 50, "XLSX first page size is incorrect")
     expect(result["workbookSecond"].get("offset") == 50, "XLSX next cursor was not honored")
     expect(result["workbookTextValue"].count("row-1\n") == 1, "XLSX conversion duplicated sheet rows")
-    expect(result["fetched"].get("_plugin", {}).get("id") == "qingzhou-documents", "plugin metadata is missing")
+    expect(result["fetched"].get("_plugin", {}).get("id") == "zuri-documents", "plugin metadata is missing")
     expect("trace" not in result["chunk"], "document result was duplicated into host trace")
     expect(result["foreignError"].get("code") == "DOCUMENT_SESSION_FOREIGN", "foreign session access should be rejected")
 

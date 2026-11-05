@@ -2,7 +2,7 @@
 
 Use a theme to provide the shared tokens, controls, and utilities for the Side Panel. The default
 implementation is in [default/index.css](default/index.css). Every theme preserves the public token,
-`qz-*`, `qz:`, and DOM contracts in the [design system guide](../../docs/design-system.md).
+`zuri-*`, `zuri:`, and DOM contracts in the [design system guide](../../docs/design-system.md).
 
 Select a theme at build time by changing the first import in
 [sidepanel.css](../sidepanel/sidepanel.css) to the theme's `index.css`, then rebuild. See [Select a

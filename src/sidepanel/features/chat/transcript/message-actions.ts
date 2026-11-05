@@ -52,10 +52,10 @@ export function createMessageActions(options: ActionOptions) {
       const actions = document.createElement("div");
       actions.className = "msg-actions";
       actions.innerHTML = `
-        <button class="qz-icon-btn qz-icon-btn--xs msg-action-btn" type="button" data-action="copy-markdown" title="${tHtml("copyMarkdown")}" aria-label="${tHtml("copyMarkdown")}">
+        <button class="zuri-icon-btn zuri-icon-btn--xs msg-action-btn" type="button" data-action="copy-markdown" title="${tHtml("copyMarkdown")}" aria-label="${tHtml("copyMarkdown")}">
           <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="8" y="8" width="10" height="12" rx="2"/><path d="M6 16H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
         </button>
-        <button class="qz-icon-btn qz-icon-btn--xs msg-action-btn" type="button" data-action="download-markdown" title="${tHtml("downloadMessage")}" aria-label="${tHtml("downloadMessage")}">
+        <button class="zuri-icon-btn zuri-icon-btn--xs msg-action-btn" type="button" data-action="download-markdown" title="${tHtml("downloadMessage")}" aria-label="${tHtml("downloadMessage")}">
           <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="2.5" y="5" width="19" height="14" rx="2"/><path d="M6 15V9l3 3 3-3v6M17 9v6m-2-2 2 2 2-2"/></svg>
         </button>
       `;

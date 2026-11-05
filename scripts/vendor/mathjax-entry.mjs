@@ -18,11 +18,11 @@ import TexError from "mathjax-full/ts/input/tex/TexError.js";
 // Preserve \\require for statically registered TeX extensions without importing the URL loader.
 const localPackages = new Set([...AllPackages, "physics", "colorv2"]);
 for (const restricted of ["base", "configmacros", "tagformat"]) localPackages.delete(restricted);
-new CommandMap("qz-local-require", { require: "Require" }, {
+new CommandMap("zuri-local-require", { require: "Require" }, {
   Require(parser, command) {
     const name = parser.GetArgument(command);
     if (!localPackages.has(name)) throw new TexError("BadRequire", 'Extension "%1" is not packaged', name);
-    const state = parser.configuration.packageData.get("qz-local-require");
+    const state = parser.configuration.packageData.get("zuri-local-require");
     if (state.required.has(name)) return;
     state.required.add(name);
     const configuration = ConfigurationHandler.get(name);
@@ -30,10 +30,10 @@ new CommandMap("qz-local-require", { require: "Require" }, {
     if (configuration.preprocessors.length) mathjax.retryAfter(Promise.resolve());
   },
 });
-Configuration.create("qz-local-require", {
-  handler: { macro: ["qz-local-require"] },
+Configuration.create("zuri-local-require", {
+  handler: { macro: ["zuri-local-require"] },
   config(_configuration, jax) {
-    jax.parseOptions.packageData.set("qz-local-require", { jax, required: new Set(jax.options.packages) });
+    jax.parseOptions.packageData.set("zuri-local-require", { jax, required: new Set(jax.options.packages) });
   },
 });
 
@@ -41,7 +41,7 @@ MathJax._.mathjax = { mathjax };
 MathJax._.core = { MathItem: { STATE }, MmlTree: { SerializedMmlVisitor: { SerializedMmlVisitor } } };
 const configuredPackages = MathJax.config.tex?.packages;
 MathJax.config.tex ||= {};
-MathJax.config.tex.packages = ["qz-local-require", ...AllPackages];
+MathJax.config.tex.packages = ["zuri-local-require", ...AllPackages];
 if (configuredPackages) insert(MathJax.config.tex, { packages: configuredPackages });
 Startup.registerConstructor("tex", TeX);
 Startup.registerConstructor("svg", SVG);

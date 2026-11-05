@@ -4,7 +4,7 @@ import test from 'node:test';
 
 test('cancelled settings reads cannot start a custom embedded host, and a later run can recover', async t => {
   const manifest = {
-    format: 'qingzhou.plugin', schemaVersion: 1, id: 'cancellation-guide',
+    format: 'zuri.plugin', schemaVersion: 1, id: 'cancellation-guide',
     settings: { fields: [{ key: 'token', type: 'secret' }] },
     tools: [{ name: 'inspect', runtime: 'host', script: 'scripts/inspect.js',
       parameters: { type: 'object', properties: { value: { type: 'string' } } } }],
@@ -14,10 +14,10 @@ test('cancelled settings reads cannot start a custom embedded host, and a later 
       { path: 'scripts/inspect.js', type: 'script', content: 'return null;' }] };
   const moduleUrl = source => `data:text/javascript;base64,${Buffer.from(source).toString('base64')}`;
   const catalogs = {
-    '#capabilities/skills': moduleUrl(`export default [qz => qz.registerSkill(${JSON.stringify(definition)})];`),
+    '#capabilities/skills': moduleUrl(`export default [zuri => zuri.registerSkill(${JSON.stringify(definition)})];`),
     '#capabilities/skillHosts': moduleUrl(`
       export const calls = [];
-      export default [qz => qz.registerSkillHost({
+      export default [zuri => zuri.registerSkillHost({
         skillName: 'cancellation-guide', manifestId: 'cancellation-guide', toolName: 'inspect',
         execute: async (args, { signal }) => { calls.push({ args, aborted: signal?.aborted }); return { ok: true }; },
       })];

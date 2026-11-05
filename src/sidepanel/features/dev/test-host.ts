@@ -10,7 +10,7 @@ export interface ConversationTestContext {
   getCurrentSessionId(): string | null; resetNavigation(): void; nowTimestamp(): string;
 }
 declare global {
-  var __QZ_CONVERSATION_BENCHMARK__: boolean | undefined;
-  var __QZ_INSTALL_CONVERSATION_BENCHMARK__: ((context: ConversationTestContext) => void) | undefined;
+  var __ZURI_CONVERSATION_BENCHMARK__: boolean | undefined;
+  var __ZURI_INSTALL_CONVERSATION_BENCHMARK__: ((context: ConversationTestContext) => void) | undefined;
 }
-export function isConversationBenchmarkHarness() { return globalThis.__QZ_CONVERSATION_BENCHMARK__ === true; }
+export function isConversationBenchmarkHarness() { return globalThis.__ZURI_CONVERSATION_BENCHMARK__ === true; }

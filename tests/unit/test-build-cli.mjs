@@ -62,7 +62,7 @@ test("a failed or interrupted typecheck preserves the last successful output", a
     assert.match(result.stderr, message);
     assert.equal(result.stdout, "");
     assert.equal(await readFile(previous, "utf8"), "last successful extension");
-    assert.equal(existsSync(join(fixture.output, ".qingzhou-build.json")), false);
+    assert.equal(existsSync(join(fixture.output, ".zuri-build.json")), false);
     assert.equal(existsSync(fixture.checked), true);
   }
 });
@@ -75,7 +75,7 @@ test("build prints a concise summary and forwards production and product options
   assert.equal(result.status, 0, result.stderr);
   assert.match(result.stdout, /^Built \d+ files \(production, public, chrome\) in /);
   assert.equal(result.stdout.trim().split("\n").length, 1);
-  const manifest = JSON.parse(await readFile(join(fixture.output, ".qingzhou-build.json"), "utf8"));
+  const manifest = JSON.parse(await readFile(join(fixture.output, ".zuri-build.json"), "utf8"));
   assert.equal(Object.hasOwn(manifest, "browser"), false);
   assert.equal(manifest.mode, "production");
   assert.equal(manifest.product, "public");
@@ -94,7 +94,7 @@ test("JSON build output remains parseable when the typecheck gate prints progres
   assert.equal(summary.browser, "chrome");
   assert.equal(summary.mode, "development");
   assert.equal(summary.outputDir, fixture.output);
-  const packaged = JSON.parse(await readFile(join(fixture.output, ".qingzhou-build.json"), "utf8"));
+  const packaged = JSON.parse(await readFile(join(fixture.output, ".zuri-build.json"), "utf8"));
   assert.equal(Object.hasOwn(packaged, "browser"), false);
   assert.equal(summary.formatVersion, 1);
   assert.ok(summary.files.includes("background/service-worker.js"));
@@ -142,7 +142,7 @@ test("a shared import of a Firefox-only module fails the Chrome build and passes
   assert.equal(firefox.status, 0, firefox.stderr);
   const summary = JSON.parse(firefox.stdout);
   assert.equal(summary.browser, "firefox");
-  const packaged = JSON.parse(await readFile(join(firefoxDir, ".qingzhou-build.json"), "utf8"));
+  const packaged = JSON.parse(await readFile(join(firefoxDir, ".zuri-build.json"), "utf8"));
   assert.equal(Object.hasOwn(packaged, "browser"), false);
   assert.ok(packaged.files.includes("background/firefox/host.js"));
 });
@@ -167,7 +167,7 @@ function run(args, options = {}) {
 }
 
 async function workspace(t) {
-  const work = await realpath(await mkdtemp(join(tmpdir(), "qingzhou-build-cli-")));
+  const work = await realpath(await mkdtemp(join(tmpdir(), "zuri-build-cli-")));
   t.after(() => rm(work, { recursive: true, force: true }));
   return { work, source: join(work, "src"), output: join(work, "output"), checked: join(work, "typecheck-ran") };
 }

@@ -296,18 +296,18 @@ export function createDataGridAdapter(options: GridOptions) {
     dataPreview.innerHTML = `
       <div class="data-grid-shell">
         <div class="data-grid-table" aria-label="${escapeHtmlAttribute(t("dataGrid"))}"></div>
-        <div class="qz-popover data-grid-filter-popover hidden" data-data-grid-filter-popover>
+        <div class="zuri-popover data-grid-filter-popover hidden" data-data-grid-filter-popover>
           <div class="data-grid-filter-head">
             <span data-data-grid-filter-title></span>
-            <button class="qz-icon-btn qz-icon-btn--xs" type="button" data-data-grid-filter-close aria-label="${escapeHtmlAttribute(t("closeFilter"))}">×</button>
+            <button class="zuri-icon-btn zuri-icon-btn--xs" type="button" data-data-grid-filter-close aria-label="${escapeHtmlAttribute(t("closeFilter"))}">×</button>
           </div>
           <div class="data-grid-filter-summary" data-data-grid-filter-summary></div>
           <div class="data-grid-filter-custom" data-data-grid-filter-custom>
-            <input class="qz-field qz-field--sm" data-data-grid-filter-input type="text" autocomplete="off">
+            <input class="zuri-field zuri-field--sm" data-data-grid-filter-input type="text" autocomplete="off">
           </div>
           <div class="data-grid-filter-options hidden" data-data-grid-filter-options></div>
           <div class="data-grid-filter-actions">
-            <button class="qz-btn qz-btn--ghost qz-btn--xs" type="button" data-data-grid-filter-clear>${escapeHtml(t("clear"))}</button>
+            <button class="zuri-btn zuri-btn--ghost zuri-btn--xs" type="button" data-data-grid-filter-clear>${escapeHtml(t("clear"))}</button>
           </div>
         </div>
         ${metaText ? `<div class="data-preview-meta" data-data-grid-meta data-base-text="${escapeHtmlAttribute(metaText)}">${escapeHtml(metaText)}</div>` : ""}
@@ -455,7 +455,7 @@ export function createDataGridAdapter(options: GridOptions) {
       .catch(err => {
         if (dataGridInstance !== instance || !lifecycle.isCurrent(generation)) return;
         lifecycle.transition("ready", generation);
-        console.warn("[轻舟数据] refresh data grid failed", err);
+        console.warn("[Zuri数据] refresh data grid failed", err);
         dataGridRenderKey = "";
         renderCurrentDataTable();
       });
@@ -566,7 +566,7 @@ export function createDataGridAdapter(options: GridOptions) {
       dataGridInstance.setHeight?.(`${nextHeight}px`);
       dataGridInstance.redraw?.(true);
     } catch (err) {
-      console.warn("[轻舟数据] resize data grid failed", err);
+      console.warn("[Zuri数据] resize data grid failed", err);
     }
   }
 
@@ -755,11 +755,11 @@ export function createDataGridAdapter(options: GridOptions) {
 
   function dataGridRowHeaderFormatter(cell: GridCell) {
     const rowId = cell?.getRow?.()?.getData?.()?._rowId || "";
-    return `<input class="qz-checkbox data-grid-row-check" type="checkbox" data-row-id="${escapeHtmlAttribute(rowId)}" aria-label="${escapeHtmlAttribute(t("selectRow"))}">`;
+    return `<input class="zuri-checkbox data-grid-row-check" type="checkbox" data-row-id="${escapeHtmlAttribute(rowId)}" aria-label="${escapeHtmlAttribute(t("selectRow"))}">`;
   }
 
   function dataGridRowHeaderTitleFormatter() {
-    return `<input class="qz-checkbox data-grid-row-check-all" type="checkbox" aria-label="${escapeHtmlAttribute(t("selectAllVisibleRows"))}">`;
+    return `<input class="zuri-checkbox data-grid-row-check-all" type="checkbox" aria-label="${escapeHtmlAttribute(t("selectAllVisibleRows"))}">`;
   }
 
   function dataGridColumnTitleFormatter(header: Pick<GridCell, "getColumn" | "getValue">) {
@@ -773,7 +773,7 @@ export function createDataGridAdapter(options: GridOptions) {
         <span class="data-grid-column-title-text">${escapeHtml(label)}</span>
         <span class="data-grid-column-sort-indicator" aria-hidden="true"></span>
         <button
-          class="qz-icon-btn qz-icon-btn--xs data-grid-column-filter-btn ${active ? "active" : ""}"
+          class="zuri-icon-btn zuri-icon-btn--xs data-grid-column-filter-btn ${active ? "active" : ""}"
           type="button"
           data-filter-field="${escapeHtmlAttribute(field)}"
           title="${escapeHtmlAttribute(active ? t("adjustFilter") : t("filter"))}"
@@ -1071,7 +1071,7 @@ export function createDataGridAdapter(options: GridOptions) {
           const label = dataGridFilterModel.categoricalValueLabel(option.value);
           return `
             <label class="data-grid-filter-option" title="${escapeHtmlAttribute(label)}">
-              <input class="qz-checkbox" type="checkbox" value="${escapeHtmlAttribute(option.value)}" ${selected.has(option.value) ? "checked" : ""}>
+              <input class="zuri-checkbox" type="checkbox" value="${escapeHtmlAttribute(option.value)}" ${selected.has(option.value) ? "checked" : ""}>
               <span class="data-grid-filter-option-label">${escapeHtml(label)}</span>
               <span class="data-grid-filter-option-count">${option.count}</span>
             </label>

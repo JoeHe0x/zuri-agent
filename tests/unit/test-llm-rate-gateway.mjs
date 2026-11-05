@@ -351,8 +351,8 @@ test("the default governor records rolling RPM and TPM in debug trace", async ()
       yield { type: "done", message: { role: "assistant", content: "ok" } };
     },
   };
-  const previousDebug = globalThis.__qzDebug;
-  globalThis.__qzDebug = { enabled: true, logs: [] };
+  const previousDebug = globalThis.__zuriDebug;
+  globalThis.__zuriDebug = { enabled: true, logs: [] };
   try {
     const gateway = createLlmGateway({
       adapters: { openai: adapter, anthropic: adapter, "openai-codex": adapter },
@@ -365,12 +365,12 @@ test("the default governor records rolling RPM and TPM in debug trace", async ()
       spanId: "run-debug:llm:1",
     });
 
-    const rateLogs = globalThis.__qzDebug.logs.filter(line => line.includes("provider_rate"));
+    const rateLogs = globalThis.__zuriDebug.logs.filter(line => line.includes("provider_rate"));
     assert.match(rateLogs[0], /phase=admitted provider=deepseek sessionId=session-debug runId=run-debug spanId=run-debug:llm:1 rpm=1 rpmLimit=19 tpm=123 tpmLimit=980000/);
     assert.match(rateLogs[1], /phase=settled provider=deepseek sessionId=session-debug runId=run-debug spanId=run-debug:llm:1 rpm=1 rpmLimit=19 tpm=123 tpmLimit=980000 tokenUnit=estimated estimatedTokens=123 reportedTokens=150/);
   } finally {
-    if (previousDebug === undefined) delete globalThis.__qzDebug;
-    else globalThis.__qzDebug = previousDebug;
+    if (previousDebug === undefined) delete globalThis.__zuriDebug;
+    else globalThis.__zuriDebug = previousDebug;
   }
 });
 
@@ -763,8 +763,8 @@ test("a prior retry attempt cannot mask a later stream-body rate failure", async
 });
 
 test("default learning trace includes provider and session/run/span identity", async () => {
-  const previousDebug = globalThis.__qzDebug;
-  globalThis.__qzDebug = { enabled: true, logs: [] };
+  const previousDebug = globalThis.__zuriDebug;
+  globalThis.__zuriDebug = { enabled: true, logs: [] };
   const governor = createProviderRateGovernor();
   const adapter = {
     async chat(_messages, _tools, _signal, options) {
@@ -792,7 +792,7 @@ test("default learning trace includes provider and session/run/span identity", a
       spanId: "run-learning-trace:llm:1",
       config: config(),
     });
-    const line = globalThis.__qzDebug.logs.find(value => value.includes("provider_rate_learning"));
+    const line = globalThis.__zuriDebug.logs.find(value => value.includes("provider_rate_learning"));
     assert.match(line, /phase=signal provider=deepseek/);
     assert.match(line, /sessionId=session-learning-trace runId=run-learning-trace spanId=run-learning-trace:llm:1/);
     assert.match(line, /signal=rate_limit dimension=requests trusted=true/);
@@ -801,8 +801,8 @@ test("default learning trace includes provider and session/run/span identity", a
     assert.match(line, /pressurePct=100 pressureLowerPct=0 pressureUpperPct=0 pressureStreak=0/);
     assert.match(line, /floorRpm=19 floorTpm=980000/);
   } finally {
-    if (previousDebug === undefined) delete globalThis.__qzDebug;
-    else globalThis.__qzDebug = previousDebug;
+    if (previousDebug === undefined) delete globalThis.__zuriDebug;
+    else globalThis.__zuriDebug = previousDebug;
   }
 });
 

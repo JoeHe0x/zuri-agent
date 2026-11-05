@@ -4,9 +4,9 @@ import { t } from "./i18n.js";
 /** A minimal parser-only format. The host still enforces file size and Session ownership. */
 export const createJsonDocumentCodec = (decodeUtf8: (bytes: Uint8Array) => string): DocumentCodec => ({
   id: "json-note",
-  mimeType: "application/vnd.qingzhou.note+json",
+  mimeType: "application/vnd.zuri.note+json",
   priority: 100,
-  matches: input => input.extension === "qznote" || input.mimeType === "application/vnd.qingzhou.note+json",
+  matches: input => input.extension === "qznote" || input.mimeType === "application/vnd.zuri.note+json",
   parse(bytes) {
     const input: unknown = JSON.parse(decodeUtf8(bytes));
     if (!input || typeof input !== "object" || !("text" in input) || typeof input.text !== "string") throw new Error(t("invalidDocument"));

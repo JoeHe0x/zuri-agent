@@ -38,27 +38,27 @@ for (const [name, value] of Object.entries(tokens)) {
 }
 
 for (const primitive of [
-  ".qz-btn",
-  ".qz-icon-btn",
-  ".qz-btn--primary",
-  ".qz-btn--secondary",
-  ".qz-btn--ghost",
-  ".qz-btn--danger",
-  ".qz-btn--inline",
-  ".qz-btn--xs",
-  ".qz-btn--sm",
-  ".qz-btn--lg",
-  ".qz-icon-btn--xs",
-  ".qz-icon-btn--sm",
-  ".qz-icon-btn--md",
-  ".qz-icon-btn--secondary",
-  ".qz-icon-btn--danger",
+  ".zuri-btn",
+  ".zuri-icon-btn",
+  ".zuri-btn--primary",
+  ".zuri-btn--secondary",
+  ".zuri-btn--ghost",
+  ".zuri-btn--danger",
+  ".zuri-btn--inline",
+  ".zuri-btn--xs",
+  ".zuri-btn--sm",
+  ".zuri-btn--lg",
+  ".zuri-icon-btn--xs",
+  ".zuri-icon-btn--sm",
+  ".zuri-icon-btn--md",
+  ".zuri-icon-btn--secondary",
+  ".zuri-icon-btn--danger",
 ]) {
   assert.match(css, new RegExp(`${primitive.replaceAll(".", "\\.")}\\b`, "u"), `${primitive} must be public`);
 }
 
 const independentButtonClasses = new Set([
-  "qz-menu-item",
+  "zuri-menu-item",
   "model-menu-trigger",
   "skill-chip-remove",
   "mention-chip-remove",
@@ -124,7 +124,7 @@ const classAttribute = tag => {
 };
 
 const classTokens = value => value.split(/\s+/u).filter(Boolean).map(token => token.split("${", 1)[0]);
-const isPrimitive = value => classTokens(value).some(token => token === "qz-btn" || token === "qz-icon-btn");
+const isPrimitive = value => classTokens(value).some(token => token === "zuri-btn" || token === "zuri-icon-btn");
 
 const audit = [];
 for (const relativePath of buttonSources) {
@@ -134,7 +134,7 @@ for (const relativePath of buttonSources) {
     const line = source.slice(0, match.index).split("\n").length;
     const tokensForButton = classTokens(classes);
     const independent = tokensForButton.find(token => independentButtonClasses.has(token));
-    const fieldSelect = tokensForButton.includes("qz-field") && tokensForButton.includes("qz-select");
+    const fieldSelect = tokensForButton.includes("zuri-field") && tokensForButton.includes("zuri-select");
     audit.push({ relativePath, line, classes, primitive: isPrimitive(classes), independent, fieldSelect });
 
     if (fieldSelect) {
@@ -145,7 +145,7 @@ for (const relativePath of buttonSources) {
     assert.notEqual(classes, "", `${relativePath}:${line} button must declare its UI role`);
     assert.ok(
       isPrimitive(classes) || independent || fieldSelect,
-      `${relativePath}:${line} conventional button must use qz-btn/qz-icon-btn; got "${classes}"`,
+      `${relativePath}:${line} conventional button must use zuri-btn/zuri-icon-btn; got "${classes}"`,
     );
 
     for (const boundaryClass of tokensForButton.filter(token => independentBoundaryClasses.has(token))) {
@@ -168,7 +168,7 @@ const sessionExportFeatureJs = readFileSync(join(root, "src/sidepanel/features/e
 const uiUtilsSource = readFileSync(join(root, "src/sidepanel/ui/ui-utils.ts"), "utf8");
 assert.match(
   uiUtilsSource,
-  /createElement\("button"\)[\s\S]{0,180}className\s*=\s*"qz-icon-btn qz-icon-btn--xs code-copy-btn"/u,
+  /createElement\("button"\)[\s\S]{0,180}className\s*=\s*"zuri-icon-btn zuri-icon-btn--xs code-copy-btn"/u,
   "the shared code-copy factory must use the icon primitive",
 );
 for (const [name, source] of [["markdown feature", markdownFeatureJs], ["generic result renderer", genericResultRendererJs]]) {
@@ -176,18 +176,18 @@ for (const [name, source] of [["markdown feature", markdownFeatureJs], ["generic
 }
 assert.match(
   sessionExportFeatureJs,
-  /createElement\("button"\)[\s\S]{0,180}className\s*=\s*"qz-icon-btn qz-icon-btn--md image-lightbox-close"/u,
+  /createElement\("button"\)[\s\S]{0,180}className\s*=\s*"zuri-icon-btn zuri-icon-btn--md image-lightbox-close"/u,
   "exported-session lightbox close button must use the icon primitive",
 );
 assert.match(
   sessionExportFeatureJs,
-  /id="qingzhou-session-cta" class="qz-btn qz-btn--primary qz-btn--xs session-export-cta"/u,
+  /id="zuri-session-cta" class="zuri-btn zuri-btn--primary zuri-btn--xs session-export-cta"/u,
   "exported-session continuation action must use the text button primitive",
 );
 
 for (const movingControl of [
-  /\.qz-btn[^{}]*(?::hover|:active)[^{}]*\{[^{}]*transform\s*:/gu,
-  /\.qz-icon-btn[^{}]*(?::hover|:active)[^{}]*\{[^{}]*transform\s*:/gu,
+  /\.zuri-btn[^{}]*(?::hover|:active)[^{}]*\{[^{}]*transform\s*:/gu,
+  /\.zuri-icon-btn[^{}]*(?::hover|:active)[^{}]*\{[^{}]*transform\s*:/gu,
 ]) {
   assert.equal(movingControl.test(css), false, `command controls must not shift under pointer interaction: ${movingControl}`);
 }

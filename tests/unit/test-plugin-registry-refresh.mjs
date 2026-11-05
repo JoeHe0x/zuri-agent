@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import {
-  QINGZHOU_SKILL_FORMAT,
-  QINGZHOU_SKILL_SCHEMA_VERSION,
+  ZURI_SKILL_FORMAT,
+  ZURI_SKILL_SCHEMA_VERSION,
 } from "../../src/shared/skills/skill-utils.js";
 import {
   SKILL_MANIFEST_FORMAT,
@@ -20,8 +20,8 @@ function pluginSkill(name, id) {
     domains: [],
     urlPatterns: [],
     excludePatterns: [],
-    format: QINGZHOU_SKILL_FORMAT,
-    schemaVersion: QINGZHOU_SKILL_SCHEMA_VERSION,
+    format: ZURI_SKILL_FORMAT,
+    schemaVersion: ZURI_SKILL_SCHEMA_VERSION,
     createdAt: "2026-07-14 10:00:00",
     updatedAt: "2026-07-14 10:00:00",
     resources: [

@@ -8,7 +8,7 @@ import test from "node:test";
 import { readTestApiKey } from "../support/local-credentials.mjs";
 
 function fixture(t) {
-  const root = mkdtempSync(join(tmpdir(), "qingzhou-credentials-"));
+  const root = mkdtempSync(join(tmpdir(), "zuri-credentials-"));
   t.after(() => rmSync(root, { recursive: true, force: true }));
   const envFile = join(root, ".env.local");
   writeFileSync(envFile, 'DEEPSEEK_API_KEY="fixture-local"\nKIMICODE_API_KEY=fixture-kimi\n');

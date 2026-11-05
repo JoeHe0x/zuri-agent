@@ -47,8 +47,8 @@ test("CLI send follows later runs without resending its accepted message", async
     } }),
     callTool: async (_endpoint, name) => {
       calls++;
-      if (name === "qingzhou_send_message") return { accepted: true, clientMessageId: "requested-message" };
-      assert.equal(name, "qingzhou_get_session_snapshot");
+      if (name === "zuri_send_message") return { accepted: true, clientMessageId: "requested-message" };
+      assert.equal(name, "zuri_get_session_snapshot");
       return passed;
     },
   });
@@ -63,8 +63,8 @@ test("CLI send finishes when its accepted queued follow-up was removed before ob
     findDaemon: async () => cliHealth(),
     callTool: async (_endpoint, name) => {
       calls.push(name);
-      if (name === "qingzhou_send_message") return { accepted: true, disposition: "queued", clientMessageId: "removed" };
-      assert.equal(name, "qingzhou_get_session_snapshot");
+      if (name === "zuri_send_message") return { accepted: true, disposition: "queued", clientMessageId: "removed" };
+      assert.equal(name, "zuri_get_session_snapshot");
       return passed;
     },
     onTaskUpdate: update => updates.push(update),
@@ -72,7 +72,7 @@ test("CLI send finishes when its accepted queued follow-up was removed before ob
   assert.equal(result.accepted, true);
   assert.equal(result.snapshot.status, "completed");
   assert.equal(updates.some(update => update.type === "text"), false);
-  assert.deepEqual(calls, ["qingzhou_send_message", "qingzhou_get_session_snapshot"]);
+  assert.deepEqual(calls, ["zuri_send_message", "zuri_get_session_snapshot"]);
 });
 
 test("CLI recovery commands preserve shell-sensitive IDs and option-like values", { skip: process.platform === "win32" }, async () => {
@@ -83,12 +83,12 @@ test("CLI recovery commands preserve shell-sensitive IDs and option-like values"
         findDaemon: async () => ({ endpoint: "http://127.0.0.1:23456", health: { features: { browserPairing: 1 },
           status: { connected: true, clients: [{ clientId }] },
         } }),
-        callTool: async (_endpoint, name) => name === "qingzhou_send_message"
+        callTool: async (_endpoint, name) => name === "zuri_send_message"
           ? { accepted: true, ...(tracked ? { clientMessageId: "requested-message" } : {}) }
           : passed,
       }), error => {
         assert.equal(error.code, tracked ? "task_changed" : "invalid_response");
-        const shell = spawnSync("/bin/sh", ["-c", `qz() { printf '%s\\n' "$@"; }\n${error.details.command}`], { encoding: "utf8" });
+        const shell = spawnSync("/bin/sh", ["-c", `zuri() { printf '%s\\n' "$@"; }\n${error.details.command}`], { encoding: "utf8" });
         assert.equal(shell.status, 0, shell.stderr);
         const parsed = parseCommand(shell.stdout.trimEnd().split("\n"));
         assert.equal(parsed.command, tracked ? "tasks" : "watch");
@@ -118,8 +118,8 @@ test("executing the CLI timeout recovery command follows the original task witho
       assert.equal(args.sessionId, "task");
       assert.equal(args.clientId, browserA);
       calls.push(name);
-      if (name === "qingzhou_send_message") return { accepted: true, clientMessageId: "requested-message" };
-      assert.equal(name, "qingzhou_get_session_snapshot");
+      if (name === "zuri_send_message") return { accepted: true, clientMessageId: "requested-message" };
+      assert.equal(name, "zuri_get_session_snapshot");
       if (resumed) reads++;
       return resumed && reads === 2 ? passed : {
         ...passed, status: "pending", runtime: { status: "pending", pendingStart: true },
@@ -129,7 +129,7 @@ test("executing the CLI timeout recovery command follows the original task witho
   await assert.rejects(runCli(["send", "task", "Requested message", "--wait", "--timeout", "0.01"], deps), error => {
     assert.equal(error.code, "timeout");
     recovery = error.details.command;
-    assert.equal(recovery, `qz watch task --client ${browserA} --stream`);
+    assert.equal(recovery, `zuri watch task --client ${browserA} --stream`);
     return true;
   });
   resumed = true;
@@ -137,7 +137,7 @@ test("executing the CLI timeout recovery command follows the original task witho
   assert.equal(result.sessionId, "task");
   assert.equal(result.snapshot, passed);
   assert.equal(reads, 2);
-  assert.equal(calls.filter(name => name === "qingzhou_send_message").length, 1);
+  assert.equal(calls.filter(name => name === "zuri_send_message").length, 1);
 });
 
 for (const deleted of [false, true]) test(`CLI missing-task feedback handles ${deleted ? "deletion" : "an incorrect ID"} with one browser`, async () => {
@@ -149,7 +149,7 @@ for (const deleted of [false, true]) test(`CLI missing-task feedback handles ${d
       findDaemon: async () => cliHealth(),
       stdout: { write: text => { output += text; } }, stderr: { write: () => assert.fail("unexpected stderr") },
       callTool: async (_endpoint, name, args) => {
-        assert.equal(name, "qingzhou_get_session_snapshot");
+        assert.equal(name, "zuri_get_session_snapshot");
         assert.equal(args.sessionId, sessionId);
         assert.equal(args.clientId, browserA);
         reads.push(args);
@@ -166,9 +166,9 @@ for (const deleted of [false, true]) test(`CLI missing-task feedback handles ${d
     assert.doesNotMatch(error.message, /was deleted/);
     assert.equal(error.sessionId, sessionId);
     assert.equal(error.clientId, browserA);
-    assert.match(error.hint, /task ID and selected browser.*qz browsers/);
-    assert.equal(error.command, `qz tasks --client ${browserA}`);
-    assert.doesNotMatch(error.hint + error.command, /Continue watching|qz watch/);
+    assert.match(error.hint, /task ID and selected browser.*zuri browsers/);
+    assert.equal(error.command, `zuri tasks --client ${browserA}`);
+    assert.doesNotMatch(error.hint + error.command, /Continue watching|zuri watch/);
     assert.equal(reads.length, deleted && command === "watch" ? 2 : 1);
   }
 });
@@ -179,8 +179,8 @@ test("CLI wrong-browser recovery stays on the resolved UUID and leaves the ownin
     const calls = [];
     const deps = { findDaemon: async () => running, callTool: async (_endpoint, name, args) => {
       calls.push({ name, ...args });
-      if (name === "qingzhou_list_sessions") return { sessions: args.clientId === browserB ? [] : [{ id: "task" }] };
-      assert.equal(name, "qingzhou_get_session_snapshot");
+      if (name === "zuri_list_sessions") return { sessions: args.clientId === browserB ? [] : [{ id: "task" }] };
+      assert.equal(name, "zuri_get_session_snapshot");
       // A later name reassignment must not alter this operation or its suggested recovery.
       running.health.status.browsers[1].name = "renamed-work";
       running.health.status.browsers[0].name = "work";
@@ -192,7 +192,7 @@ test("CLI wrong-browser recovery stays on the resolved UUID and leaves the ownin
       failure = error;
       assert.equal(error.code, command === "show" ? "task_not_found" : "task_deleted");
       assert.equal(error.details.clientId, browserB);
-      assert.equal(error.details.command, `qz tasks --client ${browserB}`);
+      assert.equal(error.details.command, `zuri tasks --client ${browserB}`);
       return true;
     });
     const listed = await runCli(failure.details.command.split(" ").slice(1), deps);

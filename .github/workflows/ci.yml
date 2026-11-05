@@ -16,7 +16,7 @@ concurrency:
 defaults:
   run:
     shell: bash
-    working-directory: qz-browser-agent
+    working-directory: zuri-agent
 
 jobs:
   portable-build:
@@ -29,13 +29,13 @@ jobs:
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
-          path: qz-browser-agent
+          path: zuri-agent
           persist-credentials: false
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
-          node-version-file: qz-browser-agent/.nvmrc
+          node-version-file: zuri-agent/.nvmrc
           cache: npm
-          cache-dependency-path: qz-browser-agent/package-lock.json
+          cache-dependency-path: zuri-agent/package-lock.json
       - run: npm ci
       - run: npm run build
       - run: npx playwright install chromium
@@ -47,7 +47,7 @@ jobs:
         if: failure()
         with:
           name: chromium-dist-extension-failure-${{ matrix.os }}
-          path: qz-browser-agent/tests/results/playwright/
+          path: zuri-agent/tests/results/playwright/
           retention-days: 7
 
   firefox-package:
@@ -57,13 +57,13 @@ jobs:
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
-          path: qz-browser-agent
+          path: zuri-agent
           persist-credentials: false
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
-          node-version-file: qz-browser-agent/.nvmrc
+          node-version-file: zuri-agent/.nvmrc
           cache: npm
-          cache-dependency-path: qz-browser-agent/package-lock.json
+          cache-dependency-path: zuri-agent/package-lock.json
       - run: npm ci
       - name: Install Mozilla Firefox
         run: |
@@ -83,6 +83,6 @@ jobs:
         with:
           name: firefox-dist-extension-firefox-failure
           path: |
-            qz-browser-agent/tests/results/playwright-firefox/
-            qz-browser-agent/tests/results/firefox-suite.json
+            zuri-agent/tests/results/playwright-firefox/
+            zuri-agent/tests/results/firefox-suite.json
           retention-days: 7

@@ -20,7 +20,7 @@ function gitExecutable() {
 }
 
 function pathWithoutMagick() {
-  const directory = mkdtempSync(join(tmpdir(), "qz-no-magick-"));
+  const directory = mkdtempSync(join(tmpdir(), "zuri-no-magick-"));
   symlinkSync(gitExecutable(), join(directory, "git"));
   return directory;
 }

@@ -20,7 +20,7 @@ import {
 } from "../support/article-extraction-benchmark.mjs";
 
 test("upstream parity language strata use the parsed frozen root declaration and preserve per-group metrics", t => {
-  const fixtureRoot = mkdtempSync(join(tmpdir(), "qingzhou-upstream-language-strata-"));
+  const fixtureRoot = mkdtempSync(join(tmpdir(), "zuri-upstream-language-strata-"));
   t.after(() => rmSync(fixtureRoot, { recursive: true, force: true }));
   const upstream = join(fixtureRoot, "upstream");
   const cache = join(upstream, "tests", "cache");
@@ -69,7 +69,7 @@ def extract(payload, **_kwargs):
   assert.equal(result.status, 0, result.stderr || result.stdout);
 
   const report = JSON.parse(readFileSync(output));
-  assert.equal(report.schema, "qingzhou.article-extraction-upstream.v3");
+  assert.equal(report.schema, "zuri.article-extraction-upstream.v3");
   assert.equal(report.corpus.documents, 4);
   assert.equal(report.languageStrata.documents, report.corpus.documents);
   const groups = report.languageStrata.groups;
@@ -82,7 +82,7 @@ def extract(payload, **_kwargs):
   assert.equal(Object.values(groups).reduce((sum, group) => sum + group.documents, 0), report.corpus.documents);
   for (const group of Object.values(groups)) {
     assert.equal(group.algorithms["trafilatura-python"].f1, 1, "language-group scoring must use only that group's documents");
-    for (const algorithm of ["legacy-readability", "qingzhou-current", "trafilatura-python"]) {
+    for (const algorithm of ["legacy-readability", "zuri-current", "trafilatura-python"]) {
       const metrics = group.algorithms[algorithm];
       assert.equal(metrics.timing.samples, group.documents);
       for (const key of ["precision", "recall", "f1"]) assert.ok(Number.isFinite(metrics[key]), `${algorithm} ${key} is missing`);
@@ -102,11 +102,11 @@ def extract(payload, **_kwargs):
   const treedpReport = JSON.parse(readFileSync(treedpOutput));
   assert.equal(treedpReport.provenance.treedpCandidate, true);
   assert.equal(typeof treedpReport.provenance.sourceSha256.instrumentExtractor, "string");
-  assert.equal(treedpReport.algorithms["qingzhou-treedp"].timing.samples, fixtures.length);
-  assert.deepEqual(Object.keys(treedpReport.headToHead).filter(key => key.includes("qingzhou-treedp")).sort(), [
-    "legacy-readability_vs_qingzhou-treedp",
-    "qingzhou-current_vs_qingzhou-treedp",
-    "qingzhou-treedp_vs_trafilatura-python",
+  assert.equal(treedpReport.algorithms["zuri-treedp"].timing.samples, fixtures.length);
+  assert.deepEqual(Object.keys(treedpReport.headToHead).filter(key => key.includes("zuri-treedp")).sort(), [
+    "legacy-readability_vs_zuri-treedp",
+    "zuri-current_vs_zuri-treedp",
+    "zuri-treedp_vs_trafilatura-python",
   ]);
 
   const defuddleBundle = join(fixtureRoot, "defuddle-fixture.js");
@@ -134,7 +134,7 @@ globalThis.Defuddle = class Defuddle {
   assert.equal(defuddleReport.algorithms.defuddle.strategies["fixture-extractor"], fixtures.length);
   assert.deepEqual(Object.keys(defuddleReport.headToHead).filter(key => key.endsWith("_vs_defuddle")).sort(), [
     "legacy-readability_vs_defuddle",
-    "qingzhou-current_vs_defuddle",
+    "zuri-current_vs_defuddle",
     "trafilatura-python_vs_defuddle",
   ]);
   assert.equal(defuddleReport.languageStrata.groups["declared-English"].algorithms.defuddle.f1, 1);
@@ -142,7 +142,7 @@ globalThis.Defuddle = class Defuddle {
 });
 
 test("capture resume verifies checkpoint provenance and assets before skipping completed sites", async t => {
-  const fixtureRoot = mkdtempSync(join(tmpdir(), "qingzhou-capture-resume-"));
+  const fixtureRoot = mkdtempSync(join(tmpdir(), "zuri-capture-resume-"));
   t.after(() => rmSync(fixtureRoot, { recursive: true, force: true }));
   const requests = new Map();
   const server = createServer((request, response) => {
@@ -158,7 +158,7 @@ test("capture resume verifies checkpoint provenance and assets before skipping c
   const origin = `http://127.0.0.1:${server.address().port}`;
   const configPath = join(fixtureRoot, "config.json");
   const config = {
-    schema: "qingzhou.article-extraction-sites.v1",
+    schema: "zuri.article-extraction-sites.v1",
     sampleTarget: 2,
     strictSiteQuotas: true,
     sites: [{
@@ -216,7 +216,7 @@ test("capture resume verifies checkpoint provenance and assets before skipping c
       reference: { confidence: "high", requiredBlocks: ["已完成站点的冻结正文"] },
     };
     const checkpoint = {
-      schema: "qingzhou.article-extraction-capture-checkpoint.v1",
+      schema: "zuri.article-extraction-capture-checkpoint.v1",
       suite: "core",
       configSha256: digest(readFileSync(configPath)),
       effectivePlanSha256: digest(JSON.stringify(config)),
@@ -288,7 +288,7 @@ test("capture resume verifies checkpoint provenance and assets before skipping c
 });
 
 test("DeepSeek seed labeling sends text-only DOM and text drafts without screenshot payloads", async t => {
-  const fixtureRoot = mkdtempSync(join(tmpdir(), "qingzhou-manual-label-text-only-"));
+  const fixtureRoot = mkdtempSync(join(tmpdir(), "zuri-manual-label-text-only-"));
   t.after(() => rmSync(fixtureRoot, { recursive: true, force: true }));
   const corpus = join(fixtureRoot, "corpus");
   const candidates = join(fixtureRoot, "candidates");
@@ -308,7 +308,7 @@ test("DeepSeek seed labeling sends text-only DOM and text drafts without screens
   writeFileSync(join(corpus, "snapshots", `${excludedSha256}.html`), excludedHtml);
   writeFileSync(join(corpus, screenshotPath), screenshotBytes);
   writeFixtureCorpus(corpus, {
-    schema: "qingzhou.article-extraction-corpus.v1",
+    schema: "zuri.article-extraction-corpus.v1",
     target: 2,
     captured: 2,
     samples: [{
@@ -338,7 +338,7 @@ test("DeepSeek seed labeling sends text-only DOM and text drafts without screens
     }],
     failures: [],
   });
-  for (const algorithm of ["legacy-readability", "qingzhou-current", "trafilatura-python"]) {
+  for (const algorithm of ["legacy-readability", "zuri-current", "trafilatura-python"]) {
     const directory = join(candidates, "outputs", algorithm);
     mkdirSync(directory, { recursive: true });
     writeFileSync(join(directory, "core-0001.json"), `${JSON.stringify({
@@ -449,7 +449,7 @@ test("DeepSeek seed labeling sends text-only DOM and text drafts without screens
   const invalidDecisionsPath = join(fixtureRoot, "invalid-decisions.json");
   const invalidFinalOutput = join(fixtureRoot, "invalid-gold");
   writeFileSync(invalidDecisionsPath, `${JSON.stringify({
-    schema: "qingzhou.article-extraction-manual-decisions.v1",
+    schema: "zuri.article-extraction-manual-decisions.v1",
     corpusDigest: digest(readFileSync(join(corpus, "manifest.json"))),
     reviewer: "fixture-reviewer",
     samples: [{
@@ -489,7 +489,7 @@ test("DeepSeek seed labeling sends text-only DOM and text drafts without screens
   const decisionsPath = join(fixtureRoot, "decisions.json");
   const finalOutput = join(fixtureRoot, "gold");
   writeFileSync(decisionsPath, `${JSON.stringify({
-    schema: "qingzhou.article-extraction-manual-decisions.v1",
+    schema: "zuri.article-extraction-manual-decisions.v1",
     corpusDigest: digest(readFileSync(join(corpus, "manifest.json"))),
     reviewer: "fixture-reviewer",
     reviewedAt: "2026-08-14T00:00:00.000Z",
@@ -550,7 +550,7 @@ test("DeepSeek seed labeling sends text-only DOM and text drafts without screens
 });
 
 test("real-world runner scores approved gold extracts and excludes in separate base and increment shards", t => {
-  const fixtureRoot = mkdtempSync(join(tmpdir(), "qingzhou-gold-score-"));
+  const fixtureRoot = mkdtempSync(join(tmpdir(), "zuri-gold-score-"));
   t.after(() => rmSync(fixtureRoot, { recursive: true, force: true }));
   const corpus = join(fixtureRoot, "corpus");
   const labels = join(fixtureRoot, "manual-labels-final-v1");
@@ -595,7 +595,7 @@ test("real-world runner scores approved gold extracts and excludes in separate b
     };
   });
   writeFixtureCorpus(corpus, {
-    schema: "qingzhou.article-extraction-corpus.v1",
+    schema: "zuri.article-extraction-corpus.v1",
     suite: "core",
     target: samples.length,
     captured: samples.length,
@@ -611,7 +611,7 @@ test("real-world runner scores approved gold extracts and excludes in separate b
   });
   fixtures.forEach(([id, status, , mainText], index) => {
     writeFileSync(join(labels, "labels", `${id}.json`), `${JSON.stringify({
-      schema: "qingzhou.article-extraction-manual-label.v1",
+      schema: "zuri.article-extraction-manual-label.v1",
       sampleId: id,
       inputSha256: samples[index].inputSha256,
       status,
@@ -627,7 +627,7 @@ test("real-world runner scores approved gold extracts and excludes in separate b
     }, null, 2)}\n`);
   });
   const labelManifest = {
-    schema: "qingzhou.article-extraction-manual-label-set.v1",
+    schema: "zuri.article-extraction-manual-label-set.v1",
     corpus: join(corpus, "manifest.json"),
     corpusDigest: digest(readFileSync(join(corpus, "manifest.json"))),
     method: "human-reviewed-frozen-dom",
@@ -667,7 +667,7 @@ def extract(payload, **kwargs):
   const result = run(output);
   assert.equal(result.status, 0, result.stderr || result.stdout);
   const report = JSON.parse(readFileSync(join(output, "report.json")));
-  assert.equal(report.schema, "qingzhou.article-extraction-report.v4");
+  assert.equal(report.schema, "zuri.article-extraction-report.v4");
   assert.deepEqual(report.provenance.candidateProvenance, { enabled: false });
   assert.equal(report.corpus.labelMethod, "human-reviewed-frozen-dom");
   assert.deepEqual(report.corpus.labelStatus, { extract: 2, exclude: 3 });
@@ -698,19 +698,19 @@ def extract(payload, **kwargs):
   assert.equal(markdownQualitySample.metrics.markdown.roundTrip.materialPrecisionDrift, true);
 
   assert.deepEqual(report.crossExtractorOracle.extractors, [
-    "qingzhou-current",
+    "zuri-current",
     "legacy-readability",
     "trafilatura-python",
   ]);
-  assert.equal(report.crossExtractorOracle.baseline, "qingzhou-current");
+  assert.equal(report.crossExtractorOracle.baseline, "zuri-current");
   assert.deepEqual(report.crossExtractorOracle.gold.base, {
     samples: 1,
     noExtractorOutput: 0,
     upperBound: { mainNgramPrecision: 1, mainNgramRecall: 1, mainNgramF1: 1 },
-    baseline: { algorithm: "qingzhou-current", mainNgramF1: 1 },
+    baseline: { algorithm: "zuri-current", mainNgramF1: 1 },
     selectionLoss: { mainNgramF1: 0, improvableSamples: 0 },
     selectedExtractorCounts: {
-      "qingzhou-current": 1,
+      "zuri-current": 1,
       "legacy-readability": 0,
       "trafilatura-python": 0,
     },
@@ -719,10 +719,10 @@ def extract(payload, **kwargs):
     samples: 1,
     noExtractorOutput: 0,
     upperBound: { mainNgramPrecision: 1, mainNgramRecall: 1, mainNgramF1: 1 },
-    baseline: { algorithm: "qingzhou-current", mainNgramF1: 0 },
+    baseline: { algorithm: "zuri-current", mainNgramF1: 0 },
     selectionLoss: { mainNgramF1: 1, improvableSamples: 1 },
     selectedExtractorCounts: {
-      "qingzhou-current": 0,
+      "zuri-current": 0,
       "legacy-readability": 0,
       "trafilatura-python": 1,
     },
@@ -736,13 +736,13 @@ def extract(payload, **kwargs):
   assert.equal(report.crossExtractorOracle.byType.channel.selectionLoss.mainNgramF1, 1);
 
   assert.deepEqual(report.internalCandidateOracle.candidates, INTERNAL_CANDIDATE_KEYS);
-  assert.equal(report.internalCandidateOracle.baseline, "qingzhou-current");
+  assert.equal(report.internalCandidateOracle.baseline, "zuri-current");
   assert.equal(report.internalCandidateOracle.contentCapChars, 80_000);
   assert.deepEqual(report.internalCandidateOracle.gold.base, {
     samples: 1,
     noCandidateOutput: 0,
     upperBound: { mainNgramPrecision: 1, mainNgramRecall: 1, mainNgramF1: 1 },
-    baseline: { algorithm: "qingzhou-current", mainNgramF1: 1 },
+    baseline: { algorithm: "zuri-current", mainNgramF1: 1 },
     selectionLoss: { mainNgramF1: 0, improvableSamples: 0 },
     selectedCandidateCounts: {
       rules: 0,
@@ -757,7 +757,7 @@ def extract(payload, **kwargs):
     samples: 1,
     noCandidateOutput: 0,
     upperBound: { mainNgramPrecision: 1, mainNgramRecall: 1, mainNgramF1: 1 },
-    baseline: { algorithm: "qingzhou-current", mainNgramF1: 0 },
+    baseline: { algorithm: "zuri-current", mainNgramF1: 0 },
     selectionLoss: { mainNgramF1: 1, improvableSamples: 1 },
     selectedCandidateCounts: {
       rules: 0,
@@ -773,8 +773,8 @@ def extract(payload, **kwargs):
   assert.equal(report.internalCandidateOracle.gold.combined.selectionLoss.mainNgramF1, 0.5);
   const diagnosticLines = readFileSync(join(output, "internal-candidates.jsonl"), "utf8").trim().split("\n").map(JSON.parse);
   assert.equal(diagnosticLines.length, fixtures.length);
-  assert.ok(diagnosticLines.every(item => item.schema === "qingzhou.article-extraction-internal-candidates.v3"));
-  assert.ok(diagnosticLines.every(item => item.benchmarkDiagnostics?.schema === "qingzhou.article-extraction-benchmark-diagnostics.v1"));
+  assert.ok(diagnosticLines.every(item => item.schema === "zuri.article-extraction-internal-candidates.v3"));
+  assert.ok(diagnosticLines.every(item => item.benchmarkDiagnostics?.schema === "zuri.article-extraction-benchmark-diagnostics.v1"));
   assert.ok(diagnosticLines.every(item => item.candidateProvenance?.enabled === false));
   assert.ok(diagnosticLines.every(item => item.benchmarkDiagnostics?.candidateProvenanceEnabled === false));
   assert.ok(diagnosticLines.every(item => !("provenance" in item.benchmarkDiagnostics)));
@@ -785,12 +785,12 @@ def extract(payload, **kwargs):
   assert.ok(diagnosticLines.flatMap(item => item.candidates).every(candidate => (
     !candidate.output || (candidate.output.text.length <= 80_000 && candidate.output.markdown.length <= 80_000)
   )));
-  const internalFixture = JSON.parse(readFileSync(join(output, "outputs", "qingzhou-internal", "core-0304.json")));
+  const internalFixture = JSON.parse(readFileSync(join(output, "outputs", "zuri-internal", "core-0304.json")));
   assert.equal(internalFixture.candidates.find(candidate => candidate.key === "baseline").metrics.mainNgramF1, 1);
   assert.equal(internalFixture.candidates.find(candidate => candidate.key === "rules").metrics.mainNgramF1, 0);
   const markdownReport = readFileSync(join(output, "report.md"), "utf8");
   assert.match(markdownReport, /Cross-extractor ensemble oracle/);
-  assert.match(markdownReport, /Qingzhou internal candidate oracle/);
+  assert.match(markdownReport, /Zuri internal candidate oracle/);
   assert.match(markdownReport, /Candidate provenance: disabled\./);
   assert.match(markdownReport, /\| type:channel \| 1 \| 1\.0000 \| 0\.0000 \| 1\.0000 \|/);
 
@@ -828,7 +828,7 @@ globalThis.Defuddle.createMarkdownContent = content => {
   assert.ok(defuddleReport.algorithms["defuddle-shared"]);
   assert.ok(defuddleReport.algorithms["defuddle-native"]);
   assert.deepEqual(defuddleReport.crossExtractorOracle.extractors, [
-    "qingzhou-current",
+    "zuri-current",
     "legacy-readability",
     "trafilatura-python",
     "defuddle-shared",
@@ -848,12 +848,12 @@ globalThis.Defuddle.createMarkdownContent = content => {
   assert.ok(defuddleDiagnostics.every(item => item.candidateProvenance?.enabled === true));
   assert.ok(defuddleDiagnostics.every(item => item.benchmarkDiagnostics?.candidateProvenanceEnabled === true));
   assert.ok(defuddleDiagnostics.every(item => (
-    item.benchmarkDiagnostics?.provenance?.schema === "qingzhou.article-extraction-provenance.v1"
+    item.benchmarkDiagnostics?.provenance?.schema === "zuri.article-extraction-provenance.v1"
       && item.benchmarkDiagnostics.provenance.sourceTree.treeElements.length > 0
   )));
   const defuddleSharedFixture = JSON.parse(readFileSync(join(defuddleOutput, "outputs", "defuddle-shared", "core-0001.json")));
   assert.match(defuddleSharedFixture.markdown, /https:\/\/cdn\.example\.com\/product\.jpg/);
-  assert.doesNotMatch(defuddleSharedFixture.markdown, /placeholder\.jpg/, "shared mode must use the Qingzhou product serializer, not bare Turndown");
+  assert.doesNotMatch(defuddleSharedFixture.markdown, /placeholder\.jpg/, "shared mode must use the Zuri product serializer, not bare Turndown");
 
   labelManifest.pendingHumanReview = 1;
   writeFileSync(join(labels, "manifest.json"), `${JSON.stringify(labelManifest, null, 2)}\n`);

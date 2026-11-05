@@ -114,4 +114,4 @@ export interface RendererExtensionAPI extends RendererServices {
   registerRenderer(renderer: RendererDefinition): void;
   registerPresentation(presentation: ToolPresentationDefinition): void;
 }
-export type RendererExtension = (qz: RendererExtensionAPI) => void;
+export type RendererExtension = (zuri: RendererExtensionAPI) => void;

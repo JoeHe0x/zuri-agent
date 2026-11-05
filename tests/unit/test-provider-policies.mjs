@@ -76,7 +76,7 @@ for (const mode of ["chat", "chatStream"]) {
     }
     assert.equal(requests[0].url, "https://opencode.ai/zen/go/v1/chat/completions");
     assert.equal(requests[0].headers.get("x-opencode-session"), "policy-session");
-    assert.equal(requests[0].headers.get("user-agent"), "qz-agent/1.0.0");
+    assert.equal(requests[0].headers.get("user-agent"), "zuri-agent/1.0.0");
     assert.equal(requests[0].headers.get("authorization"), "Bearer fixture-key");
     for (const request of requests.slice(1)) {
       assert.equal(request.headers.get("x-opencode-session"), null);
@@ -87,7 +87,7 @@ for (const mode of ["chat", "chatStream"]) {
   test(`${mode}: Fireworks retains session affinity while DeepSeek defaults yield to explicit model parameters`, async t => {
     const requests = capture(t, openaiResponse);
     await invoke(mode, "fireworks");
-    assert.equal(requests[0].headers.get("x-session-affinity"), "qz-policy-session");
+    assert.equal(requests[0].headers.get("x-session-affinity"), "zuri-policy-session");
     await invoke(mode, "deepseek");
     assert.deepEqual(requests[1].body.thinking, { type: "enabled" });
     assert.equal(requests[1].body.reasoning_effort, "high");
@@ -106,7 +106,7 @@ for (const mode of ["chat", "chatStream"]) {
     assert.equal(request.url, "https://api.kimi.com/coding/v1/messages");
     assert.equal(request.headers.get("x-api-key"), "fixture-key");
     assert.equal(request.headers.get("anthropic-version"), "2023-06-01");
-    assert.equal(request.headers.get("user-agent"), "qz-agent/1.0.0");
+    assert.equal(request.headers.get("user-agent"), "zuri-agent/1.0.0");
     assert.equal(request.headers.get("authorization"), null);
     assert.deepEqual(request.body.thinking, { type: "enabled", budget_tokens: 1024 });
     assert.deepEqual(request.body.system, [{ type: "text", text: "Follow the task.", cache_control: { type: "ephemeral" } }]);

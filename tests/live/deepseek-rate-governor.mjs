@@ -10,12 +10,12 @@ import {
 } from "../../src/background/llm/provider-rate-governor.js";
 import { contextTokensFromUsage } from "../../src/background/llm/token-accounting.js";
 
-const akFile = String(process.env.QINGZHOU_DEEPSEEK_AK_FILE || "").trim();
-const model = String(process.env.QINGZHOU_DEEPSEEK_MODEL || "deepseek-v4-flash").trim();
+const akFile = String(process.env.ZURI_DEEPSEEK_AK_FILE || "").trim();
+const model = String(process.env.ZURI_DEEPSEEK_MODEL || "deepseek-v4-flash").trim();
 
 const apiKey = readTestApiKey("deepseek", { keyFile: akFile, required: false });
 if (!apiKey) {
-  console.log("deepseek rate-governor live test skipped: set DEEPSEEK_API_KEY in .env.local or QINGZHOU_DEEPSEEK_AK_FILE");
+  console.log("deepseek rate-governor live test skipped: set DEEPSEEK_API_KEY in .env.local or ZURI_DEEPSEEK_AK_FILE");
   process.exit(0);
 }
 
@@ -30,7 +30,7 @@ try {
   console.error(message);
   process.exitCode = 1;
 } finally {
-  if (process.env.QINGZHOU_LIVE_REPORT) writeFileSync(process.env.QINGZHOU_LIVE_REPORT, redact(JSON.stringify(report, null, 2), apiKey));
+  if (process.env.ZURI_LIVE_REPORT) writeFileSync(process.env.ZURI_LIVE_REPORT, redact(JSON.stringify(report, null, 2), apiKey));
 }
 
 async function runLiveTest(key, selectedModel) {
@@ -69,7 +69,7 @@ async function runLiveTest(key, selectedModel) {
   const limitedResults = await Promise.all(Array.from({ length: 3 }, (_, index) => {
     const ordinal = index + 1;
     return gateway.chat(
-      [{ role: "user", content: `不要调用工具。只回复精确文本 QZ_RATE_${ordinal}。` }],
+      [{ role: "user", content: `不要调用工具。只回复精确文本 ZURI_RATE_${ordinal}。` }],
       [],
       AbortSignal.timeout(90_000),
       {
@@ -85,7 +85,7 @@ async function runLiveTest(key, selectedModel) {
   }));
 
   limitedResults.forEach((result, index) => {
-    assert.match(String(result?.message?.content || ""), new RegExp(`QZ_RATE_${index + 1}`));
+    assert.match(String(result?.message?.content || ""), new RegExp(`ZURI_RATE_${index + 1}`));
     assert.ok(contextTokensFromUsage(result?.usage) > 0, "DeepSeek must return token usage");
   });
 
@@ -131,7 +131,7 @@ async function runLiveTest(key, selectedModel) {
   const bypassResults = await Promise.all(Array.from({ length: 2 }, (_, index) => {
     const ordinal = index + 1;
     return gateway.chat(
-      [{ role: "user", content: `不要调用工具。只回复精确文本 QZ_BYPASS_${ordinal}。` }],
+      [{ role: "user", content: `不要调用工具。只回复精确文本 ZURI_BYPASS_${ordinal}。` }],
       [],
       AbortSignal.timeout(90_000),
       {
@@ -143,7 +143,7 @@ async function runLiveTest(key, selectedModel) {
     );
   }));
   bypassResults.forEach((result, index) => {
-    assert.match(String(result?.message?.content || ""), new RegExp(`QZ_BYPASS_${index + 1}`));
+    assert.match(String(result?.message?.content || ""), new RegExp(`ZURI_BYPASS_${index + 1}`));
   });
   assert.equal(trace.length, traceCountBeforeBypass, "rateLimit=false must bypass the governor");
 

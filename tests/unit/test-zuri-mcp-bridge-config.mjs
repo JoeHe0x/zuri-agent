@@ -1,15 +1,15 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
-  startQingzhouMcpBridge, getQingzhouMcpBridgeConfig, getQingzhouMcpConnectionStatus,
-  saveQingzhouMcpBridgeConfig,
+  startZuriMcpBridge, getZuriMcpBridgeConfig, getZuriMcpConnectionStatus,
+  saveZuriMcpBridgeConfig,
 } from "../../src/background/mcp/mcp-bridge.js";
 import { getConnectionConfig, updateConnectionConfig } from "../../src/background/mcp/connection-store.js";
 import { BridgeState } from "../../services/mcp-bridge/src/state.mjs";
 import { createMcpTransport } from "../../src/background/transports/mcp.js";
 
-const KEY = "_qingzhou_mcp_bridge";
-const ID = "_qingzhou_mcp_bridge_client_id";
+const KEY = "_zuri_mcp_bridge";
+const ID = "_zuri_mcp_bridge_client_id";
 const deferred = () => { let resolve; const promise = new Promise(r => { resolve = r; }); return { promise, resolve }; };
 async function drain() { for (let i = 0; i < 120; i++) await Promise.resolve(); }
 async function until(check) { for (let i = 0; i < 100; i++) { await drain(); if (check()) return; } assert.fail("expected state did not settle"); }
@@ -41,41 +41,41 @@ function setup(t, initial = {}) {
     const path = new URL(url).pathname, body = options.body && JSON.parse(options.body);
     calls.push({ url: String(url), path, body, options });
     if (responder) { const custom = await responder(path, body, options); if (custom !== undefined) return custom; }
-    if (path === "/health") return Response.json({ service: "qz-browser-agent", protocolVersion: 1, features: { browserPairing: 1 }, instanceId: "instance-a", version: "0.1.1" });
-    if (["/v1/qingzhou/pair", "/v1/qingzhou/rename"].includes(path)) return Response.json({ ok: true, ...body, name: body.name || "default", pairingToken: body.pairingToken });
-    if (path === "/v1/qingzhou/poll") { const batch = requests; requests = []; return Response.json({ requests: batch, instanceId: "instance-a", clientId: body.client.id, connectionId: body.client.connectionId, name: data[KEY].name }); }
+    if (path === "/health") return Response.json({ service: "zuri-agent", protocolVersion: 1, features: { browserPairing: 1 }, instanceId: "instance-a", version: "0.1.1" });
+    if (["/v1/zuri/pair", "/v1/zuri/rename"].includes(path)) return Response.json({ ok: true, ...body, name: body.name || "default", pairingToken: body.pairingToken });
+    if (path === "/v1/zuri/poll") { const batch = requests; requests = []; return Response.json({ requests: batch, instanceId: "instance-a", clientId: body.client.id, connectionId: body.client.connectionId, name: data[KEY].name }); }
     return Response.json({ ok: true });
   };
   const start = extra => {
-    const r = startQingzhouMcpBridge({ fetch, onStatus: s => statuses.push(s), assertConsent() { if (!consent) throw Object.assign(new Error("Consent required"), { code: "DATA_CONSENT_REQUIRED" }); }, ...extra });
+    const r = startZuriMcpBridge({ fetch, onStatus: s => statuses.push(s), assertConsent() { if (!consent) throw Object.assign(new Error("Consent required"), { code: "DATA_CONSENT_REQUIRED" }); }, ...extra });
     instances.push(r); return r;
   };
   t.after(() => { for (const r of instances) r.stop(); t.mock.timers.reset(); delete globalThis.chrome; });
-  return { data, calls, statuses, alarms, alarmCreates, start, setConsent: v => { consent = v; }, setResponder: fn => { responder = fn; }, setRequests: v => { requests = v; }, tick: async ms => { t.mock.timers.tick(ms); await drain(); }, fireAlarm: async () => { for (const fn of alarmListeners) fn({ name: "qingzhou-mcp-bridge-reconnect" }); await drain(); } };
+  return { data, calls, statuses, alarms, alarmCreates, start, setConsent: v => { consent = v; }, setResponder: fn => { responder = fn; }, setRequests: v => { requests = v; }, tick: async ms => { t.mock.timers.tick(ms); await drain(); }, fireAlarm: async () => { for (const fn of alarmListeners) fn({ name: "zuri-mcp-bridge-reconnect" }); await drain(); } };
 }
 
 test("new profile and first-use consent stay network/alarms quiet; status is local", async t => {
   const f = setup(t), r = f.start(); await drain();
   assert.equal((await r.status()).state, "disconnected");
-  await getQingzhouMcpConnectionStatus(); await getQingzhouMcpBridgeConfig();
+  await getZuriMcpConnectionStatus(); await getZuriMcpBridgeConfig();
   await f.tick(300000); await f.fireAlarm();
   assert.equal(f.calls.length, 0); assert.equal(f.alarmCreates.length, 0);
-  await saveQingzhouMcpBridgeConfig({ enabled: true }); await drain();
+  await saveZuriMcpBridgeConfig({ enabled: true }); await drain();
   assert.equal((await r.status()).state, "disconnected", "configuration writes do not authorize network access");
   f.setConsent(false);
   await assert.rejects(r.connect(), { code: "DATA_CONSENT_REQUIRED" }); assert.equal(f.calls.length, 0);
   f.setConsent(true);
   const s = await r.connect({ name: "work" });
   assert.equal(s.state, "connected"); assert.equal(s.name, "work");
-  assert.deepEqual(f.calls.map(c => c.path), ["/health", "/v1/qingzhou/pair", "/v1/qingzhou/poll"]);
-  assert.equal("pairingToken" in s, false); assert.equal("pairingToken" in await getQingzhouMcpBridgeConfig(), false);
+  assert.deepEqual(f.calls.map(c => c.path), ["/health", "/v1/zuri/pair", "/v1/zuri/poll"]);
+  assert.equal("pairingToken" in s, false); assert.equal("pairingToken" in await getZuriMcpBridgeConfig(), false);
 });
 
 test("unsupported connection formats reset only bridge settings and receive independent UUIDs", async t => {
   const uuid = "0a4d8fbe-7ac7-4ada-9f1e-48263996a709";
   const unrelated = { sessions: [{ id: "user-session", title: "Keep this task" }], model: { provider: "fixture" } };
   const f = setup(t, unrelated), identities = new Set([uuid]);
-  for (const [schemaVersion, storedId] of [[undefined, `qingzhou-${uuid}`], [1, uuid], [3, uuid], [2, `qingzhou-${uuid}`]]) {
+  for (const [schemaVersion, storedId] of [[undefined, `zuri-${uuid}`], [1, uuid], [3, uuid], [2, `zuri-${uuid}`]]) {
     f.data[KEY] = { schemaVersion, enabled: true, clientId: "office-chrome", name: "old-name", endpoint: "http://localhost:19999", token: "old-secret",
       authorizationId: "old-authorization", pairingToken: "old-proof", instanceId: "old-instance", state: "connected", attemptsRemaining: 0,
       leaseWaitRemaining: 0, nextRetryAt: 900000, lastError: { code: "OLD_ERROR", message: "old" }, pollTimeoutMs: 90000, includeCapabilities: false };
@@ -106,14 +106,14 @@ test("current connection format preserves identity, endpoint and durable connect
   assert.deepEqual(await getConnectionConfig(), current);
   const r = f.start(); await drain(); await f.tick(300000); await f.fireAlarm();
   assert.deepEqual(await getConnectionConfig(), current); assert.equal(f.calls.length, 0); assert.equal(f.alarmCreates.length, 0);
-  await saveQingzhouMcpBridgeConfig({ clientId: "someone-else", name: "renamed" });
+  await saveZuriMcpBridgeConfig({ clientId: "someone-else", name: "renamed" });
   assert.equal((await getConnectionConfig()).clientId, fresh.clientId); assert.equal((await getConnectionConfig()).name, "renamed");
   r.stop(); assert.equal((await getConnectionConfig()).clientId, fresh.clientId);
 });
 
 test("unsupported service pauses after one health request and exposes upgrade guidance", async t => {
   const f = setup(t), r = f.start(); await drain();
-  f.setResponder(path => path === "/health" ? Response.json({ service: "qz-browser-agent", protocolVersion: 1, instanceId: "old" }) : undefined);
+  f.setResponder(path => path === "/health" ? Response.json({ service: "zuri-agent", protocolVersion: 1, instanceId: "old" }) : undefined);
   const status = await r.connect();
   assert.equal(status.state, "paused"); assert.equal(status.lastError.code, "MCP_CONNECTION_INCOMPATIBLE"); assert.match(status.lastError.message, /tasks to finish.*latest stop.*ALL browsers.*extension in each browser.*latest connect/);
   assert.equal(f.calls.length, 1); await f.tick(300000); await f.fireAlarm(); assert.equal(f.calls.length, 1); assert.equal(f.alarms.size, 0);
@@ -203,13 +203,13 @@ test("an immediate connect after cold start uses the persisted endpoint", async 
 });
 
 test("disconnect during health/pair aborts and cannot re-enable a late response", async t => {
-  for (const gate of ["/health", "/v1/qingzhou/pair"]) {
+  for (const gate of ["/health", "/v1/zuri/pair"]) {
     const f = setup(t), r = f.start(); await drain(); const pending = deferred();
     f.setResponder(path => path === gate ? pending.promise : undefined);
     const connecting = r.connect(); await until(() => f.calls.some(c => c.path === gate));
     const signal = f.calls.find(c => c.path === gate).options.signal;
     await r.disconnect(); assert.equal(signal.aborted, true);
-    pending.resolve(Response.json({ service: "qz-browser-agent", protocolVersion: 1, features: { browserPairing: 1 }, instanceId: "instance-a" }));
+    pending.resolve(Response.json({ service: "zuri-agent", protocolVersion: 1, features: { browserPairing: 1 }, instanceId: "instance-a" }));
     await connecting; await drain();
     assert.equal((await r.status()).state, "disconnected"); assert.equal(f.data[KEY].enabled, false);
     const n = f.calls.length; await f.tick(300000); await f.fireAlarm(); assert.equal(f.calls.length, n); r.stop();
@@ -267,7 +267,7 @@ async function realServiceRuntime(t, intercept = (_path, _body, proceed) => proc
   f.setResponder(async (path, body, options) => {
     const proceed = async () => {
       try {
-        if (path === "/health") return Response.json({ service: "qz-browser-agent", protocolVersion: 1, features: { browserPairing: 1 }, instanceId: state.instanceId });
+        if (path === "/health") return Response.json({ service: "zuri-agent", protocolVersion: 1, features: { browserPairing: 1 }, instanceId: state.instanceId });
         if (path.endsWith("/pair")) return Response.json(await state.pair(body));
         if (path.endsWith("/rename")) return Response.json(await state.rename(body));
         if (path.endsWith("/disconnect")) return Response.json(await state.disconnect(body));
@@ -476,7 +476,7 @@ test("slow requests keep polling, duplicate request IDs execute once, and equiva
   const f = setup(t), pending = deferred(); const seen = [];
   const r = f.start({ dispatch(request) { seen.push(request); return pending.promise; } }); await drain();
   f.setRequests([{ id: "slow", method: "get_session_state" }]); await r.connect(); await until(() => seen.length === 1);
-  await saveQingzhouMcpBridgeConfig({ name: "default" });
+  await saveZuriMcpBridgeConfig({ name: "default" });
   f.setRequests([{ id: "slow", method: "get_session_state" }, { id: "other", method: "get_config" }]);
   await f.tick(0); await until(() => seen.length === 2);
   assert.deepEqual(seen.map(r => r.id), ["slow", "other"]); assert.equal(seen[0].signal.aborted, false);
@@ -488,7 +488,7 @@ test("changing config while a poll is pending revokes the old response before di
   const r = f.start({ dispatch() { dispatched = true; } }); await drain();
   f.setResponder(path => path.endsWith("/poll") ? pending.promise : undefined);
   const connection = r.connect(); await until(() => f.calls.some(c => c.path.endsWith("/poll")));
-  await saveQingzhouMcpBridgeConfig({ enabled: false });
+  await saveZuriMcpBridgeConfig({ enabled: false });
   pending.resolve(Response.json({ requests: [{ id: "obsolete", method: "create_session" }] })); await connection; await drain();
   assert.equal(dispatched, false); assert.equal((await r.status()).state, "disconnected"); assert.equal(f.alarms.size, 0);
 });
@@ -520,15 +520,15 @@ test("changing endpoint revokes an in-flight and queued name change without touc
 });
 
 const UUID = /^[\da-f]{8}(?:-[\da-f]{4}){3}-[\da-f]{12}$/i;
-const RECONNECT = "qingzhou-mcp-bridge-reconnect";
+const RECONNECT = "zuri-mcp-bridge-reconnect";
 
 test("chrome bridge restarts keep a fresh lease id out of storage", async t => {
   const f = setup(t);
-  assert.notEqual(globalThis.chrome.qzFirefoxMcpWake, true);
+  assert.notEqual(globalThis.chrome.zuriFirefoxMcpWake, true);
   let r = f.start(); await drain(); await r.connect();
   const first = f.calls.find(c => c.path.endsWith("/pair")).body.connectionId;
   assert.equal(f.data[KEY].connectionId, undefined);
-  assert.equal("connectionId" in await getQingzhouMcpBridgeConfig(), false);
+  assert.equal("connectionId" in await getZuriMcpBridgeConfig(), false);
   r.stop(); r = f.start(); await drain(); await f.tick(0);
   await until(() => f.calls.filter(c => c.path.endsWith("/pair")).length >= 2);
   const second = f.calls.filter(c => c.path.endsWith("/pair")).at(-1).body.connectionId;
@@ -539,12 +539,12 @@ test("chrome bridge restarts keep a fresh lease id out of storage", async t => {
 
 test("firefox wake reuses the stored lease and refills transport retries", async t => {
   const f = setup(t);
-  globalThis.chrome.qzFirefoxMcpWake = true;
+  globalThis.chrome.zuriFirefoxMcpWake = true;
   let r = f.start(); await drain(); await r.connect({ name: "firefox" });
   const lease = f.data[KEY].connectionId;
   const token = f.data[KEY].pairingToken;
   assert.match(lease, UUID);
-  assert.equal("connectionId" in await getQingzhouMcpBridgeConfig(), false);
+  assert.equal("connectionId" in await getZuriMcpBridgeConfig(), false);
   assert.equal(f.alarms.has(RECONNECT), true);
   r.stop(); f.calls.length = 0;
   r = f.start(); await drain(); await f.tick(0);
@@ -575,7 +575,7 @@ test("firefox wake reuses the stored lease and refills transport retries", async
 
 test("firefox transport failures keep the reconnect alarm armed", async t => {
   const f = setup(t);
-  globalThis.chrome.qzFirefoxMcpWake = true;
+  globalThis.chrome.zuriFirefoxMcpWake = true;
   f.setResponder(() => { throw new Error("offline"); });
   const r = f.start(); await drain(); await r.connect();
   assert.equal(f.data[KEY].state, "reconnecting");
@@ -596,7 +596,7 @@ test("firefox transport failures keep the reconnect alarm armed", async t => {
 
 test("firefox still pauses a live foreign lease", async t => {
   const foreign = setup(t);
-  globalThis.chrome.qzFirefoxMcpWake = true;
+  globalThis.chrome.zuriFirefoxMcpWake = true;
   foreign.setResponder(path => path.endsWith("/pair") ? Response.json({ code: "BRIDGE_CLIENT_IN_USE", error: "healthy original remains connected", retryAfterMs: 40000 }, { status: 409 }) : undefined);
   let runtime = foreign.start(); await drain();
   await runtime.connect();
@@ -616,8 +616,8 @@ test("firefox still pauses a live foreign lease", async t => {
 
 test("firefox keeps an incompatible bridge paused", async t => {
   const incompatible = setup(t);
-  globalThis.chrome.qzFirefoxMcpWake = true;
-  incompatible.setResponder(path => path === "/health" ? Response.json({ service: "qz-browser-agent", protocolVersion: 1, instanceId: "old" }) : undefined);
+  globalThis.chrome.zuriFirefoxMcpWake = true;
+  incompatible.setResponder(path => path === "/health" ? Response.json({ service: "zuri-agent", protocolVersion: 1, instanceId: "old" }) : undefined);
   const paused = incompatible.start(); await drain();
   assert.equal((await paused.connect()).state, "paused");
   assert.equal(incompatible.data[KEY].lastError.code, "MCP_CONNECTION_INCOMPATIBLE");

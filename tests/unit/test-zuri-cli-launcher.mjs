@@ -12,7 +12,7 @@ const sourceCli = new URL("../../services/mcp-bridge/src/cli.mjs", import.meta.u
 const metadata = JSON.parse(readFileSync(new URL("../../services/mcp-bridge/package.json", import.meta.url), "utf8"));
 
 test("launcher rejects unsupported Node before resolving runtime modules", async t => {
-  const directory = await mkdtemp(join(tmpdir(), "qz-node-guard-"));
+  const directory = await mkdtemp(join(tmpdir(), "zuri-node-guard-"));
   t.after(() => rm(directory, { recursive: true, force: true }));
   const isolatedLauncher = join(directory, "bin.mjs");
   await copyFile(launcher, isolatedLauncher);
@@ -41,7 +41,7 @@ test("launcher rejects unsupported Node before resolving runtime modules", async
 });
 
 test("launcher accepts Node 22 from its first release and resolves the CLI", async t => {
-  const directory = await mkdtemp(join(tmpdir(), "qz-node-supported-"));
+  const directory = await mkdtemp(join(tmpdir(), "zuri-node-supported-"));
   t.after(() => rm(directory, { recursive: true, force: true }));
   const isolatedLauncher = join(directory, "bin.mjs");
   await copyFile(launcher, isolatedLauncher);
@@ -59,7 +59,7 @@ test("launcher accepts Node 22 from its first release and resolves the CLI", asy
 });
 
 test("importing the launcher does not execute CLI or resolve its runtime", async t => {
-  const directory = await mkdtemp(join(tmpdir(), "qz-bin-import-"));
+  const directory = await mkdtemp(join(tmpdir(), "zuri-bin-import-"));
   t.after(() => rm(directory, { recursive: true, force: true }));
   const isolatedLauncher = join(directory, "bin.mjs");
   await copyFile(launcher, isolatedLauncher);
@@ -70,19 +70,19 @@ test("importing the launcher does not execute CLI or resolve its runtime", async
 });
 
 test("launcher and direct source entry print versions without writing service state", async t => {
-  const directory = await mkdtemp(join(tmpdir(), "qz-version-entry-"));
+  const directory = await mkdtemp(join(tmpdir(), "zuri-version-entry-"));
   t.after(() => rm(directory, { recursive: true, force: true }));
   for (const entry of [launcher, sourceCli]) {
     for (const flags of [["--version"], ["-v"], ["--json", "--version"]]) {
       const result = spawnSync(process.execPath, [fileURLToPath(entry), ...flags], {
-        encoding: "utf8", env: { ...process.env, QZ_STATE_DIR: directory },
+        encoding: "utf8", env: { ...process.env, ZURI_STATE_DIR: directory },
       });
       assert.equal(result.status, 0, result.stderr);
       assert.equal(result.stderr, "");
       if (flags.includes("--json")) assert.deepEqual(JSON.parse(result.stdout), {
         ok: true, result: { name: metadata.name, version: metadata.version },
       });
-      else assert.equal(result.stdout, `qz ${metadata.version}\n`);
+      else assert.equal(result.stdout, `zuri ${metadata.version}\n`);
     }
   }
   assert.deepEqual(await readdir(directory), []);

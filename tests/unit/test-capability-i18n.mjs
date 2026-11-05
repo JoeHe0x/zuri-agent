@@ -31,8 +31,8 @@ for (const language of ["zh-CN", "en-US"]) {
   test(`Data import errors follow ${language} without translating row content`, context => {
     useLanguage(context, language);
     assert.throws(() => parseImportText(""), { message: language === "zh-CN" ? "导入内容为空" : "Nothing to import" });
-    const result = parseImportText("产品,说明\n轻舟,保存", "sample.csv");
-    assert.equal(result[0].产品, "轻舟");
+    const result = parseImportText("产品,说明\nZuri,保存", "sample.csv");
+    assert.equal(result[0].产品, "Zuri");
     assert.equal(result[0].说明, "保存");
   });
 

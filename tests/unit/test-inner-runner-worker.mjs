@@ -8,7 +8,7 @@ import { runInnerWorker, sandboxFixture } from '../support/inner-runner-fixture.
 for (const mode of ['development', 'production']) test(`${mode} Worker executes messages, tool results and cancellable fetch after compilation`, async () => {
   const source = await compileInnerWorker({ mode });
   const { result, events } = await runInnerWorker(source, `
-    trace('Hello 轻舟 ✅');
+    trace('Hello Zuri ✅');
     const response = await tools.lookup({ query: input.query, fn() {} });
     const fetched = await fetch('https://fixture.test/data', { headers: { Date: 'Fri, 17 Jul 2026 02:00:00 GMT', Authorization: 'signed' } });
     const controller = new AbortController();
@@ -21,7 +21,7 @@ for (const mode of ['development', 'production']) test(`${mode} Worker executes 
     onMessage(message, respond) {
       if (message.type === 'tool_call') {
         if (message.toolName === 'lookup') {
-          assert.equal(message.args.fn.__qz_uncloneable, 'function');
+          assert.equal(message.args.fn.__zuri_uncloneable, 'function');
           assert.equal(message.args.query, 'needle');
         }
         respond({ type: 'tool_response', callId: message.callId, response: { ok: true, result: 'found', artifacts: [{ id: 'artifact' }] } });
@@ -32,9 +32,9 @@ for (const mode of ['development', 'production']) test(`${mode} Worker executes 
     },
   });
   assert.equal(result.ok, true, result.error);
-  assert.deepEqual(result.result, { response: 'found', body: '数据', cancelled: 'AbortError', typed: { __qz_type: 'Uint8Array', length: 3, sample: [1,2,3] }, config: 7 });
+  assert.deepEqual(result.result, { response: 'found', body: '数据', cancelled: 'AbortError', typed: { __zuri_type: 'Uint8Array', length: 3, sample: [1,2,3] }, config: 7 });
   assert.equal(result.artifacts[0].id, 'artifact');
-  assert.ok(result.trace.some(row => row.message === 'Hello 轻舟 ✅'));
+  assert.ok(result.trace.some(row => row.message === 'Hello Zuri ✅'));
   const cancelled = events.find(message => message.type === 'fetch_call' && message.request.url.endsWith('/cancel'));
   assert.equal(events.find(message => message.type === 'fetch_cancel').callId, cancelled.callId);
 });

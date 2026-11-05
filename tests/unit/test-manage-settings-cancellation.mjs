@@ -49,9 +49,9 @@ await skillRuntime.commitSkillToolRegistryCandidate(
   { reason: "test_manage_settings_cancellation" },
 );
 const runtime = createToolRuntime({ emit: event => events.push(event) });
-const context = { source: "test", loadedPluginSkillNames: ["qingzhou-management"] };
+const context = { source: "test", loadedPluginSkillNames: ["zuri-management"] };
 const manage = (input, signal) => runtime.execute(
-  "qingzhou_management__manage_settings", { timeout: 30, ...input }, signal, context,
+  "zuri_management__manage_settings", { timeout: 30, ...input }, signal, context,
 );
 const aborted = error => error?.code === "OPERATION_ABORTED";
 const drain = async () => { await setImmediate(); await setImmediate(); };
@@ -96,7 +96,7 @@ test("a pre-aborted Skill host update makes no model requests or writes", { time
   const controller = new AbortController();
   controller.abort();
   await assert.rejects(manage({
-    action: "update_config", provider: "openrouter", model: "qz-pre-aborted-unknown-model",
+    action: "update_config", provider: "openrouter", model: "zuri-pre-aborted-unknown-model",
   }, controller.signal), aborted);
   await drain();
   assert.deepEqual(requests, []);
@@ -106,7 +106,7 @@ test("a pre-aborted Skill host update makes no model requests or writes", { time
 test("cancelled capability discovery cannot save a late successful SDK match; a new invocation can recover", { timeout: 5000 }, async () => {
   const entered = Promise.withResolvers();
   const response = Promise.withResolvers();
-  const modelId = "qz-cancelled-discovery-model";
+  const modelId = "zuri-cancelled-discovery-model";
   respond = request => {
     assert.equal(request.url, "https://models.dev/api.json");
     entered.resolve();

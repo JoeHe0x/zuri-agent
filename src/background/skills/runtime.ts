@@ -459,9 +459,9 @@ function applyDisplayNameUpdate(draft: SkillRecord, patch: Fields, changes: Fiel
   } else {
     delete metadata.displayName;
   }
-  if (metadata.qingzhou?.displayName) {
-    delete metadata.qingzhou.displayName;
-    if (!Object.keys(metadata.qingzhou).length) delete metadata.qingzhou;
+  if (metadata.zuri?.displayName) {
+    delete metadata.zuri.displayName;
+    if (!Object.keys(metadata.zuri).length) delete metadata.zuri;
   }
   draft.metadata = metadata;
 }

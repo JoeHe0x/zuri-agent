@@ -107,10 +107,10 @@ test.describe("chat text size", () => {
     expect((await thinkingSummary.boundingBox()).height).toBeCloseTo(standardThinkingBox.height, 0);
     const overflow = await messages.evaluate(element => element.scrollWidth - element.clientWidth);
     expect(overflow).toBeLessThanOrEqual(1);
-    expect(await page.evaluate(() => localStorage.getItem("qingzhou.chatTextSize"))).toBe("xlarge");
+    expect(await page.evaluate(() => localStorage.getItem("zuri.chatTextSize"))).toBe("xlarge");
 
     await page.reload({ waitUntil: "domcontentloaded" });
-    await page.waitForFunction(() => Boolean(window.qingzhouConversationBenchmark));
+    await page.waitForFunction(() => Boolean(window.zuriConversationBenchmark));
     await renderTextFixture(page, "text-size-restored");
     await expect(page.locator("#messages")).toHaveAttribute("data-chat-text-size", "xlarge");
     expect(await fontSize(page.locator(".msg-assistant .msg-content").first())).toBeCloseTo(18, 1);
@@ -170,7 +170,7 @@ test.describe("chat text size", () => {
   test("keeps the same visual center while the side panel width reflows conversation", async ({ page }) => {
     await page.setViewportSize({ width: 520, height: 720 });
     await page.evaluate(async () => {
-      await window.qingzhouConversationBenchmark.runSnapshotRender({
+      await window.zuriConversationBenchmark.runSnapshotRender({
         sessionId: "sidepanel-resize-center",
         title: "侧边栏缩放视觉中心",
         transcript: Array.from({ length: 32 }, (_, index) => ({
@@ -222,7 +222,7 @@ test.describe("chat text size", () => {
         return { centerY, pointY, delta: pointY == null ? null : pointY - centerY };
       }));
     }
-    await page.waitForFunction(() => window.qingzhouConversationBenchmark.collectViewportAnchorState?.().resizeAnchored !== true);
+    await page.waitForFunction(() => window.zuriConversationBenchmark.collectViewportAnchorState?.().resizeAnchored !== true);
     await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
 
     const after = await page.evaluate(() => {
@@ -275,7 +275,7 @@ test.describe("chat text size", () => {
         content: `第 ${index + 1} 段。${"这是一段会在侧边栏宽度变化时持续重新折行的正文。".repeat(8)}`,
       }));
       transcript.splice(24, 0, artifactEntry);
-      await window.qingzhouConversationBenchmark.runSnapshotRender({
+      await window.zuriConversationBenchmark.runSnapshotRender({
         sessionId: "sidepanel-resize-artifact",
         title: "产物卡片往返缩放",
         transcript,
@@ -330,7 +330,7 @@ test.describe("chat text size", () => {
     }
 
     await page.waitForFunction(() => (
-      window.qingzhouConversationBenchmark.collectViewportAnchorState?.().resizeAnchored !== true
+      window.zuriConversationBenchmark.collectViewportAnchorState?.().resizeAnchored !== true
     ));
     expect(
       samples.every(sample => sample.connected && Number.isFinite(sample.delta) && Math.abs(sample.delta) <= 2),
@@ -354,7 +354,7 @@ test.describe("chat text size", () => {
 
     await page.setViewportSize({ width: 650, height: 720 });
     await page.waitForTimeout(120);
-    await page.waitForFunction(() => window.qingzhouConversationBenchmark.collectViewportAnchorState?.().resizeAnchored !== true);
+    await page.waitForFunction(() => window.zuriConversationBenchmark.collectViewportAnchorState?.().resizeAnchored !== true);
     const after = await messages.evaluate(element => ({
       bottomDistance: element.scrollHeight - element.scrollTop - element.clientHeight,
       beforeSpace: getComputedStyle(element).getPropertyValue("--viewport-anchor-before-space").trim(),
@@ -368,7 +368,7 @@ test.describe("chat text size", () => {
   test("keeps following the latest message when larger text first creates overflow", async ({ page }) => {
     await page.setViewportSize({ width: 560, height: 760 });
     await page.evaluate(async () => {
-      await window.qingzhouConversationBenchmark.runSnapshotRender({
+      await window.zuriConversationBenchmark.runSnapshotRender({
         sessionId: "text-size-first-overflow",
         title: "字号首次产生滚动",
         transcript: [{
@@ -438,7 +438,7 @@ for (const colorScheme of ["light", "dark"]) {
 async function renderTextFixture(page, sessionId) {
   const artifact = artifactEntry(sessionId);
   await page.evaluate(async ({ id, artifact }) => {
-    await window.qingzhouConversationBenchmark.runSnapshotRender({
+    await window.zuriConversationBenchmark.runSnapshotRender({
       sessionId: id,
       title: "对话字号预览",
       transcript: [
@@ -485,7 +485,7 @@ async function renderLongFixture(page) {
       content: `第 ${index + 1} 段内容。这里放置足够长的文字，用来验证改变对话字号时仍停留在同一阅读位置。`,
     }));
     transcript.splice(18, 0, artifact);
-    await window.qingzhouConversationBenchmark.runSnapshotRender({
+    await window.zuriConversationBenchmark.runSnapshotRender({
       sessionId: "text-size-scroll",
       title: "字号与滚动位置",
       transcript,

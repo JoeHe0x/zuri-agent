@@ -6,7 +6,7 @@ import { join, resolve } from "node:path";
 import { compileInnerWorker } from "../../scripts/build-extension.mjs";
 import { checkStore } from "../../scripts/check-store.mjs";
 
-const root = await mkdtemp(join(tmpdir(), "qz-storecheck-"));
+const root = await mkdtemp(join(tmpdir(), "zuri-storecheck-"));
 try {
   await mkdir(join(root, "icons"));
   await copyFile("src/icons/icon128.png", join(root, "icons/icon128.png"));

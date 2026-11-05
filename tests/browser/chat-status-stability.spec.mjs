@@ -4,7 +4,7 @@ for (const colorScheme of ["light", "dark"]) {
   test(`status bar suppresses short tool phases in ${colorScheme}`, async ({ page }, testInfo) => {
     await page.emulateMedia({ colorScheme });
     await page.evaluate(async () => {
-      await window.qingzhouConversationBenchmark.runSnapshotRender({
+      await window.zuriConversationBenchmark.runSnapshotRender({
         sessionId: "status-stability",
         transcript: [{ type: "user", content: "检查页面" }],
       });
@@ -12,7 +12,7 @@ for (const colorScheme of ["light", "dark"]) {
     await page.clock.install({ time: new Date("2030-01-01T00:00:00Z") });
     await page.clock.pauseAt(new Date("2030-01-01T00:00:01Z"));
     const dispatch = event => page.evaluate(event => {
-      window.qingzhouConversationBenchmark.dispatchBackgroundEvent({
+      window.zuriConversationBenchmark.dispatchBackgroundEvent({
         sessionId: "status-stability", runId: "status-run", ...event,
       });
     }, event);

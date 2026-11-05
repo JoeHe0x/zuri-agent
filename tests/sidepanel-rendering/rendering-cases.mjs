@@ -188,7 +188,7 @@ export async function testSessionExportFeature() {
   const listButton = createFakeButton({ id: "session-1" });
   const skinLink = {
     href: "https://extension.test/sidepanel/sidepanel.css",
-    dataset: { qingzhouSkin: "default" },
+    dataset: { zuriSkin: "default" },
     getAttribute: name => name === "href" ? "sidepanel.css" : null,
   };
   const root = {
@@ -196,7 +196,7 @@ export async function testSessionExportFeature() {
     createElement: createEscapingElement,
     querySelector(selector) {
       if (selector === "#btn-export-session") return currentButton;
-      if (selector === "#qingzhou-sidepanel-skin") return skinLink;
+      if (selector === "#zuri-sidepanel-skin") return skinLink;
       return null;
     },
     querySelectorAll(selector) {
@@ -240,12 +240,12 @@ export async function testSessionExportFeature() {
     assert.equal(documentResult.filename, "任务 导出.html");
     assert.match(documentResult.html, /<title>任务 \/ &lt;导出&gt;<\/title>/u);
     assert.match(documentResult.html, /<article class="msg">静态消息<\/article>/u);
-    assert.match(documentResult.html, /data-qingzhou-skin="default"/u);
+    assert.match(documentResult.html, /data-zuri-skin="default"/u);
     assert.match(documentResult.html, /default-skin/u);
-    assert.match(documentResult.html, /id="qingzhou-session-exchange"/u);
-    const exportCtaIndex = documentResult.html.indexOf('id="qingzhou-session-cta"');
-    const exchangePayloadIndex = documentResult.html.indexOf('id="qingzhou-session-exchange"');
-    const exportBridgeIndex = documentResult.html.indexOf('qingzhou:session-export:probe');
+    assert.match(documentResult.html, /id="zuri-session-exchange"/u);
+    const exportCtaIndex = documentResult.html.indexOf('id="zuri-session-cta"');
+    const exchangePayloadIndex = documentResult.html.indexOf('id="zuri-session-exchange"');
+    const exportBridgeIndex = documentResult.html.indexOf('zuri:session-export:probe');
     const messagesIndex = documentResult.html.indexOf('<main id="messages">');
     assert.ok(exportCtaIndex < exchangePayloadIndex);
     assert.ok(exchangePayloadIndex < exportBridgeIndex);
@@ -263,19 +263,19 @@ export async function testSessionExportFeature() {
     assert.doesNotMatch(mathDocument, /registry\.npmmirror\.com|cdn\.jsdelivr\.net|<script\s[^>]*\bsrc=|chrome-extension:|moz-extension:|logo-day\.png/iu);
     assert.match(mathDocument, /url\("data:image\/png;base64,DAY"\)/u);
     assert.match(mathDocument, /\\\(E=mc\^2\\\)/u);
-    assert.match(mathDocument, /id="qingzhou-session-exchange"/u);
-    assert.match(mathDocument, /"format":"qingzhou\.session"/u);
+    assert.match(mathDocument, /id="zuri-session-exchange"/u);
+    assert.match(mathDocument, /"format":"zuri\.session"/u);
     assert.match(mathDocument, /"version":1/u);
     assert.equal(documentResult.payload.app.version, "0.3.6");
 
     skinLink.href = "https://extension.test/sidepanel/sidepanel-custom.css";
-    skinLink.dataset.qingzhouSkin = "custom";
+    skinLink.dataset.zuriSkin = "custom";
     const reskinned = await feature.createDocumentFromSnapshot({
       session: { id: "session-1", title: "换肤导出" },
       transcript: [{ type: "assistant", content: "完成" }],
     });
-    assert.match(reskinned.html, /data-qingzhou-skin="custom"/u);
-    assert.match(reskinned.html, /data-qingzhou-skin-path="sidepanel\/sidepanel-custom\.css"/u);
+    assert.match(reskinned.html, /data-zuri-skin="custom"/u);
+    assert.match(reskinned.html, /data-zuri-skin-path="sidepanel\/sidepanel-custom\.css"/u);
     assert.match(reskinned.html, /alternate-skin/u);
     assert.doesNotMatch(reskinned.html, /default-skin/u);
 

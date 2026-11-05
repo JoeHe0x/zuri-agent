@@ -5,14 +5,14 @@ import { installBenchmarkChromeStub } from "./benchmark-chrome-stub.mjs";
 import { ensureTestExtension } from "../support/extension-build.mjs";
 
 const scenarios = [
-  ["en-US", "en", "en", "Save", "qz"], ["zh-CN", "zh-CN", "zh_CN", "保存配置", "轻舟"],
+  ["en-US", "en", "en", "Save", "zuri"], ["zh-CN", "zh-CN", "zh_CN", "保存配置", "Zuri"],
   ["zh-TW", "zh-TW", "zh_TW", "儲存設定", "輕舟"], ["ja-JP", "ja", "ja", "保存", "軽舟"],
-  ["ko-KR", "ko", "ko", "저장", "qz"], ["es-MX", "es", "es", "Guardar", "qz"],
-  ["fr-FR", "fr", "fr", "Enregistrer", "qz"], ["de-DE", "de", "de", "Speichern", "qz"],
-  ["pt-BR", "pt-BR", "pt_BR", "Salvar", "qz"], ["ru-RU", "ru", "ru", "Сохранить", "qz"],
-  ["ar-SA", "ar", "ar", "حفظ", "qz"], ["hi-IN", "hi", "hi", "सेव करें", "qz"],
+  ["ko-KR", "ko", "ko", "저장", "zuri"], ["es-MX", "es", "es", "Guardar", "zuri"],
+  ["fr-FR", "fr", "fr", "Enregistrer", "zuri"], ["de-DE", "de", "de", "Speichern", "zuri"],
+  ["pt-BR", "pt-BR", "pt_BR", "Salvar", "zuri"], ["ru-RU", "ru", "ru", "Сохранить", "zuri"],
+  ["ar-SA", "ar", "ar", "حفظ", "zuri"], ["hi-IN", "hi", "hi", "सेव करें", "zuri"],
 ];
-const messageId = key => `qz_${key.replace(/[^a-z0-9]/g, char => `_${char.charCodeAt(0).toString(16).padStart(4, "0")}`)}`;
+const messageId = key => `zuri_${key.replace(/[^a-z0-9]/g, char => `_${char.charCodeAt(0).toString(16).padStart(4, "0")}`)}`;
 const artifacts = resolve("tests/results/i18n/world-languages");
 const config = { provider: "custom", model: "qwen3.5-plus", apiKey: "test-key", customEndpoint: "https://example.test/v1/chat/completions", contextWindow: 128000, vision: false };
 const layoutArtifacts = resolve("tests/results/i18n/main-layout");
@@ -42,7 +42,7 @@ async function auditMainSurface(page, selector, label, testInfo) {
           }
         }
         if (box.bottom <= 0 || box.top >= innerHeight) continue;
-        if (element.matches("button, input, textarea, .qz-popover, .model-preset-switcher-panel") && (box.left < -1 || box.right > innerWidth + 1)) {
+        if (element.matches("button, input, textarea, .zuri-popover, .model-preset-switcher-panel") && (box.left < -1 || box.right > innerWidth + 1)) {
           issues.push({ kind: "outside", element: identity(element), left: box.left, right: box.right });
         }
         if (element.matches("input, textarea") && !element.value && element.placeholder) {
@@ -116,7 +116,7 @@ for (const [locale, language, chromeLocale] of scenarios) {
         ];
         await page.addInitScript(installBenchmarkChromeStub, { uiLanguage: locale, localeMessages: messages, config: { ...config, activePresetId: presets[0].id, presets } });
         await page.goto("/extension/sidepanel/sidepanel.html", { waitUntil: "domcontentloaded" });
-        await page.waitForFunction(() => Boolean(window.qingzhouConversationBenchmark));
+        await page.waitForFunction(() => Boolean(window.zuriConversationBenchmark));
         for (const width of [320, 360, 430]) {
           await page.setViewportSize({ width, height: 760 });
           await page.locator("#welcome").evaluate(element => { element.scrollTop = 0; });
@@ -128,7 +128,7 @@ for (const [locale, language, chromeLocale] of scenarios) {
             const geometry = await button.evaluate(element => ({ client: element.clientWidth, scroll: element.scrollWidth }));
             expect.soft(geometry.scroll, `${prefix}: ${await button.innerText()} is fully readable`).toBeLessThanOrEqual(geometry.client + 2);
           }
-          await page.evaluate(() => window.qingzhouConversationBenchmark.dispatchBackgroundEvent({ type: "model_preset_switcher_requested", source: "shortcut" }));
+          await page.evaluate(() => window.zuriConversationBenchmark.dispatchBackgroundEvent({ type: "model_preset_switcher_requested", source: "shortcut" }));
           await expect(page.locator("#model-preset-switcher")).toBeVisible();
           await auditMainSurface(page, "#model-preset-switcher", `${prefix}-models`, testInfo);
           await page.locator("#model-preset-switcher-input").fill("no matching model");
@@ -136,12 +136,12 @@ for (const [locale, language, chromeLocale] of scenarios) {
           await page.locator("#model-preset-switcher-input").press("Escape");
         }
         await page.evaluate(async () => {
-          await window.qingzhouConversationBenchmark.runSnapshotRender({ sessionId: "localized-layout", title: "Original user title / 用户标题 / عنوان المستخدم", transcript: [
+          await window.zuriConversationBenchmark.runSnapshotRender({ sessionId: "localized-layout", title: "Original user title / 用户标题 / عنوان المستخدم", transcript: [
             { type: "user", text: "Original user content / 用户内容 / نص المستخدم", clientMessageId: "layout-question" },
             { type: "assistant", content: "A short reply with **original content**.", spanId: "layout-reply" },
           ] });
-          window.qingzhouConversationBenchmark.configureVisualState({ running: true, pendingFollowUps: [{ clientMessageId: "layout-followup", text: "Follow-up / 追问 / متابعة" }], pendingSteerings: [{ clientMessageId: "layout-steering", text: "Steering / 补充 / توجيه" }] });
-          window.qingzhouConversationBenchmark.dispatchBackgroundEvent({ type: "llm_rate_wait", sessionId: "localized-layout", runId: "benchmark-visual-run" });
+          window.zuriConversationBenchmark.configureVisualState({ running: true, pendingFollowUps: [{ clientMessageId: "layout-followup", text: "Follow-up / 追问 / متابعة" }], pendingSteerings: [{ clientMessageId: "layout-steering", text: "Steering / 补充 / توجيه" }] });
+          window.zuriConversationBenchmark.dispatchBackgroundEvent({ type: "llm_rate_wait", sessionId: "localized-layout", runId: "benchmark-visual-run" });
         });
         for (const width of [320, 360, 430]) {
           await page.setViewportSize({ width, height: 760 });
@@ -171,7 +171,7 @@ for (const [locale, language, chromeLocale, save, brand] of scenarios) {
         const messages = JSON.parse(await readFile(resolve(await ensureTestExtension(), `_locales/${chromeLocale}/messages.json`), "utf8"));
         await page.addInitScript(installBenchmarkChromeStub, { uiLanguage: locale, localeMessages: messages, config });
         await page.goto("/extension/sidepanel/sidepanel.html", { waitUntil: "domcontentloaded" });
-        await page.waitForFunction(() => Boolean(window.qingzhouConversationBenchmark));
+        await page.waitForFunction(() => Boolean(window.zuriConversationBenchmark));
         await expect(page.locator("html")).toHaveAttribute("lang", language);
         await expect(page.locator("html")).toHaveAttribute("dir", language === "ar" ? "rtl" : "ltr");
         await expect(page).toHaveTitle(brand);
@@ -206,9 +206,9 @@ for (const [locale, language, chromeLocale, save, brand] of scenarios) {
 
         // Reopen with the same persisted state as a returning user; the real onboarding feature
         // decides which welcome to show, without the test changing presentation classes.
-        await page.evaluate(() => localStorage.setItem("qingzhou_onboarding_v2", JSON.stringify({ status: "activated" })));
+        await page.evaluate(() => localStorage.setItem("zuri_onboarding_v2", JSON.stringify({ status: "activated" })));
         await page.reload({ waitUntil: "domcontentloaded" });
-        await page.waitForFunction(() => Boolean(window.qingzhouConversationBenchmark));
+        await page.waitForFunction(() => Boolean(window.zuriConversationBenchmark));
         await expect(page.locator("#welcome")).toBeVisible();
         await expect(page.locator(".welcome-onboarding")).toBeHidden();
         await expect(page.locator(".welcome-subtitle")).toBeVisible();
@@ -229,17 +229,17 @@ for (const [locale, language, chromeLocale] of scenarios.filter(([,language]) =>
       const messages = JSON.parse(await readFile(resolve(await ensureTestExtension(), `_locales/${chromeLocale}/messages.json`), "utf8"));
       await page.addInitScript(installBenchmarkChromeStub, { uiLanguage: locale, localeMessages: messages, config });
       await page.goto("/extension/sidepanel/sidepanel.html", { waitUntil: "domcontentloaded" });
-      await page.waitForFunction(() => Boolean(window.qingzhouConversationBenchmark));
+      await page.waitForFunction(() => Boolean(window.zuriConversationBenchmark));
       const snapshot = { session: { id: "world-export", title: "User title / 用户标题" }, transcript: [
         { id: "user", type: "user", text: "用户内容 {name} <script>unchanged</script>" },
         { id: "error", type: "error", text: "Provider detail — unchanged" },
-        { id: "original-brand-text", type: "assistant", content: "Qingzhou / 轻舟 / 輕舟 / 軽舟 — original user-provided names" },
+        { id: "original-brand-text", type: "assistant", content: "Zuri / Zuri / 輕舟 / 軽舟 — original user-provided names" },
       ] };
       const exported = await page.evaluate(async value => {
-        await window.qingzhouConversationBenchmark.runSnapshotRender(value, { debug: false, clearStorage: false });
-        return window.qingzhouConversationBenchmark.renderSessionDocument(value);
+        await window.zuriConversationBenchmark.runSnapshotRender(value, { debug: false, clearStorage: false });
+        return window.zuriConversationBenchmark.renderSessionDocument(value);
       }, snapshot);
-      expect(exported.payload).toMatchObject({ format: "qingzhou.session", version: 1, source: { sessionId: "world-export" } });
+      expect(exported.payload).toMatchObject({ format: "zuri.session", version: 1, source: { sessionId: "world-export" } });
       expect(exported.payload.session.title).toBe(snapshot.session.title);
       const recipient = await browser.newContext({ locale: "en-US", offline: true });
       try {
@@ -255,12 +255,12 @@ for (const [locale, language, chromeLocale] of scenarios.filter(([,language]) =>
         await expect(offline.locator("#messages")).toContainText(snapshot.transcript[2].content);
         await expect(offline.locator(".chat-error-card")).toContainText("Provider detail — unchanged");
         await expect(offline.locator("script[src]")).toHaveCount(0);
-        await expect(offline.locator("#qingzhou-session-exchange")).toHaveCount(1);
-        await offline.evaluate(() => window.postMessage({ type: "qingzhou:session-export:result", action: "probe", installed: true }, "*"));
-        const cta = offline.locator("#qingzhou-session-cta");
+        await expect(offline.locator("#zuri-session-exchange")).toHaveCount(1);
+        await offline.evaluate(() => window.postMessage({ type: "zuri:session-export:result", action: "probe", installed: true }, "*"));
+        const cta = offline.locator("#zuri-session-cta");
         await expect(cta).toBeVisible();
         await expect(cta).toHaveText({
-          ja: "軽舟にインポート", ko: "qz로 가져오기", ar: "استيراد إلى qz", hi: "qz में इंपोर्ट करें",
+          ja: "軽舟にインポート", ko: "zuri로 가져오기", ar: "استيراد إلى zuri", hi: "zuri में इंपोर्ट करें",
         }[language]);
         expect(errors).toEqual([]);
       } finally { await recipient.close(); }

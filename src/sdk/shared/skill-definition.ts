@@ -10,6 +10,6 @@ export interface SkillDefinition {
   resources?: readonly { path: string; type: string; title?: string; description?: string; content?: string; encoding?: string; mimeType?: string; size?: number }[];
 }
 export interface SkillExtensionAPI { registerSkill(definition: SkillDefinition): void }
-export type SkillExtension = (qz: SkillExtensionAPI) => void;
+export type SkillExtension = (zuri: SkillExtensionAPI) => void;
 export { SKILL_MANIFEST_PATH, SKILL_MANIFEST_FORMAT, SKILL_MANIFEST_SCHEMA_VERSION } from "../../shared/skills/skill-format.js";
 export { createSkillHostResources } from "../../shared/skills/skill-host-resources.js";

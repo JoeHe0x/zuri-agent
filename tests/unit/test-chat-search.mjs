@@ -73,7 +73,7 @@ function assertChatSearchRenderContract() {
 
   const stripMath = extractFunction(sidepanel, "stripMarkdownMathFromSearchText");
   assert.match(stripMath, /extractMarkdownMathPlaceholders/, "math stripping should reuse the production Markdown math parser");
-  assert.match(stripMath, /@@QZ_MATH_\\d\+@@/, "math stripping should remove generated math placeholders from search text");
+  assert.match(stripMath, /@@ZURI_MATH_\\d\+@@/, "math stripping should remove generated math placeholders from search text");
 
   const apply = extractFunction(sidepanel, "applyChatSearchDomState");
   assert.match(apply, /transcriptElementByKey\(match\.key\)/, "search highlights should be derived from transcript keys");

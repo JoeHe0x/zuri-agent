@@ -6,7 +6,7 @@ function makeOpenAiCodexProviderConfig() {
   return {
     providerId: "openaicodex",
     providerLabel: "OpenAI Codex",
-    source: "qz-openai-codex-provider-metadata",
+    source: "zuri-openai-codex-provider-metadata",
     models: [
       ...makeModels(["gpt-6-astra"], 272000, 128000, true),
       ...makeModels([

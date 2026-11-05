@@ -66,7 +66,7 @@ export function safeMcpFilename(value: string) {
   let filename = String(value || "").replace(/[\u0000-\u001f\u007f/\\:*?"<>|]/g, "_")
     .replace(/^[.\s]+|[.\s]+$/g, "").slice(0, 180);
   if (/^(con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\.|$)/i.test(filename)) filename = `_${filename}`;
-  return filename || "qz-export";
+  return filename || "zuri-export";
 }
 
 function localFileUrl(filename: string) {

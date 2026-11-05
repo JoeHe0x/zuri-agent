@@ -22,7 +22,7 @@ import test from "node:test";
 import { fileURLToPath } from "node:url";
 
 test("release validation accepts current and historical branding and rejects unrelated manifests or unsafe locale resources", async t => {
-  const directory = await mkdtemp(join(tmpdir(), "qingzhou-localized-manifest-"));
+  const directory = await mkdtemp(join(tmpdir(), "zuri-localized-manifest-"));
   t.after(() => rm(directory, { recursive: true, force: true }));
   const program = `
 import importlib.util, json, pathlib, sys
@@ -33,7 +33,7 @@ spec.loader.exec_module(module)
 root = pathlib.Path(sys.argv[2])
 source = pathlib.Path(sys.argv[3])
 assert module.load_manifest(source) == json.loads((source / 'manifest.json').read_text(encoding='utf-8'))
-for locale, name in [('en', 'qz'), ('en', 'Qingzhou'), ('zh_CN', '轻舟'), ('zh_TW', '輕舟'), ('ja', '軽舟')]:
+for locale, name in [('en', 'zuri'), ('en', 'Zuri'), ('zh_CN', 'Zuri'), ('zh_TW', '輕舟'), ('ja', '軽舟')]:
     path = root / '_locales' / locale
     path.mkdir(parents=True, exist_ok=True)
     (path / 'messages.json').write_text(json.dumps({'extensionName': {'message': name}}), encoding='utf-8')
@@ -48,14 +48,14 @@ for locale in ['missing', '../outside', '']:
         pass
     else:
         raise AssertionError('Accepted invalid locale: ' + locale)
-for name in ['qz', 'Qingzhou', '轻舟 fixture']:
+for name in ['zuri', 'Zuri', 'Zuri fixture']:
     manifest = {'manifest_version': 3, 'name': name}
     (root / 'manifest.json').write_text(json.dumps(manifest), encoding='utf-8')
     assert module.load_manifest(root) == manifest
 for manifest in [
     {'manifest_version': 3, 'name': 'Another extension', 'description': 'FAQZone'},
-    {'manifest_version': 3, 'name': 'QZip'},
-    {'manifest_version': 2, 'name': 'qz'},
+    {'manifest_version': 3, 'name': 'ZURIip'},
+    {'manifest_version': 2, 'name': 'zuri'},
 ]:
     (root / 'manifest.json').write_text(json.dumps(manifest), encoding='utf-8')
     try:
@@ -85,7 +85,7 @@ const SOURCE_EXTENSION = join(ROOT, "src");
 const RELEASE_NOTICES = ["LICENSE", "NOTICE", "THIRD_PARTY_NOTICES.md"];
 
 test("release bundler is deterministic, preserves vendor, and keeps runtime entry contracts", async t => {
-  const work = await mkdtemp(join(tmpdir(), "qingzhou-bundle-test-"));
+  const work = await mkdtemp(join(tmpdir(), "zuri-bundle-test-"));
   t.after(() => rm(work, { recursive: true, force: true }));
   const first = join(work, "first");
   const second = join(work, "second");
@@ -160,7 +160,7 @@ test("release bundler is deterministic, preserves vendor, and keeps runtime entr
 });
 
 test("public package audit checks bundled code, paths and resource credentials", async t => {
-  const work = await mkdtemp(join(tmpdir(), "qz-package-audit-"));
+  const work = await mkdtemp(join(tmpdir(), "zuri-package-audit-"));
   t.after(() => rm(work, { recursive: true, force: true }));
   const zip = join(work, "fixture.zip");
   const write = (path, source) => execFileSync("python3", ["-c",
@@ -185,7 +185,7 @@ test("public package audit checks bundled code, paths and resource credentials",
 });
 
 test("release publisher packages bundles and records auditable metadata", async t => {
-  const output = await mkdtemp(join(tmpdir(), "qingzhou-release-test-"));
+  const output = await mkdtemp(join(tmpdir(), "zuri-release-test-"));
   t.after(() => rm(output, { recursive: true, force: true }));
   const version = "0.0.0.942";
 
@@ -247,7 +247,7 @@ test("release publisher packages bundles and records auditable metadata", async 
 });
 
 test("Web Store publisher removes the upload ZIP when storecheck rejects CSP", async t => {
-  const work = await mkdtemp(join(tmpdir(), "qingzhou-store-gate-"));
+  const work = await mkdtemp(join(tmpdir(), "zuri-store-gate-"));
   t.after(() => rm(work, { recursive: true, force: true }));
   const source = join(work, "source");
   await cp(SOURCE_EXTENSION, source, { recursive: true });
@@ -267,7 +267,7 @@ test("Web Store publisher removes the upload ZIP when storecheck rejects CSP", a
 });
 
 test("publisher compiles TS without bundling and rejects obsolete minifier configuration", async t => {
-  const work = await mkdtemp(join(tmpdir(), "qingzhou-compile-release-"));
+  const work = await mkdtemp(join(tmpdir(), "zuri-compile-release-"));
   t.after(() => rm(work, { recursive: true, force: true }));
   const source = join(work, "source");
   await cp(SOURCE_EXTENSION, source, { recursive: true });
@@ -291,7 +291,7 @@ test("publisher compiles TS without bundling and rejects obsolete minifier confi
 });
 
 test("release debug maps trace readable bundles from Unicode and spaced checkouts", async t => {
-  const work = await mkdtemp(join(tmpdir(), "qingzhou-debug-release-"));
+  const work = await mkdtemp(join(tmpdir(), "zuri-debug-release-"));
   t.after(() => rm(work, { recursive: true, force: true }));
   const repo = join(work, "checkout 开发 100% #");
   const source = join(repo, "src");
@@ -336,7 +336,7 @@ test("release debug maps trace readable bundles from Unicode and spaced checkout
   }
   const provenance = zipJson(zip, "zuri-agent-extension/vendor/provenance.json");
   assert.equal(Object.keys(provenance.assets).some(path => path.endsWith(".map")), false);
-  assert.equal(installed.some(path => /qingzhou-(?:debug|build)/.test(path)), false);
+  assert.equal(installed.some(path => /zuri-(?:debug|build)/.test(path)), false);
   const runtime = "background/service-worker.js";
   const readZip = (path, entry) => execFileSync("python3", ["-c",
     "import sys,zipfile; sys.stdout.buffer.write(zipfile.ZipFile(sys.argv[1]).read(sys.argv[2]))", path, entry], { maxBuffer: 32 * 1024 * 1024 });
@@ -347,12 +347,12 @@ test("release debug maps trace readable bundles from Unicode and spaced checkout
   const before = generated.slice(0, index).split("\n");
   const map = zipJson(debug, `maps/${runtime}.map`);
   const entry = new SourceMap(map).findEntry(before.length - 1, before.at(-1).length);
-  assert.equal(entry.originalSource, `qingzhou://extension/${sourcePath}`);
+  assert.equal(entry.originalSource, `zuri://extension/${sourcePath}`);
   assert.equal(entry.originalLine + 1, sourceLine, "bundle maps must retain the original TS line");
   assert.ok(map.sourcesContent.some(contents => contents?.includes(probe.trim())));
   const build = zipJson(debug, "build.json");
   const worker = build.embeddedDebugScripts.find(script => script.entry === "workers/inner-runner.ts");
-  const workerCode = readZip(debug, `debug/${worker.artifact.replace(/^\.qingzhou-debug\//, "")}`).toString();
+  const workerCode = readZip(debug, `debug/${worker.artifact.replace(/^\.zuri-debug\//, "")}`).toString();
   const sandbox = readZip(zip, "zuri-agent-extension/runner-sandbox.js").toString();
   const strings = [...tokenizer(sandbox, { ecmaVersion: "latest", sourceType: "module" })]
     .filter(token => ["string", "template"].includes(token.type.label)).map(token => token.value);
@@ -377,7 +377,7 @@ with tempfile.TemporaryDirectory() as temporary:
     for name in ['LICENSE','NOTICE','THIRD_PARTY_NOTICES.md']:
         (root/name).write_text('Synthetic distribution notice: '+name)
     extension=root/'src';extension.mkdir()
-    (extension/'manifest.json').write_text(json.dumps({'manifest_version':3,'name':'qz fixture','version':'0.0.0.1','key':'fixture-public-key'}))
+    (extension/'manifest.json').write_text(json.dumps({'manifest_version':3,'name':'zuri fixture','version':'0.0.0.1','key':'fixture-public-key'}))
     (extension/'fixture.js').write_text('console.log(42);')
     (extension/'fixture.js.map').write_text('{}')
     scripts=root/'scripts';scripts.mkdir()
@@ -477,7 +477,7 @@ with tempfile.TemporaryDirectory() as temporary:
     for missing in files:
         check([(name,data) for name,data in files.items() if name!=missing])
     for name in ['products/manifest.json','nested/extension/manifest.json',
-                 'worker.js.map','.qingzhou-debug/worker.js','.qingzhou-build.json','.env.local',
+                 'worker.js.map','.zuri-debug/worker.js','.zuri-build.json','.env.local',
                  '../outside','/absolute','C:/drive','folder\\worker.js','worker.js']:
         check([*files.items(),(name,b'fixture')])
     for invalid in [[],{'manifest_version':2},{**manifest,'key':'fixture-public-key'},{**manifest,'key':''},
@@ -499,12 +499,12 @@ store=module.release_paths(pathlib.Path('releases'),'1.2.3','webstore')
 assert store.package.as_posix()=='releases/1.2.3/webstore/zuri-agent-extension-1.2.3.webstore.zip'
 assert store.debug.name=='zuri-agent-extension-1.2.3.webstore.debug.zip'
 firefox=module.release_paths(pathlib.Path('releases'),'1.2.3','firefox')
-assert firefox.package.as_posix()=='releases/1.2.3/firefox/qz-browser-agent-firefox-1.2.3.xpi'
-assert firefox.debug.as_posix()=='releases/1.2.3/firefox/qz-browser-agent-firefox-1.2.3.debug.zip'
+assert firefox.package.as_posix()=='releases/1.2.3/firefox/zuri-agent-firefox-1.2.3.xpi'
+assert firefox.debug.as_posix()=='releases/1.2.3/firefox/zuri-agent-firefox-1.2.3.debug.zip'
 assert module.archive_uses_root_manifest('manual') is False
 assert module.archive_uses_root_manifest('webstore') is True
 assert module.archive_uses_root_manifest('firefox') is True
-manifest={'manifest_version':3,'version':'0.1.0','name':'qz',
+manifest={'manifest_version':3,'version':'0.1.0','name':'zuri',
     'permissions':['storage',*module.FIREFOX_KEPT_PERMISSIONS],
     'background':{'scripts':['background/firefox-boot.js'],'type':'module'},
     'browser_specific_settings':{'gecko':{
@@ -514,7 +514,7 @@ manifest={'manifest_version':3,'version':'0.1.0','name':'qz',
 files={'manifest.json':json.dumps(manifest).encode(),'background/firefox-boot.js':b'fixture',
     **{name:b'notice' for name in module.RELEASE_NOTICES}}
 with tempfile.TemporaryDirectory() as temporary:
-    path=pathlib.Path(temporary)/'qz-browser-agent-firefox-0.1.0.xpi'
+    path=pathlib.Path(temporary)/'zuri-agent-firefox-0.1.0.xpi'
     def write(entries):
         path.unlink(missing_ok=True)
         with zipfile.ZipFile(path,'w') as archive:
@@ -546,7 +546,7 @@ with tempfile.TemporaryDirectory() as temporary:
 });
 
 test("firefox release target writes an unsigned root-manifest xpi", async t => {
-  const output = await mkdtemp(join(tmpdir(), "qingzhou-firefox-release-"));
+  const output = await mkdtemp(join(tmpdir(), "zuri-firefox-release-"));
   t.after(() => rm(output, { recursive: true, force: true }));
   const version = "0.0.0.947";
   const args = [
@@ -559,13 +559,13 @@ test("firefox release target writes an unsigned root-manifest xpi", async t => {
   ];
   execFileSync("python3", args, { cwd: ROOT, stdio: "pipe", timeout: 180_000 });
   const releaseDir = join(output, version, "firefox");
-  const xpi = join(releaseDir, `qz-browser-agent-firefox-${version}.xpi`);
+  const xpi = join(releaseDir, `zuri-agent-firefox-${version}.xpi`);
   const metadata = JSON.parse(await readFile(join(releaseDir, "version.json"), "utf8"));
   assert.equal(metadata.browser, "firefox");
   assert.equal(metadata.geckoId, FIREFOX_GECKO_ID);
   assert.equal(metadata.target, "firefox");
   assert.equal(metadata.packageRoot, ".");
-  assert.equal(metadata.package, `qz-browser-agent-firefox-${version}.xpi`);
+  assert.equal(metadata.package, `zuri-agent-firefox-${version}.xpi`);
   assert.deepEqual(await readdir(join(output, version)), ["firefox"]);
   const entries = zipEntries(xpi);
   assert.equal(entries.includes("manifest.json"), true);
@@ -591,7 +591,7 @@ test("firefox release target writes an unsigned root-manifest xpi", async t => {
   assert.equal(entries.includes("background/firefox-boot.js"), true);
   assert.equal(entries.includes(manifest.sidebar_action.default_panel), true);
   assert.equal(entries.includes(manifest.sidebar_action.default_icon), true);
-  const debug = join(releaseDir, `qz-browser-agent-firefox-${version}.debug.zip`);
+  const debug = join(releaseDir, `zuri-agent-firefox-${version}.debug.zip`);
   const debugMetadata = zipJson(debug, "manifest.json");
   assert.equal(debugMetadata.localOnly, true);
   assert.equal(debugMetadata.package.name, metadata.package);
@@ -655,7 +655,7 @@ for missing in ['LICENSE','NOTICE','THIRD_PARTY_NOTICES.md']:
         with tempfile.TemporaryDirectory() as temporary:
             root=pathlib.Path(temporary).resolve();module.REPO_DIR=root
             source=root/'src';source.mkdir()
-            original=json.dumps({'manifest_version':3,'name':'qz','version':'0.0.0.1'})
+            original=json.dumps({'manifest_version':3,'name':'zuri','version':'0.0.0.1'})
             manifest=source/'manifest.json';manifest.write_text(original)
             for name in ['LICENSE','NOTICE','THIRD_PARTY_NOTICES.md']:
                 if name!=missing: (root/name).write_text('Synthetic notice: '+name)
@@ -675,7 +675,7 @@ for missing in ['LICENSE','NOTICE','THIRD_PARTY_NOTICES.md']:
 
 
 test("private publisher re-entry cannot mutate a Git working tree or a directory inside it", async t => {
-  const work = await mkdtemp(join(tmpdir(), "qingzhou-release-prepared-"));
+  const work = await mkdtemp(join(tmpdir(), "zuri-release-prepared-"));
   t.after(() => rm(work, { recursive: true, force: true }));
   execFileSync("git", ["init", "--quiet", work]);
   for (const repo of [work, join(work, "nested-export")]) {
@@ -696,7 +696,7 @@ test("private publisher re-entry cannot mutate a Git working tree or a directory
 });
 
 test("Git releases execute the source, publisher, build scripts, lockfile and notices from the same commit", async t => {
-  const work = await mkdtemp(join(tmpdir(), "qingzhou-release-provenance-"));
+  const work = await mkdtemp(join(tmpdir(), "zuri-release-provenance-"));
   t.after(() => rm(work, { recursive: true, force: true }));
   const repo = join(work, "repo");
   await cp(SOURCE_EXTENSION, join(repo, "src"), { recursive: true });

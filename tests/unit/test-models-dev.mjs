@@ -298,7 +298,7 @@ test("known SDK models and private fallbacks resolve without any network request
   assert.equal(miniMax.source, "models.dev");
   const codex = await matchConfiguredModelCapabilities({ provider: "openaicodex", model: "gpt-5.6-sol" });
   assert.equal(codex.contextWindow, 272000);
-  assert.equal(codex.source, "qz-openai-codex-provider-metadata");
+  assert.equal(codex.source, "zuri-openai-codex-provider-metadata");
   const aliased = await matchConfiguredModelCapabilities({ provider: "opencodego", model: Object.keys(snapshot["opencode-go"].models)[0] });
   assert.equal(aliased.providerId, "opencode-go");
   assert.equal(aliased.matched, true);

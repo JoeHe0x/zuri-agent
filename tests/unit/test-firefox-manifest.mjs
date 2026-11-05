@@ -113,11 +113,11 @@ test("the firefox toolbar glyph is the 16px mark that follows the light or dark 
 test("firefox copy and the sidebar boot stay out of the chrome files", () => {
   assert.equal(firefoxFileAccessMessageId(), chromeMessageId(FILE_ACCESS_MESSAGE_KEY));
   const id = firefoxFileAccessMessageId();
-  const rewritten = rewriteFirefoxMessages("en", { [id]: { message: "Open qz Details in chrome://extensions, enable Allow access to file URLs, then retry." }, other: { message: "keep" } });
+  const rewritten = rewriteFirefoxMessages("en", { [id]: { message: "Open zuri Details in chrome://extensions, enable Allow access to file URLs, then retry." }, other: { message: "keep" } });
   assert.match(rewritten[id].message, /about:addons/);
   assert.equal(rewritten[id].message.includes("chrome://extensions"), false);
   assert.equal(rewritten.other.message, "keep");
-  const inserted = rewriteFirefoxMessages("zh_CN", { qz_language: { message: "zh-CN" } });
+  const inserted = rewriteFirefoxMessages("zh_CN", { zuri_language: { message: "zh-CN" } });
   assert.match(inserted[id].message, /about:addons/);
   assert.equal(rewriteFirefoxMessages("en", { other: { message: "keep" } }).other.message, "keep");
   assert.equal(Object.hasOwn(rewriteFirefoxMessages("en", { other: { message: "keep" } }), id), false);
@@ -133,22 +133,22 @@ test("firefox copy and the sidebar boot stay out of the chrome files", () => {
   for (const token of ["Canvas", "CanvasText", "AccentColor", "AccentColorText"]) {
     assert.doesNotMatch(skin, new RegExp(`\\b${token}\\b`), `${token} is the system color, not Firefox's sidebar`);
   }
-  assert.match(skin, /--qz-ff-sidebar: light-dark\(#ffffff, #1c1b22\);/);
-  assert.match(skin, /--qz-ff-sidebar-text: light-dark\(#15141a, #f9f9fa\);/);
-  assert.match(skin, /--qz-ff-accent: light-dark\(#764edd, #b89cff\);/, "the default accent is Firefox's violet");
-  assert.match(skin, /--qz-ff-field: light-dark\(var\(--qz-ff-sidebar\), color-mix\(in srgb, black 18%, var\(--qz-ff-sidebar\)\)\);/);
+  assert.match(skin, /--zuri-ff-sidebar: light-dark\(#ffffff, #1c1b22\);/);
+  assert.match(skin, /--zuri-ff-sidebar-text: light-dark\(#15141a, #f9f9fa\);/);
+  assert.match(skin, /--zuri-ff-accent: light-dark\(#764edd, #b89cff\);/, "the default accent is Firefox's violet");
+  assert.match(skin, /--zuri-ff-field: light-dark\(var\(--zuri-ff-sidebar\), color-mix\(in srgb, black 18%, var\(--zuri-ff-sidebar\)\)\);/);
   for (const property of FIREFOX_THEME_PROPERTIES) assert.match(skin, new RegExp(`^  ${property}:`, "m"));
-  assert.match(skin, /:where\(a:any-link\) \{\n\s*color: var\(--qz-ff-accent-ink\);/, "an unstyled link takes the theme's accent, not the browser's blue");
+  assert.match(skin, /:where\(a:any-link\) \{\n\s*color: var\(--zuri-ff-accent-ink\);/, "an unstyled link takes the theme's accent, not the browser's blue");
   assert.match(skin, /^@layer components \{$/m);
-  assert.doesNotMatch(skin, /color-mix\([^;]*--qz-ff-(?:accent|primary)\b/, "the accent never tints a surface");
+  assert.doesNotMatch(skin, /color-mix\([^;]*--zuri-ff-(?:accent|primary)\b/, "the accent never tints a surface");
   for (const radius of skin.matchAll(/(?:border-radius|--radius-\w+|--control-radius|--popover-radius|--block-radius):\s*([^;]+);/g)) {
     for (const value of radius[1].split(/\s+/)) assert.ok(["0", "4px", "6px", "8px"].includes(value), `radius ${radius[0]}`);
   }
-  assert.match(skin, /--qz-ff-success: light-dark\(#00713e, #8adf8d\)/);
-  assert.match(skin, /--qz-ff-primary: light-dark\(#764edd, #b89cff\)/);
-  assert.match(skin, /--control-primary-surface: var\(--qz-ff-primary\)/);
-  assert.match(skin, /\.qz-btn--primary:disabled \{\n\s*--qz-control-bg: var\(--qz-ff-fill\);\n\s*cursor: not-allowed;/);
-  assert.match(skin, /--send-standby-bg: color-mix\(in srgb, var\(--qz-ff-field-text\) \d+%, transparent\)/);
+  assert.match(skin, /--zuri-ff-success: light-dark\(#00713e, #8adf8d\)/);
+  assert.match(skin, /--zuri-ff-primary: light-dark\(#764edd, #b89cff\)/);
+  assert.match(skin, /--control-primary-surface: var\(--zuri-ff-primary\)/);
+  assert.match(skin, /\.zuri-btn--primary:disabled \{\n\s*--zuri-control-bg: var\(--zuri-ff-fill\);\n\s*cursor: not-allowed;/);
+  assert.match(skin, /--send-standby-bg: color-mix\(in srgb, var\(--zuri-ff-field-text\) \d+%, transparent\)/);
   assert.match(skin, /#messages:not\(\[data-chat-state="landing"\]\) \{\n    padding-inline: 14px;\n    scrollbar-gutter: stable both-edges;\n  \}/);
   const sharedStream = readFileSync(join(repoRoot, "src/sidepanel/features/chat/transcript/viewport.css"), "utf8");
   assert.match(sharedStream, /padding:\s*0 10px var\(--chat-tail-safe-bottom\)/);
@@ -160,17 +160,17 @@ test("firefox copy and the sidebar boot stay out of the chrome files", () => {
   assert.equal(firefoxUserText("chrome-extension://abc and Android Chrome and Chrome DevTools MCP"), "moz-extension://abc and an Android layout and a browser snapshot");
   assert.equal(firefoxUserText("The chrome.debugger API and Die chrome.debugger-API"), "The debugger API and Die debugger-API");
   const accessId = firefoxFileAccessMessageId();
-  const kept = rewriteFirefoxMessages("en", { qz_language: { message: "en" } }, { [accessId]: { message: "should not replace" } });
+  const kept = rewriteFirefoxMessages("en", { zuri_language: { message: "en" } }, { [accessId]: { message: "should not replace" } });
   assert.match(kept[accessId].message, /about:addons/);
   assert.equal(kept[accessId].message.includes("should not replace"), false);
   const catalogs = rewriteFirefoxMessages("en", {
-    qz_language: { message: "en" },
+    zuri_language: { message: "en" },
     [HISTORICAL_LABELS_MESSAGE_ID]: { message: "Chrome" },
-    qz_example: { message: "Use Chrome and chrome://downloads" },
+    zuri_example: { message: "Use Chrome and chrome://downloads" },
   });
   assert.equal(catalogs[HISTORICAL_LABELS_MESSAGE_ID].message, "Chrome");
-  assert.equal(catalogs.qz_language.message, "en");
-  assert.equal(catalogs.qz_example.message, "Use Firefox and about:downloads");
+  assert.equal(catalogs.zuri_language.message, "en");
+  assert.equal(catalogs.zuri_example.message, "Use Firefox and about:downloads");
 });
 
 test("english and simplified chinese catalogs receive firefox wording the bundle would show", () => {
@@ -181,14 +181,14 @@ test("english and simplified chinese catalogs receive firefox wording the bundle
   const startup = chromeMessageId("core.startupFailed");
   const pdf = chromeMessageId("documents.temporaryPdfRenderingRequiresTheChromeDebuggerRuntime");
   const unavailable = chromeMessageId("backend.toolError.DEBUGGER_UNAVAILABLE.message");
-  assert.equal(english[startup].message, "Could not start qz. Reopen the sidebar.");
+  assert.equal(english[startup].message, "Could not start zuri. Reopen the sidebar.");
   assert.equal(chinese[startup], undefined);
   assert.equal(english[pdf].message, "Creating the PDF requires access to the Firefox debugger.");
   assert.equal(chinese[pdf].message, "临时 PDF 渲染需要 Firefox 调试服务。");
   assert.equal(english[unavailable].message, "The debugger API is unavailable in this environment.");
   assert.equal(chinese[unavailable].message, "当前环境不可用 debugger API。");
   const merged = rewriteFirefoxMessages("de", {
-    qz_language: { message: "de" },
+    zuri_language: { message: "de" },
     [unavailable]: { message: "Die chrome.debugger-API ist in dieser Umgebung nicht verfügbar." },
   });
   assert.equal(merged[unavailable].message, "Die debugger-API ist in dieser Umgebung nicht verfügbar.");

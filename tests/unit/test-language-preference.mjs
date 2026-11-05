@@ -28,7 +28,7 @@ function fixture({ browser = "en-GB", preference, fetch, get, set } = {}) {
       requests.push(url);
       if (fetch) return fetch(url);
       const language = /_locales\/([^/]+)/.exec(url)[1].replace("_", "-");
-      return { ok: true, json: async () => ({ qz_language: encodeChromeMessage(language), [chromeMessageId("sample.label")]: encodeChromeMessage(`${language}: $5 $$6 $NAME$ {value}`) }) };
+      return { ok: true, json: async () => ({ zuri_language: encodeChromeMessage(language), [chromeMessageId("sample.label")]: encodeChromeMessage(`${language}: $5 $$6 $NAME$ {value}`) }) };
     },
   };
   return { runtime: createLanguageRuntime(() => env), env, values, requests, changed };
@@ -71,9 +71,9 @@ test("storage and resource failures remain recoverable, explicit saves never rep
   f.env.fetch = async () => ({ ok: false, status: 404 });
   await assert.rejects(f.runtime.saveLanguagePreference("ja"), /404/);
   assert.equal(f.values[LANGUAGE_PREFERENCE_KEY], undefined);
-  f.env.fetch = async () => ({ ok: true, json: async () => ({ qz_language: { message: "ko" } }) });
+  f.env.fetch = async () => ({ ok: true, json: async () => ({ zuri_language: { message: "ko" } }) });
   await assert.rejects(f.runtime.saveLanguagePreference("ja"), /does not match/);
-  f.env.fetch = async () => ({ ok: true, json: async () => ({ qz_language: { message: "ja" } }) });
+  f.env.fetch = async () => ({ ok: true, json: async () => ({ zuri_language: { message: "ja" } }) });
   await f.runtime.saveLanguagePreference("ja");
   assert.equal(f.values[LANGUAGE_PREFERENCE_KEY].language, "ja");
   f.env.chrome.storage.local.set = async () => { throw new Error("write failed"); };
@@ -89,10 +89,10 @@ test("background observes latest preference, rejecting stale initial reads and c
   f.changed({ v: 1, language: "ja" });
   f.changed({ v: 1, language: "ar" });
   initial.resolve({ [LANGUAGE_PREFERENCE_KEY]: { v: 1, language: "zh-CN" } });
-  arabic.resolve({ ok: true, json: async () => ({ qz_language: { message: "ar" } }) });
+  arabic.resolve({ ok: true, json: async () => ({ zuri_language: { message: "ar" } }) });
   await ready;
   assert.equal(f.runtime.getLanguage(), "ar");
-  japanese.resolve({ ok: true, json: async () => ({ qz_language: { message: "ja" } }) });
+  japanese.resolve({ ok: true, json: async () => ({ zuri_language: { message: "ja" } }) });
   await turn();
   assert.equal(f.runtime.getLanguage(), "ar");
   assert.equal(f.runtime.withLanguage("ja", () => f.runtime.getLanguage()), "ja");
@@ -105,12 +105,12 @@ test("readiness follows preference changes arriving during an earlier load", asy
   await turn();
   const waiting = f.runtime.whenLanguageReady();
   f.changed({ v: 1, language: "ar" });
-  loads.ja.resolve({ ok: true, json: async () => ({ qz_language: { message: "ja" } }) });
+  loads.ja.resolve({ ok: true, json: async () => ({ zuri_language: { message: "ja" } }) });
   let completed = false;
   void waiting.then(() => { completed = true; });
   await turn();
   assert.equal(completed, false);
-  loads.ar.resolve({ ok: true, json: async () => ({ qz_language: { message: "ar" } }) });
+  loads.ar.resolve({ ok: true, json: async () => ({ zuri_language: { message: "ar" } }) });
   await Promise.all([ready, waiting]);
   assert.equal(f.runtime.getLanguage(), "ar");
 });

@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { expect, test } from "./sidepanel-fixtures.mjs";
 import { assistantStreamPlan, analyzeAssistantStreamFrames } from "../support/assistant-stream-fuzz.mjs";
 
-const seedOffset = Number(process.env.QINGZHOU_ASSISTANT_FUZZ_SEED_OFFSET || 0);
+const seedOffset = Number(process.env.ZURI_ASSISTANT_FUZZ_SEED_OFFSET || 0);
 for (const [index, width] of [360, 430, 560].entries()) for (const readHistory of [false, true]) {
   const seed = 0x51f15e + seedOffset + index * 7919 + (readHistory ? 104729 : 0);
   test(`assistant stream viewport fuzz · ${width}px · ${readHistory ? "history then tail" : "tail"} · seed ${seed}`, async ({ page }, testInfo) => {
@@ -11,16 +11,16 @@ for (const [index, width] of [360, 430, 560].entries()) for (const readHistory o
     await page.emulateMedia({ colorScheme: readHistory ? "dark" : "light" });
     // Optional local baseline module proves the same assertions reject an older renderer.
     // Keep compiled baselines and private traces outside tracked fixtures.
-    if (process.env.QINGZHOU_FUZZ_MARKDOWN_MODULE) {
+    if (process.env.ZURI_FUZZ_MARKDOWN_MODULE) {
       await page.route("**/sidepanel/features/chat/markdown-feature.js", route => route.fulfill({
-        contentType: "application/javascript", body: readFileSync(process.env.QINGZHOU_FUZZ_MARKDOWN_MODULE, "utf8"),
+        contentType: "application/javascript", body: readFileSync(process.env.ZURI_FUZZ_MARKDOWN_MODULE, "utf8"),
       }));
       await page.reload();
-      await page.waitForFunction(() => Boolean(window.qingzhouConversationBenchmark));
+      await page.waitForFunction(() => Boolean(window.zuriConversationBenchmark));
     }
     const plan = assistantStreamPlan(seed + testInfo.repeatEachIndex * 1000003);
     await page.evaluate(async plan => {
-      const bench = window.qingzhouConversationBenchmark;
+      const bench = window.zuriConversationBenchmark;
       const answer = plan.transcript.at(-1), runId = answer.runId, sessionId = "assistant-viewport-fuzz";
       const history = Array.from({ length: plan.historyTurns }, (_, i) => [
         { type: "user", text: `历史问题 ${i}` },

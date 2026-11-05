@@ -15,15 +15,15 @@ let page;
 let directory;
 
 async function readArticle(params) {
-  return page.evaluate(next => window.__callQingzhouContent("readArticle", next), params);
+  return page.evaluate(next => window.__callZuriContent("readArticle", next), params);
 }
 
 async function findElements(params) {
-  return page.evaluate(next => window.__callQingzhouContent("findElements", next), params);
+  return page.evaluate(next => window.__callZuriContent("findElements", next), params);
 }
 
 test.before(async () => {
-  directory = await mkdtemp(join(tmpdir(), "qz-open-shadow-"));
+  directory = await mkdtemp(join(tmpdir(), "zuri-open-shadow-"));
   await build({
     absWorkingDir: root,
     entryPoints: {
@@ -49,7 +49,7 @@ test.before(async () => {
     Object.defineProperty(window.chrome, "runtime", {
       configurable: true,
       value: {
-        getManifest: () => ({ name: "Qingzhou Test", version: "0.0.0" }),
+        getManifest: () => ({ name: "Zuri Test", version: "0.0.0" }),
         onMessage: {
           addListener(next) { listener = next; },
           removeListener() { listener = null; },
@@ -57,7 +57,7 @@ test.before(async () => {
         sendMessage: async () => ({ ok: true }),
       },
     });
-    window.__callQingzhouContent = (action, params = {}) => new Promise((resolve, reject) => {
+    window.__callZuriContent = (action, params = {}) => new Promise((resolve, reject) => {
       if (typeof listener !== "function") {
         reject(new Error("content-script listener is not installed"));
         return;
@@ -71,7 +71,7 @@ test.before(async () => {
   });
   await page.addScriptTag({ path: join(directory, "article-extractor.js") });
   await page.addScriptTag({ path: join(directory, "content-script.js") });
-  await page.waitForFunction(() => window.__QZ_CONTENT_READY === true);
+  await page.waitForFunction(() => window.__ZURI_CONTENT_READY === true);
 });
 
 test.after(async () => {

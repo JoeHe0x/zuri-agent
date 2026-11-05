@@ -5,7 +5,7 @@ import { createHash } from 'node:crypto';
 export const COLLECTION_IMAGE_COUNT = 40;
 export const COLLECTION_IMAGE_WIDTH = 3072;
 export const COLLECTION_IMAGE_HEIGHT = 192;
-export const COLLECTION_MARKER = 'QZ_IMAGE_COLLECT';
+export const COLLECTION_MARKER = 'ZURI_IMAGE_COLLECT';
 
 export function collectionToolCall(index, origin) {
   if (!Number.isInteger(index) || index < 1 || index > COLLECTION_IMAGE_COUNT + 1) throw new RangeError('Invalid collection index');

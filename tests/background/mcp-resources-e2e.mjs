@@ -8,14 +8,14 @@ import {
   PROJECT_ROOT, assertNoUnexpectedDiagnostics, extensionRequest, launchIsolatedExtensionMcp,
 } from "../support/isolated-extension-mcp.mjs";
 
-const downloadDirectory = mkdtempSync(join(tmpdir(), "qz-resource-downloads-"));
+const downloadDirectory = mkdtempSync(join(tmpdir(), "zuri-resource-downloads-"));
 const report = { ok: false, scenario: "mcp-cli-resources", cases: [] };
 let environment;
 try {
-  environment = await launchIsolatedExtensionMcp({ profilePrefix: "qz-resource-e2e-", requestTimeoutSeconds: 40, downloadDirectory });
+  environment = await launchIsolatedExtensionMcp({ profilePrefix: "zuri-resource-e2e-", requestTimeoutSeconds: 40, downloadDirectory });
   const dependencies = { findDaemon: async () => ({ endpoint: environment.bridge.endpoint, health: await readHealth(environment.bridge.endpoint) }) };
   const command = async (...args) => (await runCli([...args, "--timeout", "30"], dependencies)).result;
-  const downloads = (args = {}) => callTool(environment.bridge.endpoint, "qingzhou_list_downloads", {
+  const downloads = (args = {}) => callTool(environment.bridge.endpoint, "zuri_list_downloads", {
     clientId: environment.bridgeStatus.clients[0].clientId, timeoutSeconds: 30, ...args,
   }, { timeoutMs: 30_000 });
   let lastExport;

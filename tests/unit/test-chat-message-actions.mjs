@@ -98,7 +98,7 @@ function assertSessionTitleEditingContracts() {
   assert.match(sessionNavigation, /event\.key === "Enter"[\s\S]*commitSessionTitleEdit[\s\S]*event\.key === "Escape"[\s\S]*closeSessionTitleEditor/, "the inline editor should support conventional save and cancel keys");
   assert.match(sidepanelTransport, /rename_session:\s*\{[\s\S]*method:\s*"sessions.rename"[\s\S]*response:\s*"rename_session_result"/, "Side Panel title edits should route through the Background API");
   const titleEditorClasses = sidepanelHtml.match(/class="session-title-editor([^"]*)"/)?.[1].split(/\s+/) || [];
-  assert.ok(titleEditorClasses.includes("qz:h-6"), "the title row retains its 24px height through the 4px utility scale");
+  assert.ok(titleEditorClasses.includes("zuri:h-6"), "the title row retains its 24px height through the 4px utility scale");
   assert.match(sidepanelCss, /\.session-title-input\s*\{[^}]*height:\s*24px;/, "the edit input should preserve the title row height");
   assert.match(sidepanelCss, /\.session-title-edit-trigger\s*\{[\s\S]*width:\s*fit-content;[\s\S]*max-width:\s*calc\(100% \+ 3px\);/, "the rename hit target should hug the visible title instead of filling the row");
 }

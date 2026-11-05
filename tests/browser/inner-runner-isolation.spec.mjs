@@ -7,7 +7,7 @@ import { ensureTestExtension } from "../support/extension-build.mjs";
 
 test("inner scripts run in an opaque Worker without extension or storage access", async () => {
   const extension = await ensureTestExtension();
-  const profile = await mkdtemp(join(tmpdir(), "qz-inner-isolation-"));
+  const profile = await mkdtemp(join(tmpdir(), "zuri-inner-isolation-"));
   const context = await chromium.launchPersistentContext(profile, {
     headless: true, executablePath: chromium.executablePath(),
     ignoreDefaultArgs: ["--disable-extensions"],
@@ -29,10 +29,10 @@ test("inner scripts run in an opaque Worker without extension or storage access"
         else resolve(result);
       }
       function receive(event) {
-        if (event.source !== frame.contentWindow || event.data?.source !== "qz-inner-runner-sandbox") return;
+        if (event.source !== frame.contentWindow || event.data?.source !== "zuri-inner-runner-sandbox") return;
         if (event.data.type === "ready") {
           frame.contentWindow.postMessage({
-            source: "qz-inner-runner-host", type: "execute", requestId: "isolation",
+            source: "zuri-inner-runner-host", type: "execute", requestId: "isolation",
             scriptSource: `
               let storageError = "";
               try { indexedDB.open("extension-private"); } catch (error) { storageError = error.name; }

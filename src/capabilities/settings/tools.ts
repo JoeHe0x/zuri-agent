@@ -7,13 +7,13 @@ import type { GuardrailRule } from "#sdk/shared/security";
 type AlertsSettingsHost = Pick<ToolExtensionAPI,
   "registerTool" | "ToolExecutionError" | "clampLimit" | "secondsToMs"
   | "getToolRuntimeDependencies" | "models">;
-type SettingsInput = Partial<ToolArguments<typeof QINGZHOU_MANAGE_SETTINGS_TOOL_PARAMETERS>> & { id?: string; activePresetId?: string };
-type GuardrailsInput = Partial<ToolArguments<typeof QINGZHOU_MANAGE_GUARDRAILS_TOOL_PARAMETERS>>;
-type SkillSettingsInput = Partial<ToolArguments<typeof QINGZHOU_MANAGE_SKILL_SETTINGS_TOOL_PARAMETERS>>;
+type SettingsInput = Partial<ToolArguments<typeof ZURI_MANAGE_SETTINGS_TOOL_PARAMETERS>> & { id?: string; activePresetId?: string };
+type GuardrailsInput = Partial<ToolArguments<typeof ZURI_MANAGE_GUARDRAILS_TOOL_PARAMETERS>>;
+type SkillSettingsInput = Partial<ToolArguments<typeof ZURI_MANAGE_SKILL_SETTINGS_TOOL_PARAMETERS>>;
 import type { SettingsConfig } from "#sdk/shared/settings";
 interface AlertRateState { timestamps: number[]; dedupe: Record<string, unknown> }
 import { requireToolFields } from "#sdk/background/tools";
-import { getQingzhouManageGuardrailsToolDescription, QINGZHOU_MANAGE_GUARDRAILS_TOOL_PARAMETERS, getQingzhouManageSkillSettingsToolDescription, QINGZHOU_MANAGE_SKILL_SETTINGS_TOOL_PARAMETERS, getQingzhouManageSettingsToolDescription, QINGZHOU_MANAGE_SETTINGS_TOOL_PARAMETERS } from "./embedded-skill.js";
+import { getZuriManageGuardrailsToolDescription, ZURI_MANAGE_GUARDRAILS_TOOL_PARAMETERS, getZuriManageSkillSettingsToolDescription, ZURI_MANAGE_SKILL_SETTINGS_TOOL_PARAMETERS, getZuriManageSettingsToolDescription, ZURI_MANAGE_SETTINGS_TOOL_PARAMETERS } from "./embedded-skill.js";
 import { matchConfiguredModelCapabilities } from "#sdk/background/models";
 import { normalizeModelParameters } from "#sdk/shared/models";
 import {
@@ -24,7 +24,7 @@ import {
 } from "#sdk/shared/security";
 import { trace as toolTrace } from "#sdk/background/tools";
 
-const SEND_ALERT_RATE_LIMIT_STORAGE_KEY = "_qz_send_alert_rate_limit_v1";
+const SEND_ALERT_RATE_LIMIT_STORAGE_KEY = "_zuri_send_alert_rate_limit_v1";
 const SEND_ALERT_RATE_LIMIT_POLICY = Object.freeze({
   minIntervalMs: 5000,
   windowMs: 60 * 1000,
@@ -208,7 +208,7 @@ function sendAlertResultPolicy() {
 
 async function sendBrowserAlert({ title, message, level, dedupeKey, sessionId = "" }: { title?: string; message: string; level?: string; dedupeKey?: string; sessionId?: string }) {
   const normalizedTitle = normalizeSendAlertText(title, {
-    fallback: t("qingzhouReminder"),
+    fallback: t("zuriReminder"),
     maxChars: SEND_ALERT_RATE_LIMIT_POLICY.maxTitleChars,
   });
   const normalizedMessage = normalizeSendAlertText(message, {
@@ -241,8 +241,8 @@ async function sendBrowserAlert({ title, message, level, dedupeKey, sessionId = 
 
     const sourceSessionId = String(sessionId || "").trim().replace(/[^a-zA-Z0-9]/g, "");
     const notificationId = sourceSessionId
-      ? `qz_alert_session_${sourceSessionId}_${now}_${normalizedDedupeKey}`
-      : `qz_alert_${now}_${normalizedDedupeKey}`;
+      ? `zuri_alert_session_${sourceSessionId}_${now}_${normalizedDedupeKey}`
+      : `zuri_alert_${now}_${normalizedDedupeKey}`;
     const iconUrl = globalThis.chrome?.runtime?.getURL
       ? globalThis.chrome.runtime.getURL("icons/icon128.png")
       : "icons/icon128.png";
@@ -310,8 +310,8 @@ const SETTINGS_CONFIG_FIELDS = [
 
 registerTool({
   name: "manage_settings",
-  get description() { return getQingzhouManageSettingsToolDescription(); },
-  get parameters() { return QINGZHOU_MANAGE_SETTINGS_TOOL_PARAMETERS; },
+  get description() { return getZuriManageSettingsToolDescription(); },
+  get parameters() { return ZURI_MANAGE_SETTINGS_TOOL_PARAMETERS; },
   hidden: true,
   execute: async (input, signal, context = {}) => executeManageSettingsAction(input, context, signal),
   validateArgs: args => {
@@ -322,8 +322,8 @@ registerTool({
 
 registerTool({
   name: "manage_guardrails",
-  get description() { return getQingzhouManageGuardrailsToolDescription(); },
-  get parameters() { return QINGZHOU_MANAGE_GUARDRAILS_TOOL_PARAMETERS; },
+  get description() { return getZuriManageGuardrailsToolDescription(); },
+  get parameters() { return ZURI_MANAGE_GUARDRAILS_TOOL_PARAMETERS; },
   hidden: true,
   execute: async (input, _signal, context = {}) => executeManageGuardrailsAction(input, context),
   validateArgs: args => {
@@ -337,8 +337,8 @@ registerTool({
 
 registerTool({
   name: "manage_skill_settings",
-  get description() { return getQingzhouManageSkillSettingsToolDescription(); },
-  get parameters() { return QINGZHOU_MANAGE_SKILL_SETTINGS_TOOL_PARAMETERS; },
+  get description() { return getZuriManageSkillSettingsToolDescription(); },
+  get parameters() { return ZURI_MANAGE_SKILL_SETTINGS_TOOL_PARAMETERS; },
   hidden: true,
   execute: async (input, _signal, context = {}) => executeManageSkillSettingsAction(input, context),
   validateArgs: args => {

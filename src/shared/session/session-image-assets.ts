@@ -55,7 +55,7 @@ export function createSessionImageStorage(save = saveHistoryImage, { maxMemoChar
 /** Traverse storage records without decoding images or serializing large inline strings. */
 export function collectSessionImageReferences(value: unknown, references = new Set<string>()): Set<string> {
   if (typeof value === "string") {
-    if (/^qz-history-image:v1:[a-f0-9]{64}$/.test(value)) references.add(value);
+    if (/^zuri-history-image:v1:[a-f0-9]{64}$/.test(value)) references.add(value);
   } else if (value && typeof value === "object") {
     for (const item of Object.values(value)) collectSessionImageReferences(item, references);
   }
@@ -67,7 +67,7 @@ export const persistSessionImages = createSessionImageStorage();
 /** Resolve only at read boundaries. No process-wide cache of decoded payloads. */
 export async function resolveSessionImages<T>(input: T, load = getHistoryImage): Promise<T> {
   const pending = new Map<string, Promise<string | null>>();
-  return mapStrings(input, value => /^qz-history-image:v1:[a-f0-9]{64}$/.test(value), async value => {
+  return mapStrings(input, value => /^zuri-history-image:v1:[a-f0-9]{64}$/.test(value), async value => {
     let loading = pending.get(value);
     if (!loading) {
       loading = load(value).catch(cause => {
@@ -83,7 +83,7 @@ export async function resolveSessionImages<T>(input: T, load = getHistoryImage):
     if (dataUrl === null) {
       // A damaged/missing asset must not become an invalid model image URL.
       // Normalizers omit empty image slots; all other history remains readable.
-      console.warn("[轻舟] missing Session image asset", value.slice(HISTORY_IMAGE_PREFIX.length));
+      console.warn("[Zuri] missing Session image asset", value.slice(HISTORY_IMAGE_PREFIX.length));
     }
     return dataUrl ?? "";
   }, 4);

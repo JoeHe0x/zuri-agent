@@ -16,7 +16,7 @@ const identity = (state, name) => ({ clientId: randomUUID(), connectionId: rando
 const poll = (state, paired, options = {}) => state.poll({ id: paired.clientId, ...paired, pairingVersion: 1 }, { timeoutMs: 1, ...options });
 const expire = (state, id) => { state.clients.get(id).lastSeenAt -= 180; };
 async function storage(t) {
-  const directory = await mkdtemp(join(tmpdir(), "qz-browser-registry-"));
+  const directory = await mkdtemp(join(tmpdir(), "zuri-browser-registry-"));
   t.after(() => rm(directory, { force: true, recursive: true }));
   return join(directory, "scope.browsers.json");
 }
@@ -73,7 +73,7 @@ test("pair HTTP errors return only the public remaining lease field", async t =>
   const bridge = await startBridge({ port: 0 });
   t.after(() => bridge.close());
   const paired = await bridge.state.pair(identity(bridge.state));
-  const response = await fetch(`${bridge.state.endpoint}/v1/qingzhou/pair`, {
+  const response = await fetch(`${bridge.state.endpoint}/v1/zuri/pair`, {
     method: "POST", headers: { "content-type": "application/json" },
     body: JSON.stringify({ ...paired, connectionId: randomUUID() }),
   });
@@ -92,7 +92,7 @@ test("rename preserves the active lease, rejects conflicts, and exposes a public
   await assert.rejects(state.rename({ ...first, name: "taken" }), code("BRIDGE_NAME_IN_USE"));
   const task = state.callExtension("ping", {}, { clientId: first.clientId });
   const [request] = await poll(state, first);
-  const response = await fetch(`${bridge.endpoint}/v1/qingzhou/rename`, {
+  const response = await fetch(`${bridge.endpoint}/v1/zuri/rename`, {
     method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ ...first, name: "renamed" }),
   });
   assert.equal(response.status, 200);
@@ -100,7 +100,7 @@ test("rename preserves the active lease, rejects conflicts, and exposes a public
   assert.deepEqual(canonical, { ok: true, clientId: first.clientId, name: "renamed", connectionId: first.connectionId, instanceId: state.instanceId });
   assert.equal(state.clients.get(first.clientId), client); assert.equal(client.controller.signal.aborted, false);
   assert.equal(state.complete(request.id, { ...first, ok: true, result: "still running" }), true); assert.equal(await task, "still running");
-  const pollResponse = await fetch(`${bridge.endpoint}/v1/qingzhou/poll`, {
+  const pollResponse = await fetch(`${bridge.endpoint}/v1/zuri/poll`, {
     method: "POST", headers: { "content-type": "application/json" },
     body: JSON.stringify({ client: { ...first, id: first.clientId, pairingVersion: 1, pollTimeoutMs: 1 } }),
   });
@@ -309,14 +309,14 @@ test("MCP create and observation resolve a name once and keep its UUID", async (
       return method === "create_session" ? { session: { id: "task" } }
         : { sessionId: "task", status: "completed", runtime: { status: "completed" }, transcript: [] };
     } };
-  await executeMcpTool(state, "qingzhou_create_session", { firstMessage: "Test", wait: true, clientId: "work" });
+  await executeMcpTool(state, "zuri_create_session", { firstMessage: "Test", wait: true, clientId: "work" });
   assert.equal(resolves, 1); assert.deepEqual(calls, ["fixed-profile", "fixed-profile"]);
 });
 
 test("HTTP pairing reports typed errors with extension CORS and enforces instance fencing", async t => {
   const bridge = await startBridge({ port: 0 }); t.after(() => bridge.close());
   const origin = `chrome-extension://${"a".repeat(32)}`;
-  const post = (path, body) => fetch(`${bridge.endpoint}/v1/qingzhou/${path}`, { method: "POST", headers: { origin, "content-type": "application/json" }, body: JSON.stringify(body) });
+  const post = (path, body) => fetch(`${bridge.endpoint}/v1/zuri/${path}`, { method: "POST", headers: { origin, "content-type": "application/json" }, body: JSON.stringify(body) });
   const health = await (await fetch(`${bridge.endpoint}/health`)).json();
   assert.deepEqual(health.features, { browserPairing: 1 });
   const paired = await (await post("pair", identity(bridge.state))).json();
@@ -354,7 +354,7 @@ test("CLI requires explicit multi-browser selection and resolves names to UUID f
   assert.equal(calls[1].args.clientId, clients[0].clientId);
   assert.equal((await runCli(["browsers"], dependencies)).result.browsers.length, 3);
   await runCli(["browsers", "forget", "offline"], dependencies);
-  assert.deepEqual(calls.at(-1), { tool: "qingzhou_forget_browser", args: { clientId: health.status.browsers[2].clientId } });
+  assert.deepEqual(calls.at(-1), { tool: "zuri_forget_browser", args: { clientId: health.status.browsers[2].clientId } });
 });
 
 test("new CLI explains an older healthy daemon and never upgrades it by stopping it", async () => {
@@ -427,7 +427,7 @@ test("one MCP operation cannot transfer observation to a replacement connection 
   const state = new BridgeState({ connectWaitMs: 0 }); t.after(() => state.close());
   const paired = await state.pair(identity(state));
   const entered = Promise.withResolvers(), resume = Promise.withResolvers();
-  const pending = executeMcpTool(state, "qingzhou_create_session", { firstMessage: "Test", wait: true, clientId: "default" }, {
+  const pending = executeMcpTool(state, "zuri_create_session", { firstMessage: "Test", wait: true, clientId: "default" }, {
     onTaskUpdate: async event => { if (event.type === "created") { entered.resolve(); await resume.promise; } },
   });
   const rejected = assert.rejects(pending, code("BRIDGE_CLIENT_DISCONNECTED"));
@@ -449,7 +449,7 @@ test("async tool jobs outlive their caller but cannot transfer to a replacement 
     const original = state.callExtension.bind(state), entered = Promise.withResolvers(), resume = Promise.withResolvers();
     state.callExtension = async (...args) => { entered.resolve(); await resume.promise; return original(...args); };
     const caller = new AbortController();
-    const job = await executeMcpTool(state, "qingzhou_execute_tool", { sessionId: "task", name: "open_tab", args: { url: "https://example.test" }, wait: false }, { signal: caller.signal });
+    const job = await executeMcpTool(state, "zuri_execute_tool", { sessionId: "task", name: "open_tab", args: { url: "https://example.test" }, wait: false }, { signal: caller.signal });
     await entered.promise; caller.abort(new Error("MCP response finished"));
     let target = paired;
     if (replace) {
@@ -501,14 +501,14 @@ test("binding URL preparation does not select, probe or open a browser and suppo
   for (const clients of [[], running.health.status.clients]) {
     const health = { ...running.health, status: { ...running.health.status, clients } };
     const prepared = await runCli(["connect", "--no-open", "--json"], { ...deps, ensureDaemon: async () => ({ ...running, health }) });
-    assert.deepEqual(prepared.result, { endpoint: running.endpoint, url: `${running.endpoint}/qz-connect`, mcpUrl: `${running.endpoint}/mcp`, opened: false });
+    assert.deepEqual(prepared.result, { endpoint: running.endpoint, url: `${running.endpoint}/zuri-connect`, mcpUrl: `${running.endpoint}/mcp`, opened: false });
     assert.equal(opened, undefined);
   }
   const named = await runCli(["connect", "--no-open", "--name", "work-Chrome_2", "--json"], deps);
-  assert.equal(named.result.url, `${running.endpoint}/qz-connect?name=work-Chrome_2`);
+  assert.equal(named.result.url, `${running.endpoint}/zuri-connect?name=work-Chrome_2`);
   assert.equal(named.result.opened, false); assert.equal(opened, undefined);
   const launched = await runCli(["connect", "--name", "work"], deps);
-  assert.equal(opened, `${running.endpoint}/qz-connect?name=work`);
+  assert.equal(opened, `${running.endpoint}/zuri-connect?name=work`);
   assert.equal(launched.result.opened, true); assert.equal(Object.hasOwn(launched.result, "connected"), false);
   for (const args of [["--client", "missing", "--no-open"], ["--client", "work", "--name", "personal"],
     ["--name", ""], ["--name", "two words"], ["--name", randomUUID()]]) {

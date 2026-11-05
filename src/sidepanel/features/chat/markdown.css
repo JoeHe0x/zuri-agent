@@ -232,13 +232,13 @@
 }
 
 .code-copy-btn {
-  --qz-control-size: 24px;
-  --qz-control-icon-size: 14px;
-  --qz-control-border: color-mix(in srgb, var(--border) 58%, transparent);
-  --qz-control-border-hover: color-mix(in srgb, var(--code-accent) 22%, var(--border));
-  --qz-control-border-focus: var(--qz-control-border-hover);
-  --qz-control-bg: color-mix(in srgb, var(--bg-primary) 80%, transparent);
-  --qz-control-bg-hover: color-mix(in srgb, var(--bg-primary) 92%, var(--accent-subtle));
+  --zuri-control-size: 24px;
+  --zuri-control-icon-size: 14px;
+  --zuri-control-border: color-mix(in srgb, var(--border) 58%, transparent);
+  --zuri-control-border-hover: color-mix(in srgb, var(--code-accent) 22%, var(--border));
+  --zuri-control-border-focus: var(--zuri-control-border-hover);
+  --zuri-control-bg: color-mix(in srgb, var(--bg-primary) 80%, transparent);
+  --zuri-control-bg-hover: color-mix(in srgb, var(--bg-primary) 92%, var(--accent-subtle));
   position: absolute;
   top: 7px;
   right: 7px;

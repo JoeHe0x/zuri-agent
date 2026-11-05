@@ -10,8 +10,8 @@ export function installSidepanelFirefoxHost(
   media: MediaHost | undefined = globalThis.navigator?.mediaDevices as MediaHost | undefined,
   root: ParentNode | null | undefined = typeof document === "undefined" ? null : document,
 ): void {
-  if (!chromeApi || chromeApi.qzFirefoxSidepanel) return;
-  chromeApi.qzFirefoxSidepanel = true;
+  if (!chromeApi || chromeApi.zuriFirefoxSidepanel) return;
+  chromeApi.zuriFirefoxSidepanel = true;
   disableSessionAutomations(chromeApi);
   if (root) removeSessionAutomationControls(root);
   rewriteExtensionPages(chromeApi);
@@ -116,8 +116,8 @@ interface MediaHost {
   getUserMedia?(constraints?: MediaConstraints): Promise<MediaStream>;
 }
 interface SidepanelChrome extends FirefoxThemeChrome {
-  qzFirefoxSidepanel?: boolean;
-  qzSessionAutomationsEnabled?: boolean;
+  zuriFirefoxSidepanel?: boolean;
+  zuriSessionAutomationsEnabled?: boolean;
   tabs?: { create(properties?: TabProperties): unknown };
   permissions?: { request(request?: PermissionRequest): Promise<boolean> };
   desktopCapture?: { chooseDesktopMedia?(sources: string[], callback: (streamId: string, options?: { canRequestAudioTrack?: boolean }) => void): number };

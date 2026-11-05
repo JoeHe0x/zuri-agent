@@ -61,7 +61,7 @@ for (const mode of modes) {
     for (const request of requests) {
       assert.equal(request.url, 'https://opencode.ai/zen/go/v1/chat/completions');
       assert.equal(request.headers.get('x-opencode-session'), 'session-root');
-      assert.equal(request.headers.get('user-agent'), 'qz-agent/1.0.0');
+      assert.equal(request.headers.get('user-agent'), 'zuri-agent/1.0.0');
       assert.equal(request.headers.get('x-session-affinity'), null);
       assert.equal(request.headers.get('authorization'), 'Bearer fixture-key');
       assert.equal(request.body.model, 'fixture-model');
@@ -187,8 +187,8 @@ for (const mode of modes) {
         config: config('fireworks'), sessionId, rateLimit: false, retry: noRetry,
       });
     }
-    assert.equal(requests[0].headers.get('x-session-affinity'), 'qz-fireworks-session');
-    assert.match(requests[1].headers.get('x-session-affinity'), /^qz-/);
+    assert.equal(requests[0].headers.get('x-session-affinity'), 'zuri-fireworks-session');
+    assert.match(requests[1].headers.get('x-session-affinity'), /^zuri-/);
     assert.equal(requests[1].headers.get('x-session-affinity'), requests[2].headers.get('x-session-affinity'));
     for (const request of requests) {
       assert.equal(request.headers.get('x-opencode-session'), null);

@@ -15,9 +15,9 @@ function host(overrides = {}) {
 test("a nested analysis uses the injected model service and preserves cancellation and run identity", async () => {
   const controller = new AbortController();
   let request;
-  const qz = host({ models: { chat: async (...args) => { request = args; return { message: { content: "answer" } }; } } });
-  registerAnalysisSkillsTools(qz);
-  const execute = qz.definitions.get("ask_llm").execute;
+  const zuri = host({ models: { chat: async (...args) => { request = args; return { message: { content: "answer" } }; } } });
+  registerAnalysisSkillsTools(zuri);
+  const execute = zuri.definitions.get("ask_llm").execute;
   assert.equal(await execute({ prompt: "summarize", system: "brief", data: "rows" }, controller.signal,
     { sessionId: "parent-task", runId: "run-7" }), "answer");
   assert.deepEqual(request, [[{ role: "system", content: "brief" }, { role: "user", content: "summarize\n\n---\nrows" }], [],
@@ -34,9 +34,9 @@ test("a nested analysis uses the injected model service and preserves cancellati
 
 test("Skill lookup uses the supplied repository without a global storage dependency", async () => {
   const calls = [];
-  const qz = host({ skills: { load: async name => { calls.push(name); return null; }, list: async () => [{ name: "injected-skill" }] } });
-  registerAnalysisSkillsTools(qz);
-  const result = await qz.definitions.get("load_skill").execute({ name: "missing" });
+  const zuri = host({ skills: { load: async name => { calls.push(name); return null; }, list: async () => [{ name: "injected-skill" }] } });
+  registerAnalysisSkillsTools(zuri);
+  const result = await zuri.definitions.get("load_skill").execute({ name: "missing" });
   assert.deepEqual(calls, ["missing"]);
   assert.equal(result.code, "SKILL_NOT_FOUND");
   assert.deepEqual(result.available, ["injected-skill"]);
@@ -48,10 +48,10 @@ test("settings mutations call the supplied model service and publish its resulti
   globalThis.chrome = { storage: { local: { get: async key => { assert.equal(key, "securityGuardrails"); return {}; } } } };
   const changes = [], events = [];
   const config = { provider: "extension-provider", model: "test-model", modelParameters: {}, presets: [] };
-  const qz = host({ models: { applyPreset: async id => { changes.push(id); return config; } },
+  const zuri = host({ models: { applyPreset: async id => { changes.push(id); return config; } },
     getToolRuntimeDependencies: () => ({ emit: event => events.push(event) }) });
-  registerAlertsSettingsTools(qz);
-  const result = await qz.definitions.get("manage_settings").execute({ action: "apply_preset", presetId: "custom-preset" }, undefined,
+  registerAlertsSettingsTools(zuri);
+  const result = await zuri.definitions.get("manage_settings").execute({ action: "apply_preset", presetId: "custom-preset" }, undefined,
     { sessionId: "session", runId: "run" });
   assert.deepEqual(changes, ["custom-preset"]);
   assert.equal(result.config.provider, "extension-provider");

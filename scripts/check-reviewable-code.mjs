@@ -24,7 +24,7 @@ const REVIEWED = new Map([
     reason: "loadMathRuntime loads only packaged vendor/mathjax/startup.js, with a local test-server fallback.",
   }]),
   ["dynamic-code:4257df8c31520a5d7340e3b17e0186dba6dbb7e359bb6b7a83f57be5ac518dae", {
-    files: /^(?:runner-sandbox\.js#embedded-1|\.qingzhou-debug\/embedded\/workers\/inner-runner\.js)$/u,
+    files: /^(?:runner-sandbox\.js#embedded-1|\.zuri-debug\/embedded\/workers\/inner-runner\.js)$/u,
     reason: "Existing user/Agent script executor in an isolated sandbox Worker; no extension APIs. See policy risk in the audit guide.",
   }],
   ["dynamic-code:9320e0271a5fb141f43cdc676a62a81b330b57d7b32cd48f5974aeadb62435d2", {
@@ -194,7 +194,7 @@ export function inspectJavaScript(source, file = "input.js", depth = 0) {
     // Inspect compiled source embedded as a string, not just the readable host around it.
     if (depth < 3 && (node.type === "Literal" && typeof node.value === "string" || node.type === "TemplateLiteral" && !node.expressions.length)) {
       const text = staticText(node);
-      if (text.length > 80 && /^(?:\s*\(\(\) =>|\s*(?:var|let|const) QZ_)/u.test(text) && !embedded.has(text)) {
+      if (text.length > 80 && /^(?:\s*\(\(\) =>|\s*(?:var|let|const) ZURI_)/u.test(text) && !embedded.has(text)) {
         embedded.add(text);
         findings.push(...inspectJavaScript(text, `${file}#embedded-${embedded.size}`, depth + 1).findings);
       }

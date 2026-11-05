@@ -8,9 +8,9 @@ import test from "node:test";
 import { acquireBuildOutput, BuildOutputLockedError } from "../../scripts/build-output-lock.mjs";
 
 async function fixture(t) {
-  const root = await mkdtemp(join(tmpdir(), "qingzhou-build-lock-"));
+  const root = await mkdtemp(join(tmpdir(), "zuri-build-lock-"));
   t.after(() => rm(root, { recursive: true, force: true }));
-  return { lock: join(root, ".output.qingzhou-build-lock"), options: { sourceDir: join(root, "source"), outputDir: join(root, "output"), mode: "development" } };
+  return { lock: join(root, ".output.zuri-build-lock"), options: { sourceDir: join(root, "source"), outputDir: join(root, "output"), mode: "development" } };
 }
 
 test("only an identical live watcher counts as an already-running dev command", async t => {

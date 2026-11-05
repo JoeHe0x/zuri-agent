@@ -2,8 +2,8 @@ import { t } from "./i18n.js";
 import type { UiExtensionAPI } from "#sdk/sidepanel";
 
 /** `@` in the composer lists the window's tabs; the token carries the tabId for the agent. */
-export default function (qz: UiExtensionAPI) {
-  qz.extensions.register({
+export default function (zuri: UiExtensionAPI) {
+  zuri.extensions.register({
     references: [{
       id: "tab", label: t("tab", { tabId: "" }).trim(), menuLabel: t("tabs"), filterLabel: "tab", className: "tab", order: 5,
       emptyText: t("noMatchingTabs"),

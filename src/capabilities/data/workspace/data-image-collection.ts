@@ -219,7 +219,7 @@ export function createDataImageCollection(options: DataImageCollectionOptions = 
         const result = await deleteImageAsset(assetId);
         if (result?.deleted) deleted += 1;
       } catch (err) {
-        console.warn("[轻舟数据] delete image asset failed", assetId, err);
+        console.warn("[Zuri数据] delete image asset failed", assetId, err);
       }
     }
     return { deleted, skipped: referenced.size };

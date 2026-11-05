@@ -24,17 +24,17 @@ test("unmount cancels queued and visible dialogs without closing another owner's
     void scopes.queued.dialogs.choose({ title: "Cancelled queue" }).then(value => { window.__dialogLifetime.results.queued = value; });
     void scopes.visible.dialogs.confirm({ title: "Next owner" }).then(value => { window.__dialogLifetime.results.visible = value; });
   });
-  await expect(page.locator("#qz-decision-title")).toHaveText("Other owner");
+  await expect(page.locator("#zuri-decision-title")).toHaveText("Other owner");
   await page.evaluate(() => window.__dialogLifetime.runtime.unmount("queued"));
   await expect.poll(() => page.evaluate(() => window.__dialogLifetime.results.queued)).toBe(null);
-  await expect(page.locator("#qz-decision-title")).toHaveText("Other owner");
-  await page.locator("#qz-decision-cancel").click();
-  await expect(page.locator("#qz-decision-title")).toHaveText("Next owner");
+  await expect(page.locator("#zuri-decision-title")).toHaveText("Other owner");
+  await page.locator("#zuri-decision-cancel").click();
+  await expect(page.locator("#zuri-decision-title")).toHaveText("Next owner");
   await page.evaluate(() => window.__dialogLifetime.runtime.unmount("visible"));
-  await expect(page.locator("#qz-decision-dialog")).not.toBeVisible();
+  await expect(page.locator("#zuri-decision-dialog")).not.toBeVisible();
   expect(await page.evaluate(() => window.__dialogLifetime.results)).toEqual({ other: false, queued: null, visible: false });
   expect(await page.evaluate(() => window.__dialogLifetime.scopes.visible.dialogs.requestText({ title: "Too late" }))).toBe(null);
-  await expect(page.locator("#qz-decision-dialog")).not.toBeVisible();
+  await expect(page.locator("#zuri-decision-dialog")).not.toBeVisible();
 });
 
 test("owner cancellation overrides a confirmation during its closing animation", async ({ page }) => {
@@ -47,13 +47,13 @@ test("owner cancellation overrides a confirmation during its closing animation",
     void dialogs.confirm({ title: "Pending confirmation", signal: window.__dialogOwner.signal })
       .then(result => { window.__cancelledAnswer = result; });
   });
-  await expect(page.locator("#qz-decision-dialog")).toBeVisible();
+  await expect(page.locator("#zuri-decision-dialog")).toBeVisible();
   await page.evaluate(() => {
-    document.querySelector("#qz-decision-confirm").click();
+    document.querySelector("#zuri-decision-confirm").click();
     window.__dialogOwner.abort();
   });
   await expect.poll(() => page.evaluate(() => window.__cancelledAnswer)).toBe(false);
-  await expect(page.locator("#qz-decision-dialog")).not.toBeVisible();
+  await expect(page.locator("#zuri-decision-dialog")).not.toBeVisible();
 });
 
 for (const variant of variants) {
@@ -72,7 +72,7 @@ for (const variant of variants) {
           link.addEventListener("load", resolve, { once: true });
           link.addEventListener("error", reject, { once: true });
         });
-        document.body.innerHTML = '<button id="decision-opener" class="qz-btn qz-btn--secondary" type="button">解除绑定</button>';
+        document.body.innerHTML = '<button id="decision-opener" class="zuri-btn zuri-btn--secondary" type="button">解除绑定</button>';
         document.body.style.margin = "0";
         document.body.style.padding = "16px";
         const module = await import("/extension/sidepanel/ui/decision-dialog-feature.js");
@@ -89,11 +89,11 @@ for (const variant of variants) {
       });
 
       await page.locator("#decision-opener").click();
-      await expect(page.locator("#qz-decision-dialog")).toBeVisible();
+      await expect(page.locator("#zuri-decision-dialog")).toBeVisible();
       const metrics = await page.evaluate(() => {
-        const dialog = document.querySelector("#qz-decision-dialog");
-        const panel = dialog.querySelector(".qz-decision-panel");
-        const confirm = dialog.querySelector("#qz-decision-confirm");
+        const dialog = document.querySelector("#zuri-decision-dialog");
+        const panel = dialog.querySelector(".zuri-decision-panel");
+        const confirm = dialog.querySelector("#zuri-decision-confirm");
         const bounds = panel.getBoundingClientRect();
         const panelStyle = getComputedStyle(panel);
         const confirmStyle = getComputedStyle(confirm);
@@ -108,7 +108,7 @@ for (const variant of variants) {
           borderBalanced: panelStyle.borderLeftColor === panelStyle.borderTopColor
             && panelStyle.borderLeftWidth === panelStyle.borderTopWidth,
           dangerFill: confirmStyle.backgroundColor,
-          cancelFocused: document.activeElement?.id === "qz-decision-cancel",
+          cancelFocused: document.activeElement?.id === "zuri-decision-cancel",
         };
       });
       expect(metrics.pageOverflow).toBe(0);
@@ -125,7 +125,7 @@ for (const variant of variants) {
       const screenshot = await page.screenshot({ fullPage: true });
       await testInfo.attach("decision-confirm.png", { body: screenshot, contentType: "image/png" });
 
-      await page.locator("#qz-decision-cancel").click();
+      await page.locator("#zuri-decision-cancel").click();
       await expect.poll(() => page.evaluate(() => window.__decisionResult)).toBe(false);
       await expect(page.locator("#decision-opener")).toBeFocused();
 
@@ -140,10 +140,10 @@ for (const variant of variants) {
           ],
         }).then(result => { window.__decisionResult = result; });
       });
-      await expect(page.locator("#qz-decision-dialog")).toBeVisible();
-      await expect(page.locator("#qz-decision-confirm")).not.toBeVisible();
-      await expect(page.locator('[data-qz-decision-value="keep"]')).toBeFocused();
-      await page.locator('[data-qz-decision-value="keep"]').click();
+      await expect(page.locator("#zuri-decision-dialog")).toBeVisible();
+      await expect(page.locator("#zuri-decision-confirm")).not.toBeVisible();
+      await expect(page.locator('[data-zuri-decision-value="keep"]')).toBeFocused();
+      await page.locator('[data-zuri-decision-value="keep"]').click();
       await expect.poll(() => page.evaluate(() => window.__decisionResult)).toBe("keep");
       await expect(page.locator("#decision-opener")).toBeFocused();
 
@@ -156,10 +156,10 @@ for (const variant of variants) {
           maxLength: 128,
         }).then(result => { window.__decisionResult = result; });
       });
-      await expect(page.locator("#qz-decision-dialog")).toBeVisible();
-      const input = page.locator("[data-qz-decision-input]");
+      await expect(page.locator("#zuri-decision-dialog")).toBeVisible();
+      const input = page.locator("[data-zuri-decision-input]");
       await expect(input).toBeFocused();
-      await expect(page.locator("#qz-decision-confirm")).toBeDisabled();
+      await expect(page.locator("#zuri-decision-confirm")).toBeDisabled();
       await input.fill("city");
       await page.keyboard.press("Enter");
       await expect.poll(() => page.evaluate(() => window.__decisionResult)).toBe("city");

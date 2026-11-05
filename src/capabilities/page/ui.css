@@ -74,7 +74,7 @@
   height: 100%;
 }
 
-.tool-article-body.qz-markdown .tool-article-media-item img {
+.tool-article-body.zuri-markdown .tool-article-media-item img {
   display: block;
   width: 100%;
   height: 100%;
@@ -84,19 +84,19 @@
   object-fit: cover;
 }
 
-.tool-article-body.qz-markdown table {
+.tool-article-body.zuri-markdown table {
   width: max-content;
   min-width: 100%;
   max-width: none;
 }
 
-.tool-article-body.qz-markdown :is(th, td) {
+.tool-article-body.zuri-markdown :is(th, td) {
   white-space: nowrap;
   overflow-wrap: normal;
   word-break: normal;
 }
 
-.tool-article-body.qz-markdown caption {
+.tool-article-body.zuri-markdown caption {
   padding: 0 0 6px;
   color: var(--text-secondary);
   font-weight: 560;

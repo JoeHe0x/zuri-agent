@@ -86,7 +86,7 @@ assert.deepEqual(chineseNameSkill.domains, ["bilibili.com"]);
 
 const exportedChineseNameSkill = skillToSkillMarkdown(chineseNameSkill);
 assert.match(exportedChineseNameSkill, /metadata:\n  displayName: "B站视频搜索"\n  scope: "site"/);
-assert.doesNotMatch(exportedChineseNameSkill, /qingzhou:\n\s+displayName/);
+assert.doesNotMatch(exportedChineseNameSkill, /zuri:\n\s+displayName/);
 
 assert.throws(
   () => parseSkillMarkdownFrontmatter(`---

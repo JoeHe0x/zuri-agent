@@ -28,7 +28,7 @@ function displayWidth(line) {
 function fits(text, width) {
   for (const line of text.split("\n")) {
     // Copyable commands retain their bytes; terminals wrap these lines visually.
-    if (/^  qz /.test(stripVTControlCharacters(line))) continue;
+    if (/^  zuri /.test(stripVTControlCharacters(line))) continue;
     assert.ok(displayWidth(line) <= width, `Overflow at ${width}: ${JSON.stringify(line)}`);
   }
   assert.ok(text.endsWith("\n"));
@@ -40,7 +40,7 @@ test("help recommends direct creation, optional titles, waiting, and contextual 
   assert.match(general, /create "PROMPT"/);
   assert.match(general, /--stream/);
   assert.match(general, /--title Research --wait/);
-  assert.match(general, /npm run qz -- COMMAND/);
+  assert.match(general, /npm run zuri -- COMMAND/);
   assert.match(renderHelp("create"), /title is optional/);
   assert.match(renderHelp("create"), /read stdin/);
   assert.match(renderHelp("create"), /--title, -t/);
@@ -52,7 +52,7 @@ test("help recommends direct creation, optional titles, waiting, and contextual 
   assert.match(renderHelp("send"), /next safe boundary/);
   assert.match(renderHelp("send"), /next run/);
   for (const name of ["", "create", "tasks", "show", "cancel", "submit", "approve", "reject", "watch", "connect", "install", "status", "stop", "mcp", "send", "data", "images", "skills", "settings", "automations", "browsers"]) {
-    assert.doesNotMatch(renderHelp(name), /qz run|qz tasks (create|list|get|stop)|Legacy|--prompt|--args|--client-id/);
+    assert.doesNotMatch(renderHelp(name), /zuri run|zuri tasks (create|list|get|stop)|Legacy|--prompt|--args|--client-id/);
     for (const width of [40, 80]) fits(renderHelp(name, { width }), width);
   }
 });
@@ -70,15 +70,15 @@ test("task lists preserve complete IDs and real statuses at wide and narrow widt
   }
   const empty = renderResult({ command: "tasks" }, { sessions: [] });
   assert.match(empty, /No tasks yet/);
-  assert.match(empty, /qz create/);
+  assert.match(empty, /zuri create/);
 });
 
 test("creation reports scheduling accurately and gives usable next commands", () => {
   const queued = renderResult(parsed("create"), { session: task, started: true });
   assert.match(queued, /Task queued/);
   assert.doesNotMatch(queued, /Completed|Running/);
-  assert.ok(queued.includes(`qz show ${taskId}`));
-  assert.ok(queued.includes(`qz cancel ${taskId}`));
+  assert.ok(queued.includes(`zuri show ${taskId}`));
+  assert.ok(queued.includes(`zuri cancel ${taskId}`));
   assert.match(renderResult(parsed("create"), { session: task, started: false }), /Task created/);
   fits(renderResult(parsed("create"), { session: task, started: true }, { width: 40 }), 40);
 });
@@ -103,7 +103,7 @@ test("waited creation shows actual status; streamed creation suppresses repeated
   const waited = renderResult({ ...parsed("create"), options: { wait: true } }, result);
   assert.match(waited, /Completed/);
   assert.match(waited, /Sources checked/);
-  assert.doesNotMatch(waited, /qz cancel/);
+  assert.doesNotMatch(waited, /zuri cancel/);
   const streamed = renderResult({ ...parsed("create"), presentation: { streamed: true } }, result);
   assert.match(streamed, /Completed/);
   assert.doesNotMatch(streamed, /Latest response|Sources checked/);
@@ -114,10 +114,10 @@ test("waiting and stopped tasks retain runtime truth", () => {
     runtime: { status: "waiting_user", waitTitle: "Location permission", waitMessage: "Choose whether to share your location.", waitForm: { browserPermission: "history" } } });
   assert.match(waiting, /Waiting for you/);
   assert.match(waiting, /Location permission/);
-  assert.match(waiting, /Open the qz side panel/);
+  assert.match(waiting, /Open the zuri side panel/);
   assert.doesNotMatch(waiting, /Running/);
   for (const status of ["waitingUser", "paused"]) {
-    assert.match(renderResult(parsed("get"), { ...snapshot, status }), /qz approve/);
+    assert.match(renderResult(parsed("get"), { ...snapshot, status }), /zuri approve/);
   }
   const stopped = renderResult({ ...parsed("stop"), id: taskId }, { sessionId: taskId, stopped: true, status: "cancelled" });
   assert.match(stopped, /Task stopped/);
@@ -148,9 +148,9 @@ test("show renders complete field choices and metadata without terminal controls
     assert.doesNotMatch(text, /\[object Object\]/);
     assert.match(text, /https:\/\/example.com\/logo.png/);
     assert.match(text, /Anything else/);
-    assert.match(text, /qz submit/);
+    assert.match(text, /zuri submit/);
     assert.match(text, /'\{"selectedIds":\["job-a"\],"note":"<text>"\}'/);
-    assert.match(text, /qz reject/);
+    assert.match(text, /zuri reject/);
     assert.doesNotMatch(text, /SECRET|\u001b/);
     fits(text, width);
   }
@@ -163,10 +163,10 @@ test("pending command templates retain the selected browser and backend required
     renderResult({ command: "submit", options: { "client-id": "profile-2" } }, { accepted: false, input })]) {
     assert.match(result, /Required  yes/);
     assert.match(result, /--wait-id wait-1 --client profile-2 --wait/);
-    assert.match(result, /qz reject task-1 --wait-id wait-1 --client profile-2/);
+    assert.match(result, /zuri reject task-1 --wait-id wait-1 --client profile-2/);
   }
   assert.match(renderResult({ command: "submit", options: { "client-id": "profile-2" } },
-    { accepted: true, sessionId: "task-1" }), /qz watch task-1 --client profile-2 --stream/);
+    { accepted: true, sessionId: "task-1" }), /zuri watch task-1 --client profile-2 --stream/);
 });
 
 test("submission templates preserve actual keys and shell quotes without hard wrapping JSON", { skip: process.platform === "win32" }, () => {
@@ -176,11 +176,11 @@ test("submission templates preserve actual keys and shell quotes without hard wr
     form: { fields: Object.keys(answers).map(id => ({ id, type: id === "choices" ? "multi_choice" : "text" })) },
     responseTemplate: { sessionId: "task-1", waitId: "wait-2", action: "submit", answers } };
   const text = renderResult(parsed("get"), { ...snapshot, status: "waiting_user", input }, { width: 30, shell: "posix" });
-  const command = text.split("\n").find(line => line.startsWith("  qz submit "));
+  const command = text.split("\n").find(line => line.startsWith("  zuri submit "));
   assert.ok(command.endsWith("--wait-id wait-2 --wait"));
   assert.match(text, /Edit the template/);
   assert.doesNotMatch(text, /FIELD_ID|[\u001b\u202e\u0085]/);
-  const result = spawnSync("/bin/sh", ["-c", `qz() { printf '%s\\n' "$@"; }\n${command}`], { encoding: "utf8" });
+  const result = spawnSync("/bin/sh", ["-c", `zuri() { printf '%s\\n' "$@"; }\n${command}`], { encoding: "utf8" });
   assert.equal(result.status, 0, result.stderr);
   const argv = result.stdout.trimEnd().split("\n");
   assert.deepEqual(argv.slice(0, 2), ["submit", "task-1"]);
@@ -201,14 +201,14 @@ test("show and rejected responses include the canonical current input and ready-
   for (const result of results) {
     assert.match(result, /Field ID  city/);
     assert.match(result, /Value  "hz"/);
-    assert.match(result, /qz submit task-1 '\{"city":"<option value>"\}' --wait-id new-wait --wait/);
-    assert.doesNotMatch(result, /oldField|Old question|old-wait|qz input/);
+    assert.match(result, /zuri submit task-1 '\{"city":"<option value>"\}' --wait-id new-wait --wait/);
+    assert.doesNotMatch(result, /oldField|Old question|old-wait|zuri input/);
   }
   const native = renderResult({ command: "approve" }, { accepted: false, requiresUserAction: true,
     input: { sessionId: "task-1", waitId: "native", waiting: true, kind: "browser_permission", requiresUserAction: true,
-      instructions: "Click Allow in the qz side panel.", form: { browserPermission: "history" } } });
-  assert.match(native, /Click Allow in the qz side panel/);
-  assert.doesNotMatch(native, /qz input|qz approve/);
+      instructions: "Click Allow in the zuri side panel.", form: { browserPermission: "history" } } });
+  assert.match(native, /Click Allow in the zuri side panel/);
+  assert.doesNotMatch(native, /zuri input|zuri approve/);
 });
 
 test("permission and declined responses cannot look like successful approval", () => {
@@ -221,10 +221,10 @@ test("permission and declined responses cannot look like successful approval", (
   const invalid = renderResult({ command: "submit", id: taskId }, { accepted: false, code: "INVALID_INPUT", fieldErrors: { city: "Choose a listed option." } });
   assert.match(invalid, /Input was not accepted/);
   assert.match(invalid, /Choose a listed option/);
-  assert.match(invalid, /qz show/);
+  assert.match(invalid, /zuri show/);
   const empty = renderResult(parsed("get"), { ...snapshot, input: { waiting: false, sessionId: taskId } });
   assert.match(empty, /Completed/);
-  assert.doesNotMatch(empty, /qz submit|qz approve/);
+  assert.doesNotMatch(empty, /zuri submit|zuri approve/);
 });
 
 test("location consent shows its disclosure and approval, while native permission directs the user to Chrome", () => {
@@ -232,30 +232,30 @@ test("location consent shows its disclosure and approval, while native permissio
     message: "Coordinates will be shared with your configured model provider.", form: { locationConsent: true }, actions: ["approve", "reject"] };
   const location = renderResult(parsed("get"), { ...snapshot, status: "waiting_user", input });
   assert.match(location, /Coordinates will be shared/);
-  assert.match(location, /qz approve task-1 --wait-id wait-1 --wait/);
-  assert.match(location, /qz reject task-1 --wait-id wait-1/);
-  assert.doesNotMatch(location, /Open the qz side panel/);
+  assert.match(location, /zuri approve task-1 --wait-id wait-1 --wait/);
+  assert.match(location, /zuri reject task-1 --wait-id wait-1/);
+  assert.doesNotMatch(location, /Open the zuri side panel/);
   const native = renderResult(parsed("get"), { ...snapshot, status: "waiting_user", input: { ...input, kind: "browser_permission", form: { browserPermission: "history" } } });
-  assert.match(native, /Open the qz side panel/);
-  assert.doesNotMatch(native, /qz approve/);
+  assert.match(native, /Open the zuri side panel/);
+  assert.doesNotMatch(native, /zuri approve/);
 });
 
 test("connection, install, and service results offer concise next steps", () => {
   const connected = renderResult({ command: "connect" }, { connected: true, mcpUrl: "http://127.0.0.1:18765/mcp", clients: [{ clientId: "one" }] });
-  assert.match(connected, /Connected to qz/);
+  assert.match(connected, /Connected to zuri/);
   assert.match(connected, /http:\/\/127.0.0.1:18765\/mcp/);
   assert.doesNotMatch(connected, /clientId|"clients"/);
-  assert.match(renderResult({ command: "status" }, { running: false, connected: false }), /qz connect/);
+  assert.match(renderResult({ command: "status" }, { running: false, connected: false }), /zuri connect/);
   assert.match(renderResult({ command: "status" }, { running: true, connected: false }), /browser disconnected/);
   const updateAvailable = renderResult({ command: "status" }, { running: true, connected: true, clientCount: 2, updateAvailable: true });
   assert.match(updateAvailable, /Service update available/);
-  assert.match(updateAvailable, /qz stop && qz connect/);
+  assert.match(updateAvailable, /zuri stop && zuri connect/);
   assert.match(renderResult({ command: "stop" }, { stopped: false }), /already stopped/);
   assert.match(renderResult({ command: "install" }, { opened: true, url: "https://example.com" }), /Click Add to Chrome/);
 });
 
 test("status displays every full browser client ID for explicit profile selection", () => {
-  const clients = [{ clientId: `qz-${taskId}`, capabilities: { privatePayload: "omit" } }, { clientId: "profile-b" }];
+  const clients = [{ clientId: `zuri-${taskId}`, capabilities: { privatePayload: "omit" } }, { clientId: "profile-b" }];
   for (const width of [40, 80]) {
     const text = renderResult({ command: "status" }, { running: true, connected: true, clientCount: 2, clients }, { width });
     assert.match(text, /Browsers  2/);
@@ -314,10 +314,10 @@ test("OSC strings use BEL and both string terminators, including C1 and unfinish
 
 test("errors retain actionable details and respect plain and color output", () => {
   const payload = { ok: false, error: { code: "connection_pending", message: "Open the connection page in Chrome.",
-    url: "http://127.0.0.1:18765/qz-connect", hint: "Then run qz connect again.", guide: "https://example.com/guide" } };
+    url: "http://127.0.0.1:18765/zuri-connect", hint: "Then run zuri connect again.", guide: "https://example.com/guide" } };
   const plain = renderError(payload, { width: 40 });
   assert.match(plain, /Waiting for Chrome/);
-  assert.match(plain, /Then run qz connect again/);
+  assert.match(plain, /Then run zuri connect again/);
   const colored = renderError(payload, { color: true, width: 40 });
   assert.match(colored, /\x1b\[33m/);
   assert.equal(stripVTControlCharacters(colored), plain);
@@ -329,9 +329,9 @@ test("errors retain actionable details and respect plain and color output", () =
 test("suggested shell commands use placeholders for untrusted identifiers", () => {
   const output = renderResult(parsed("create"), { session: { id: "task; touch /tmp/bad", title: "Task" }, started: true });
   assert.match(output, /Task  task; touch \/tmp\/bad/);
-  assert.match(output, /qz show TASK_ID/);
-  assert.match(output, /qz cancel TASK_ID/);
-  assert.doesNotMatch(output, /qz show task;/);
+  assert.match(output, /zuri show TASK_ID/);
+  assert.match(output, /zuri cancel TASK_ID/);
+  assert.doesNotMatch(output, /zuri show task;/);
 
 });
 
@@ -339,7 +339,7 @@ test("suggested shell commands use placeholders for untrusted identifiers", () =
 test("help advertises task-centric commands and omits removed CLI entry points", () => {
   for (const topic of ["", "show", "submit", "skills"]) {
     const help = renderHelp(topic);
-    assert.doesNotMatch(help, /qz (?:input|tools|call|logs|downloads)\b/);
+    assert.doesNotMatch(help, /zuri (?:input|tools|call|logs|downloads)\b/);
     assert.doesNotMatch(help, /^\s+(?:input|tools|call|logs|downloads)\s/m);
   }
   assert.match(renderHelp("show"), /TASK_ID/);
@@ -357,19 +357,19 @@ test("Windows command hints identify PowerShell and escape every supported apost
   for (const topic of ["", "submit", "data", "skills"]) {
     const text = renderHelp(topic, { shell: "powershell" });
     assert.equal(text.match(/PowerShell 7\.3\+/g)?.length, 1);
-    assert.match(text, /qz\.ps1/);
-    assert.match(text, /Version: qz --version \(-v\)/);
+    assert.match(text, /zuri\.ps1/);
+    assert.match(text, /Version: zuri --version \(-v\)/);
     fits(text, 80);
   }
   const text = renderResult({ command: "data", action: "list" }, { tables: [{ name: "-O'Brien’s 表" }] }, { shell: "powershell" });
-  assert.match(text, /qz data export '--' '-O''Brien’’s 表'/);
+  assert.match(text, /zuri data export '--' '-O''Brien’’s 表'/);
   assert.match(text, /PowerShell 7\.3\+/);
   const notice = renderInputNotice({ sessionId: "task", waiting: true, kind: "form", responseTemplate: { answers: { city: "Xi'an" } } }, { shell: "powershell" });
-  assert.match(notice, /qz submit task '\{"city":"Xi''an"\}' --wait/);
+  assert.match(notice, /zuri submit task '\{"city":"Xi''an"\}' --wait/);
   assert.match(notice, /PowerShell 7\.3\+/);
 });
 
-const powershell = process.env.QZ_TEST_PWSH || "pwsh";
+const powershell = process.env.ZURI_TEST_PWSH || "pwsh";
 const powershellProbe = spawnSync(powershell, ["-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "$PSVersionTable.PSVersion.ToString()"], { encoding: "utf8", timeout: 15000 });
 for (const shell of ["posix", "powershell"]) {
   const skip = shell === "posix" ? process.platform === "win32"
@@ -380,12 +380,12 @@ for (const shell of ["posix", "powershell"]) {
       const [major, minor] = powershellProbe.stdout.trim().split(".").map(Number);
       assert.ok(major > 7 || (major === 7 && minor >= 3), "PowerShell 7.3+ is required");
     }
-    const directory = mkdtempSync(join(tmpdir(), "qz-shell-"));
+    const directory = mkdtempSync(join(tmpdir(), "zuri-shell-"));
     t.after(() => rmSync(directory, { recursive: true, force: true }));
     const capture = join(directory, "capture.mjs");
     writeFileSync(capture, 'process.stdout.write(JSON.stringify(process.argv.slice(2)) + "\\n");\n');
     // The PowerShell wrapper matches npm's native Node invocation, including $args forwarding.
-    writeFileSync(join(directory, "qz.ps1"), `& ${shellQuote(process.execPath, "powershell")} ${shellQuote(capture, "powershell")} $args\n`);
+    writeFileSync(join(directory, "zuri.ps1"), `& ${shellQuote(process.execPath, "powershell")} ${shellQuote(capture, "powershell")} $args\n`);
     const commands = [], expected = [];
     const names = ["杭州 O'Brien’s \"quoted\" 📄", "-leading-name", "--", "-quoted ' 表",
       "'; touch injected; # $(touch injected) `touch injected` & echo injected",
@@ -396,13 +396,13 @@ for (const shell of ["posix", "powershell"]) {
         const result = { [command === "data" ? "tables" : command === "images" ? "collections" : command === "skills" ? "items" : "automations"]: items };
         const text = renderResult({ command, action: "list", options: { "client-id": "profile" } }, result, { shell, width: 30 });
         const action = command === "automations" ? "run" : "export";
-        commands.push(text.split("\n").find(line => line.startsWith(`  qz ${command} ${action} `)));
+        commands.push(text.split("\n").find(line => line.startsWith(`  zuri ${command} ${action} `)));
         expected.push({ command, action, id: name });
       }
       const path = "-resources/O'Brien’s 文档 \"test\".md";
       const text = renderResult({ command: "skills", action: "read", id: name, options: { path, limit: 10, "client-id": "profile" } },
         { name, path, end: 10, truncated: true }, { shell, width: 30 });
-      commands.push(text.split("\n").find(line => line.startsWith("  qz skills read ")));
+      commands.push(text.split("\n").find(line => line.startsWith("  zuri skills read ")));
       expected.push({ command: "skills", action: "read", id: name, path });
     }
     const answers = { "O'Brien’s field": "‘’; New-Item injected; # $(touch injected) `touch injected` \"杭州\" ",
@@ -410,12 +410,12 @@ for (const shell of ["posix", "powershell"]) {
     const text = renderResult(parsed("get"), { ...snapshot, status: "waiting_user", input: {
       waiting: true, sessionId: "task", waitId: "wait", kind: "form", responseTemplate: { answers },
     } }, { shell, width: 30 });
-    commands.push(text.split("\n").find(line => line.startsWith("  qz submit ")));
+    commands.push(text.split("\n").find(line => line.startsWith("  zuri submit ")));
     expected.push({ command: "submit", id: "task", answers });
     assert.ok(commands.every(Boolean));
     const program = shell === "posix" ? "sh" : powershell;
     const script = shell === "posix"
-      ? `qz() { ${shellQuote(process.execPath, shell)} ${shellQuote(capture, shell)} "$@"; }\n${commands.join("\n")}`
+      ? `zuri() { ${shellQuote(process.execPath, shell)} ${shellQuote(capture, shell)} "$@"; }\n${commands.join("\n")}`
       : `$ErrorActionPreference = 'Stop'\n${commands.join("\n")}`;
     const args = shell === "posix" ? ["-c", script] : ["-NoLogo", "-NoProfile", "-NonInteractive", "-Command", script];
     const result = spawnSync(program, args, { cwd: directory, encoding: "utf8", timeout: 30000,
@@ -448,17 +448,17 @@ test("task and resource next actions retain the resolved browser UUID", () => {
     [{ command: "data", action: "list" }, { tables: [{ name: "prices" }] }],
   ]) {
     const text = renderResult(parsed, { ...result, clientId });
-    for (const line of text.split("\n").filter(line => /^  qz /.test(line))) assert.ok(line.includes(`--client ${clientId}`), line);
+    for (const line of text.split("\n").filter(line => /^  zuri /.test(line))) assert.ok(line.includes(`--client ${clientId}`), line);
   }
 });
 
 
 test("a prepared binding URL never claims that the target browser is connected", () => {
   for (const opened of [false, true]) {
-    const text = renderResult({ command: "connect" }, { endpoint: "http://127.0.0.1:23456", url: "http://127.0.0.1:23456/qz-connect?name=work", mcpUrl: "http://127.0.0.1:23456/mcp", opened });
+    const text = renderResult({ command: "connect" }, { endpoint: "http://127.0.0.1:23456", url: "http://127.0.0.1:23456/zuri-connect?name=work", mcpUrl: "http://127.0.0.1:23456/mcp", opened });
     assert.match(text, /binding (URL ready|page opened)/);
-    assert.match(text, /qz-connect\?name=work/);
-    assert.match(text, /qz browsers/);
-    assert.doesNotMatch(text, /Connected to qz|Waiting for qz/);
+    assert.match(text, /zuri-connect\?name=work/);
+    assert.match(text, /zuri browsers/);
+    assert.doesNotMatch(text, /Connected to zuri|Waiting for zuri/);
   }
 });

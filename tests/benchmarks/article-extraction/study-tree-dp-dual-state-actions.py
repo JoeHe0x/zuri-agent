@@ -39,8 +39,8 @@ def load_module(name: str, path: Path):
 
 BOUNDED_PATH = HERE / "study-tree-dp-bounded-actions.py"
 LOCAL_PATH = HERE / "study-tree-dp-local-mlp.py"
-BOUNDED = load_module("qingzhou_dual_bounded", BOUNDED_PATH)
-LOCAL = load_module("qingzhou_dual_local", LOCAL_PATH)
+BOUNDED = load_module("zuri_dual_bounded", BOUNDED_PATH)
+LOCAL = load_module("zuri_dual_local", LOCAL_PATH)
 DISTILL = BOUNDED.DISTILL
 GLOBAL_DISTILL = BOUNDED.GLOBAL_DISTILL
 CHOICE = BOUNDED.GLOBAL
@@ -520,7 +520,7 @@ def main():
         print(json.dumps({"fold": fold, "summary": summary}, ensure_ascii=False), flush=True)
     summary = GLOBAL_DISTILL.summary(rows)
     report = {
-        "schema": "qingzhou.tree-dp-dual-state-action-study.v1",
+        "schema": "zuri.tree-dp-dual-state-action-study.v1",
         "protocol": {
             "trainingSplits": ["base", "train"],
             "grouping": "siteFamily",

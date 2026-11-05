@@ -2,7 +2,7 @@
 .data-consent { height: 100%; overflow-y: auto; line-height: 1.6; }
 .data-consent h1 { font-size: 17px; line-height: 1.3; font-weight: 600; }
 .data-consent p { margin: 0; }
-.data-consent .qz-btn { height: auto; min-height: var(--qz-control-height); white-space: normal; }
+.data-consent .zuri-btn { height: auto; min-height: var(--zuri-control-height); white-space: normal; }
 .data-consent [role="alert"]:empty { display: none; }
 
 #app[data-workspace-booting] {
@@ -120,8 +120,8 @@
 }
 
 .chat-text-size-trigger {
-  --qz-control-size: 24px;
-  --qz-control-icon-size: 16px;
+  --zuri-control-size: 24px;
+  --zuri-control-icon-size: 16px;
 }
 
 .chat-text-size-trigger .chat-text-size-glyph {
@@ -133,12 +133,12 @@
 }
 
 .chat-text-size-popover {
-  --qz-popover-radius: var(--radius-md);
-  --qz-popover-shadow: var(--shadow-md);
+  --zuri-popover-radius: var(--radius-md);
+  --zuri-popover-shadow: var(--shadow-md);
 }
 
 .chat-text-size-step {
-  --qz-control-size: 26px;
+  --zuri-control-size: 26px;
   color: var(--text-secondary);
   font-size: 10.5px;
   font-weight: 620;
@@ -206,8 +206,8 @@
 }
 
 .session-title-export-btn {
-  --qz-control-size: 24px;
-  --qz-control-icon-size: 15px;
+  --zuri-control-size: 24px;
+  --zuri-control-icon-size: 15px;
   flex: 0 0 auto;
 }
 

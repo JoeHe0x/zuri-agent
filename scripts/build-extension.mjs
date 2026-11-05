@@ -22,7 +22,7 @@ import { copyRuntimeAssets, createDependencyGraph, encodeSourceMapPath, original
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 export const DEFAULT_EXTENSION_OUTPUT = resolve(ROOT, "dist/extension");
 export const DEFAULT_FIREFOX_EXTENSION_OUTPUT = resolve(ROOT, "dist/extension-firefox");
-const BUILD_MANIFEST = ".qingzhou-build.json";
+const BUILD_MANIFEST = ".zuri-build.json";
 const SCRIPT_EXTENSIONS = /\.(?:js|mjs|ts)$/;
 const ASSET_EXTENSIONS = /\.(?:html|css|json|png|svg|jpg|jpeg|gif|webp|ico|woff2?|ttf|wasm|txt)$/;
 
@@ -43,8 +43,8 @@ export const EXTENSION_ENTRIES = Object.freeze([
 const CLASSIC_ENTRIES = new Set(EXTENSION_ENTRIES.filter(entry => entry.format === "iife").map(entry => entry.path));
 const EMBEDDED_WORKER = "workers/inner-runner.ts";
 const EMBEDDED_SCRIPTS = [
-  { entry: "shared/script-runtime.ts", host: "capabilities/script/tools.js", symbol: "SCRIPT_RUNTIME_SOURCE", globalName: "QZ_SCRIPT_RUNTIME" },
-  { entry: "content/page-scripts/element.ts", host: "background/tools/page-scripts.js", symbol: "ELEMENT_PAGE_SCRIPT_SOURCE", globalName: "QZ_ELEMENT_PAGE_SCRIPTS" },
+  { entry: "shared/script-runtime.ts", host: "capabilities/script/tools.js", symbol: "SCRIPT_RUNTIME_SOURCE", globalName: "ZURI_SCRIPT_RUNTIME" },
+  { entry: "content/page-scripts/element.ts", host: "background/tools/page-scripts.js", symbol: "ELEMENT_PAGE_SCRIPT_SOURCE", globalName: "ZURI_ELEMENT_PAGE_SCRIPTS" },
   { entry: EMBEDDED_WORKER, host: "runner-sandbox.js", symbol: "INNER_WORKER_SOURCE", debugMap: true },
   { entry: "sidepanel/features/export/session-export-runtime.ts", host: "sidepanel/features/export/session-export-feature.js", symbol: "SESSION_EXPORT_RUNTIME_SOURCE" },
 ];
@@ -112,7 +112,7 @@ async function compileExtension({ sourceDir: source, outputDir: output, mode, bu
       embedded.set(script.host, { [script.symbol]: JSON.stringify(result.code) });
       if (result.map) {
         // This is the exact injected fragment, not a map for its enclosing dynamic wrapper.
-        const artifact = `.qingzhou-debug/embedded/${script.entry.replace(/\.ts$/, ".js")}`;
+        const artifact = `.zuri-debug/embedded/${script.entry.replace(/\.ts$/, ".js")}`;
         const map = `${artifact}.map`;
         await mkdir(dirname(resolve(compiled, artifact)), { recursive: true });
         await writeFile(resolve(compiled, artifact), result.code);
@@ -168,7 +168,7 @@ async function compileExtension({ sourceDir: source, outputDir: output, mode, bu
     const files = (await allFiles(compiled)).map(path => posix(relative(compiled, path)));
     const summary = {
       formatVersion: 1,
-      tool: `qingzhou-build/esbuild@${esbuildVersion}`,
+      tool: `zuri-build/esbuild@${esbuildVersion}`,
       mode,
       debugMaps,
       embeddedDebugScripts,
@@ -535,7 +535,7 @@ async function assertOwnedOutput(output) {
   if (!entries.length) return;
   let previous;
   try { previous = JSON.parse(await readFile(resolve(output, BUILD_MANIFEST), "utf8")); } catch { /* checked below */ }
-  if (previous?.formatVersion !== 1 || !previous?.tool?.startsWith("qingzhou-build/")) {
+  if (previous?.formatVersion !== 1 || !previous?.tool?.startsWith("zuri-build/")) {
     throw new Error(`refusing to replace a directory not owned by this build: ${output}`);
   }
 }

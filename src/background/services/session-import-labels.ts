@@ -15,7 +15,7 @@ export async function createSessionImportLabels(pageLanguage?: string): Promise<
     const t = createTranslator(coreMessages);
     return Object.fromEntries(sessionImportLabelKeys.map(key => [key, t(key)])) as SessionImportLabels;
   });
-  const authored = resolved === "en" || resolved === "zh-CN" ? coreMessages.messages.importQingzhou[resolved] : undefined;
-  if (requested && !authored && resolved !== "en" && labels.importQingzhou === coreMessages.messages.importQingzhou.en) return null;
+  const authored = resolved === "en" || resolved === "zh-CN" ? coreMessages.messages.importZuri[resolved] : undefined;
+  if (requested && !authored && resolved !== "en" && labels.importZuri === coreMessages.messages.importZuri.en) return null;
   return labels;
 }

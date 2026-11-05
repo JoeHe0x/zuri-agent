@@ -14,7 +14,7 @@ const plans = [
 for (const { seed, kind, scenarios } of plans) for (const watchNetwork of [false, true]) {
   test(`navigation ${kind} fuzz seed=${seed} watchNetwork=${watchNetwork}`, async ({}, info) => {
     test.setTimeout(180000);
-    const directory = await mkdtemp(join(tmpdir(), "qz-navigation-fuzz-")), extension = join(directory, "extension");
+    const directory = await mkdtemp(join(tmpdir(), "zuri-navigation-fuzz-")), extension = join(directory, "extension");
     let browser;
     const report = { browser: "chromium", kind, seed, watchNetwork, reads: 0, cases: [] };
     try {

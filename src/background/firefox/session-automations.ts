@@ -5,7 +5,7 @@ interface FirefoxAlarmHost extends SessionAutomationHost {
   alarms?: {
     create?: (name: string, info?: chrome.alarms.AlarmCreateInfo) => Promise<void> | void;
     clear?: (name?: string) => Promise<boolean> | boolean;
-    qzSessionAutomationAlarmBlocked?: boolean;
+    zuriSessionAutomationAlarmBlocked?: boolean;
   };
 }
 
@@ -13,8 +13,8 @@ interface FirefoxAlarmHost extends SessionAutomationHost {
 export function disableFirefoxSessionAutomations(chromeApi: FirefoxAlarmHost): void {
   disableSessionAutomations(chromeApi);
   const alarms = chromeApi.alarms;
-  if (alarms && !alarms.qzSessionAutomationAlarmBlocked && typeof alarms.create === "function") {
-    alarms.qzSessionAutomationAlarmBlocked = true;
+  if (alarms && !alarms.zuriSessionAutomationAlarmBlocked && typeof alarms.create === "function") {
+    alarms.zuriSessionAutomationAlarmBlocked = true;
     const create = alarms.create.bind(alarms);
     alarms.create = (name, info) => {
       if (name === AUTOMATION_SCHEDULER_ALARM) return Promise.resolve();
@@ -25,5 +25,5 @@ export function disableFirefoxSessionAutomations(chromeApi: FirefoxAlarmHost): v
   if (cleared && typeof (cleared as Promise<boolean>).catch === "function") {
     void (cleared as Promise<boolean>).catch(() => {});
   }
-  console.info("[轻舟] firefox session automations disabled");
+  console.info("[Zuri] firefox session automations disabled");
 }

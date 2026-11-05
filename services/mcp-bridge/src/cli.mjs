@@ -2,7 +2,7 @@
 import { realpathSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { setTimeout as delay } from "node:timers/promises";
-import { GUIDE_URL, INSTALL_URL, QzError, withToolClient, readHealth } from "./client.mjs";
+import { GUIDE_URL, INSTALL_URL, ZuriError, withToolClient, readHealth } from "./client.mjs";
 import { ensureDaemon, findDaemon, stopDaemon } from "./daemon.mjs";
 import { openBrowser } from "./open-browser.mjs";
 import { parseCommand } from "./args.mjs";
@@ -40,11 +40,11 @@ async function stdinText({ signal } = {}) {
   });
 }
 
-const UPGRADE_HINT = "Use the latest CLI. After current tasks finish, run npx --yes qz-browser-agent@latest stop (disconnects all browsers), update and reload the qz extension, then run npx --yes qz-browser-agent@latest connect.";
+const UPGRADE_HINT = "Use the latest CLI. After current tasks finish, run npx --yes zuri-agent@latest stop (disconnects all browsers), update and reload the zuri extension, then run npx --yes zuri-agent@latest connect.";
 
 function requirePairingSupport(health) {
-  if (health?.features?.browserPairing !== 1) throw new QzError("upgrade_required",
-    "This qz service is unsupported. Upgrade the CLI and extension, then run qz stop and qz connect.",
+  if (health?.features?.browserPairing !== 1) throw new ZuriError("upgrade_required",
+    "This zuri service is unsupported. Upgrade the CLI and extension, then run zuri stop and zuri connect.",
     { hint: UPGRADE_HINT });
 }
 
@@ -54,10 +54,10 @@ function selectClient(health, selector = "", { allowEmpty = false } = {}) {
     const entry = (health.status?.browsers || []).find(client => client.clientId === selector || client.name === selector);
     const selected = clients.find(client => client.clientId === (entry?.clientId || selector));
     if (selected) return selected.clientId;
-    throw new QzError(entry ? "client_offline" : "client_not_found", `Browser ${selector} is ${entry ? "offline" : "not registered"}.`,
-      { hint: "Run qz browsers to inspect names and UUIDs. Reconnect that profile from its extension settings." });
+    throw new ZuriError(entry ? "client_offline" : "client_not_found", `Browser ${selector} is ${entry ? "offline" : "not registered"}.`,
+      { hint: "Run zuri browsers to inspect names and UUIDs. Reconnect that profile from its extension settings." });
   }
-  if (clients.length > 1) throw new QzError("selection_required", "Multiple browsers are connected. Select one with --client NAME|UUID.",
+  if (clients.length > 1) throw new ZuriError("selection_required", "Multiple browsers are connected. Select one with --client NAME|UUID.",
     { clients: clients.map(({ clientId, name }) => ({ clientId, name })), hint: clients.map(client => `${client.name || client.clientId}: ${client.clientId}`).join("\n") });
   if (clients.length === 1) return clients[0].clientId;
   if (allowEmpty) return "";
@@ -65,7 +65,7 @@ function selectClient(health, selector = "", { allowEmpty = false } = {}) {
 }
 
 function connectionRequired() {
-  return new QzError("not_connected", "Run qz connect to start the local service and connect Chrome. If qz is not installed, run qz install.");
+  return new ZuriError("not_connected", "Run zuri connect to start the local service and connect Chrome. If zuri is not installed, run zuri install.");
 }
 
 function recoveryCommand(command, sessionId, clientId, stream = false) {
@@ -73,15 +73,15 @@ function recoveryCommand(command, sessionId, clientId, stream = false) {
   if (clientId && sanitizeTerminalText(clientId) !== String(clientId)) clientId = "CLIENT_ID";
   const client = clientId ? ` --client${String(clientId).startsWith("-") ? "=" : " "}${shellArgument(clientId)}` : "";
   const options = `${client}${stream ? " --stream" : ""}`;
-  if (!sessionId) return `qz ${command}${options}`;
+  if (!sessionId) return `zuri ${command}${options}`;
   return String(sessionId).startsWith("-")
-    ? `qz ${command}${options} ${optionTerminator()} ${shellArgument(sessionId)}`
-    : `qz ${command} ${shellArgument(sessionId)}${options}`;
+    ? `zuri ${command}${options} ${optionTerminator()} ${shellArgument(sessionId)}`
+    : `zuri ${command} ${shellArgument(sessionId)}${options}`;
 }
 
 function missingTaskDetails(sessionId, clientId) {
   return { sessionId, ...(clientId ? { clientId } : {}),
-    hint: "Check the task ID and selected browser. Run qz browsers to inspect browser names and UUIDs. List tasks in the selected browser:",
+    hint: "Check the task ID and selected browser. Run zuri browsers to inspect browser names and UUIDs. List tasks in the selected browser:",
     command: recoveryCommand("tasks", "", clientId) };
 }
 
@@ -92,7 +92,7 @@ export async function runCli(argv, dependencies = {}) {
 async function executeCommand(parsed, dependencies) {
   if (parsed.command === "version") return parsed.options.json
     ? { result: { name: PACKAGE_NAME, version: PACKAGE_VERSION } }
-    : { text: `qz ${PACKAGE_VERSION}\n` };
+    : { text: `zuri ${PACKAGE_VERSION}\n` };
   return withToolClient(async callTool => {
     const returned = await dispatchCommand(parsed, { ...dependencies, callTool: dependencies.callTool || callTool });
     const clientId = parsed.presentation?.clientId;
@@ -113,10 +113,10 @@ async function dispatchCommand(parsed, dependencies) {
   if (command === "connect") {
     const running = await (dependencies.ensureDaemon || ensureDaemon)(options.port === undefined ? {} : { preferredPort: options.port });
     requirePairingSupport(running.health);
-    if (options.port !== undefined && Number(new URL(running.endpoint).port) !== options.port) throw new QzError("port_mismatch",
+    if (options.port !== undefined && Number(new URL(running.endpoint).port) !== options.port) throw new ZuriError("port_mismatch",
       `The local service is already running at ${running.endpoint}.`, { endpoint: running.endpoint,
-        hint: "Use its current address, or run qz stop before connecting on a different port." });
-    const bindingUrl = new URL("/qz-connect", running.endpoint);
+        hint: "Use its current address, or run zuri stop before connecting on a different port." });
+    const bindingUrl = new URL("/zuri-connect", running.endpoint);
     if (options.name !== undefined) bindingUrl.searchParams.set("name", options.name);
     const connectUrl = bindingUrl.href;
     if (options["no-open"] || options.name !== undefined) {
@@ -136,7 +136,7 @@ async function dispatchCommand(parsed, dependencies) {
         const timeout = AbortSignal.timeout(timeoutMs);
         try {
           // A lease can outlive a stopped poller. Confirm a real extension round trip.
-          await dependencies.callTool(running.endpoint, "qingzhou_call", {
+          await dependencies.callTool(running.endpoint, "zuri_call", {
             method: "ping", clientId: client.clientId, timeoutSeconds: timeoutMs / 1000,
           }, { timeoutMs, signal: dependencies.signal ? AbortSignal.any([dependencies.signal, timeout]) : timeout });
           selected = client.clientId;
@@ -151,32 +151,32 @@ async function dispatchCommand(parsed, dependencies) {
     };
     const result = health => ({ result: { connected: true, mcpUrl: `${running.endpoint}/mcp`, clients: health.status.clients, clientId: selected } });
     if (await probe(running.health)) return result(running.health);
-    if (options["client-id"]) throw new QzError("client_offline", "The selected browser is not responding. Reconnect it from its extension settings.");
+    if (options["client-id"]) throw new ZuriError("client_offline", "The selected browser is not responding. Reconnect it from its extension settings.");
     dependencies.signal?.throwIfAborted();
     await open(connectUrl);
     while (Date.now() < deadline) {
       dependencies.signal?.throwIfAborted();
       const health = await healthReader(running.endpoint).catch(() => null);
-      if (health && health.instanceId !== running.instanceId) throw new QzError("connection_changed", "The local service changed. Run qz connect again.", { url: connectUrl });
+      if (health && health.instanceId !== running.instanceId) throw new ZuriError("connection_changed", "The local service changed. Run zuri connect again.", { url: connectUrl });
       if (health && await probe(health)) return result(health);
       await delay(200, undefined, { signal: dependencies.signal });
     }
-    throw new QzError("connection_pending", "qz is waiting for Chrome. Open the connection URL in the Chrome profile with qz installed and confirm the connection in qz. Then run qz connect again.", { url: connectUrl });
+    throw new ZuriError("connection_pending", "zuri is waiting for Chrome. Open the connection URL in the Chrome profile with zuri installed and confirm the connection in zuri. Then run zuri connect again.", { url: connectUrl });
   }
   // Validate JSON before connecting; malformed arguments cannot cause browser actions.
   let args = {};
   if (command === "submit" || (command === "settings" && action === "set" && id === undefined)) {
     const source = options.args === "-" ? await (dependencies.readStdin || stdinText)({ signal: dependencies.signal }) : options.args ?? "{}";
     try { args = JSON.parse(source); }
-    catch { throw new QzError("invalid_arguments", "Pass a JSON object, or - to read one from stdin."); }
-    if (!args || Array.isArray(args) || typeof args !== "object") throw new QzError("invalid_arguments", `${command === "submit" ? "Answers" : "Settings"} must be a JSON object.`);
+    catch { throw new ZuriError("invalid_arguments", "Pass a JSON object, or - to read one from stdin."); }
+    if (!args || Array.isArray(args) || typeof args !== "object") throw new ZuriError("invalid_arguments", `${command === "submit" ? "Answers" : "Settings"} must be a JSON object.`);
   }
   let config;
   if (command === "settings" && action === "set") config = settingsPatch(id, options.value, args);
   let prompt = options.prompt || "";
   if (((command === "tasks" && action === "create") || command === "send") && prompt === "-") {
     prompt = await (dependencies.readStdin || stdinText)({ signal: dependencies.signal });
-    if (!prompt.trim()) throw new QzError("invalid_arguments", "The prompt read from stdin is empty.");
+    if (!prompt.trim()) throw new ZuriError("invalid_arguments", "The prompt read from stdin is empty.");
   }
   dependencies.signal?.throwIfAborted();
   const resource = resourceRequest(parsed, config);
@@ -189,8 +189,8 @@ async function dispatchCommand(parsed, dependencies) {
   if (command === "browsers") {
     if (action === "list") return { result: running.health.status };
     const browser = running.health.status?.browsers?.find(browser => browser.clientId === id || browser.name === id);
-    if (!browser) throw new QzError("client_not_found", `No registered browser named ${id}. Run qz browsers to inspect names and UUIDs.`);
-    return { result: await call(running.endpoint, "qingzhou_forget_browser", { clientId: browser.clientId }, { timeoutMs: timeoutSeconds * 1000, signal: dependencies.signal }) };
+    if (!browser) throw new ZuriError("client_not_found", `No registered browser named ${id}. Run zuri browsers to inspect names and UUIDs.`);
+    return { result: await call(running.endpoint, "zuri_forget_browser", { clientId: browser.clientId }, { timeoutMs: timeoutSeconds * 1000, signal: dependencies.signal }) };
   }
   // Resolve names once. Every subsequent operation carries this profile UUID.
   const clientId = selectClient(running.health, options["client-id"]);
@@ -201,14 +201,14 @@ async function dispatchCommand(parsed, dependencies) {
   const startedAt = Date.now();
   const readSnapshot = async (sessionId, seconds, signal) => {
     try {
-      return await call(running.endpoint, "qingzhou_get_session_snapshot", {
+      return await call(running.endpoint, "zuri_get_session_snapshot", {
         ...common, sessionId, timeoutSeconds: seconds, compact: false, tail: false, includeArtifacts: false,
       }, { timeoutMs: seconds * 1000, signal });
     } catch (error) {
       signal?.throwIfAborted();
       if (error.name === "TimeoutError" || error.code === -32001 || error.code === "timeout" || error.code === "BRIDGE_REQUEST_TIMEOUT"
         || (error.code === "tool_error" && /BRIDGE_REQUEST_TIMEOUT/.test(error.message))) {
-        throw new QzError("request_timeout", "Reading the task status timed out. The browser task may still be running.");
+        throw new ZuriError("request_timeout", "Reading the task status timed out. The browser task may still be running.");
       }
       throw error;
     }
@@ -226,9 +226,9 @@ async function dispatchCommand(parsed, dependencies) {
       });
     } catch (error) {
       const code = error.name === "TimeoutError" ? "timeout" : error.name === "AbortError" ? "interrupted" : error.code || "task_wait_failed";
-      if (code === "task_deleted") throw new QzError(code, error.message, { ...error.details, ...missingTaskDetails(sessionId, clientId) });
+      if (code === "task_deleted") throw new ZuriError(code, error.message, { ...error.details, ...missingTaskDetails(sessionId, clientId) });
       const changed = code === "task_changed";
-      throw new QzError(code, code === "timeout"
+      throw new ZuriError(code, code === "timeout"
         ? "Stopped watching after the configured --timeout. The browser task may still be running." : error.message,
       { ...error.details, sessionId, ...(clientId ? { clientId } : {}), hint: changed ? "Inspect the task conversation before sending another message:" : "Continue watching the same task:",
         command: recoveryCommand(changed ? "show" : "watch", sessionId, clientId, !changed) });
@@ -236,12 +236,12 @@ async function dispatchCommand(parsed, dependencies) {
   };
   if (command === "watch") return { result: { sessionId: id, snapshot: await observe(id, { allowIdle: true }) } };
   if (command === "send") {
-    let result = await call(running.endpoint, "qingzhou_send_message", {
+    let result = await call(running.endpoint, "zuri_send_message", {
       ...common, sessionId: id, text: prompt, steer: Boolean(options.steer), wait: false, waitForStart: true,
     }, requestOptions);
     if (options.wait && result?.accepted === true) {
       if (typeof result.clientMessageId !== "string" || !result.clientMessageId.trim()) {
-        throw new QzError("invalid_response", "The message was accepted without a tracking ID. Inspect the task before sending it again.", {
+        throw new ZuriError("invalid_response", "The message was accepted without a tracking ID. Inspect the task before sending it again.", {
           sessionId: id, hint: "Continue watching the same task:", command: recoveryCommand("watch", id, clientId, true),
         });
       }
@@ -255,21 +255,21 @@ async function dispatchCommand(parsed, dependencies) {
     let waitId = options["wait-id"];
     let input, consentVersion;
     if (!waitId || command === "approve") {
-      input = await call(running.endpoint, "qingzhou_get_user_input", { ...common, sessionId: id }, requestOptions);
+      input = await call(running.endpoint, "zuri_get_user_input", { ...common, sessionId: id }, requestOptions);
       if (!waitId) {
-        if (!input?.waiting || !input?.waitId) throw new QzError("not_waiting", "This task has no pending input.", { sessionId: id });
+        if (!input?.waiting || !input?.waitId) throw new ZuriError("not_waiting", "This task has no pending input.", { sessionId: id });
         waitId = input.waitId;
       }
     }
     if (command === "approve" && input?.waiting && input.waitId === waitId && input.kind === "location_consent") {
       if (!Number.isInteger(input.consentVersion) || input.consentVersion < 1) {
-        throw new QzError("invalid_response", "The location notice has no valid consent version. Run qz show to review the current request.", { sessionId: id });
+        throw new ZuriError("invalid_response", "The location notice has no valid consent version. Run zuri show to review the current request.", { sessionId: id });
       }
       consentVersion = input.consentVersion;
       await dependencies.onUserInput?.(input);
     }
     dependencies.signal?.throwIfAborted();
-    let result = await call(running.endpoint, "qingzhou_respond_to_user_input", {
+    let result = await call(running.endpoint, "zuri_respond_to_user_input", {
       ...common, sessionId: id, waitId, action: command, ...(command === "submit" ? { answers: args } : {}),
       ...(consentVersion === undefined ? {} : { consentVersion }),
     }, requestOptions);
@@ -287,18 +287,18 @@ async function dispatchCommand(parsed, dependencies) {
   if (resource) {
     name = resource.name; parameters = { ...common, ...resource.args };
   } else {
-    name = { list: "qingzhou_list_sessions", create: "qingzhou_create_session", get: "qingzhou_get_session_snapshot", stop: "qingzhou_stop_session" }[action];
+    name = { list: "zuri_list_sessions", create: "zuri_create_session", get: "zuri_get_session_snapshot", stop: "zuri_stop_session" }[action];
     parameters = { ...common, ...(id ? { sessionId: id } : {}),
       ...(action === "create" ? { title: options.title || "", firstMessage: prompt, ...(options.parent ? { parentSessionId: options.parent } : {}) } : {}),
       ...(action === "list" && options.limit !== undefined ? { limit: Number(options.limit) } : {}) };
   }
   let result = await call(running.endpoint, name, parameters, requestOptions);
   if (command === "tasks" && action === "get" && result?.session === null) {
-    throw new QzError("task_not_found", TASK_NOT_FOUND_MESSAGE, missingTaskDetails(id, clientId));
+    throw new ZuriError("task_not_found", TASK_NOT_FOUND_MESSAGE, missingTaskDetails(id, clientId));
   }
   if (command === "tasks" && action === "create" && options.wait) {
     const sessionId = result?.session?.id || result?.sessionId;
-    if (!sessionId) throw new QzError("invalid_response", "The task was created without an ID. Run qz tasks to find it before retrying.");
+    if (!sessionId) throw new ZuriError("invalid_response", "The task was created without an ID. Run zuri tasks to find it before retrying.");
     await dependencies.onTaskCreated?.(result);
     result = { ...result, snapshot: await observe(sessionId) };
   }
@@ -308,19 +308,19 @@ async function dispatchCommand(parsed, dependencies) {
 export function errorPayload(error) {
   if (error.code === "invalid_arguments") return { ok: false, error: {
     code: error.code, message: error.message,
-    hint: "With npm, use npm run qz -- <command> [options]. Run qz --help for usage.",
+    hint: "With npm, use npm run zuri -- <command> [options]. Run zuri --help for usage.",
   } };
   const interrupted = error.name === "AbortError" || error.code === "interrupted";
   const timeout = error.name === "TimeoutError" || error.code === -32001 || error.code === "timeout";
   const code = interrupted ? "interrupted" : timeout ? "timeout" : error.code || "connection_error";
   const payload = { code, message: interrupted ? "Stopped waiting. A started browser task may still be running."
     : timeout && error.code !== "timeout" ? "The request timed out. A started browser task may still be running." : error.message, ...error.details };
-  if (!payload.hint && (timeout || interrupted)) payload.hint = "Run qz tasks to inspect the task before repeating the command.";
+  if (!payload.hint && (timeout || interrupted)) payload.hint = "Run zuri tasks to inspect the task before repeating the command.";
   if (!payload.hint && code === "BRIDGE_REQUEST_TIMEOUT") payload.hint = "The browser operation may still be running. Check the task before repeating the command.";
-  if (!payload.hint && code === "BRIDGE_CLIENT_REQUIRED") payload.hint = "Run qz status to list browser IDs, then repeat with --client ID.";
+  if (!payload.hint && code === "BRIDGE_CLIENT_REQUIRED") payload.hint = "Run zuri status to list browser IDs, then repeat with --client ID.";
   if (["not_connected", "connection_error", "connection_unavailable", "connection_pending", "connection_changed", "browser_open_failed", "BRIDGE_NOT_CONNECTED", "BRIDGE_CLOSED"].includes(code)) {
     Object.assign(payload, { guide: GUIDE_URL, install: INSTALL_URL,
-      hint: payload.hint || "Run qz install if the extension is missing, then qz connect. See the GitHub guide for setup." });
+      hint: payload.hint || "Run zuri install if the extension is missing, then zuri connect. See the GitHub guide for setup." });
   }
   return { ok: false, error: payload };
 }

@@ -26,7 +26,7 @@ from sklearn.preprocessing import StandardScaler
 
 HERE = Path(__file__).resolve().parent
 STUDY_PATH = HERE / "study-tree-dp-readability.py"
-SPEC = importlib.util.spec_from_file_location("qingzhou_readability_study", STUDY_PATH)
+SPEC = importlib.util.spec_from_file_location("zuri_readability_study", STUDY_PATH)
 if SPEC is None or SPEC.loader is None:
     raise RuntimeError(f"cannot load {STUDY_PATH}")
 READABILITY = importlib.util.module_from_spec(SPEC)
@@ -431,7 +431,7 @@ def main() -> int:
         ]
         validation_report = {"summary": summarize(rows), "rows": rows}
     report = {
-        "schema": "qingzhou.tree-dp-root-quality-study.v1",
+        "schema": "zuri.tree-dp-root-quality-study.v1",
         "protocol": {
             "model": "single-tree-dp-one-primary-root-quality-state",
             "runtimeReadabilityCandidate": False,

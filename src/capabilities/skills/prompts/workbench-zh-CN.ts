@@ -13,15 +13,15 @@ export default `# 技能工作台
 6. 需要理解当前完整 skill 体系时，调用本 skill 暴露的“列出技能”工具，按 \`all/global/site/resident\` 获取现有技能名称全集，再决定创建新 skill 还是更新已有 skill。
 7. 创建新 skill 时调用本 skill 暴露的“创建技能”Skill 工具；写入或编辑 \`plugin.json\`、\`scripts/*.js\`、\`references/*.md\` 等资源时调用“编辑技能资源”，一次只改一个资源且一次只做一个动作；修改已有 skill 正文或元信息时调用“更新技能”；删除时调用“删除技能”。
 8. Skill 脚本不要承载完整流程，只封装可重复、边界明确、适合 LLM tool 调用的局部动作；skill 本身就是用户可选择的入口，不要额外设计 Skill slash command。
-9. 写入或更新后，轻舟会刷新 Skill 注册表；显式声明的新工具和工具结果渲染应立即对当前对话生效。
-10. Skill 脚本默认使用 \`runtime:"page"\` 注入当前任务网页，页面工具会自动获得可选参数 \`tabRef\`：传当前任务拥有的标签页别名或正整数 ID（也可用数字字符串），省略时使用当前任务工作标签页。在 \`plugin.json\` 中声明时，使用 \`tabRef\` 和 \`type:["integer","string"]\`。未知别名会报错，不会回退到工作标签页。与页面无关、需要自身设置或网络 API 的脚本使用 \`runtime:"inner"\`：通过 \`$plugin.config\` 读取 manifest 设置，通过标准 \`fetch\` 访问 \`network.allowedOrigins\` 声明的来源。不要给用户自定义 Skill 配置 \`runtime:"host"\`；host 只用于轻舟 core 显式注册的受控后台动作。
+9. 写入或更新后，Zuri会刷新 Skill 注册表；显式声明的新工具和工具结果渲染应立即对当前对话生效。
+10. Skill 脚本默认使用 \`runtime:"page"\` 注入当前任务网页，页面工具会自动获得可选参数 \`tabRef\`：传当前任务拥有的标签页别名或正整数 ID（也可用数字字符串），省略时使用当前任务工作标签页。在 \`plugin.json\` 中声明时，使用 \`tabRef\` 和 \`type:["integer","string"]\`。未知别名会报错，不会回退到工作标签页。与页面无关、需要自身设置或网络 API 的脚本使用 \`runtime:"inner"\`：通过 \`$plugin.config\` 读取 manifest 设置，通过标准 \`fetch\` 访问 \`network.allowedOrigins\` 声明的来源。不要给用户自定义 Skill 配置 \`runtime:"host"\`；host 只用于Zuri core 显式注册的受控后台动作。
 11. Skill 脚本工具会自动拥有必填的 \`timeout\` 调用参数；不要把超时写进业务 schema。单位是秒，\`timeout <= 0\` 表示无限等待，\`timeout > 0\` 表示最多等待对应秒数；调用 Skill 工具、\`run_script\` 或 \`run_skill_script\` 时由模型按任务复杂度主动选择。
 12. Skill 工具曝光由 skill 的 \`scope\` 决定，不在 manifest 里额外配置：\`scope:"resident"\` 常驻曝光；\`scope:"site"\` 在当前页面匹配 skill 的 \`domains/urlPatterns\` 时曝光，也可由当前会话 \`load_skill\` 后曝光；\`scope:"global"\` 只在当前会话 \`load_skill\` 后曝光。\`builtin\`、\`readOnly\` 和 \`source\` 只描述来源与权限，不改变加载策略。
-13. 接入外部 MCP 时，先 \`load_skill("qingzhou-mcp")\`，按该 skill 完成 registry 搜索、未注册 URL 探测和必要的最小试调用。只有确认要长期复用时，才把选中的 MCP server 和工具绑定写入目标 skill；已注册 MCP 必须通过对应 Skill 工具名调用。
+13. 接入外部 MCP 时，先 \`load_skill("zuri-mcp")\`，按该 skill 完成 registry 搜索、未注册 URL 探测和必要的最小试调用。只有确认要长期复用时，才把选中的 MCP server 和工具绑定写入目标 skill；已注册 MCP 必须通过对应 Skill 工具名调用。
 14. Agent 用现有页面或 Network 工具找到 Skill Zip URL 后，先确保来源页面是当前任务的工作标签页，再把该 URL 传给“导入页面 Zip”。这个工具不负责扫描或猜测下载链接；下载在该页面的认证上下文中完成，解压、校验和 Skill 写入由 Background 统一处理。不要用页面脚本手工拼 base64 或自己解析 Zip。
 15. 用户给出支持的 GitHub 或 GitLab 仓库/目录页时，调用“探测并导入 Git 仓库”。它会打开仓库页面、等待必要登录、探测分支与 Zip，并绑定为可更新的 Skill 来源；发生同名或本地修改冲突时，不得未经用户确认传 \`overwrite:true\`。
 16. 用户明确要求把某个本地 Skill 安装到 Git 仓库时，调用“安装 Skill 到 Git”。目标 URL 必须由当前产品的 Git 发布适配器支持；目录决定安装位置，工具会创建或更新 \`<目录>/<skill-name>/SKILL.md\` 及其资源并生成一次 commit。未安装对应发布适配器时，先导出 Skill 再由用户提交。
-17. Skill 包可以携带 DOCX、XLSX、PDF 参考资源。调用 \`load_skill_resource(name,path)\` 时会自动通过 document pipeline 返回首块预览和 \`docModelId\`；需要继续读取时先 \`load_skill("qingzhou-documents")\`，再调用 \`document_read_chunk\`。这些二进制资源不能使用文本 replace/append/set 编辑。
+17. Skill 包可以携带 DOCX、XLSX、PDF 参考资源。调用 \`load_skill_resource(name,path)\` 时会自动通过 document pipeline 返回首块预览和 \`docModelId\`；需要继续读取时先 \`load_skill("zuri-documents")\`，再调用 \`document_read_chunk\`。这些二进制资源不能使用文本 replace/append/set 编辑。
 
 ## 页面模式前置条件
 
@@ -32,7 +32,7 @@ export default `# 技能工作台
 ## Skill content 与 Skill 脚本的分工
 
 - \`SKILL.md\` / skill content：解释“怎么完成任务”。例如检索 B 站视频时，写清如何打开 B 站、如何搜索、如何筛选、何时进入详情页、哪些页面状态代表成功、遇到风控/空结果怎么处理。
-- \`plugin.json\`：可选。只有需要把脚本工具化或定制工具结果 UI 时才创建。它让工具进入 LLM schema，让工具结果用轻舟组件展示。
+- \`plugin.json\`：可选。只有需要把脚本工具化或定制工具结果 UI 时才创建。它让工具进入 LLM schema，让工具结果用Zuri组件展示。
 - \`scripts/*.js\`：可选，且必须由 \`plugin.json.tools[]\` 显式声明后才会成为工具。页面动作使用 \`runtime:"page"\`；纯计算、Skill 自身设置或外部 API 使用 \`runtime:"inner"\`。脚本只实现边界明确的局部动作，不承载完整任务流程。
 - 如果一个工具需要多步前置流程，工具描述或 skill content 要明确“先 load_skill 读取流程，再在合适页面调用脚本”。
 - 创建、更新、删除 skill 不再直接使用裸露 core tool；统一调用本 skill 暴露的 Skill 工具，让创建逻辑、目录规范和结果 UI 都走同一个入口。
@@ -46,18 +46,18 @@ export default `# 技能工作台
 
 ## MCP 接入 SOP
 
-轻舟只支持远程 HTTP MCP，不支持本地 stdio。MCP 的发现、探测和一次性调用由 \`qingzhou-mcp\` 负责；本 skill 只承接已经确认需要持久化的配置：
+Zuri只支持远程 HTTP MCP，不支持本地 stdio。MCP 的发现、探测和一次性调用由 \`zuri-mcp\` 负责；本 skill 只承接已经确认需要持久化的配置：
 
-1. 编辑前先 \`load_skill("qingzhou-mcp")\`，根据其探测结果、\`tools[].name/description/inputSchema\`、最小试调用和用户目标，选出真正需要绑定的工具；不要默认包装 server 的全部工具。
+1. 编辑前先 \`load_skill("zuri-mcp")\`，根据其探测结果、\`tools[].name/description/inputSchema\`、最小试调用和用户目标，选出真正需要绑定的工具；不要默认包装 server 的全部工具。
 2. 在 \`plugin.json\` 顶层写 \`category\`，按用户任务场景选择稳定业务分类（如“研究”“数据”“出行”“开发”）；只有跨场景纯 MCP 网关才使用 \`{ "id": "mcp", "label": "MCP" }\`。
 3. 根据最小试调用的真实返回 shape 调用“读取可用渲染器”，为每个绑定工具选择 \`table/list/fields/summary/article/image_grid/tree/markdown/text\` 等标准 renderer。MCP 返回 \`structuredContent\` 或 JSON 文本时可直接映射；只有自然语言文本时使用 \`text/markdown\`，不要臆测字段。
 4. 在 \`plugin.json.mcpServers\` 声明 server，并在 \`tools[]\` 中为选中的工具配置 \`runtime:"mcp"\`、\`mcp:{ server, tool }\` 和匹配返回结构的 \`renderer\`。renderer 可以写在单个 tool 上，也可以写在顶层 \`renderers.tools\`。
-5. 写入前轻舟会校验启用的 MCP server 能否完成 \`tools/list\`；失败时修正 URL、headers，或明确将暂不可用的 server 设为 \`enabled:false\`，不要绕过校验。
-6. 写入后重新 \`load_skill(name)\`，再按 \`qingzhou-mcp\` 的 registry 流程验证 \`pluginTool.name\`，通过该 Skill 工具做正式调用，并确认命中了预期 renderer 而不是通用文本兜底。
+5. 写入前Zuri会校验启用的 MCP server 能否完成 \`tools/list\`；失败时修正 URL、headers，或明确将暂不可用的 server 设为 \`enabled:false\`，不要绕过校验。
+6. 写入后重新 \`load_skill(name)\`，再按 \`zuri-mcp\` 的 registry 流程验证 \`pluginTool.name\`，通过该 Skill 工具做正式调用，并确认命中了预期 renderer 而不是通用文本兜底。
 
 \`\`\`json
 {
-  "format": "qingzhou.plugin",
+  "format": "zuri.plugin",
   "schemaVersion": 1,
   "id": "docs-mcp",
   "displayName": "文档 MCP",
@@ -100,7 +100,7 @@ export default `# 技能工作台
 
 \`\`\`json
 {
-  "format": "qingzhou.plugin",
+  "format": "zuri.plugin",
   "schemaVersion": 1,
   "id": "page-inspector",
   "displayName": "页面洞察",
@@ -187,7 +187,7 @@ export default `# 技能工作台
 
 ## 脚本约定
 
-Skill 脚本与 \`run_script.code\` 使用同一种源码形态：默认写成单个 \`async () => { ... }\` 函数表达式，由轻舟自动调用。不要写顶层 \`return\`、IIFE、\`main();\` 或把结果包在 \`result\` 字段里。\`runtime:"page"\` 在当前任务工作标签页或用 \`tabRef\` 指定的自有页面上执行；\`runtime:"inner"\` 在无 DOM 的 Worker 中执行，不需要 tab，可用标准 Web APIs、\`$plugin.config\`、\`fetch\` 和 \`tools/tool\`。
+Skill 脚本与 \`run_script.code\` 使用同一种源码形态：默认写成单个 \`async () => { ... }\` 函数表达式，由Zuri自动调用。不要写顶层 \`return\`、IIFE、\`main();\` 或把结果包在 \`result\` 字段里。\`runtime:"page"\` 在当前任务工作标签页或用 \`tabRef\` 指定的自有页面上执行；\`runtime:"inner"\` 在无 DOM 的 Worker 中执行，不需要 tab，可用标准 Web APIs、\`$plugin.config\`、\`fetch\` 和 \`tools/tool\`。
 
 \`\`\`js
 async () => {
@@ -258,10 +258,10 @@ async () => {
 - skill 的 \`name\` 是稳定英文 id，只用小写字母、数字和连字符；\`displayName\` 是中文显示名。创建中文技能时必须同时传 \`displayName\`，不要把中文只放在正文标题里。
 - Skill 的 \`displayName\` 是 Skill 中文名；\`category\` 必须填写，用于 Skill 上层归类和对话流中的工具自动聚合。按用户可理解的业务场景命名，不要省略让系统回退到默认分类。
 - \`renderers.tools\` 的可用类型以“读取可用渲染器”工具返回为准。创建带 UI 的 Skill 前先读取 registry，再选择合适 renderer，并按返回 schema 设计脚本 return。
-- 配置了 renderer 的工具用轻舟标准可视化/分组展示；没有 renderer 的工具自动按通用脚本结果展示。
-- 更复杂的展示用 renderer 的 \`layout.blocks\` 组合已有轻舟组件，不要写一次性的视觉结构。
-- 需要用户配置时，在 manifest 声明通用 \`settings.fields\`，轻舟会自动把设置卡片放进“设置 → 技能”。
-- manifest 的 \`settings.fields\` 只定义字段结构和可选初始 default，不代表用户当前配置；实际读写配置值时加载 \`qingzhou-management\`，使用 \`qingzhou_management__manage_skill_settings\` 的 list/get/update，并以 get 结果验收。secret 不在 manifest 声明 default。
+- 配置了 renderer 的工具用Zuri标准可视化/分组展示；没有 renderer 的工具自动按通用脚本结果展示。
+- 更复杂的展示用 renderer 的 \`layout.blocks\` 组合已有Zuri组件，不要写一次性的视觉结构。
+- 需要用户配置时，在 manifest 声明通用 \`settings.fields\`，Zuri会自动把设置卡片放进“设置 → 技能”。
+- manifest 的 \`settings.fields\` 只定义字段结构和可选初始 default，不代表用户当前配置；实际读写配置值时加载 \`zuri-management\`，使用 \`zuri_management__manage_skill_settings\` 的 list/get/update，并以 get 结果验收。secret 不在 manifest 声明 default。
 
 ## 质量要求
 

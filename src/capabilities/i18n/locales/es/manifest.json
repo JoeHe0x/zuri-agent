@@ -1,5 +1,5 @@
 {
   "manifest.extensionName": "Zuri Agent",
-  "manifest.extensionDescription": "qz es un espacio de trabajo con agentes de IA en tu navegador.",
+  "manifest.extensionDescription": "zuri es un espacio de trabajo con agentes de IA en tu navegador.",
   "manifest.switchModel": "Cambiar rápidamente de perfil de modelo"
 }

@@ -1,7 +1,7 @@
 /** Runs in either the Chrome fixture page or Firefox's real extension sidebar. */
 export async function runToolCollapseProbe({ scope = window, toolCount = 45, footer = false } = {}) {
   const doc = scope.document;
-  const bench = scope.qingzhouConversationBenchmark;
+  const bench = scope.zuriConversationBenchmark;
   const frame = () => new Promise(resolve => scope.requestAnimationFrame(resolve));
   const settle = async () => { for (let index = 0; index < 20; index += 1) await frame(); };
   const sessionId = "short-collapse-session";

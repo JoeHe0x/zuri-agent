@@ -112,7 +112,7 @@ async function stopCaseRecording() {
   const mimeType = recorder.mimeType || "video/webm";
   const blob = new Blob(caseRecordingChunks, { type: mimeType });
   const format = caseRecordingFormatFromMimeType(mimeType);
-  const filename = `qingzhou-case-${caseRecordingTimestamp(new Date())}.${format.extension}`;
+  const filename = `zuri-case-${caseRecordingTimestamp(new Date())}.${format.extension}`;
   downloadCaseRecordingBlob(blob, filename);
   const result = {
     filename,

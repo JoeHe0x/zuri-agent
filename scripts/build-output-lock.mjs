@@ -16,7 +16,7 @@ export class BuildOutputLockedError extends Error {
 /** Publish a complete owner atomically; recovery and release can only remove that owner's file. */
 export async function acquireBuildOutput(options, { watch = false } = {}) {
   const { outputDir, sourceDir, mode = "development", product, bundle = mode === "production", debugMaps = false } = options;
-  const lock = resolve(dirname(outputDir), `.${basename(outputDir)}.qingzhou-build-lock`);
+  const lock = resolve(dirname(outputDir), `.${basename(outputDir)}.zuri-build-lock`);
   const owner = {
     pid: process.pid, token: randomUUID(), watch,
     launcherPid: watch ? options.launcherPid : undefined,

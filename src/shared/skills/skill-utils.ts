@@ -6,7 +6,7 @@ export interface SkillResource extends Data {
   path: string; type: string; title: string; description: string;
   content?: string; encoding?: string; mimeType?: string; size?: number;
 }
-export interface SkillMetadata extends Data { qingzhou?: Data }
+export interface SkillMetadata extends Data { zuri?: Data }
 export interface SkillRecord extends Data {
   builtin?: unknown; readOnly?: unknown; source?: unknown;
   name: string; displayName: string; description: string; content: string; metadata: SkillMetadata;
@@ -20,9 +20,9 @@ const objectInput = (value: unknown): Data => value && typeof value === "object"
 export const SKILL_SCOPE_GLOBAL = "global";
 export const SKILL_SCOPE_SITE = "site";
 export const SKILL_SCOPE_RESIDENT = "resident";
-export const QINGZHOU_SKILL_FORMAT = "qingzhou.skill";
-export const QINGZHOU_SKILL_SCHEMA_VERSION = 2;
-export const QINGZHOU_SKILL_METADATA_KEY = "qingzhou";
+export const ZURI_SKILL_FORMAT = "zuri.skill";
+export const ZURI_SKILL_SCHEMA_VERSION = 2;
+export const ZURI_SKILL_METADATA_KEY = "zuri";
 export const SKILL_RESOURCE_ENCODING_BASE64 = "base64";
 
 const SKILL_DOCUMENT_MIME_BY_EXTENSION: Readonly<Record<string, string>> = Object.freeze({
@@ -65,8 +65,8 @@ export function normalizeSkill(input: unknown = {}): SkillRecord {
 export function normalizeModernSkill(skill: unknown = {}) {
   return normalizeSkill({
     ...objectInput(skill),
-    format: QINGZHOU_SKILL_FORMAT,
-    schemaVersion: QINGZHOU_SKILL_SCHEMA_VERSION,
+    format: ZURI_SKILL_FORMAT,
+    schemaVersion: ZURI_SKILL_SCHEMA_VERSION,
   });
 }
 
@@ -88,10 +88,10 @@ export function toAgentSkillName(value: unknown = "", fallback = "skill") {
 
 export function getSkillDisplayName(skill: Data = {}) {
   const metadata = normalizeSkillMetadata(skill.metadata);
-  const qingzhou = metadata[QINGZHOU_SKILL_METADATA_KEY] || {};
+  const zuri = metadata[ZURI_SKILL_METADATA_KEY] || {};
   return String(
     metadata.displayName
-      || qingzhou.displayName
+      || zuri.displayName
       || skill.displayName
       || skill.name
       || "",
@@ -128,15 +128,15 @@ export function normalizeSkillLookup(value: unknown = "") {
 
 export function normalizeSkillMetadata(value: unknown = {}): SkillMetadata {
   const metadata: SkillMetadata = clonePlainObject(value);
-  const qingzhou = clonePlainObject(metadata[QINGZHOU_SKILL_METADATA_KEY]);
-  if (Object.keys(qingzhou).length) metadata[QINGZHOU_SKILL_METADATA_KEY] = qingzhou;
+  const zuri = clonePlainObject(metadata[ZURI_SKILL_METADATA_KEY]);
+  if (Object.keys(zuri).length) metadata[ZURI_SKILL_METADATA_KEY] = zuri;
   return metadata;
 }
 
 export function isModernSkillRecord(skill: unknown = {}) {
   const normalized = normalizeSkill(skill);
-  return normalized.format === QINGZHOU_SKILL_FORMAT
-    && normalized.schemaVersion >= QINGZHOU_SKILL_SCHEMA_VERSION;
+  return normalized.format === ZURI_SKILL_FORMAT
+    && normalized.schemaVersion >= ZURI_SKILL_SCHEMA_VERSION;
 }
 
 export function modernSkillValuesFromRecord(skills: Data = {}) {
@@ -253,7 +253,7 @@ function normalizeSkillIdentity(skill: Data = {}, metadata: SkillMetadata = {}) 
   const rawName = String(skill.name || "").trim();
   const rawDisplayName = String(
     metadata.displayName
-      || metadata[QINGZHOU_SKILL_METADATA_KEY]?.displayName
+      || metadata[ZURI_SKILL_METADATA_KEY]?.displayName
       || skill.displayName
       || "",
   ).trim();
@@ -261,10 +261,10 @@ function normalizeSkillIdentity(skill: Data = {}, metadata: SkillMetadata = {}) 
   const name = basis ? (isValidAgentSkillName(basis) ? basis : toAgentSkillName(basis)) : "";
   const displayName = rawDisplayName || (rawName && rawName !== name ? rawName : name);
   const nextMetadata = normalizeSkillMetadata(metadata);
-  if (nextMetadata[QINGZHOU_SKILL_METADATA_KEY]?.displayName) {
-    delete nextMetadata[QINGZHOU_SKILL_METADATA_KEY].displayName;
-    if (!Object.keys(nextMetadata[QINGZHOU_SKILL_METADATA_KEY]).length) {
-      delete nextMetadata[QINGZHOU_SKILL_METADATA_KEY];
+  if (nextMetadata[ZURI_SKILL_METADATA_KEY]?.displayName) {
+    delete nextMetadata[ZURI_SKILL_METADATA_KEY].displayName;
+    if (!Object.keys(nextMetadata[ZURI_SKILL_METADATA_KEY]).length) {
+      delete nextMetadata[ZURI_SKILL_METADATA_KEY];
     }
   }
   if (displayName && displayName !== name) {

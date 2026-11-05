@@ -142,7 +142,7 @@ export function createDataGridColumns(options: DataGridColumnOptions) {
           </svg>
         </span>
         <label class="data-column-visible-toggle">
-          <input class="qz-checkbox" type="checkbox" value="${escapeHtmlAttribute(column)}" ${visibleDataColumns.has(column) ? "checked" : ""} ${renaming ? "disabled" : ""}>
+          <input class="zuri-checkbox" type="checkbox" value="${escapeHtmlAttribute(column)}" ${visibleDataColumns.has(column) ? "checked" : ""} ${renaming ? "disabled" : ""}>
           ${renderDataColumnOptionName(column)}
         </label>
         ${renderDataColumnOptionActions(column)}
@@ -164,7 +164,7 @@ export function createDataGridColumns(options: DataGridColumnOptions) {
     }
     return `
       <input
-        class="qz-field qz-field--sm data-column-rename-input"
+        class="zuri-field zuri-field--sm data-column-rename-input"
         data-column-rename-input
         data-column-rename-from="${escapeHtmlAttribute(column)}"
         value="${escapeHtmlAttribute(column)}"
@@ -179,12 +179,12 @@ export function createDataGridColumns(options: DataGridColumnOptions) {
     if (dataColumnRenameField === column) {
       return `
         <span class="data-column-option-actions" aria-label="${escapeHtmlAttribute(t("renameColumnActions", { name: column }))}">
-          <button type="button" class="qz-icon-btn qz-icon-btn--xs confirm" data-column-action="rename-commit" data-column="${escapeHtmlAttribute(column)}" title="${escapeHtmlAttribute(t("confirmRename"))}" aria-label="${escapeHtmlAttribute(t("confirmRename"))}">
+          <button type="button" class="zuri-icon-btn zuri-icon-btn--xs confirm" data-column-action="rename-commit" data-column="${escapeHtmlAttribute(column)}" title="${escapeHtmlAttribute(t("confirmRename"))}" aria-label="${escapeHtmlAttribute(t("confirmRename"))}">
             <svg viewBox="0 0 16 16" fill="none" aria-hidden="true">
               <path d="M3.2 8.3 6.4 11.4 12.9 4.6" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
           </button>
-          <button type="button" class="qz-icon-btn qz-icon-btn--xs" data-column-action="rename-cancel" data-column="${escapeHtmlAttribute(column)}" title="${escapeHtmlAttribute(t("cancelRename"))}" aria-label="${escapeHtmlAttribute(t("cancelRename"))}">
+          <button type="button" class="zuri-icon-btn zuri-icon-btn--xs" data-column-action="rename-cancel" data-column="${escapeHtmlAttribute(column)}" title="${escapeHtmlAttribute(t("cancelRename"))}" aria-label="${escapeHtmlAttribute(t("cancelRename"))}">
             <svg viewBox="0 0 16 16" fill="none" aria-hidden="true">
               <path d="M4.6 4.6 11.4 11.4M11.4 4.6 4.6 11.4" stroke="currentColor" stroke-width="1.55" stroke-linecap="round"/>
             </svg>
@@ -194,12 +194,12 @@ export function createDataGridColumns(options: DataGridColumnOptions) {
     }
     return `
       <span class="data-column-option-actions" aria-label="${escapeHtmlAttribute(t("columnActions", { name: column }))}">
-        <button type="button" class="qz-icon-btn qz-icon-btn--xs" data-column-action="rename" data-column="${escapeHtmlAttribute(column)}" title="${escapeHtmlAttribute(t("renameColumn"))}" aria-label="${escapeHtmlAttribute(t("renameColumn"))}">
+        <button type="button" class="zuri-icon-btn zuri-icon-btn--xs" data-column-action="rename" data-column="${escapeHtmlAttribute(column)}" title="${escapeHtmlAttribute(t("renameColumn"))}" aria-label="${escapeHtmlAttribute(t("renameColumn"))}">
           <svg viewBox="0 0 16 16" fill="none" aria-hidden="true">
             <path d="M9.9 3.1 12.9 6.1M2.8 10.6 2.4 13.6 5.4 13.2 13.1 5.5a2.1 2.1 0 0 0-3-3L2.8 10.6Z" stroke="currentColor" stroke-width="1.45" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
         </button>
-        <button type="button" class="qz-icon-btn qz-icon-btn--xs qz-icon-btn--danger " data-column-action="delete" data-column="${escapeHtmlAttribute(column)}" title="${escapeHtmlAttribute(t("deleteColumn"))}" aria-label="${escapeHtmlAttribute(t("deleteColumn"))}">
+        <button type="button" class="zuri-icon-btn zuri-icon-btn--xs zuri-icon-btn--danger " data-column-action="delete" data-column="${escapeHtmlAttribute(column)}" title="${escapeHtmlAttribute(t("deleteColumn"))}" aria-label="${escapeHtmlAttribute(t("deleteColumn"))}">
           <svg viewBox="0 0 16 16" fill="none" aria-hidden="true">
             <path d="M2.9 4.4h10.2M6.4 2.8h3.2M5 4.4l.5 8.1c.04.7.55 1.2 1.25 1.2h2.5c.7 0 1.21-.5 1.25-1.2l.5-8.1M6.9 7.1v3.7M9.1 7.1v3.7" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
@@ -211,7 +211,7 @@ export function createDataGridColumns(options: DataGridColumnOptions) {
   function renderDataColumnAddAction() {
     if (!state.currentDataTable || isCurrentImageCollectionTable()) return "";
     return `
-      <button type="button" class="qz-btn qz-btn--secondary qz-btn--sm data-column-add-btn" data-column-add title="${escapeHtmlAttribute(t("addColumn"))}">
+      <button type="button" class="zuri-btn zuri-btn--secondary zuri-btn--sm data-column-add-btn" data-column-add title="${escapeHtmlAttribute(t("addColumn"))}">
         <span aria-hidden="true">+</span>
         <span>${escapeHtml(t("addColumn"))}</span>
       </button>

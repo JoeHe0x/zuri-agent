@@ -147,8 +147,8 @@ async function runComparison(output, fixtures) {
         const child = spawnSync(process.execPath, ["--import", "tsx", "--import", PRELOAD, driver,
           "--mode", mode, "--json", "--color-scheme", profile.colorScheme, "--artifact-dir", dir, canonical], {
           cwd: root, encoding: "utf8", timeout: 180_000, maxBuffer: 32 * 1024 * 1024,
-          env: { ...process.env, CHROME_EXECUTABLE: plan.executable, QZ_COMPARISON_DRIVER: driver,
-            QZ_COMPARISON_TIME: FIXED_TIME, QINGZHOU_TEST_EXTENSION_DIR: currentExtension,
+          env: { ...process.env, CHROME_EXECUTABLE: plan.executable, ZURI_COMPARISON_DRIVER: driver,
+            ZURI_COMPARISON_TIME: FIXED_TIME, ZURI_TEST_EXTENSION_DIR: currentExtension,
             CONVERSATION_BENCH_WIDTH: String(profile.width), CONVERSATION_BENCH_HEIGHT: String(profile.height) },
         });
         writeFileSync(join(dir, "stdout.log"), child.stdout || "");
@@ -202,7 +202,7 @@ export function writeReport(output, plan, results, planned) {
     definitions: plan.definitions, results };
   save(join(output, "comparison.json"), report);
   const cards = results.map(item => `<article><h2>${html(`${labels.get(item.id)} / ${item.profile} / ${item.mode} / ${item.position}`)}</h2><p>${html(item.id)} · ${item.status} · AE ${item.pixel.differentPixels ?? "unavailable"} · ${(100 * (item.pixel.ratio ?? 1)).toFixed(4)}% pixels differ · scroll ${html(JSON.stringify(item.scroll))}</p><div>${["before", "after", "diff"].map(key => `<figure><figcaption>${key}</figcaption><a href="${html(item[key])}"><img loading="lazy" src="${html(item[key])}" alt="${key}"></a></figure>`).join("")}</div></article>`).join("\n");
-  writeFileSync(join(output, "index.html"), `<!doctype html><meta charset="utf-8"><title>Qingzhou visual comparison</title><style>body{font:14px system-ui;margin:24px;background:#eee;color:#222}article{background:white;padding:16px;margin:20px 0}article>div{display:flex;gap:12px}figure{margin:0;flex:1;min-width:0}img{width:100%;height:auto}h2{font-size:16px}</style><h1>Same-transcript visual comparison</h1><p>Baseline ${html(plan.baselineCommit)} · Chromium ${html(plan.browser.browserVersion)} · ${passed}/${planned} screenshots within 0.1% AE · pixel consistency ${(100 * report.pixelConsistency).toFixed(4)}% · ${report.uniqueViewPairs} unique pairs.</p><p>Same transcript and wall clock; no masked regions. Short transcripts may repeat top/middle/bottom. Missing or failed renders remain in the denominator. Metrics measure pixel agreement, not task success or a perceptual score.</p>${cards}`);
+  writeFileSync(join(output, "index.html"), `<!doctype html><meta charset="utf-8"><title>Zuri visual comparison</title><style>body{font:14px system-ui;margin:24px;background:#eee;color:#222}article{background:white;padding:16px;margin:20px 0}article>div{display:flex;gap:12px}figure{margin:0;flex:1;min-width:0}img{width:100%;height:auto}h2{font-size:16px}</style><h1>Same-transcript visual comparison</h1><p>Baseline ${html(plan.baselineCommit)} · Chromium ${html(plan.browser.browserVersion)} · ${passed}/${planned} screenshots within 0.1% AE · pixel consistency ${(100 * report.pixelConsistency).toFixed(4)}% · ${report.uniqueViewPairs} unique pairs.</p><p>Same transcript and wall clock; no masked regions. Short transcripts may repeat top/middle/bottom. Missing or failed renders remain in the denominator. Metrics measure pixel agreement, not task success or a perceptual score.</p>${cards}`);
   return report;
 }
 

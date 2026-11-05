@@ -59,7 +59,7 @@ if (values.baseline) {
 const browser = await chromium.launch({ headless: true });
 let blockedRequests = 0;
 const report = {
-  schema: "qingzhou.article-extraction-offline-smoke.v1",
+  schema: "zuri.article-extraction-offline-smoke.v1",
   scope: "Synthetic correctness and timing smoke; not a real-world corpus quality score or a performance budget.",
   environment: { node: process.version, chromium: browser.version(), os: platform(), arch: arch(), cpu: cpus()[0]?.model },
   measurement: { warmups, samples, methods: ["extract", "readArticle"], unit: "ms", includes: "In-page extraction only; readArticle also includes serialization. Build, injection, DOM setup and protocol transfer are excluded." },
@@ -101,7 +101,7 @@ try {
           const { elapsed, result } = await run.page.evaluate(async method => {
             const started = performance.now();
             const value = method === "extract"
-              ? globalThis.QingzhouArticleExtractor.extract(document, { complete: true })
+              ? globalThis.ZuriArticleExtractor.extract(document, { complete: true })
               : await globalThis.__offlineReadArticle();
             const elapsed = performance.now() - started;
             const result = method === "extract" && value

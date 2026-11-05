@@ -1,7 +1,7 @@
 import { expect, test } from "./fixtures.mjs";
 import { ensureCapabilityExampleExtension, resolveTestAsset } from "../support/extension-build.mjs";
 
-test.use({ viewport: { width: 760, height: 600 }, video: process.env.QINGZHOU_RECORD_DEMO ? "on" : "off", launchOptions: { slowMo: process.env.QINGZHOU_RECORD_DEMO ? 400 : 0 } });
+test.use({ viewport: { width: 760, height: 600 }, video: process.env.ZURI_RECORD_DEMO ? "on" : "off", launchOptions: { slowMo: process.env.ZURI_RECORD_DEMO ? 400 : 0 } });
 
 test.beforeEach(async ({ page }) => {
   const extensionDir = await ensureCapabilityExampleExtension();

@@ -22,9 +22,9 @@ export type SessionExchangePayload = ReturnType<typeof normalizeSessionExchangeP
 export interface PortableSessionTab { url: string; title: string; working: boolean }
 const asRecord = (value: unknown): Record<string, unknown> => value && typeof value === "object" ? value as Record<string, unknown> : {};
 
-export const SESSION_EXCHANGE_FORMAT = "qingzhou.session";
+export const SESSION_EXCHANGE_FORMAT = "zuri.session";
 export const SESSION_EXCHANGE_VERSION = 1;
-export const SESSION_EXCHANGE_SCRIPT_ID = "qingzhou-session-exchange";
+export const SESSION_EXCHANGE_SCRIPT_ID = "zuri-session-exchange";
 export const SESSION_EXCHANGE_IMPORT_CAPSULE_REASON = "session_exchange_import";
 
 const SESSION_EXCHANGE_TAB_URL_LIMIT = 64 * 1024;
@@ -37,7 +37,7 @@ const SESSION_EXCHANGE_EXPLICIT_NAVIGATION_TOOLS = new Set([
 
 const SESSION_EXCHANGE_IMPORT_CAPSULE_TEXT = [
   "[外部会话 capsule]",
-  "本对话由外部导出的轻舟会话加载。原环境中的技能、工具、数据表、图集、文件、下载记录和浏览器页面可能在当前环境中不存在或已经变化。继续任务时请以当前可用能力和实际资源为准；遇到缺失时灵活调整方案，不要假设历史资源仍可访问。",
+  "本对话由外部导出的Zuri会话加载。原环境中的技能、工具、数据表、图集、文件、下载记录和浏览器页面可能在当前环境中不存在或已经变化。继续任务时请以当前可用能力和实际资源为准；遇到缺失时灵活调整方案，不要假设历史资源仍可访问。",
 ].join("\n");
 
 export function createSessionExchangePayload({
@@ -76,7 +76,7 @@ export function createSessionExchangePayload({
     version: SESSION_EXCHANGE_VERSION,
     exportedAt: String(exportedAt || nowBeijingDateTime()),
     app: {
-      name: "轻舟",
+      name: "Zuri",
       version: String(appVersion || ""),
     },
     source: {
@@ -139,7 +139,7 @@ export function normalizeSessionExchangePayload(input: unknown) {
     version: SESSION_EXCHANGE_VERSION,
     exportedAt: String(value.exportedAt || ""),
     app: {
-      name: "轻舟",
+      name: "Zuri",
       version: String(asRecord(value.app).version || ""),
     },
     source: {

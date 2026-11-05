@@ -18,8 +18,8 @@ const scenarios = [
 
 export async function runFirefoxTableRevealJourneys({ session, sidebar, call, finish, output, report, save }) {
   const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
-  const selected = scenarios.filter(scenario => !process.env.QINGZHOU_LIVE_UI_CASES
-    || process.env.QINGZHOU_LIVE_UI_CASES.split(',').includes(scenario.id));
+  const selected = scenarios.filter(scenario => !process.env.ZURI_LIVE_UI_CASES
+    || process.env.ZURI_LIVE_UI_CASES.split(',').includes(scenario.id));
   assert.ok(selected.length, 'At least one Firefox journey must be selected');
   for (const scenario of selected) {
     const record = report.scenarios[scenario.id] = { ok: false, ...scenario, interactions: [] };

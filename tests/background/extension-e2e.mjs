@@ -26,7 +26,7 @@ if (workerRestartOnly && !["worker_restart", "worker_restart_images", "worker_re
   throw new Error("Supported scenarios: worker_restart, worker_restart_images, worker_restart_errors, worker_restart_checkpoint, worker_restart_compact, reset_reopen, uid_batch");
 }
 const extensionPath = await ensureTestExtension({
-  extensionDir: process.env.QINGZHOU_EXTENSION_PATH || process.env.QINGZHOU_TEST_EXTENSION_DIR,
+  extensionDir: process.env.ZURI_EXTENSION_PATH || process.env.ZURI_TEST_EXTENSION_DIR,
 });
 const { chromium } = await import("playwright");
 const executablePath = findChromeExecutable(chromium.executablePath());
@@ -34,7 +34,7 @@ if (!executablePath) throw new Error("Chrome executable not found");
 
 const provider = await createProviderServer();
 const gitRepository = await createGitRepositoryServer();
-const profile = mkdtempSync(join(tmpdir(), "qingzhou-background-e2e-"));
+const profile = mkdtempSync(join(tmpdir(), "zuri-background-e2e-"));
 let context;
 let page;
 const pageErrors = [];
@@ -70,7 +70,7 @@ try {
     page = await automationAlarmRunsWithoutSidepanel(page, context, extensionId, provider);
     await runningAutomationCanBeDeleted(page, provider);
 
-    const attachmentFixtureBase64 = process.env.QINGZHOU_ATTACHMENT_E2E_BASE64
+    const attachmentFixtureBase64 = process.env.ZURI_ATTACHMENT_E2E_BASE64
       || Buffer.from(await createDocumentBytes({
         format: "xlsx",
         title: "Attachment E2E",
@@ -115,7 +115,7 @@ try {
     providerFaultCases: workerRestartOnly ? 0 : 16,
   }));
 } catch (error) {
-  const events = await page?.evaluate(() => window.__qzBackgroundE2E?.events?.() || []).catch(() => []);
+  const events = await page?.evaluate(() => window.__zuriBackgroundE2E?.events?.() || []).catch(() => []);
   const sidepanelState = await page?.evaluate(() => ({
     booting: document.querySelector("#app")?.hasAttribute("data-workspace-booting"),
     fallback: document.querySelector("#app")?.getAttribute("data-workspace-boot-fallback") || "",
@@ -152,23 +152,23 @@ async function runProfileInitializationFailureIsVisible(page, browserContext) {
   const sessionId = await createSession(page, "Run profile initialization failure");
   const worker = browserContext.serviceWorkers().find(worker => worker.url().startsWith("chrome-extension://"));
   assert.ok(worker);
-  const failure = "QZ run profile initialization failed: platform information unavailable";
+  const failure = "ZURI run profile initialization failed: platform information unavailable";
   try {
-    assert.match(await runPrompt(page, sessionId, "QZ_E2E_BASIC"), /QZ_E2E_BASIC_OK/);
+    assert.match(await runPrompt(page, sessionId, "ZURI_E2E_BASIC"), /ZURI_E2E_BASIC_OK/);
     await switchUiToSession(page, sessionId);
-    await page.waitForFunction(() => document.querySelector("#messages")?.innerText.includes("QZ_E2E_BASIC_OK"));
+    await page.waitForFunction(() => document.querySelector("#messages")?.innerText.includes("ZURI_E2E_BASIC_OK"));
     // Fail one native dependency of _buildRunProfile, before Agent can emit agent_start.
     await worker.evaluate(message => {
       const original = chrome.runtime.getPlatformInfo;
       let entered;
-      globalThis.__qzRunProfileFault = {
+      globalThis.__zuriRunProfileFault = {
         entered: new Promise(resolve => { entered = resolve; }),
         restore: () => { chrome.runtime.getPlatformInfo = original; },
       };
       chrome.runtime.getPlatformInfo = () => {
         chrome.runtime.getPlatformInfo = original;
         return new Promise((_resolve, reject) => {
-          globalThis.__qzRunProfileFault.reject = () => reject(new Error(message));
+          globalThis.__zuriRunProfileFault.reject = () => reject(new Error(message));
           entered();
         });
       };
@@ -176,8 +176,8 @@ async function runProfileInitializationFailureIsVisible(page, browserContext) {
     const after = await eventCount(page);
     await submitComposerMessage(page, "Follow up after the completed answer");
     const pending = await waitEvent(page, { type: "session_pending", sessionId }, after);
-    await worker.evaluate(() => globalThis.__qzRunProfileFault.entered);
-    await worker.evaluate(() => globalThis.__qzRunProfileFault.reject());
+    await worker.evaluate(() => globalThis.__zuriRunProfileFault.entered);
+    await worker.evaluate(() => globalThis.__zuriRunProfileFault.reject());
     const failed = await waitEvent(page, { type: "error", sessionId, runId: pending.runId }, after);
     await waitEvent(page, { type: "agent_end", sessionId, runId: pending.runId }, after);
     assert.equal(failed.message, failure);
@@ -187,24 +187,24 @@ async function runProfileInitializationFailureIsVisible(page, browserContext) {
     assert.equal(state.runtime?.reason, failure);
     await page.waitForFunction(message => [...document.querySelectorAll(".chat-error-card")]
       .some(card => card.textContent.includes(message)), failure, { timeout: 10_000 });
-    assert.match(await page.locator("#messages").innerText(), /QZ_E2E_BASIC_OK/);
+    assert.match(await page.locator("#messages").innerText(), /ZURI_E2E_BASIC_OK/);
     assert.equal(await page.locator("#status-bar").isVisible(), false);
     assert.equal(await page.locator("#input").isEditable(), true);
     const recoveryAfter = await eventCount(page);
-    await submitComposerMessage(page, "QZ_E2E_RECOVER");
+    await submitComposerMessage(page, "ZURI_E2E_RECOVER");
     const recovered = await waitEvent(page, { type: "agent_start", sessionId }, recoveryAfter);
     assert.notEqual(recovered.runId, pending.runId);
     await waitEvent(page, { type: "agent_end", sessionId, runId: recovered.runId }, recoveryAfter);
-    await page.waitForFunction(() => document.querySelector("#messages")?.innerText.includes("QZ_E2E_RECOVER_OK"));
+    await page.waitForFunction(() => document.querySelector("#messages")?.innerText.includes("ZURI_E2E_RECOVER_OK"));
     assert.equal((await request(page, "get_state", { sessionId }, "state")).status, "completed");
-    assert.match(await page.locator("#messages").innerText(), /QZ_E2E_BASIC_OK/);
+    assert.match(await page.locator("#messages").innerText(), /ZURI_E2E_BASIC_OK/);
     assert.equal(await page.locator("#input").isEditable(), true);
     console.log(JSON.stringify({ scenario: "run_profile_initialization_error_recovery", ok: true }));
   } finally {
     await worker.evaluate(() => {
-      globalThis.__qzRunProfileFault?.restore();
-      globalThis.__qzRunProfileFault?.reject?.();
-      delete globalThis.__qzRunProfileFault;
+      globalThis.__zuriRunProfileFault?.restore();
+      globalThis.__zuriRunProfileFault?.reject?.();
+      delete globalThis.__zuriRunProfileFault;
     });
     await deleteSession(page, sessionId);
   }
@@ -220,7 +220,7 @@ async function locationOnlyWhenRequested(page) {
   });
   const sessionId = await createSession(page, "Location consent");
   await switchUiToSession(page, sessionId);
-  await page.locator("#input").fill("QZ_E2E_LOCATION");
+  await page.locator("#input").fill("ZURI_E2E_LOCATION");
   await page.locator("#input").press("Enter");
   await page.locator('.waiting-active [data-wait-action="continue"]').waitFor();
   assert.equal(await page.evaluate(() => window.__locationReads), 0);
@@ -246,7 +246,7 @@ async function waitForWorkspaceReady(page) {
 
 async function mcpOutputSchemaSurvivesExtensionCsp(page, providerServer) {
   const sessionId = await createSession(page, "MCP output schema under MV3 CSP");
-  assert.match(await runPrompt(page, sessionId, "QZ_E2E_MCP_OUTPUT_SCHEMA"), /QZ_E2E_MCP_OUTPUT_SCHEMA_OK/);
+  assert.match(await runPrompt(page, sessionId, "ZURI_E2E_MCP_OUTPUT_SCHEMA"), /ZURI_E2E_MCP_OUTPUT_SCHEMA_OK/);
   const events = await sessionEvents(page, sessionId);
   const toolResult = id => events.find(event => event.type === "tool_execution_end" && event.toolCallId === id);
   const inspected = toolResult("mcp_schema_inspect");
@@ -267,8 +267,8 @@ async function mcpOutputSchemaSurvivesExtensionCsp(page, providerServer) {
 async function screenActionFeedbackRoundTrip(page, browserContext, providerServer) {
   const sessionId = await createSession(page, "screen action feedback");
   const activeTabId = await page.evaluate(async () => (await chrome.tabs.query({ active: true, currentWindow: true }))[0]?.id);
-  const result = await runPrompt(page, sessionId, "QZ_E2E_SCREEN_ACTION");
-  assert.match(result, /QZ_E2E_SCREEN_ACTION_OK/);
+  const result = await runPrompt(page, sessionId, "ZURI_E2E_SCREEN_ACTION");
+  assert.match(result, /ZURI_E2E_SCREEN_ACTION_OK/);
 
   const tabs = await page.evaluate(() => chrome.tabs.query({}));
   const targetTab = tabs.find(tab => tab.url === providerServer.screenActionUrl);
@@ -303,7 +303,7 @@ async function screenActionFeedbackRoundTrip(page, browserContext, providerServe
   assert.equal(observedState.dragReleased, true);
   assert.equal(observedState.dropped, true);
 
-  const events = await page.evaluate(() => window.__qzBackgroundE2E.events());
+  const events = await page.evaluate(() => window.__zuriBackgroundE2E.events());
   const screenshotEnd = events.find(event => (
     event?.type === "tool_execution_end"
     && event?.sessionId === sessionId
@@ -369,7 +369,7 @@ async function screenActionFeedbackRoundTrip(page, browserContext, providerServe
   assert.equal(macroEnd?.result?._display, undefined, "run_script should not synthesize an action animation");
   assert.match(macroEnd?.result?._image, /^data:image\/jpeg;base64,/);
   const feedbackPixels = await page.evaluate(async id => {
-    const event = window.__qzBackgroundE2E.events().find(item => (
+    const event = window.__zuriBackgroundE2E.events().find(item => (
       item?.type === "tool_execution_end"
       && item?.sessionId === id
       && item?.toolName === "run_script"
@@ -396,7 +396,7 @@ async function screenActionFeedbackRoundTrip(page, browserContext, providerServe
   assert.ok(feedbackPixels.red < 20, `model feedback should not contain a burned-in red position marker (${feedbackPixels.red})`);
   assert.ok(feedbackPixels.green > 1000, `run_script should promote the final explicit screenshot after the green hover/drop states (${feedbackPixels.green})`);
 
-  const requests = providerServer.requests.filter(item => item.marker === "QZ_E2E_SCREEN_ACTION");
+  const requests = providerServer.requests.filter(item => item.marker === "ZURI_E2E_SCREEN_ACTION");
   assert.equal(requests.length, 11, "one run should execute the visual macro and seven further screenshot observations");
   assert.equal(requests[2].imageCount, 1, "the actionable screenshot should reach the model");
   assert.equal(requests[3].imageCount, 1, "the batch's last explicit observation should return to the model");
@@ -423,14 +423,14 @@ async function uidBatchCollectAcrossTabsHonorsDocumentIdentity(page, browserCont
   const worker = browserContext.serviceWorkers().find(worker => worker.url().startsWith("chrome-extension://"));
   assert.ok(worker);
   try {
-    await send(page, "prompt", { sessionId, text: "QZ_E2E_TABUIDS", clientMessageId: id("uid-batch") });
+    await send(page, "prompt", { sessionId, text: "ZURI_E2E_TABUIDS", clientMessageId: id("uid-batch") });
     const started = await waitEvent(page, { type: "agent_start", sessionId }, after, 20_000);
 
     // The provider gates the third request until the pages change below.
     const collectRequest = await (async () => {
       const deadline = Date.now() + 60_000;
       while (Date.now() < deadline) {
-        const match = providerServer.requests.find(item => item.marker === "QZ_E2E_TABUIDS" && item.count === 3);
+        const match = providerServer.requests.find(item => item.marker === "ZURI_E2E_TABUIDS" && item.count === 3);
         if (match) return match;
         await page.waitForTimeout(50);
       }
@@ -467,7 +467,7 @@ async function uidBatchCollectAcrossTabsHonorsDocumentIdentity(page, browserCont
         return original.call(chrome.scripting, options);
       };
     }, collectRequest.uidBatch.a.tabId);
-    providerServer.release("QZ_E2E_TABUIDS_COLLECT");
+    providerServer.release("ZURI_E2E_TABUIDS_COLLECT");
     const seen = await worker.evaluate(async tabId => {
       const deadline = Date.now() + 15_000;
       while (Date.now() < deadline && (!globalThis.__uidBatchProbe.held || !globalThis.__uidBatchProbe.seen.includes(tabId))) {
@@ -480,7 +480,7 @@ async function uidBatchCollectAcrossTabsHonorsDocumentIdentity(page, browserCont
       "a second call on the held uid tab must wait for its lane");
     await worker.evaluate(() => globalThis.__uidBatchProbe.restore());
     await waitEvent(page, { type: "agent_end", sessionId, runId: started.runId }, after, 90_000);
-    assert.match(await latestAssistantText(page, sessionId), /QZ_E2E_TABUIDS_OK/);
+    assert.match(await latestAssistantText(page, sessionId), /ZURI_E2E_TABUIDS_OK/);
 
     const events = await sessionEvents(page, sessionId, after);
     const collectStart = variant => events.find(event => event.type === "tool_execution_start" && event.toolCallId === `uid_batch_collect_${variant}`);
@@ -522,7 +522,7 @@ async function uidBatchCollectAcrossTabsHonorsDocumentIdentity(page, browserCont
       ["/uid-batch/b-renamed", "/uid-batch/a"], "CSS uses the owned working tab while the uid retains its own tab");
   } finally {
     await worker.evaluate(() => globalThis.__uidBatchProbe?.restore()).catch(() => undefined);
-    providerServer.release("QZ_E2E_TABUIDS_COLLECT");
+    providerServer.release("ZURI_E2E_TABUIDS_COLLECT");
     const fixtureTabIds = await page.evaluate(async () => (
       (await chrome.tabs.query({})).filter(tab => String(tab.url || "").includes("/uid-batch/")).map(tab => tab.id)
     )).catch(() => []);
@@ -538,7 +538,7 @@ async function automationAlarmRunsWithoutSidepanel(currentPage, browserContext, 
   const saved = await request(currentPage, "save_automation", {
     automation: {
       title: "alarm without sidepanel",
-      instruction: "QZ_E2E_AUTOMATION",
+      instruction: "ZURI_E2E_AUTOMATION",
       schedule: { type: "once", runAt: new Date(fireAt).toISOString() },
       missedPolicy: "skip",
       notifyPolicy: "silent",
@@ -555,11 +555,11 @@ async function automationAlarmRunsWithoutSidepanel(currentPage, browserContext, 
   await currentPage.close();
 
   const deadline = Date.now() + 15_000;
-  while (providerServer.count("QZ_E2E_AUTOMATION") === 0 && Date.now() < deadline) {
+  while (providerServer.count("ZURI_E2E_AUTOMATION") === 0 && Date.now() < deadline) {
     await sleep(100);
   }
   assert.equal(
-    providerServer.count("QZ_E2E_AUTOMATION"),
+    providerServer.count("ZURI_E2E_AUTOMATION"),
     1,
     "a real Chrome alarm should launch the automation while no sidepanel page is open",
   );
@@ -584,7 +584,7 @@ async function automationAlarmRunsWithoutSidepanel(currentPage, browserContext, 
 }
 
 async function runningAutomationCanBeDeleted(page, providerServer) {
-  const marker = "QZ_E2E_DELETE_RUNNING_AUTOMATION";
+  const marker = "ZURI_E2E_DELETE_RUNNING_AUTOMATION";
   const saved = await request(page, "save_automation", {
     automation: {
       title: "delete while running",
@@ -665,7 +665,7 @@ async function composerDraftSurvivesActualSidepanelCloseAndResize(currentPage, b
 
 async function composerAttachmentsSurviveSessionSwitchAndSend(page, fixtureBase64, providerServer) {
   const historicalSessionId = await createSession(page, "attachment history");
-  await runPrompt(page, historicalSessionId, "QZ_E2E_ATTACHMENT_HISTORY_SEED");
+  await runPrompt(page, historicalSessionId, "ZURI_E2E_ATTACHMENT_HISTORY_SEED");
 
   await page.locator("#btn-new").click();
   await page.waitForFunction(() => (
@@ -683,9 +683,9 @@ async function composerAttachmentsSurviveSessionSwitchAndSend(page, fixtureBase6
   const created = await waitEvent(page, { type: "session_created" }, createdAfter, 20_000);
   const newSessionId = created.session?.id;
   assert.ok(newSessionId, "adding files in a new chat must create one real Session");
-  await page.locator("#input").fill("QZ_E2E_ATTACHMENT_NEW");
+  await page.locator("#input").fill("ZURI_E2E_ATTACHMENT_NEW");
   await assertComposerAttachments(page, {
-    text: "QZ_E2E_ATTACHMENT_NEW",
+    text: "ZURI_E2E_ATTACHMENT_NEW",
     imageName: "new-session-image.png",
     documentName: "new-session-document.xlsx",
   });
@@ -702,9 +702,9 @@ async function composerAttachmentsSurviveSessionSwitchAndSend(page, fixtureBase6
     imageName: "history-session-image.png",
     documentName: "history-session-document.xlsx",
   });
-  await page.locator("#input").fill("QZ_E2E_ATTACHMENT_HISTORY");
+  await page.locator("#input").fill("ZURI_E2E_ATTACHMENT_HISTORY");
   await assertComposerAttachments(page, {
-    text: "QZ_E2E_ATTACHMENT_HISTORY",
+    text: "ZURI_E2E_ATTACHMENT_HISTORY",
     imageName: "history-session-image.png",
     documentName: "history-session-document.xlsx",
   });
@@ -712,13 +712,13 @@ async function composerAttachmentsSurviveSessionSwitchAndSend(page, fixtureBase6
   for (let round = 0; round < 3; round += 1) {
     await switchUiToSession(page, newSessionId);
     await assertComposerAttachments(page, {
-      text: "QZ_E2E_ATTACHMENT_NEW",
+      text: "ZURI_E2E_ATTACHMENT_NEW",
       imageName: "new-session-image.png",
       documentName: "new-session-document.xlsx",
     });
     await switchUiToSession(page, historicalSessionId);
     await assertComposerAttachments(page, {
-      text: "QZ_E2E_ATTACHMENT_HISTORY",
+      text: "ZURI_E2E_ATTACHMENT_HISTORY",
       imageName: "history-session-image.png",
       documentName: "history-session-document.xlsx",
     });
@@ -734,14 +734,14 @@ async function composerAttachmentsSurviveSessionSwitchAndSend(page, fixtureBase6
   }
   assert.doesNotMatch(attachmentTrace.join("\n"), /真实后台解析/, "attachment trace must not include parsed file content");
 
-  await sendComposerAttachments(page, historicalSessionId, "QZ_E2E_ATTACHMENT_HISTORY", providerServer);
+  await sendComposerAttachments(page, historicalSessionId, "ZURI_E2E_ATTACHMENT_HISTORY", providerServer);
   await switchUiToSession(page, newSessionId);
   await assertComposerAttachments(page, {
-    text: "QZ_E2E_ATTACHMENT_NEW",
+    text: "ZURI_E2E_ATTACHMENT_NEW",
     imageName: "new-session-image.png",
     documentName: "new-session-document.xlsx",
   });
-  await sendComposerAttachments(page, newSessionId, "QZ_E2E_ATTACHMENT_NEW", providerServer);
+  await sendComposerAttachments(page, newSessionId, "ZURI_E2E_ATTACHMENT_NEW", providerServer);
 
   for (const sessionId of [historicalSessionId, newSessionId]) {
     await switchUiToSession(page, sessionId);
@@ -851,8 +851,8 @@ async function gitSkillSourceAuthenticatedArchive(page, repositoryServer) {
   const stored = await page.evaluate(async () => chrome.storage.local.get(["_skills", "_gitSkillSources"]));
   const skill = stored._skills?.["git-auth-e2e-skill"];
   const source = Object.values(stored._gitSkillSources || {})[0];
-  assert.equal(skill?.metadata?.qingzhou?.origin?.type, "git");
-  assert.equal(skill?.metadata?.qingzhou?.origin?.sourceId, source?.id);
+  assert.equal(skill?.metadata?.zuri?.origin?.type, "git");
+  assert.equal(skill?.metadata?.zuri?.origin?.sourceId, source?.id);
   assert.equal(source?.repositoryUrl, repositoryServer.rootUrl);
   assert.equal(source?.browseUrl, repositoryServer.repositoryUrl);
   assert.equal(source?.ref, "main");
@@ -891,7 +891,7 @@ async function gitSkillSourceAuthenticatedArchive(page, repositoryServer) {
   const detached = await page.evaluate(async () => {
     const { _skills: skills = {} } = await chrome.storage.local.get("_skills");
     const value = skills["git-auth-e2e-skill"];
-    return { content: value?.content, origin: value?.metadata?.qingzhou?.origin || null };
+    return { content: value?.content, origin: value?.metadata?.zuri?.origin || null };
   });
   assert.equal(detached.content, "# Locally modified before unbind");
   assert.equal(detached.origin, null);
@@ -927,7 +927,7 @@ async function skillResultSelectionRoundTrip(page, providerServer) {
   await page.emulateMedia({ colorScheme: "light" });
 
   for (const cancel of [false, true]) {
-    const marker = cancel ? "QZ_E2E_SELECTION_CANCEL" : "QZ_E2E_SELECTION_PICK";
+    const marker = cancel ? "ZURI_E2E_SELECTION_CANCEL" : "ZURI_E2E_SELECTION_PICK";
     const sessionId = await createSession(page, marker);
     await switchUiToSession(page, sessionId);
     const after = await eventCount(page);
@@ -947,18 +947,18 @@ async function skillResultSelectionRoundTrip(page, providerServer) {
     }
     const card = page.locator(`.waiting-active[data-wait-id="${waiting.waitId}"]`);
     await card.waitFor();
-    assert.deepEqual(await card.locator(".qz-choice-card input").evaluateAll(inputs => inputs.map(input => input.value)), candidateIds);
-    for (const image of await card.locator(".qz-choice-card-image").all()) {
+    assert.deepEqual(await card.locator(".zuri-choice-card input").evaluateAll(inputs => inputs.map(input => input.value)), candidateIds);
+    for (const image of await card.locator(".zuri-choice-card-image").all()) {
       await image.scrollIntoViewIfNeeded();
       await image.evaluate(element => element.decode());
     }
-    const rendered = await card.locator(".qz-choice-card").evaluateAll(cards => cards.map(element => {
+    const rendered = await card.locator(".zuri-choice-card").evaluateAll(cards => cards.map(element => {
       const image = element.querySelector("img");
       const rect = image.getBoundingClientRect();
       return {
-        title: element.querySelector(".qz-choice-card-title").textContent,
-        meta: [...element.querySelectorAll(".qz-choice-card-tag")].map(tag => tag.textContent),
-        url: element.querySelector(".qz-choice-card-source").href,
+        title: element.querySelector(".zuri-choice-card-title").textContent,
+        meta: [...element.querySelectorAll(".zuri-choice-card-tag")].map(tag => tag.textContent),
+        url: element.querySelector(".zuri-choice-card-source").href,
         decoded: image.complete && image.naturalWidth > 0,
         imageSize: [rect.width, rect.height],
         overflow: element.scrollWidth > element.clientWidth + 1,
@@ -1012,7 +1012,7 @@ async function skillResultSelectionRoundTrip(page, providerServer) {
       assert.equal(selection.selectedItems[0].company, "Harbor");
       assert.equal(selection.totalItems, 3);
       assert.equal(modelRequests.at(-1).selectionContainsUnselected, false, "unselected candidate data stays out of model context");
-      assert.match(await latestAssistantText(page, sessionId), /QZ_E2E_SELECTION_PICK_OK/);
+      assert.match(await latestAssistantText(page, sessionId), /ZURI_E2E_SELECTION_PICK_OK/);
       await page.screenshot({ path: join(evidenceDirectory, "submitted-light.png"), animations: "disabled" });
     }
     await deleteSession(page, sessionId);
@@ -1023,14 +1023,14 @@ async function skillResultSelectionRoundTrip(page, providerServer) {
 }
 
 async function uiComposerRoundTrip(page) {
-  await page.locator("#input").fill("QZ_E2E_UI");
+  await page.locator("#input").fill("ZURI_E2E_UI");
   await page.locator("#input").press("Enter");
-  await page.waitForFunction(() => document.querySelector("#messages")?.innerText?.includes("QZ_E2E_UI_OK"), null, {
+  await page.waitForFunction(() => document.querySelector("#messages")?.innerText?.includes("ZURI_E2E_UI_OK"), null, {
     timeout: 20_000,
   });
   const text = await page.locator("#messages").innerText();
-  assert.match(text, /QZ_E2E_UI/);
-  assert.match(text, /QZ_E2E_UI_OK/);
+  assert.match(text, /ZURI_E2E_UI/);
+  assert.match(text, /ZURI_E2E_UI_OK/);
 }
 
 async function manualCompactRendersLifecycleCard(page) {
@@ -1078,52 +1078,52 @@ async function manualCompactRendersLifecycleCard(page) {
 }
 
 async function queuedComposerBubbleUsesOutgoingMotion(page) {
-  await page.locator("#input").fill("QZ_QUEUE_ACTIVE");
+  await page.locator("#input").fill("ZURI_QUEUE_ACTIVE");
   await page.locator("#input").press("Enter");
   await page.locator("#btn-abort").waitFor({ state: "visible", timeout: 20_000 });
 
   await page.evaluate(() => {
-    window.__qzQueuedEntryMotion = null;
-    window.__qzQueuedEntryObserver?.disconnect?.();
+    window.__zuriQueuedEntryMotion = null;
+    window.__zuriQueuedEntryObserver?.disconnect?.();
     const messages = document.querySelector("#messages");
     const observer = new MutationObserver(() => {
       const message = [...messages.querySelectorAll(".msg-user")]
-        .find(element => element.textContent?.includes("QZ_QUEUE_NEXT"));
+        .find(element => element.textContent?.includes("ZURI_QUEUE_NEXT"));
       if (!message) return;
       const content = message.querySelector(".msg-content");
-      window.__qzQueuedEntryMotion = {
+      window.__zuriQueuedEntryMotion = {
         armed: message.classList.contains("msg-user-outgoing-enter"),
         animationName: content ? getComputedStyle(content).animationName : "",
       };
       observer.disconnect();
     });
     observer.observe(messages, { childList: true, subtree: true });
-    window.__qzQueuedEntryObserver = observer;
+    window.__zuriQueuedEntryObserver = observer;
   });
 
-  await page.locator("#input").fill("QZ_QUEUE_NEXT");
+  await page.locator("#input").fill("ZURI_QUEUE_NEXT");
   await page.locator("#input").press("Enter");
-  await page.waitForFunction(() => document.querySelector("#queued-followups")?.innerText?.includes("QZ_QUEUE_NEXT"), null, {
+  await page.waitForFunction(() => document.querySelector("#queued-followups")?.innerText?.includes("ZURI_QUEUE_NEXT"), null, {
     timeout: 10_000,
   });
-  await page.waitForFunction(() => window.__qzQueuedEntryMotion !== null, null, { timeout: 20_000 });
-  const motion = await page.evaluate(() => window.__qzQueuedEntryMotion);
+  await page.waitForFunction(() => window.__zuriQueuedEntryMotion !== null, null, { timeout: 20_000 });
+  const motion = await page.evaluate(() => window.__zuriQueuedEntryMotion);
   assert.deepEqual(motion, { armed: true, animationName: "user-message-sail-in" });
-  await page.waitForFunction(() => document.querySelector("#messages")?.innerText?.includes("QZ_QUEUE_NEXT_OK"), null, {
+  await page.waitForFunction(() => document.querySelector("#messages")?.innerText?.includes("ZURI_QUEUE_NEXT_OK"), null, {
     timeout: 20_000,
   });
 }
 
 async function basicAndRetryScenarios(page, providerServer) {
   const basic = await createSession(page, "deterministic basic");
-  const basicResult = await runPrompt(page, basic, "QZ_E2E_BASIC");
-  assert.match(basicResult, /QZ_E2E_BASIC_OK/);
+  const basicResult = await runPrompt(page, basic, "ZURI_E2E_BASIC");
+  assert.match(basicResult, /ZURI_E2E_BASIC_OK/);
   await deleteSession(page, basic);
 
   const retry = await createSession(page, "deterministic retry");
-  const retryResult = await runPrompt(page, retry, "QZ_E2E_RETRY");
-  assert.match(retryResult, /QZ_E2E_RETRY_OK/);
-  assert.equal(providerServer.count("QZ_E2E_RETRY"), 2, "503 must produce exactly one retry");
+  const retryResult = await runPrompt(page, retry, "ZURI_E2E_RETRY");
+  assert.match(retryResult, /ZURI_E2E_RETRY_OK/);
+  assert.equal(providerServer.count("ZURI_E2E_RETRY"), 2, "503 must produce exactly one retry");
   await deleteSession(page, retry);
 }
 
@@ -1134,19 +1134,19 @@ async function steeringReentersTheActiveRun(page, providerServer) {
   const after = await eventCount(page);
   await send(page, "prompt", {
     sessionId,
-    text: "QZ_E2E_STEER_ACTIVE",
+    text: "ZURI_E2E_STEER_ACTIVE",
     clientMessageId: id("steering-active"),
   });
   const activeRun = await waitEvent(page, { type: "agent_start", sessionId }, after, 20_000);
 
   await send(page, "follow_up", {
     sessionId,
-    text: "QZ_E2E_STEER_ONE",
+    text: "ZURI_E2E_STEER_ONE",
     clientMessageId: firstClientMessageId,
   });
   await send(page, "follow_up", {
     sessionId,
-    text: "QZ_E2E_STEER_TWO",
+    text: "ZURI_E2E_STEER_TWO",
     clientMessageId: secondClientMessageId,
   });
   await waitForQueueCount(page, sessionId, 2, after);
@@ -1171,12 +1171,12 @@ async function steeringReentersTheActiveRun(page, providerServer) {
   const history = await historyMessages(page, sessionId);
   assert.deepEqual(
     history
-      .filter(message => message.role === "user" && /QZ_E2E_STEER_(?:ONE|TWO)/u.test(messageText(message)))
+      .filter(message => message.role === "user" && /ZURI_E2E_STEER_(?:ONE|TWO)/u.test(messageText(message)))
       .map(message => messageText(message)),
-    ["QZ_E2E_STEER_ONE", "QZ_E2E_STEER_TWO"],
+    ["ZURI_E2E_STEER_ONE", "ZURI_E2E_STEER_TWO"],
   );
   const events = await page.evaluate(({ sessionId, after }) => (
-    window.__qzBackgroundE2E.events().slice(after).filter(event => event?.sessionId === sessionId)
+    window.__zuriBackgroundE2E.events().slice(after).filter(event => event?.sessionId === sessionId)
   ), { sessionId, after });
   const acceptedSteering = events.filter(event => (
     event.type === "message_start"
@@ -1205,11 +1205,11 @@ async function steeringReentersTheActiveRun(page, providerServer) {
   assert.ok(acceptedSteering.every(event => event.runId === activeRun.runId), "steering must stay inside the active run");
   assert.equal(events.filter(event => event.type === "agent_start").length, 1, "steering must not open follow-up runs");
 
-  const steeredRequest = providerServer.requests.find(item => item.marker === "QZ_E2E_STEER_TWO");
+  const steeredRequest = providerServer.requests.find(item => item.marker === "ZURI_E2E_STEER_TWO");
   assert.ok(steeredRequest, "provider must receive a continuation after steering is injected");
   assert.deepEqual(
-    steeredRequest.userTexts.filter(text => /QZ_E2E_STEER_(?:ONE|TWO)/u.test(text)),
-    ["QZ_E2E_STEER_ONE", "QZ_E2E_STEER_TWO"],
+    steeredRequest.userTexts.filter(text => /ZURI_E2E_STEER_(?:ONE|TWO)/u.test(text)),
+    ["ZURI_E2E_STEER_ONE", "ZURI_E2E_STEER_TWO"],
     "all steering messages available at the safe point must share one LLM request",
   );
   const checkpoint = await readRuntime(page, sessionId);
@@ -1226,27 +1226,27 @@ async function steeringQueueLifecycleMatrix(page, providerServer) {
   try {
     await switchUiToSession(page, singleSessionId);
     const singleAfter = await eventCount(page);
-    await submitComposerMessage(page, "QZ_E2E_STEER_SINGLE_ACTIVE");
+    await submitComposerMessage(page, "ZURI_E2E_STEER_SINGLE_ACTIVE");
     const singleRun = await waitEvent(page, { type: "agent_start", sessionId: singleSessionId }, singleAfter, 20_000);
-    const singleMessageId = await enqueueComposerMessage(page, "QZ_E2E_STEER_SINGLE_MESSAGE");
+    const singleMessageId = await enqueueComposerMessage(page, "ZURI_E2E_STEER_SINGLE_MESSAGE");
     await steerQueuedMessage(page, singleMessageId);
     await waitForRuntimeQueues(page, singleSessionId, {
       steerings: [singleMessageId],
       followUps: [],
     });
 
-    providerServer.release("QZ_E2E_STEER_SINGLE_ACTIVE");
+    providerServer.release("ZURI_E2E_STEER_SINGLE_ACTIVE");
     await waitEvent(page, { type: "agent_end", sessionId: singleSessionId, runId: singleRun.runId }, singleAfter, 20_000);
-    await page.waitForFunction(text => document.querySelector("#messages")?.innerText?.includes(text), "QZ_E2E_STEER_SINGLE_OK", {
+    await page.waitForFunction(text => document.querySelector("#messages")?.innerText?.includes(text), "ZURI_E2E_STEER_SINGLE_OK", {
       timeout: 20_000,
     });
 
     const singleHistory = await historyMessages(page, singleSessionId);
     assert.deepEqual(
       singleHistory
-        .filter(message => message.role === "user" && messageText(message).includes("QZ_E2E_STEER_SINGLE_MESSAGE"))
+        .filter(message => message.role === "user" && messageText(message).includes("ZURI_E2E_STEER_SINGLE_MESSAGE"))
         .map(message => messageText(message)),
-      ["QZ_E2E_STEER_SINGLE_MESSAGE"],
+      ["ZURI_E2E_STEER_SINGLE_MESSAGE"],
       "one steering message must enter the transcript exactly once",
     );
     assert.equal(
@@ -1261,23 +1261,23 @@ async function steeringQueueLifecycleMatrix(page, providerServer) {
     assert.deepEqual(await visibleQueueRows(page), [], "single steering queue must be empty after handoff");
     assertRuntimeQueuesEmpty(await readRuntime(page, singleSessionId));
     const singleRequest = [...providerServer.requests].reverse()
-      .find(item => item.marker === "QZ_E2E_STEER_SINGLE_MESSAGE");
+      .find(item => item.marker === "ZURI_E2E_STEER_SINGLE_MESSAGE");
     assert.ok(singleRequest, "provider must receive the single steering continuation");
     assert.equal(
-      singleRequest.userTexts.filter(text => text.includes("QZ_E2E_STEER_SINGLE_MESSAGE")).length,
+      singleRequest.userTexts.filter(text => text.includes("ZURI_E2E_STEER_SINGLE_MESSAGE")).length,
       1,
       "provider must receive the single steering message exactly once",
     );
 
     await switchUiToSession(page, multiSessionId);
     const multiAfter = await eventCount(page);
-    await submitComposerMessage(page, "QZ_E2E_STEER_MULTI_ACTIVE");
+    await submitComposerMessage(page, "ZURI_E2E_STEER_MULTI_ACTIVE");
     const multiRun = await waitEvent(page, { type: "agent_start", sessionId: multiSessionId }, multiAfter, 20_000);
 
-    const firstId = await enqueueComposerMessage(page, "QZ_E2E_STEER_MULTI_ONE");
-    const deletedSteeringId = await enqueueComposerMessage(page, "QZ_E2E_STEER_MULTI_DELETE_STEERING");
-    const thirdId = await enqueueComposerMessage(page, "QZ_E2E_STEER_MULTI_THREE");
-    const deletedFollowUpId = await enqueueComposerMessage(page, "QZ_E2E_STEER_MULTI_DELETE_FOLLOWUP");
+    const firstId = await enqueueComposerMessage(page, "ZURI_E2E_STEER_MULTI_ONE");
+    const deletedSteeringId = await enqueueComposerMessage(page, "ZURI_E2E_STEER_MULTI_DELETE_STEERING");
+    const thirdId = await enqueueComposerMessage(page, "ZURI_E2E_STEER_MULTI_THREE");
+    const deletedFollowUpId = await enqueueComposerMessage(page, "ZURI_E2E_STEER_MULTI_DELETE_FOLLOWUP");
     await steerQueuedMessage(page, firstId);
     await steerQueuedMessage(page, deletedSteeringId);
     await steerQueuedMessage(page, thirdId);
@@ -1288,25 +1288,25 @@ async function steeringQueueLifecycleMatrix(page, providerServer) {
       followUps: [],
     });
     assert.deepEqual(await visibleQueueRows(page), [
-      { id: firstId, kind: "steering", text: "QZ_E2E_STEER_MULTI_ONE" },
-      { id: thirdId, kind: "steering", text: "QZ_E2E_STEER_MULTI_THREE" },
+      { id: firstId, kind: "steering", text: "ZURI_E2E_STEER_MULTI_ONE" },
+      { id: thirdId, kind: "steering", text: "ZURI_E2E_STEER_MULTI_THREE" },
     ], "deleting one steering and one follow-up must preserve the remaining order");
 
     await switchUiToSession(page, otherSessionId);
     assert.deepEqual(await visibleQueueRows(page), [], "another session must not display the active session queue");
     await switchUiToSession(page, multiSessionId);
     assert.deepEqual(await visibleQueueRows(page), [
-      { id: firstId, kind: "steering", text: "QZ_E2E_STEER_MULTI_ONE" },
-      { id: thirdId, kind: "steering", text: "QZ_E2E_STEER_MULTI_THREE" },
+      { id: firstId, kind: "steering", text: "ZURI_E2E_STEER_MULTI_ONE" },
+      { id: thirdId, kind: "steering", text: "ZURI_E2E_STEER_MULTI_THREE" },
     ], "switching back must restore the exact steering queue from runtime state");
 
     await observeSteeringBatchMotion(page);
-    providerServer.release("QZ_E2E_STEER_MULTI_ACTIVE");
+    providerServer.release("ZURI_E2E_STEER_MULTI_ACTIVE");
     await waitEvent(page, { type: "agent_end", sessionId: multiSessionId, runId: multiRun.runId }, multiAfter, 20_000);
-    await page.waitForFunction(text => document.querySelector("#messages")?.innerText?.includes(text), "QZ_E2E_STEER_MULTI_OK", {
+    await page.waitForFunction(text => document.querySelector("#messages")?.innerText?.includes(text), "ZURI_E2E_STEER_MULTI_OK", {
       timeout: 20_000,
     });
-    await page.waitForFunction(() => window.__qzSteeringBatchMotion?.maxBatchGhostCount >= 1, null, { timeout: 10_000 });
+    await page.waitForFunction(() => window.__zuriSteeringBatchMotion?.maxBatchGhostCount >= 1, null, { timeout: 10_000 });
     const batchMotion = await finishSteeringBatchMotion(page);
     assert.deepEqual(batchMotion, {
       maxBatchGhostCount: 1,
@@ -1318,9 +1318,9 @@ async function steeringQueueLifecycleMatrix(page, providerServer) {
     const multiHistory = await historyMessages(page, multiSessionId);
     assert.deepEqual(
       multiHistory
-        .filter(message => message.role === "user" && /QZ_E2E_STEER_MULTI_(?:ONE|THREE)/u.test(messageText(message)))
+        .filter(message => message.role === "user" && /ZURI_E2E_STEER_MULTI_(?:ONE|THREE)/u.test(messageText(message)))
         .map(message => messageText(message)),
-      ["QZ_E2E_STEER_MULTI_ONE", "QZ_E2E_STEER_MULTI_THREE"],
+      ["ZURI_E2E_STEER_MULTI_ONE", "ZURI_E2E_STEER_MULTI_THREE"],
       "surviving steering messages must enter the transcript once and in order",
     );
     assert.equal(
@@ -1329,7 +1329,7 @@ async function steeringQueueLifecycleMatrix(page, providerServer) {
       "one multi-message steering handoff must share one runtime-context capsule",
     );
     assert.equal(
-      multiHistory.some(message => /QZ_E2E_STEER_MULTI_DELETE_(?:STEERING|FOLLOWUP)/u.test(messageText(message))),
+      multiHistory.some(message => /ZURI_E2E_STEER_MULTI_DELETE_(?:STEERING|FOLLOWUP)/u.test(messageText(message))),
       false,
       "deleted queue entries must never enter the transcript",
     );
@@ -1341,22 +1341,22 @@ async function steeringQueueLifecycleMatrix(page, providerServer) {
     assertRuntimeQueuesEmpty(await readRuntime(page, multiSessionId));
 
     const multiRequest = [...providerServer.requests].reverse()
-      .find(item => item.marker === "QZ_E2E_STEER_MULTI_THREE");
+      .find(item => item.marker === "ZURI_E2E_STEER_MULTI_THREE");
     assert.ok(multiRequest, "provider must receive the multi steering continuation");
     assert.deepEqual(
-      multiRequest.userTexts.filter(text => /QZ_E2E_STEER_MULTI_(?:ONE|THREE)/u.test(text)),
-      ["QZ_E2E_STEER_MULTI_ONE", "QZ_E2E_STEER_MULTI_THREE"],
+      multiRequest.userTexts.filter(text => /ZURI_E2E_STEER_MULTI_(?:ONE|THREE)/u.test(text)),
+      ["ZURI_E2E_STEER_MULTI_ONE", "ZURI_E2E_STEER_MULTI_THREE"],
       "all surviving steering messages must share one provider request in FIFO order",
     );
     assert.equal(
-      multiRequest.userTexts.some(text => /QZ_E2E_STEER_MULTI_DELETE_(?:STEERING|FOLLOWUP)/u.test(text)),
+      multiRequest.userTexts.some(text => /ZURI_E2E_STEER_MULTI_DELETE_(?:STEERING|FOLLOWUP)/u.test(text)),
       false,
       "deleted queue entries must never reach the provider",
     );
   } finally {
     await finishSteeringBatchMotion(page).catch(() => undefined);
-    providerServer.release("QZ_E2E_STEER_SINGLE_ACTIVE");
-    providerServer.release("QZ_E2E_STEER_MULTI_ACTIVE");
+    providerServer.release("ZURI_E2E_STEER_SINGLE_ACTIVE");
+    providerServer.release("ZURI_E2E_STEER_MULTI_ACTIVE");
     await Promise.all([
       deleteSession(page, singleSessionId),
       deleteSession(page, otherSessionId),
@@ -1371,17 +1371,17 @@ async function manageExistingSession(page, provider) {
   try {
     for (const mode of ["follow_up", "steer"]) {
       const after = await eventCount(page);
-      await runPrompt(page, parent, "QZ_E2E_MANAGE " + JSON.stringify({ action: "send_message", sessionId: child, message: "QZ_E2E_RECOVER", mode }));
+      await runPrompt(page, parent, "ZURI_E2E_MANAGE " + JSON.stringify({ action: "send_message", sessionId: child, message: "ZURI_E2E_RECOVER", mode }));
       await waitEvent(page, { type: "agent_end", sessionId: child }, after, 20_000);
     }
     const after = await eventCount(page);
-    await send(page, "prompt", { sessionId: child, text: "QZ_E2E_MANAGED_CHILD", clientMessageId: id("managed") });
+    await send(page, "prompt", { sessionId: child, text: "ZURI_E2E_MANAGED_CHILD", clientMessageId: id("managed") });
     await waitEvent(page, { type: "agent_start", sessionId: child }, after, 20_000);
-    await runPrompt(page, parent, "QZ_E2E_MANAGE " + JSON.stringify({ action: "stop", sessionId: child }));
+    await runPrompt(page, parent, "ZURI_E2E_MANAGE " + JSON.stringify({ action: "stop", sessionId: child }));
     const state = await request(page, "get_state", { sessionId: child }, "state");
     assert.equal(state.status, "aborted");
   } finally {
-    provider.release("QZ_E2E_MANAGED_CHILD");
+    provider.release("ZURI_E2E_MANAGED_CHILD");
     await deleteSession(page, parent);
     await deleteSession(page, child);
   }
@@ -1389,8 +1389,8 @@ async function manageExistingSession(page, provider) {
 
 async function providerFailureReleasesTheSession(page) {
   for (const [marker, expected] of [
-    ["QZ_E2E_HTTP_ERROR", /401|injected auth failure/i],
-    ["QZ_E2E_UNSUPPORTED_IMAGE", /当前模型可能不支持图片或截图输入/],
+    ["ZURI_E2E_HTTP_ERROR", /401|injected auth failure/i],
+    ["ZURI_E2E_UNSUPPORTED_IMAGE", /当前模型可能不支持图片或截图输入/],
   ]) {
     const sessionId = await createSession(page, "provider failure recovery");
     const after = await eventCount(page);
@@ -1405,14 +1405,14 @@ async function providerFailureReleasesTheSession(page) {
     assert.equal(failureTranscript.filter(entry => entry.type === "error").length, 0, "visible assistant failure must not duplicate an error card");
     assert.equal(failureTranscript.filter(entry => entry.type === "assistant" && /LLM 调用失败/.test(entry.content || "")).length, 1);
 
-    if (marker === "QZ_E2E_UNSUPPORTED_IMAGE") {
+    if (marker === "ZURI_E2E_UNSUPPORTED_IMAGE") {
       const failure = failureTranscript.find(entry => entry.type === "assistant" && /LLM 调用失败/.test(entry.content || ""));
       assert.match(failure.content, expected);
       assert.doesNotMatch(failure.content, /data:|Unexpected|invalid_parameter_error/);
     }
 
-    const recovered = await runPrompt(page, sessionId, "QZ_E2E_RECOVER");
-    assert.match(recovered, /QZ_E2E_RECOVER_OK/);
+    const recovered = await runPrompt(page, sessionId, "ZURI_E2E_RECOVER");
+    assert.match(recovered, /ZURI_E2E_RECOVER_OK/);
     const state = await request(page, "get_state", { sessionId }, "state");
     assert.equal(state.status, "completed");
     await deleteSession(page, sessionId);
@@ -1422,7 +1422,7 @@ async function providerFailureReleasesTheSession(page) {
 async function providerFaultLifecycleMatrix(page, providerServer) {
   for (const fault of ["HTTP", "EOF", "SSE", "SOCKET"]) {
     for (const action of ["FAIL", "STEER", "STOP", "DELETE"]) {
-      const marker = `QZ_E2E_FAULT_${fault}_${action}`;
+      const marker = `ZURI_E2E_FAULT_${fault}_${action}`;
       const sessionId = await createSession(page, marker);
       const after = await eventCount(page);
       try {
@@ -1439,7 +1439,7 @@ async function providerFaultLifecycleMatrix(page, providerServer) {
 
         let queuedId;
         if (action === "STEER") {
-          queuedId = await enqueueComposerMessage(page, "QZ_E2E_RECOVER");
+          queuedId = await enqueueComposerMessage(page, "ZURI_E2E_RECOVER");
           await steerQueuedMessage(page, queuedId);
           await waitForRuntimeQueues(page, sessionId, { steerings: [queuedId] });
         } else if (action === "STOP") {
@@ -1451,7 +1451,7 @@ async function providerFaultLifecycleMatrix(page, providerServer) {
         }
 
         const boundary = await eventCount(page);
-        const recoveryRequests = providerServer.count("QZ_E2E_RECOVER");
+        const recoveryRequests = providerServer.count("ZURI_E2E_RECOVER");
         providerServer.release(marker);
         if (action === "DELETE" || action === "STOP") {
           // Allow the late network failure to cross the real worker/Port boundary.
@@ -1473,11 +1473,11 @@ async function providerFaultLifecycleMatrix(page, providerServer) {
           await waitEvent(page, { type: "agent_end", sessionId, runId: run.runId }, after);
           assert.equal(await matchingEventCount(page, { type: "aborted", sessionId, runId: run.runId }, after), 0);
           if (action === "STEER") {
-            await page.waitForFunction(() => document.querySelector("#messages")?.innerText?.includes("QZ_E2E_RECOVER_OK"), null, { timeout: 20_000 });
+            await page.waitForFunction(() => document.querySelector("#messages")?.innerText?.includes("ZURI_E2E_RECOVER_OK"), null, { timeout: 20_000 });
             await waitForAgentEndCount(page, sessionId, after, 2, 20_000);
             const history = await historyMessages(page, sessionId);
-            assert.equal(history.filter(message => message.role === "user" && messageText(message) === "QZ_E2E_RECOVER").length, 1);
-            assert.equal(providerServer.count("QZ_E2E_RECOVER"), recoveryRequests + 1,
+            assert.equal(history.filter(message => message.role === "user" && messageText(message) === "ZURI_E2E_RECOVER").length, 1);
+            assert.equal(providerServer.count("ZURI_E2E_RECOVER"), recoveryRequests + 1,
               "queued steering must continue automatically and reach the provider exactly once");
             assertRuntimeQueuesEmpty(await readRuntime(page, sessionId));
             assert.deepEqual(await visibleQueueRows(page), []);
@@ -1485,7 +1485,7 @@ async function providerFaultLifecycleMatrix(page, providerServer) {
           }
           const state = await request(page, "get_state", { sessionId }, "state");
           assert.equal(state.status, action === "STEER" ? "completed" : "error");
-          if (action === "FAIL") assert.match(await runPrompt(page, sessionId, "QZ_E2E_RECOVER"), /QZ_E2E_RECOVER_OK/);
+          if (action === "FAIL") assert.match(await runPrompt(page, sessionId, "ZURI_E2E_RECOVER"), /ZURI_E2E_RECOVER_OK/);
         }
         console.log(JSON.stringify({ providerFault: fault, action, ok: true }));
       } finally {
@@ -1499,19 +1499,19 @@ async function providerFaultLifecycleMatrix(page, providerServer) {
 async function stopCutsOffLateStreaming(page, providerServer) {
   const sessionId = await createSession(page, "stream stop");
   const after = await eventCount(page);
-  await send(page, "prompt", { sessionId, text: "QZ_E2E_STOP", clientMessageId: id("stop") });
+  await send(page, "prompt", { sessionId, text: "ZURI_E2E_STOP", clientMessageId: id("stop") });
   const stoppedRun = await waitEvent(page, { type: "agent_start", sessionId }, after, 20_000);
   await waitEvent(page, { type: "message_update", sessionId, runId: stoppedRun.runId }, after, 20_000);
 
   const queueAfter = await eventCount(page);
   await send(page, "follow_up", {
     sessionId,
-    text: "QZ_E2E_AFTER_ABORT_1",
+    text: "ZURI_E2E_AFTER_ABORT_1",
     clientMessageId: id("queued-1"),
   });
   await send(page, "follow_up", {
     sessionId,
-    text: "QZ_E2E_AFTER_ABORT_2",
+    text: "ZURI_E2E_AFTER_ABORT_2",
     clientMessageId: id("queued-2"),
   });
   const queued = await waitForQueueCount(page, sessionId, 2, queueAfter);
@@ -1541,16 +1541,16 @@ async function stopCutsOffLateStreaming(page, providerServer) {
   const history = await historyMessages(page, sessionId);
   assert.deepEqual(
     history
-      .filter(message => message.role === "user" && /QZ_E2E_AFTER_ABORT_[12]/.test(messageText(message)))
+      .filter(message => message.role === "user" && /ZURI_E2E_AFTER_ABORT_[12]/.test(messageText(message)))
       .map(message => messageText(message)),
-    ["QZ_E2E_AFTER_ABORT_1", "QZ_E2E_AFTER_ABORT_2"],
+    ["ZURI_E2E_AFTER_ABORT_1", "ZURI_E2E_AFTER_ABORT_2"],
     "queued user messages must survive abort in FIFO order",
   );
   assert.deepEqual(
     providerServer.requests
-      .filter(item => /^QZ_E2E_AFTER_ABORT_[12]$/u.test(item.marker))
+      .filter(item => /^ZURI_E2E_AFTER_ABORT_[12]$/u.test(item.marker))
       .map(item => item.marker),
-    ["QZ_E2E_AFTER_ABORT_1", "QZ_E2E_AFTER_ABORT_2"],
+    ["ZURI_E2E_AFTER_ABORT_1", "ZURI_E2E_AFTER_ABORT_2"],
     "the provider must receive each queued message exactly once and in order",
   );
   const checkpoint = await readRuntime(page, sessionId);
@@ -1566,22 +1566,22 @@ async function concurrentSessionsStayIsolated(page) {
   ]);
   const after = await eventCount(page);
   await Promise.all([
-    send(page, "prompt", { sessionId: left, text: "QZ_E2E_PARALLEL_A", clientMessageId: id("left") }),
-    send(page, "prompt", { sessionId: right, text: "QZ_E2E_PARALLEL_B", clientMessageId: id("right") }),
+    send(page, "prompt", { sessionId: left, text: "ZURI_E2E_PARALLEL_A", clientMessageId: id("left") }),
+    send(page, "prompt", { sessionId: right, text: "ZURI_E2E_PARALLEL_B", clientMessageId: id("right") }),
   ]);
   await Promise.all([
     waitEvent(page, { type: "agent_end", sessionId: left }, after, 20_000),
     waitEvent(page, { type: "agent_end", sessionId: right }, after, 20_000),
   ]);
-  assert.match(await latestAssistantText(page, left), /QZ_E2E_PARALLEL_A_OK/);
-  assert.match(await latestAssistantText(page, right), /QZ_E2E_PARALLEL_B_OK/);
+  assert.match(await latestAssistantText(page, left), /ZURI_E2E_PARALLEL_A_OK/);
+  assert.match(await latestAssistantText(page, right), /ZURI_E2E_PARALLEL_B_OK/);
   await Promise.all([deleteSession(page, left), deleteSession(page, right)]);
 }
 
 async function sidepanelReloadKeepsTheBackgroundRun(page) {
   const sessionId = await createSession(page, "sidepanel reload");
   const after = await eventCount(page);
-  await send(page, "prompt", { sessionId, text: "QZ_E2E_RECONNECT", clientMessageId: id("reload") });
+  await send(page, "prompt", { sessionId, text: "ZURI_E2E_RECONNECT", clientMessageId: id("reload") });
   await waitEvent(page, { type: "message_update", sessionId }, after, 20_000);
 
   await page.reload();
@@ -1589,20 +1589,20 @@ async function sidepanelReloadKeepsTheBackgroundRun(page) {
   await installHarness(page);
   const terminal = await waitForTerminalState(page, sessionId, 20_000);
   assert.equal(terminal.status, "completed");
-  assert.match(await latestAssistantText(page, sessionId), /QZ_E2E_RECONNECT_OK/);
+  assert.match(await latestAssistantText(page, sessionId), /ZURI_E2E_RECONNECT_OK/);
   const history = await historyMessages(page, sessionId);
-  assert.equal(history.filter(message => message.role === "user" && messageText(message).includes("QZ_E2E_RECONNECT")).length, 1);
+  assert.equal(history.filter(message => message.role === "user" && messageText(message).includes("ZURI_E2E_RECONNECT")).length, 1);
   await deleteSession(page, sessionId);
 }
 
 async function resetSurvivesSessionReopen(page, providerServer) {
   const sessionId = await createSession(page, "reset and reopen");
   const otherSessionId = await createSession(page, "switch away after reset");
-  const oldPrompt = `QZ_E2E_RESET_OLD ${id("old-context")}`;
+  const oldPrompt = `ZURI_E2E_RESET_OLD ${id("old-context")}`;
   try {
-    assert.match(await runPrompt(page, sessionId, oldPrompt), /QZ_E2E_RESET_OLD_OK/);
+    assert.match(await runPrompt(page, sessionId, oldPrompt), /ZURI_E2E_RESET_OLD_OK/);
     await switchUiToSession(page, sessionId);
-    await page.waitForFunction(() => document.querySelector("#messages")?.innerText.includes("QZ_E2E_RESET_OLD_OK"));
+    await page.waitForFunction(() => document.querySelector("#messages")?.innerText.includes("ZURI_E2E_RESET_OLD_OK"));
     const after = await eventCount(page);
     await send(page, "reset", { sessionId });
     await waitEvent(page, { type: "reset", sessionId }, after);
@@ -1615,7 +1615,7 @@ async function resetSurvivesSessionReopen(page, providerServer) {
     assert.deepEqual(cleared.active?.entries, [], "reset completion must follow the empty active-conversation write");
     assert.deepEqual(cleared.record?.conversation?.entries, [], "reset must replace the durable model history");
     assert.deepEqual(readCheckpointRecord(cleared.record, cleared.checkpoint)?.transcript, []);
-    await page.waitForFunction(() => !document.querySelector("#messages")?.innerText.includes("QZ_E2E_RESET_OLD"));
+    await page.waitForFunction(() => !document.querySelector("#messages")?.innerText.includes("ZURI_E2E_RESET_OLD"));
     await switchUiToSession(page, otherSessionId);
     await switchUiToSession(page, sessionId);
 
@@ -1629,16 +1629,16 @@ async function resetSurvivesSessionReopen(page, providerServer) {
     const { conversation } = readSessionSnapshot(stored.record, stored.active, stored.checkpoint);
     await request(page, "restore_session", { sessionId, session: conversation }, "session_restored");
     const reopened = await request(page, "get_messages", { sessionId }, "messages");
-    assert.doesNotMatch(JSON.stringify(reopened.transcript), /QZ_E2E_RESET_OLD/);
-    assert.doesNotMatch(await page.locator("#messages").innerText(), /QZ_E2E_RESET_OLD/);
-    assert.match(await runPrompt(page, sessionId, "QZ_E2E_RESET_NEW"), /QZ_E2E_RESET_NEW_OK/);
-    const nextRequest = providerServer.requests.find(item => item.marker === "QZ_E2E_RESET_NEW");
+    assert.doesNotMatch(JSON.stringify(reopened.transcript), /ZURI_E2E_RESET_OLD/);
+    assert.doesNotMatch(await page.locator("#messages").innerText(), /ZURI_E2E_RESET_OLD/);
+    assert.match(await runPrompt(page, sessionId, "ZURI_E2E_RESET_NEW"), /ZURI_E2E_RESET_NEW_OK/);
+    const nextRequest = providerServer.requests.find(item => item.marker === "ZURI_E2E_RESET_NEW");
     assert.ok(nextRequest);
     assert.equal(nextRequest.containsResetHistory, false, "reset must remove old context from the next model request");
     assert.equal(nextRequest.userTexts.includes(oldPrompt), false);
-    assert.equal(providerServer.count("QZ_E2E_RESET_OLD"), 1);
-    assert.equal(providerServer.count("QZ_E2E_RESET_NEW"), 1);
-    assert.doesNotMatch(JSON.stringify((await request(page, "get_messages", { sessionId }, "messages")).transcript), /QZ_E2E_RESET_OLD/);
+    assert.equal(providerServer.count("ZURI_E2E_RESET_OLD"), 1);
+    assert.equal(providerServer.count("ZURI_E2E_RESET_NEW"), 1);
+    assert.doesNotMatch(JSON.stringify((await request(page, "get_messages", { sessionId }, "messages")).transcript), /ZURI_E2E_RESET_OLD/);
     console.log(JSON.stringify({ scenario: "reset_reopen", ok: true }));
   } finally {
     await deleteSession(page, sessionId);
@@ -1651,7 +1651,7 @@ async function serviceWorkerRestartSettlesInterruptedTurn(page, browserContext, 
   const after = await eventCount(page);
   await send(page, "prompt", {
     sessionId,
-    text: "QZ_E2E_WORKER_OLD",
+    text: "ZURI_E2E_WORKER_OLD",
     clientMessageId: id("worker-old"),
   });
   await waitEvent(page, { type: "message_update", sessionId }, after, 20_000);
@@ -1665,9 +1665,9 @@ async function serviceWorkerRestartSettlesInterruptedTurn(page, browserContext, 
   assert.equal(recovered.status, "interrupted");
   assert.equal(recovered.runtime?.reason, "service_worker_restarted");
 
-  const response = await runPrompt(page, sessionId, "QZ_E2E_WORKER_NEW");
-  assert.match(response, /QZ_E2E_WORKER_NEW_OK/);
-  const requestRecord = [...providerServer.requests].reverse().find(item => item.marker === "QZ_E2E_WORKER_NEW");
+  const response = await runPrompt(page, sessionId, "ZURI_E2E_WORKER_NEW");
+  assert.match(response, /ZURI_E2E_WORKER_NEW_OK/);
+  const requestRecord = [...providerServer.requests].reverse().find(item => item.marker === "ZURI_E2E_WORKER_NEW");
   assert.equal(requestRecord?.settledInterruptedTurn, true, "the provider must not receive consecutive unresolved user turns");
   await deleteSession(page, sessionId);
   return serviceWorkerRestartKeepsCompletedCheckpoints(page, browserContext, extensionId, providerServer);
@@ -1675,9 +1675,9 @@ async function serviceWorkerRestartSettlesInterruptedTurn(page, browserContext, 
 
 async function serviceWorkerRestartKeepsCompletedCheckpoints(page, browserContext, extensionId, providerServer) {
   const sessionId = await createSession(page, "restore completed checkpoint after restart");
-  const marker = "QZ_E2E_WORKER_CHECKPOINT";
-  const completedText = "QZ_CHECKPOINT_COMPLETED_BEFORE_RESTART";
-  const partialText = "QZ_CHECKPOINT_IN_PROGRESS";
+  const marker = "ZURI_E2E_WORKER_CHECKPOINT";
+  const completedText = "ZURI_CHECKPOINT_COMPLETED_BEFORE_RESTART";
+  const partialText = "ZURI_CHECKPOINT_IN_PROGRESS";
   const toolCallId = "call_worker_checkpoint_tabs";
   const interruptedText = "运行已中断，已恢复保存的对话。发送消息可继续。";
   const assertInterruptedNotice = async () => {
@@ -1693,12 +1693,12 @@ async function serviceWorkerRestartKeepsCompletedCheckpoints(page, browserContex
   };
   try {
     assert.equal(await page.locator("html").getAttribute("lang"), "zh-CN");
-    assert.match(await runPrompt(page, sessionId, "QZ_E2E_BASIC"), /QZ_E2E_BASIC_OK/);
+    assert.match(await runPrompt(page, sessionId, "ZURI_E2E_BASIC"), /ZURI_E2E_BASIC_OK/);
     const completedTranscript = await page.evaluate(async sessionId => {
       const key = `_session_${sessionId}`;
       return (await chrome.storage.local.get(key))[key]?.transcript;
     }, sessionId);
-    assert.ok(completedTranscript?.some(entry => entry.type === "assistant" && entry.content === "QZ_E2E_BASIC_OK"));
+    assert.ok(completedTranscript?.some(entry => entry.type === "assistant" && entry.content === "ZURI_E2E_BASIC_OK"));
     await switchUiToSession(page, sessionId);
     const after = await eventCount(page);
     await submitComposerMessage(page, marker);
@@ -1747,7 +1747,7 @@ async function serviceWorkerRestartKeepsCompletedCheckpoints(page, browserContex
     await page.waitForFunction(texts => texts.every(text => document.querySelector("#messages")?.innerText.includes(text)),
       [completedText, partialText]);
     assert.equal(await page.locator("#messages .msg-user").filter({ hasText: marker }).count(), 1);
-    for (const text of ["QZ_E2E_BASIC_OK", completedText, partialText]) {
+    for (const text of ["ZURI_E2E_BASIC_OK", completedText, partialText]) {
       assert.equal(await page.locator("#messages .msg-assistant").filter({ hasText: text }).count(), 1);
     }
     const tools = restored.transcript.filter(entry => entry.type === "tool" && entry.toolCallId === toolCallId);
@@ -1770,7 +1770,7 @@ async function serviceWorkerRestartKeepsCompletedCheckpoints(page, browserContex
     await deleteSession(page, otherSessionId);
     assert.equal(providerServer.count(marker), 2, "reopening must not resend the interrupted request");
     const oldRunId = state.runtime.runId;
-    assert.match(await runPrompt(page, sessionId, "QZ_E2E_RECOVER"), /QZ_E2E_RECOVER_OK/);
+    assert.match(await runPrompt(page, sessionId, "ZURI_E2E_RECOVER"), /ZURI_E2E_RECOVER_OK/);
     const completed = await request(page, "get_state", { sessionId }, "state");
     assert.equal(completed.status, "completed");
     assert.notEqual(completed.runtime.runId, oldRunId);
@@ -1780,8 +1780,8 @@ async function serviceWorkerRestartKeepsCompletedCheckpoints(page, browserContex
     const notices = afterContinuation.filter(entry => entry.type === "run-status" && entry.status === "interrupted");
     assert.equal(notices.length, 1);
     assert.equal(notices[0].runId, oldRunId);
-    assert.ok(afterContinuation.indexOf(notices[0]) < afterContinuation.findIndex(entry => entry.type === "user" && entry.text === "QZ_E2E_RECOVER"));
-    assert.equal(afterContinuation.filter(entry => entry.type === "assistant" && entry.content === "QZ_E2E_RECOVER_OK").length, 1);
+    assert.ok(afterContinuation.indexOf(notices[0]) < afterContinuation.findIndex(entry => entry.type === "user" && entry.text === "ZURI_E2E_RECOVER"));
+    assert.equal(afterContinuation.filter(entry => entry.type === "assistant" && entry.content === "ZURI_E2E_RECOVER_OK").length, 1);
     assert.equal(providerServer.count(marker), 2);
     console.log(JSON.stringify({ scenario: "worker_restart_checkpoint", ok: true }));
     await deleteSession(page, sessionId);
@@ -1801,7 +1801,7 @@ async function restartWorkerAndReloadSession(page, browserContext, extensionId, 
 
 async function serviceWorkerRestartCancelsCompaction(page, browserContext, extensionId, providerServer) {
   const sessionId = await createSession(page, "restore interrupted manual compaction");
-  const marker = "QZ_E2E_WORKER_COMPACT";
+  const marker = "ZURI_E2E_WORKER_COMPACT";
   try {
     const longRound = "compact fixture history ".repeat(80);
     for (const round of ["first", "second", "retained"]) await runPrompt(page, sessionId, `${longRound} ${round}`);
@@ -1828,7 +1828,7 @@ async function serviceWorkerRestartCancelsCompaction(page, browserContext, exten
     assert.equal(providerServer.count(marker), 1, "the summary provider request must be held at its gate");
 
     for (const continued of [false, true]) {
-      if (continued) assert.match(await runPrompt(page, sessionId, "QZ_E2E_RECOVER"), /QZ_E2E_RECOVER_OK/);
+      if (continued) assert.match(await runPrompt(page, sessionId, "ZURI_E2E_RECOVER"), /ZURI_E2E_RECOVER_OK/);
       await restartWorkerAndReloadSession(page, browserContext, extensionId, sessionId);
       const transcript = (await request(page, "get_messages", { sessionId }, "messages")).transcript;
       const compact = transcript.filter(entry => entry.type === "compact");
@@ -1843,7 +1843,7 @@ async function serviceWorkerRestartCancelsCompaction(page, browserContext, exten
       assert.ok((await card.innerText()).includes("压缩已取消，未写入新的上下文边界。"));
       assert.equal(await card.locator(".compact-node-dot").evaluate(node => getComputedStyle(node).animationName), "none");
       assert.equal(providerServer.count(marker), 1, "reopening must not replay the interrupted compaction");
-      if (continued) assert.equal(transcript.filter(entry => entry.type === "assistant" && entry.content === "QZ_E2E_RECOVER_OK").length, 1);
+      if (continued) assert.equal(transcript.filter(entry => entry.type === "assistant" && entry.content === "ZURI_E2E_RECOVER_OK").length, 1);
     }
     console.log(JSON.stringify({ scenario: "worker_restart_compact", ok: true }));
   } finally {
@@ -1864,9 +1864,9 @@ async function serviceWorkerRestartKeepsImagesAndThinking(page, browserContext, 
   try {
     await saveConfig(page, providerServer.endpoint, { vision: true });
     const after = await eventCount(page);
-    await send(page, "prompt", { sessionId, text: "QZ_E2E_WORKER_IMAGES", clientMessageId: id("worker-images") });
+    await send(page, "prompt", { sessionId, text: "ZURI_E2E_WORKER_IMAGES", clientMessageId: id("worker-images") });
     await waitEvent(page, { type: "agent_end", sessionId }, after, 60_000);
-    assert.match(await latestAssistantText(page, sessionId), /QZ_E2E_WORKER_IMAGES_OK/);
+    assert.match(await latestAssistantText(page, sessionId), /ZURI_E2E_WORKER_IMAGES_OK/);
     const before = (await request(page, "get_messages", { sessionId }, "messages")).transcript;
     const screenshots = before.filter(entry => entry.type === "tool" && entry.name === "screenshot");
     assert.equal(screenshots.length, 9);
@@ -1903,7 +1903,7 @@ async function serviceWorkerRestartKeepsProviderFailure(page, browserContext, ex
   try {
     await switchUiToSession(page, sessionId);
     const after = await eventCount(page);
-    await submitComposerMessage(page, "QZ_E2E_HTTP_ERROR");
+    await submitComposerMessage(page, "ZURI_E2E_HTTP_ERROR");
     await waitEvent(page, { type: "error", sessionId }, after);
     await waitEvent(page, { type: "agent_end", sessionId }, after);
     const before = (await request(page, "get_messages", { sessionId }, "messages")).transcript;
@@ -1914,7 +1914,7 @@ async function serviceWorkerRestartKeepsProviderFailure(page, browserContext, ex
     const failureText = await errorCard.innerText();
     assert.match(failureText, /401|injected auth failure/);
     for (const recovered of [false, true]) {
-      if (recovered) assert.match(await runPrompt(page, sessionId, "QZ_E2E_RECOVER"), /QZ_E2E_RECOVER_OK/);
+      if (recovered) assert.match(await runPrompt(page, sessionId, "ZURI_E2E_RECOVER"), /ZURI_E2E_RECOVER_OK/);
       await restartWorkerAndReloadSession(page, browserContext, extensionId, sessionId);
       const restored = (await request(page, "get_messages", { sessionId }, "messages")).transcript;
       assert.equal(restored.filter(entry => entry.type === "assistant" && entry.content === failure.content).length, 1,
@@ -1922,7 +1922,7 @@ async function serviceWorkerRestartKeepsProviderFailure(page, browserContext, ex
       await errorCard.waitFor({ state: "visible" });
       assert.equal(await errorCard.count(), 1);
       assert.equal(await errorCard.innerText(), failureText);
-      if (recovered) assert.equal(restored.filter(entry => entry.type === "assistant" && entry.content === "QZ_E2E_RECOVER_OK").length, 1);
+      if (recovered) assert.equal(restored.filter(entry => entry.type === "assistant" && entry.content === "ZURI_E2E_RECOVER_OK").length, 1);
     }
     console.log(JSON.stringify({ scenario: "worker_restart_errors", ok: true }));
   } finally {
@@ -2096,7 +2096,7 @@ function assertRuntimeQueuesEmpty(runtime) {
 
 function sessionEvents(page, sessionId, after = 0) {
   return page.evaluate(({ sessionId, after }) => (
-    window.__qzBackgroundE2E.events().slice(after).filter(event => event?.sessionId === sessionId)
+    window.__zuriBackgroundE2E.events().slice(after).filter(event => event?.sessionId === sessionId)
   ), { sessionId, after });
 }
 
@@ -2132,7 +2132,7 @@ async function observeSteeringBatchMotion(page) {
     document.querySelectorAll(".queued-followup-exit-ghost, .queued-followup-batch-exit-ghost").length === 0
   ), null, { timeout: 10_000 });
   await page.evaluate(() => {
-    window.__qzSteeringBatchObserver?.disconnect?.();
+    window.__zuriSteeringBatchObserver?.disconnect?.();
     const state = {
       maxBatchGhostCount: 0,
       maxBatchRowCount: 0,
@@ -2156,23 +2156,23 @@ async function observeSteeringBatchMotion(page) {
     };
     const observer = new MutationObserver(scan);
     observer.observe(document.body, { childList: true, subtree: true });
-    window.__qzSteeringBatchMotion = state;
-    window.__qzSteeringBatchObserver = observer;
+    window.__zuriSteeringBatchMotion = state;
+    window.__zuriSteeringBatchObserver = observer;
     scan();
   });
 }
 
 async function finishSteeringBatchMotion(page) {
   return page.evaluate(() => {
-    window.__qzSteeringBatchObserver?.disconnect?.();
-    window.__qzSteeringBatchObserver = null;
-    const state = window.__qzSteeringBatchMotion || {
+    window.__zuriSteeringBatchObserver?.disconnect?.();
+    window.__zuriSteeringBatchObserver = null;
+    const state = window.__zuriSteeringBatchMotion || {
       maxBatchGhostCount: 0,
       maxBatchRowCount: 0,
       maxIndividualGhostCount: 0,
       batchSizes: [],
     };
-    window.__qzSteeringBatchMotion = null;
+    window.__zuriSteeringBatchMotion = null;
     return state;
   });
 }
@@ -2213,7 +2213,7 @@ async function installHarness(page) {
         waiters.add(waiter);
       });
     };
-    window.__qzBackgroundE2E = {
+    window.__zuriBackgroundE2E = {
       send(type, payload = {}) { port.postMessage({ type, ...payload }); },
       wait,
       count: () => events.length,
@@ -2231,33 +2231,33 @@ async function installHarness(page) {
 
 async function request(page, type, payload, responseType, timeoutMs = 20_000) {
   const result = await page.evaluate(({ type, payload, responseType, timeoutMs }) => (
-    window.__qzBackgroundE2E.request(type, payload, responseType, timeoutMs)
+    window.__zuriBackgroundE2E.request(type, payload, responseType, timeoutMs)
   ), { type, payload, responseType, timeoutMs });
   if (["error", "request_failed", "transport_error"].includes(result.type)) throw Object.assign(new Error(result.message), { code: result.code, details: result.details });
   return result;
 }
 
 function send(page, type, payload = {}) {
-  return page.evaluate(({ type, payload }) => window.__qzBackgroundE2E.send(type, payload), { type, payload });
+  return page.evaluate(({ type, payload }) => window.__zuriBackgroundE2E.send(type, payload), { type, payload });
 }
 
 function waitEvent(page, expected, after = 0, timeoutMs = 20_000) {
-  return page.evaluate(({ expected, after, timeoutMs }) => window.__qzBackgroundE2E.wait(expected, after, timeoutMs), {
+  return page.evaluate(({ expected, after, timeoutMs }) => window.__zuriBackgroundE2E.wait(expected, after, timeoutMs), {
     expected, after, timeoutMs,
   });
 }
 
 function eventCount(page) {
-  return page.evaluate(() => window.__qzBackgroundE2E.count());
+  return page.evaluate(() => window.__zuriBackgroundE2E.count());
 }
 
 function matchingEventCount(page, expected, after = 0) {
-  return page.evaluate(({ expected, after }) => window.__qzBackgroundE2E.matchingCount(expected, after), { expected, after });
+  return page.evaluate(({ expected, after }) => window.__zuriBackgroundE2E.matchingCount(expected, after), { expected, after });
 }
 
 function waitForQueueCount(page, sessionId, count, after = 0, timeoutMs = 20_000) {
   return page.evaluate(({ sessionId, count, after, timeoutMs }) => (
-    window.__qzBackgroundE2E.wait({}, after, timeoutMs, message => (
+    window.__zuriBackgroundE2E.wait({}, after, timeoutMs, message => (
       message?.type === "queue_update"
       && message?.sessionId === sessionId
       && message?.pendingFollowUpMessages?.length === count
@@ -2267,13 +2267,13 @@ function waitForQueueCount(page, sessionId, count, after = 0, timeoutMs = 20_000
 
 async function waitForAgentEndCount(page, sessionId, after, count, timeoutMs) {
   await page.waitForFunction(({ sessionId, after, count }) => (
-    window.__qzBackgroundE2E.events()
+    window.__zuriBackgroundE2E.events()
       .slice(after)
       .filter(message => message?.type === "agent_end" && message?.sessionId === sessionId)
       .length >= count
   ), { sessionId, after, count }, { timeout: timeoutMs });
   return page.evaluate(({ sessionId, after }) => (
-    window.__qzBackgroundE2E.events()
+    window.__zuriBackgroundE2E.events()
       .slice(after)
       .filter(message => message?.type === "agent_end" && message?.sessionId === sessionId)
   ), { sessionId, after });
@@ -2365,34 +2365,34 @@ async function createProviderServer() {
       ...imageProjectionStats(body.messages),
       documentCapsuleCount: documentCapsuleCount(body),
       containsDisplayProjection: JSON.stringify(body?.messages || []).includes("imageWithAction"),
-      ...(marker === "QZ_E2E_RESET_NEW" ? { containsResetHistory: JSON.stringify(body.messages).includes("QZ_E2E_RESET_OLD") } : {}),
-      ...(marker.startsWith("QZ_E2E_SELECTION_") ? {
+      ...(marker === "ZURI_E2E_RESET_NEW" ? { containsResetHistory: JSON.stringify(body.messages).includes("ZURI_E2E_RESET_OLD") } : {}),
+      ...(marker.startsWith("ZURI_E2E_SELECTION_") ? {
         selectionResult: selectionToolResult(body),
         selectionContainsUnselected: JSON.stringify(body.messages).includes("northstar-backend"),
       } : {}),
-      ...(marker === "QZ_E2E_TABUIDS" ? { uidBatch: uidBatchTargets(body) } : {}),
+      ...(marker === "ZURI_E2E_TABUIDS" ? { uidBatch: uidBatchTargets(body) } : {}),
     });
 
-    if (marker.startsWith("QZ_E2E_FAULT_")) {
+    if (marker.startsWith("ZURI_E2E_FAULT_")) {
       const fault = marker.split("_")[3];
       if (fault !== "HTTP") {
         res.writeHead(200, { "content-type": "text/event-stream; charset=utf-8" });
-        res.write(`data: ${JSON.stringify(streamChunk("QZ partial output before injected failure", true))}\n\n`);
+        res.write(`data: ${JSON.stringify(streamChunk("ZURI partial output before injected failure", true))}\n\n`);
       }
       // The recovery attempt must receive the fault too, without a second gate.
       if (count === 1) await waitForRelease(marker);
       if (res.destroyed) return;
-      if (fault === "HTTP") sendJson(res, 401, { error: { message: "QZ gated auth failure" } });
+      if (fault === "HTTP") sendJson(res, 401, { error: { message: "ZURI gated auth failure" } });
       else if (fault === "SOCKET") res.destroy();
-      else if (fault === "SSE") res.end(`data: ${JSON.stringify({ error: { message: "QZ gated stream failure", type: "invalid_request_error", code: "invalid_request_error" } })}\n\n`);
+      else if (fault === "SSE") res.end(`data: ${JSON.stringify({ error: { message: "ZURI gated stream failure", type: "invalid_request_error", code: "invalid_request_error" } })}\n\n`);
       else res.end(); // Clean transport EOF without the protocol's finish marker.
       return;
     }
-    if (marker === "QZ_E2E_HTTP_ERROR") {
-      sendJson(res, 401, { error: { message: "QZ injected auth failure" } });
+    if (marker === "ZURI_E2E_HTTP_ERROR") {
+      sendJson(res, 401, { error: { message: "ZURI injected auth failure" } });
       return;
     }
-    if (marker === "QZ_E2E_UNSUPPORTED_IMAGE") {
+    if (marker === "ZURI_E2E_UNSUPPORTED_IMAGE") {
       const content = `data: ${JSON.stringify({ error: {
         code: "invalid_parameter_error",
         type: "invalid_request_error",
@@ -2402,26 +2402,26 @@ async function createProviderServer() {
       res.end(`data: ${JSON.stringify({ choices: [{ index: 0, delta: { content }, finish_reason: "error_finish" }] })}\n\ndata: [DONE]\n\n`);
       return;
     }
-    if (marker === "QZ_E2E_RETRY" && count === 1) {
-      sendJson(res, 503, { error: { message: "QZ injected overloaded" } });
+    if (marker === "ZURI_E2E_RETRY" && count === 1) {
+      sendJson(res, 503, { error: { message: "ZURI injected overloaded" } });
       return;
     }
-    if (marker === "QZ_E2E_WORKER_COMPACT") {
+    if (marker === "ZURI_E2E_WORKER_COMPACT") {
       await waitForRelease(marker);
       if (res.destroyed) return;
     }
     if (body.stream !== true) {
-      sendJson(res, 200, completion("QZ validation OK"));
+      sendJson(res, 200, completion("ZURI validation OK"));
       return;
     }
 
-    if (marker === "QZ_E2E_WORKER_IMAGES" && count <= 10) {
+    if (marker === "ZURI_E2E_WORKER_IMAGES" && count <= 10) {
       res.writeHead(200, { "content-type": "text/event-stream; charset=utf-8" });
       if (count > 1) {
         const thinking = streamChunk("", true);
-        thinking.choices[0].delta.reasoning_content = `QZ_SCREEN_THINK_${count - 1}: retain the complete reasoning for screenshot ${count - 1}.`;
+        thinking.choices[0].delta.reasoning_content = `ZURI_SCREEN_THINK_${count - 1}: retain the complete reasoning for screenshot ${count - 1}.`;
         res.write(`data: ${JSON.stringify(thinking)}\n\n`);
-        res.write(`data: ${JSON.stringify(streamChunk(`QZ_SCREENSHOT_${count - 1}`, false))}\n\n`);
+        res.write(`data: ${JSON.stringify(streamChunk(`ZURI_SCREENSHOT_${count - 1}`, false))}\n\n`);
       }
       const call = count === 1
         ? streamToolCall("call_worker_images_open", "open_tab", JSON.stringify({ url: `http://127.0.0.1:${server.address().port}/screen-action-target` }))
@@ -2432,22 +2432,22 @@ async function createProviderServer() {
       return;
     }
 
-    if (marker === "QZ_E2E_WORKER_CHECKPOINT") {
+    if (marker === "ZURI_E2E_WORKER_CHECKPOINT") {
       res.writeHead(200, { "content-type": "text/event-stream; charset=utf-8" });
       if (count === 1) {
-        res.write(`data: ${JSON.stringify(streamChunk("QZ_CHECKPOINT_COMPLETED_BEFORE_RESTART", true))}\n\n`);
+        res.write(`data: ${JSON.stringify(streamChunk("ZURI_CHECKPOINT_COMPLETED_BEFORE_RESTART", true))}\n\n`);
         res.write(`data: ${JSON.stringify(streamToolCall("call_worker_checkpoint_tabs", "list_tabs", "{}"))}\n\n`);
         res.write(`data: ${JSON.stringify(streamToolCallsDone())}\n\n`);
         res.end("data: [DONE]\n\n");
       } else {
-        res.write(`data: ${JSON.stringify(streamChunk("QZ_CHECKPOINT_IN_PROGRESS", true))}\n\n`);
+        res.write(`data: ${JSON.stringify(streamChunk("ZURI_CHECKPOINT_IN_PROGRESS", true))}\n\n`);
         await waitForRelease(marker);
         if (!res.destroyed) res.end();
       }
       return;
     }
 
-    if (marker === "QZ_E2E_TABUIDS" && count <= 3) {
+    if (marker === "ZURI_E2E_TABUIDS" && count <= 3) {
       res.writeHead(200, {
         "content-type": "text/event-stream; charset=utf-8",
         "cache-control": "no-cache",
@@ -2476,7 +2476,7 @@ async function createProviderServer() {
           table: "uid_batch_e2e", targets: ["css:#img-2", targets.a?.targets?.[0]],
         })]);
         // The scenario renames one document and navigates another before these calls stream.
-        await waitForRelease("QZ_E2E_TABUIDS_COLLECT");
+        await waitForRelease("ZURI_E2E_TABUIDS_COLLECT");
         if (res.destroyed) return;
       }
       for (const [index, [toolCallId, name, args]] of calls.entries()) {
@@ -2488,7 +2488,7 @@ async function createProviderServer() {
       return;
     }
 
-    if (marker === "QZ_E2E_LOCATION" && count <= 2) {
+    if (marker === "ZURI_E2E_LOCATION" && count <= 2) {
       res.writeHead(200, { "content-type": "text/event-stream" });
       res.write(`data: ${JSON.stringify(streamToolCall(`location_${count}`, "get_location", "{}"))}\n\n`);
       res.write(`data: ${JSON.stringify(streamToolCallsDone())}\n\n`);
@@ -2496,7 +2496,7 @@ async function createProviderServer() {
       return;
     }
 
-    if (marker.startsWith("QZ_E2E_SELECTION_") && count <= 2) {
+    if (marker.startsWith("ZURI_E2E_SELECTION_") && count <= 2) {
       const [toolCallId, name, args] = count === 1
         ? ["selection_load", "load_skill", { name: "result-selection-example" }]
         : ["selection_choose", "result_selection_example__choose", { timeout: 10 }];
@@ -2507,10 +2507,10 @@ async function createProviderServer() {
       return;
     }
 
-    if (marker === "QZ_E2E_MCP_OUTPUT_SCHEMA" && count <= 5) {
+    if (marker === "ZURI_E2E_MCP_OUTPUT_SCHEMA" && count <= 5) {
       const serverArgs = { url: `http://127.0.0.1:${server.address().port}/mcp-output-schema`, name: "schema-fixture", timeout: 10 };
       const steps = [
-        ["mcp_schema_load", "load_skill", { name: "qingzhou-mcp" }],
+        ["mcp_schema_load", "load_skill", { name: "zuri-mcp" }],
         ["mcp_schema_inspect", getMcpSkillToolName("mcp_inspect_server"), { ...serverArgs, refresh: true }],
         ["mcp_schema_valid", getMcpSkillToolName("mcp_call_tool"), { ...serverArgs, tool: "count", args: {} }],
         ["mcp_schema_invalid", getMcpSkillToolName("mcp_call_tool"), { ...serverArgs, tool: "count", args: { invalid: true } }],
@@ -2524,22 +2524,22 @@ async function createProviderServer() {
       return;
     }
 
-    if (marker === "QZ_E2E_MANAGED_CHILD") {
+    if (marker === "ZURI_E2E_MANAGED_CHILD") {
       res.writeHead(200, { "content-type": "text/event-stream" });
       await waitForRelease(marker);
       if (!res.destroyed) res.end("data: [DONE]\n\n");
       return;
     }
-    if (marker === "QZ_E2E_MANAGE" && count % 2 === 1) {
-      const text = userMessageTexts(body).findLast(value => value.startsWith("QZ_E2E_MANAGE "));
-      const args = text.slice("QZ_E2E_MANAGE ".length);
+    if (marker === "ZURI_E2E_MANAGE" && count % 2 === 1) {
+      const text = userMessageTexts(body).findLast(value => value.startsWith("ZURI_E2E_MANAGE "));
+      const args = text.slice("ZURI_E2E_MANAGE ".length);
       res.writeHead(200, { "content-type": "text/event-stream" });
       res.write(`data: ${JSON.stringify(streamToolCall(`manage_${count}`, "manage_sessions", args))}\n\n`);
       res.write(`data: ${JSON.stringify(streamToolCallsDone())}\n\n`);
       res.end("data: [DONE]\n\n");
       return;
     }
-    if (marker === "QZ_E2E_STEER_ACTIVE" && count === 1) {
+    if (marker === "ZURI_E2E_STEER_ACTIVE" && count === 1) {
       res.writeHead(200, {
         "content-type": "text/event-stream; charset=utf-8",
         "cache-control": "no-cache",
@@ -2554,13 +2554,13 @@ async function createProviderServer() {
       return;
     }
 
-    if (["QZ_E2E_STEER_SINGLE_ACTIVE", "QZ_E2E_STEER_MULTI_ACTIVE"].includes(marker) && count === 1) {
+    if (["ZURI_E2E_STEER_SINGLE_ACTIVE", "ZURI_E2E_STEER_MULTI_ACTIVE"].includes(marker) && count === 1) {
       res.writeHead(200, {
         "content-type": "text/event-stream; charset=utf-8",
         "cache-control": "no-cache",
         connection: "keep-alive",
       });
-      const suffix = marker === "QZ_E2E_STEER_SINGLE_ACTIVE" ? "single" : "multi";
+      const suffix = marker === "ZURI_E2E_STEER_SINGLE_ACTIVE" ? "single" : "multi";
       res.write(`data: ${JSON.stringify(streamToolCall(`call_steering_matrix_${suffix}`, "list_tabs", "{}"))}\n\n`);
       await waitForRelease(marker);
       if (res.destroyed || req.aborted) return;
@@ -2570,7 +2570,7 @@ async function createProviderServer() {
       return;
     }
 
-    if (marker === "QZ_E2E_DELETE_RUNNING_AUTOMATION" && count === 1) {
+    if (marker === "ZURI_E2E_DELETE_RUNNING_AUTOMATION" && count === 1) {
       res.writeHead(200, {
         "content-type": "text/event-stream; charset=utf-8",
         "cache-control": "no-cache",
@@ -2584,7 +2584,7 @@ async function createProviderServer() {
       return;
     }
 
-    if (marker === "QZ_E2E_SCREEN_ACTION" && count <= 10) {
+    if (marker === "ZURI_E2E_SCREEN_ACTION" && count <= 10) {
       res.writeHead(200, {
         "content-type": "text/event-stream; charset=utf-8",
         "cache-control": "no-cache",
@@ -2698,12 +2698,12 @@ async function createProviderServer() {
 
     const output = outputForMarker(marker);
     const delayMs = [
-      "QZ_E2E_STOP",
-      "QZ_QUEUE_ACTIVE",
-      "QZ_E2E_RECONNECT",
-      "QZ_E2E_PARALLEL_A",
-      "QZ_E2E_PARALLEL_B",
-      "QZ_E2E_WORKER_OLD",
+      "ZURI_E2E_STOP",
+      "ZURI_QUEUE_ACTIVE",
+      "ZURI_E2E_RECONNECT",
+      "ZURI_E2E_PARALLEL_A",
+      "ZURI_E2E_PARALLEL_B",
+      "ZURI_E2E_WORKER_OLD",
     ].includes(marker) ? 90 : 0;
     res.writeHead(200, {
       "content-type": "text/event-stream; charset=utf-8",
@@ -2750,7 +2750,7 @@ async function createGitRepositoryServer() {
     content: "# Git authenticated archive fixture\n\nLoaded from the repository Zip.",
     scope: "global",
     metadata: {
-      qingzhou: {
+      zuri: {
         origin: { type: "local-draft", note: "legacy publish metadata" },
       },
     },
@@ -2776,14 +2776,14 @@ async function createGitRepositoryServer() {
     if (url.pathname === "/group/private-skill-repository" || url.pathname === "/group/private-skill-repository/tree/main/skills") {
       res.writeHead(200, {
         "content-type": "text/html; charset=utf-8",
-        "set-cookie": "qz_git_auth=1; Path=/; SameSite=Lax",
+        "set-cookie": "zuri_git_auth=1; Path=/; SameSite=Lax",
       });
       res.end(`<!doctype html><html><head><meta name="project:default_branch" content="main"><title>private-skill-repository</title></head><body data-project-id="77"><a href="/group/private-skill-repository/commit/${"a".repeat(40)}">commit</a></body></html>`);
       return;
     }
     if (url.pathname === "/api/v3/projects/77/repository/archive.zip") {
       archiveRequests += 1;
-      const authenticated = /(?:^|;\s*)qz_git_auth=1(?:;|$)/u.test(String(req.headers.cookie || ""));
+      const authenticated = /(?:^|;\s*)zuri_git_auth=1(?:;|$)/u.test(String(req.headers.cookie || ""));
       if (!authenticated) {
         sendJson(res, 401, { error: "authentication required" });
         return;
@@ -2817,59 +2817,59 @@ async function createGitRepositoryServer() {
 
 function outputForMarker(marker) {
   return {
-    QZ_E2E_BASIC: "QZ_E2E_BASIC_OK",
-    QZ_E2E_RESET_OLD: "QZ_E2E_RESET_OLD_OK",
-    QZ_E2E_RESET_NEW: "QZ_E2E_RESET_NEW_OK",
-    QZ_E2E_UI: "QZ_E2E_UI_OK",
-    QZ_E2E_ATTACHMENT_HISTORY_SEED: "QZ_E2E_ATTACHMENT_HISTORY_SEED_OK",
-    QZ_E2E_ATTACHMENT_HISTORY: "QZ_E2E_ATTACHMENT_HISTORY_OK",
-    QZ_E2E_ATTACHMENT_NEW: "QZ_E2E_ATTACHMENT_NEW_OK",
-    QZ_E2E_AUTOMATION: "QZ_E2E_AUTOMATION_OK",
-    QZ_E2E_DELETE_RUNNING_AUTOMATION: "QZ_E2E_DELETE_RUNNING_AUTOMATION_OK",
-    QZ_E2E_SCREEN_ACTION: "QZ_E2E_SCREEN_ACTION_OK",
-    QZ_E2E_MCP_OUTPUT_SCHEMA: "QZ_E2E_MCP_OUTPUT_SCHEMA_OK",
-    QZ_E2E_SELECTION_PICK: "QZ_E2E_SELECTION_PICK_OK",
-    QZ_E2E_SELECTION_CANCEL: "QZ_E2E_SELECTION_CANCEL_OK",
-    QZ_E2E_RETRY: "QZ_E2E_RETRY_OK",
-    QZ_E2E_STEER_TWO: "QZ_E2E_STEER_OK",
-    QZ_E2E_STEER_SINGLE_MESSAGE: "QZ_E2E_STEER_SINGLE_OK",
-    QZ_E2E_STEER_MULTI_THREE: "QZ_E2E_STEER_MULTI_OK",
-    QZ_E2E_RECOVER: "QZ_E2E_RECOVER_OK",
-    QZ_E2E_STOP: "QZ_E2E_STOP_SHOULD_BE_CUT_OFF_AFTER_THE_FIRST_CHUNK",
-    QZ_QUEUE_ACTIVE: "QZ_QUEUE_ACTIVE_STREAM_MUST_STAY_OPEN_LONG_ENOUGH_TO_QUEUE",
-    QZ_QUEUE_NEXT: "QZ_QUEUE_NEXT_OK",
-    QZ_E2E_AFTER_ABORT_1: "QZ_E2E_AFTER_ABORT_1_OK",
-    QZ_E2E_AFTER_ABORT_2: "QZ_E2E_AFTER_ABORT_2_OK",
-    QZ_E2E_PARALLEL_A: "QZ_E2E_PARALLEL_A_OK",
-    QZ_E2E_PARALLEL_B: "QZ_E2E_PARALLEL_B_OK",
-    QZ_E2E_RECONNECT: "QZ_E2E_RECONNECT_OK",
-    QZ_E2E_WORKER_OLD: "QZ_E2E_WORKER_OLD_STREAM_MUST_BE_INTERRUPTED",
-    QZ_E2E_WORKER_NEW: "QZ_E2E_WORKER_NEW_OK",
-    QZ_E2E_WORKER_IMAGES: "QZ_E2E_WORKER_IMAGES_OK",
-    QZ_E2E_TABUIDS: "QZ_E2E_TABUIDS_OK",
-  }[marker] || "QZ_DEFAULT_OK";
+    ZURI_E2E_BASIC: "ZURI_E2E_BASIC_OK",
+    ZURI_E2E_RESET_OLD: "ZURI_E2E_RESET_OLD_OK",
+    ZURI_E2E_RESET_NEW: "ZURI_E2E_RESET_NEW_OK",
+    ZURI_E2E_UI: "ZURI_E2E_UI_OK",
+    ZURI_E2E_ATTACHMENT_HISTORY_SEED: "ZURI_E2E_ATTACHMENT_HISTORY_SEED_OK",
+    ZURI_E2E_ATTACHMENT_HISTORY: "ZURI_E2E_ATTACHMENT_HISTORY_OK",
+    ZURI_E2E_ATTACHMENT_NEW: "ZURI_E2E_ATTACHMENT_NEW_OK",
+    ZURI_E2E_AUTOMATION: "ZURI_E2E_AUTOMATION_OK",
+    ZURI_E2E_DELETE_RUNNING_AUTOMATION: "ZURI_E2E_DELETE_RUNNING_AUTOMATION_OK",
+    ZURI_E2E_SCREEN_ACTION: "ZURI_E2E_SCREEN_ACTION_OK",
+    ZURI_E2E_MCP_OUTPUT_SCHEMA: "ZURI_E2E_MCP_OUTPUT_SCHEMA_OK",
+    ZURI_E2E_SELECTION_PICK: "ZURI_E2E_SELECTION_PICK_OK",
+    ZURI_E2E_SELECTION_CANCEL: "ZURI_E2E_SELECTION_CANCEL_OK",
+    ZURI_E2E_RETRY: "ZURI_E2E_RETRY_OK",
+    ZURI_E2E_STEER_TWO: "ZURI_E2E_STEER_OK",
+    ZURI_E2E_STEER_SINGLE_MESSAGE: "ZURI_E2E_STEER_SINGLE_OK",
+    ZURI_E2E_STEER_MULTI_THREE: "ZURI_E2E_STEER_MULTI_OK",
+    ZURI_E2E_RECOVER: "ZURI_E2E_RECOVER_OK",
+    ZURI_E2E_STOP: "ZURI_E2E_STOP_SHOULD_BE_CUT_OFF_AFTER_THE_FIRST_CHUNK",
+    ZURI_QUEUE_ACTIVE: "ZURI_QUEUE_ACTIVE_STREAM_MUST_STAY_OPEN_LONG_ENOUGH_TO_QUEUE",
+    ZURI_QUEUE_NEXT: "ZURI_QUEUE_NEXT_OK",
+    ZURI_E2E_AFTER_ABORT_1: "ZURI_E2E_AFTER_ABORT_1_OK",
+    ZURI_E2E_AFTER_ABORT_2: "ZURI_E2E_AFTER_ABORT_2_OK",
+    ZURI_E2E_PARALLEL_A: "ZURI_E2E_PARALLEL_A_OK",
+    ZURI_E2E_PARALLEL_B: "ZURI_E2E_PARALLEL_B_OK",
+    ZURI_E2E_RECONNECT: "ZURI_E2E_RECONNECT_OK",
+    ZURI_E2E_WORKER_OLD: "ZURI_E2E_WORKER_OLD_STREAM_MUST_BE_INTERRUPTED",
+    ZURI_E2E_WORKER_NEW: "ZURI_E2E_WORKER_NEW_OK",
+    ZURI_E2E_WORKER_IMAGES: "ZURI_E2E_WORKER_IMAGES_OK",
+    ZURI_E2E_TABUIDS: "ZURI_E2E_TABUIDS_OK",
+  }[marker] || "ZURI_DEFAULT_OK";
 }
 
 function detectMarker(body) {
   const messages = Array.isArray(body?.messages) ? body.messages : [];
-  const markers = ["QZ_E2E_LOCATION", "QZ_E2E_SELECTION_PICK", "QZ_E2E_SELECTION_CANCEL",
-    "QZ_E2E_RESET_OLD", "QZ_E2E_RESET_NEW",
-    "QZ_E2E_MANAGED_CHILD", "QZ_E2E_MANAGE", "QZ_E2E_HTTP_ERROR", "QZ_E2E_UNSUPPORTED_IMAGE", "QZ_E2E_RETRY", "QZ_E2E_BASIC", "QZ_E2E_UI",
-    "QZ_E2E_ATTACHMENT_HISTORY_SEED", "QZ_E2E_ATTACHMENT_HISTORY", "QZ_E2E_ATTACHMENT_NEW",
-    "QZ_E2E_AUTOMATION", "QZ_E2E_DELETE_RUNNING_AUTOMATION", "QZ_E2E_SCREEN_ACTION", "QZ_E2E_MCP_OUTPUT_SCHEMA", "QZ_E2E_RECOVER",
-    "QZ_E2E_STEER_ACTIVE", "QZ_E2E_STEER_ONE", "QZ_E2E_STEER_TWO",
-    "QZ_E2E_STEER_SINGLE_ACTIVE", "QZ_E2E_STEER_SINGLE_MESSAGE",
-    "QZ_E2E_STEER_MULTI_ACTIVE", "QZ_E2E_STEER_MULTI_ONE", "QZ_E2E_STEER_MULTI_THREE",
-    "QZ_E2E_STEER_MULTI_DELETE_STEERING", "QZ_E2E_STEER_MULTI_DELETE_FOLLOWUP",
-    "QZ_E2E_STOP", "QZ_E2E_AFTER_ABORT_1", "QZ_E2E_AFTER_ABORT_2", "QZ_QUEUE_ACTIVE", "QZ_QUEUE_NEXT",
-    "QZ_E2E_PARALLEL_A", "QZ_E2E_PARALLEL_B", "QZ_E2E_RECONNECT",
-    "QZ_E2E_WORKER_OLD", "QZ_E2E_WORKER_NEW", "QZ_E2E_WORKER_CHECKPOINT", "QZ_E2E_WORKER_IMAGES", "QZ_E2E_WORKER_COMPACT",
-    "QZ_E2E_TABUIDS",
+  const markers = ["ZURI_E2E_LOCATION", "ZURI_E2E_SELECTION_PICK", "ZURI_E2E_SELECTION_CANCEL",
+    "ZURI_E2E_RESET_OLD", "ZURI_E2E_RESET_NEW",
+    "ZURI_E2E_MANAGED_CHILD", "ZURI_E2E_MANAGE", "ZURI_E2E_HTTP_ERROR", "ZURI_E2E_UNSUPPORTED_IMAGE", "ZURI_E2E_RETRY", "ZURI_E2E_BASIC", "ZURI_E2E_UI",
+    "ZURI_E2E_ATTACHMENT_HISTORY_SEED", "ZURI_E2E_ATTACHMENT_HISTORY", "ZURI_E2E_ATTACHMENT_NEW",
+    "ZURI_E2E_AUTOMATION", "ZURI_E2E_DELETE_RUNNING_AUTOMATION", "ZURI_E2E_SCREEN_ACTION", "ZURI_E2E_MCP_OUTPUT_SCHEMA", "ZURI_E2E_RECOVER",
+    "ZURI_E2E_STEER_ACTIVE", "ZURI_E2E_STEER_ONE", "ZURI_E2E_STEER_TWO",
+    "ZURI_E2E_STEER_SINGLE_ACTIVE", "ZURI_E2E_STEER_SINGLE_MESSAGE",
+    "ZURI_E2E_STEER_MULTI_ACTIVE", "ZURI_E2E_STEER_MULTI_ONE", "ZURI_E2E_STEER_MULTI_THREE",
+    "ZURI_E2E_STEER_MULTI_DELETE_STEERING", "ZURI_E2E_STEER_MULTI_DELETE_FOLLOWUP",
+    "ZURI_E2E_STOP", "ZURI_E2E_AFTER_ABORT_1", "ZURI_E2E_AFTER_ABORT_2", "ZURI_QUEUE_ACTIVE", "ZURI_QUEUE_NEXT",
+    "ZURI_E2E_PARALLEL_A", "ZURI_E2E_PARALLEL_B", "ZURI_E2E_RECONNECT",
+    "ZURI_E2E_WORKER_OLD", "ZURI_E2E_WORKER_NEW", "ZURI_E2E_WORKER_CHECKPOINT", "ZURI_E2E_WORKER_IMAGES", "ZURI_E2E_WORKER_COMPACT",
+    "ZURI_E2E_TABUIDS",
   ];
   for (const message of [...messages].reverse()) {
     if (message?.role !== "user") continue;
     const text = JSON.stringify(message.content ?? "");
-    const faultMarker = text.match(/QZ_E2E_FAULT_[A-Z_]+/u)?.[0];
+    const faultMarker = text.match(/ZURI_E2E_FAULT_[A-Z_]+/u)?.[0];
     if (faultMarker) return faultMarker;
     const marker = markers.find(candidate => text.includes(candidate));
     if (marker) return marker;
@@ -2894,8 +2894,8 @@ function isTitleGenerationRequest(body = {}) {
 
 function hasSettledInterruptedTurn(body) {
   const messages = Array.isArray(body?.messages) ? body.messages : [];
-  const oldIndex = messages.findIndex(message => JSON.stringify(message?.content || "").includes("QZ_E2E_WORKER_OLD"));
-  const newIndex = messages.findIndex(message => JSON.stringify(message?.content || "").includes("QZ_E2E_WORKER_NEW"));
+  const oldIndex = messages.findIndex(message => JSON.stringify(message?.content || "").includes("ZURI_E2E_WORKER_OLD"));
+  const newIndex = messages.findIndex(message => JSON.stringify(message?.content || "").includes("ZURI_E2E_WORKER_NEW"));
   if (oldIndex < 0 || newIndex <= oldIndex) return false;
   return messages.slice(oldIndex + 1, newIndex).some(message => (
     message?.role === "assistant" && String(message?.content || "").includes("上一轮运行中断")

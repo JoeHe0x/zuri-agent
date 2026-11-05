@@ -4,18 +4,18 @@ import { getAvailableLanguages, getLanguagePreference, readLanguagePreference, s
 import { t } from "./i18n.js";
 
 /** Preference changes take effect by reloading the panel after the shared save succeeds. */
-export default function (qz: UiExtensionAPI) {
+export default function (zuri: UiExtensionAPI) {
   const startupPreference = getLanguagePreference();
   let savedPreference = startupPreference;
   const sectionId = "i18n-language";
-  const view = qz.mountTemplate("i18n-language-template");
+  const view = zuri.mountTemplate("i18n-language-template");
   const section = view.querySelector<HTMLElement>("#i18n-language-settings")!;
   const select = section.querySelector<HTMLSelectElement>("#i18n-language-select")!;
   const languages = getAvailableLanguages();
   const supported = new Set(["system", ...languages.map(language => language.language)]);
   const normalize = (value: string) => supported.has(value) ? value : "system";
   for (const language of [{ language: "system", name: t("followBrowser"), direction: undefined }, ...languages]) {
-    const option = qz.root.createElement("option");
+    const option = zuri.root.createElement("option");
     option.value = language.language;
     option.textContent = language.name;
     option.dir = language.direction || "auto";
@@ -23,7 +23,7 @@ export default function (qz: UiExtensionAPI) {
     select.append(option);
   }
 
-  const form = createSettingsForm(qz, {
+  const form = createSettingsForm(zuri, {
     initialValue: normalize(startupPreference),
     getDraft: () => select.value,
     setDraft: value => { select.value = value; },
@@ -45,7 +45,7 @@ export default function (qz: UiExtensionAPI) {
       const text = loading ? t("loading") : saving ? t("saving")
         : phase === "load-error" ? t("loadFailed") : phase === "save-error" ? t("saveFailed")
         : dirty ? t("unsavedChanges") : t("saved");
-      qz.settings.setState(sectionId, {
+      zuri.settings.setState(sectionId, {
         text,
         tone: failed ? "error" : loading || saving ? "muted" : dirty ? "dirty" : "saved",
         saveLabel: saving ? t("saving") : t("save"),
@@ -54,9 +54,9 @@ export default function (qz: UiExtensionAPI) {
       });
     },
   });
-  select.addEventListener("change", form.changed, { signal: qz.signal });
+  select.addEventListener("change", form.changed, { signal: zuri.signal });
 
-  qz.registerSettings({
+  zuri.registerSettings({
     id: sectionId,
     title: t("title"),
     tab: { id: "advanced", title: t("advanced"), order: 30 },
@@ -66,8 +66,8 @@ export default function (qz: UiExtensionAPI) {
     deactivate: form.deactivate,
     save: form.save,
     afterSave({ signal }) {
-      if (!signal.aborted && !qz.signal.aborted && savedPreference !== startupPreference) {
-        qz.root.defaultView?.location.reload();
+      if (!signal.aborted && !zuri.signal.aborted && savedPreference !== startupPreference) {
+        zuri.root.defaultView?.location.reload();
       }
     },
   });

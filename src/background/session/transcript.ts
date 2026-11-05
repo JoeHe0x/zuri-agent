@@ -71,7 +71,7 @@ export function createSessionTranscript({
 
   function reportCheckpointFailure(error: unknown) {
     if (["STALE_SESSION_LEASE", "SESSION_DELETED"].includes(String((error as { code?: unknown })?.code))) return;
-    console.warn("[轻舟] persist transcript checkpoint failed:", error);
+    console.warn("[Zuri] persist transcript checkpoint failed:", error);
   }
 
   function scheduleCheckpoint(id: string, event: TranscriptAgentEvent) {

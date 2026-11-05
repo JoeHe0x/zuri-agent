@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { registerMcpTools } from "../../src/capabilities/mcp/tools.js";
-import { QINGZHOU_MCP_TOOL_SPECS } from "../../src/capabilities/mcp/skill-contract.js";
+import { ZURI_MCP_TOOL_SPECS } from "../../src/capabilities/mcp/skill-contract.js";
 
 class ToolExecutionError extends Error {
   constructor(code, message, details = {}) {
@@ -44,8 +44,8 @@ assert.deepEqual(
   "MCP family registration order is part of the stable tool catalog",
 );
 for (const [name, definition] of definitions) {
-  assert.equal(definition.description, QINGZHOU_MCP_TOOL_SPECS[name].description);
-  assert.equal(definition.parameters, QINGZHOU_MCP_TOOL_SPECS[name].parameters);
+  assert.equal(definition.description, ZURI_MCP_TOOL_SPECS[name].description);
+  assert.equal(definition.parameters, ZURI_MCP_TOOL_SPECS[name].parameters);
 }
 
 const signal = new AbortController().signal;

@@ -8,6 +8,6 @@
   "browser-permissions.name.history": "historial de navegación",
   "browser-permissions.name.desktopCapture": "grabación de pantalla",
   "browser-permissions.name.downloads.open": "apertura de archivos descargados",
-  "browser-permissions.required": "Concede el permiso de {permission} en el panel lateral de qz y vuelve a intentarlo.",
+  "browser-permissions.required": "Concede el permiso de {permission} en el panel lateral de zuri y vuelve a intentarlo.",
   "browser-permissions.denied": "No se concedió el permiso de {permission} y se canceló la acción. Vuelve a intentarlo para concederlo."
 }

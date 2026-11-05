@@ -25,7 +25,7 @@ function appendGroupTabsProfile(parent: HTMLElement, args: Data, result: unknown
   const data = record(result);
   const tabs = normalizeGroupedTabs(data.tabs);
   const count = Number(data.count || tabs.length || 0);
-  const title = data.title || t("qingzhouTask");
+  const title = data.title || t("zuriTask");
   const domains = normalizeGroupedDomains(data.domains).length
     ? normalizeGroupedDomains(data.domains)
     : topTabDomains(tabs, 4);

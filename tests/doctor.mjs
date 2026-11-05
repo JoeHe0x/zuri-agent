@@ -42,12 +42,12 @@ checkManifestPaths();
 await checkChrome();
 
 if (failures.length) {
-  console.error("Qingzhou test environment is not ready:");
+  console.error("Zuri test environment is not ready:");
   failures.forEach(item => console.error(`  - ${item}`));
   process.exit(1);
 }
 
-console.log("Qingzhou test environment ready");
+console.log("Zuri test environment ready");
 details.forEach(item => console.log(`  ${item}`));
 
 function check(condition, success, failure) {

@@ -124,22 +124,22 @@ async function runDataStoreDeleteTests() {
       "ordered pagination should apply after display ordering",
     );
 
-    globalThis.__qingzhouDataStorePerf = [];
+    globalThis.__zuriDataStorePerf = [];
     const reloadedDataStore = await import(`../../src/shared/data-store.js?reload=${Date.now()}`);
     await reloadedDataStore.listDataTables();
-    const reloadRepairTrace = globalThis.__qingzhouDataStorePerf.find(entry => entry?.name === "repair_record_ids");
+    const reloadRepairTrace = globalThis.__zuriDataStorePerf.find(entry => entry?.name === "repair_record_ids");
     assert.equal(
       reloadRepairTrace?.meta?.skipped,
       true,
       "data-store record-id repair should be skipped after its repair marker survives extension reload",
     );
 
-    globalThis.__qingzhouDataStorePerf = [];
+    globalThis.__zuriDataStorePerf = [];
     const reloadedAgainDataStore = await import(`../../src/shared/data-store.js?reload_again=${Date.now()}`);
     await reloadedAgainDataStore.listDataTables();
-    const secondReloadRecordRepairTrace = globalThis.__qingzhouDataStorePerf.find(entry => entry?.name === "repair_record_ids");
-    const secondReloadRowOrderRepairTrace = globalThis.__qingzhouDataStorePerf.find(entry => entry?.name === "repair_row_order");
-    const secondReloadTableRepairTrace = globalThis.__qingzhouDataStorePerf.find(entry => entry?.name === "repair_table_index");
+    const secondReloadRecordRepairTrace = globalThis.__zuriDataStorePerf.find(entry => entry?.name === "repair_record_ids");
+    const secondReloadRowOrderRepairTrace = globalThis.__zuriDataStorePerf.find(entry => entry?.name === "repair_row_order");
+    const secondReloadTableRepairTrace = globalThis.__zuriDataStorePerf.find(entry => entry?.name === "repair_table_index");
     assert.equal(
       secondReloadRecordRepairTrace?.meta?.skipped,
       true,
@@ -415,7 +415,7 @@ async function assertExistingScopedRowIdsStayUnchanged() {
     meta: [{ key: "repair.record_ids.v1", completedAt: "2026-01-01 10:00:02" }],
   });
 
-  globalThis.__qingzhouDataStorePerf = [];
+  globalThis.__zuriDataStorePerf = [];
   const dataStore = await import(`../../src/shared/data-store.js?preserve_scoped_id=${Date.now()}`);
   const [inserted] = await dataStore.insertDataRows(table, [{ title: "New" }]);
   const listed = await dataStore.queryDataRows({ table, limit: 10 });
@@ -436,7 +436,7 @@ async function assertExistingScopedRowIdsStayUnchanged() {
   assert.equal(deleted.deleted, 1, "existing row IDs should keep working for delete");
   assert.equal((await dataStore.queryDataRows({ table, limit: 10 })).totalMatched, 1);
   assert.equal(
-    globalThis.__qingzhouDataStorePerf.find(entry => entry?.name === "repair_record_ids")?.meta?.skipped,
+    globalThis.__zuriDataStorePerf.find(entry => entry?.name === "repair_record_ids")?.meta?.skipped,
     true,
     "the existing v1 repair marker should remain authoritative; no new ID migration should run",
   );
@@ -697,7 +697,7 @@ async function seedSingleDataRow(table, id, data) {
 
 function openSeedDb() {
   return new Promise((resolve, reject) => {
-    const req = indexedDB.open("qz-browser-agent-data");
+    const req = indexedDB.open("zuri-agent-data");
     req.onupgradeneeded = () => {
       const db = req.result;
       const records = db.createObjectStore("records", { keyPath: "id" });

@@ -6,7 +6,7 @@ import {
 const dnrCalls = [];
 const fetchCalls = [];
 const runtime = {
-  id: "qingzhou-test-extension",
+  id: "zuri-test-extension",
   getURL(path) {
     return `chrome-extension://${this.id}/${path}`;
   },

@@ -172,7 +172,7 @@ test("incoming Ports wait fairly for shared allocation and malformed transfer cl
     onError: error => errors.push(error.code),
   }));
   t.after(() => ports.forEach(port => port.dispose()));
-  const frame = fields => ({ __qz_transport__: 1, ...fields });
+  const frame = fields => ({ __zuri_transport__: 1, ...fields });
   ports.forEach(port => port.receive(frame({ op: "hello" })));
   ports[0].receive(frame({ op: "begin", id: "first", bytes: 10_000, identity: {} }));
   ports[1].receive(frame({ op: "begin", id: "second", bytes: 10_000, identity: {} }));
@@ -253,7 +253,7 @@ test("waiting receive timeout and disconnect cancel quota ownership even before 
     postMessage() {}, onMessage: assert.fail, onError: error => errors.push(error.code),
   });
   t.after(() => transport.dispose());
-  const frame = fields => ({ __qz_transport__: 1, ...fields });
+  const frame = fields => ({ __zuri_transport__: 1, ...fields });
   transport.receive(frame({ op: 'hello' }));
   transport.receive(frame({ op: 'begin', id: 'timeout', bytes: 6000, identity: {} }));
   assert.equal(budget.snapshot().waiting, 1);

@@ -25,8 +25,8 @@ interface Input extends WaitIdentity {
 }
 
 const browserPermissionInstructions = () => productText(
-  "Open this task in the qz side panel, click Allow and continue, and approve Chrome's permission prompt.",
-  "Open this task in the qz sidebar, click Allow and continue, and approve Firefox's permission prompt.",
+  "Open this task in the zuri side panel, click Allow and continue, and approve Chrome's permission prompt.",
+  "Open this task in the zuri sidebar, click Allow and continue, and approve Firefox's permission prompt.",
 );
 
 /** Commands share the supervisor's live wait, never a persisted UI snapshot alone. */
@@ -46,8 +46,8 @@ export function createSessionUserInput(options: Options) {
       form: structuredClone(form), actions: [kind === "form" ? "submit" : "approve", "reject"],
       ...consent,
       instructions: kind === "browser_permission" ? browserPermissionInstructions() : kind === "form"
-        ? "Fill responseTemplate.answers with the user's answers. Keys are field IDs; choices use option values, and multi_choice uses an array. Send the completed template to qingzhou_respond_to_user_input."
-        : "Show this request to the user. After approval, send responseTemplate to qingzhou_respond_to_user_input; to decline, use action reject with this sessionId and waitId.",
+        ? "Fill responseTemplate.answers with the user's answers. Keys are field IDs; choices use option values, and multi_choice uses an array. Send the completed template to zuri_respond_to_user_input."
+        : "Show this request to the user. After approval, send responseTemplate to zuri_respond_to_user_input; to decline, use action reject with this sessionId and waitId.",
       ...(kind === "browser_permission" ? { requiresUserAction: true as const } : {
         responseTemplate: {
           sessionId, waitId: wait.waitId, action: kind === "form" ? "submit" : "approve",

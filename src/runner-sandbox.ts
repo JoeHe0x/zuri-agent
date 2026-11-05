@@ -3,8 +3,8 @@ import type { InnerWorkerOutput } from './shared/contracts/inner-runner.js';
 /** Injected from the separately compiled Worker entry by build-extension.mjs. */
 declare const INNER_WORKER_SOURCE: string;
 
-const HOST_SOURCE = "qz-inner-runner-host";
-const SANDBOX_SOURCE = "qz-inner-runner-sandbox";
+const HOST_SOURCE = "zuri-inner-runner-host";
+const SANDBOX_SOURCE = "zuri-inner-runner-sandbox";
 
 const workers = new Map<string, Worker>();
 

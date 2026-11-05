@@ -125,8 +125,8 @@ export function createToastFeature(options: { root?: Document; hasBlockingOverla
         <strong class="case-toast-title"></strong>
         <span class="case-toast-message"></span>
       </span>
-      <button class="qz-btn qz-btn--secondary qz-btn--sm case-toast-action" type="button" hidden></button>
-      <button class="qz-icon-btn qz-icon-btn--sm case-toast-close" type="button" title="${tHtml("close")}" aria-label="${tHtml("close")}" hidden>
+      <button class="zuri-btn zuri-btn--secondary zuri-btn--sm case-toast-action" type="button" hidden></button>
+      <button class="zuri-icon-btn zuri-icon-btn--sm case-toast-close" type="button" title="${tHtml("close")}" aria-label="${tHtml("close")}" hidden>
         <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m7 7 10 10M17 7 7 17"></path></svg>
       </button>
     `;
@@ -136,10 +136,10 @@ export function createToastFeature(options: { root?: Document; hasBlockingOverla
       if (!action) return;
       try {
         Promise.resolve(action()).catch(error => {
-          console.debug("[轻舟] toast action failed:", error instanceof Error ? error.message : error);
+          console.debug("[Zuri] toast action failed:", error instanceof Error ? error.message : error);
         });
       } catch (error) {
-        console.debug("[轻舟] toast action failed:", error instanceof Error ? error.message : error);
+        console.debug("[Zuri] toast action failed:", error instanceof Error ? error.message : error);
       }
     });
     toast.querySelector(".case-toast-close")?.addEventListener("click", () => hide());

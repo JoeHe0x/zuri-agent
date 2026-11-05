@@ -20,7 +20,7 @@ interface ActionModel {
   rootInputWeight: Float32Array; rootInputBias: Float32Array; rootOutputWeight: Float32Array; rootOutputBias: number;
   emptyInputWeight: Float32Array; emptyInputBias: Float32Array; emptyOutputWeight: Float32Array; emptyOutputBias: number;
 }
-const host = globalThis as typeof globalThis & { QingzhouArticleExtractor?: ArticleExtractor };
+const host = globalThis as typeof globalThis & { ZuriArticleExtractor?: ArticleExtractor };
 /**
  * Browser-native main-content extraction pipeline.
  *
@@ -33,7 +33,7 @@ const host = globalThis as typeof globalThis & { QingzhouArticleExtractor?: Arti
  * serializer and one public result contract.
  */
 (() => {
-  if (host.QingzhouArticleExtractor) return;
+  if (host.ZuriArticleExtractor) return;
 
   const MIN_EXTRACTED_SIZE = 250;
   const MIN_CONTENT_LENGTH = 100;
@@ -133,7 +133,7 @@ const host = globalThis as typeof globalThis & { QingzhouArticleExtractor?: Arti
   // exact final all-development model, packed little-endian for a compact,
   // synchronous content-script dependency.
   const TREE_DP_ACTION_MODEL_ARTIFACT = Object.freeze({
-    schema: "qingzhou.tree-dp-rich-bounded-action.v1",
+    schema: "zuri.tree-dp-rich-bounded-action.v1",
     reportSha256: "d679bc65b9630e71ed5c7e2cc466b7ab7c5e91273ccef9334aa7ac042f632baf",
     packedSha256: "65a060d2dd57e8071fcc187840979255eda2d6450052694b925f3244241d0da3",
     dimensions: 118,
@@ -2780,5 +2780,5 @@ const host = globalThis as typeof globalThis & { QingzhouArticleExtractor?: Arti
     return withMetadata(result, readability);
   }
 
-  host.QingzhouArticleExtractor = Object.freeze({ extract });
+  host.ZuriArticleExtractor = Object.freeze({ extract });
 })();

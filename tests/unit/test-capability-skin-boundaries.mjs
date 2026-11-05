@@ -44,11 +44,11 @@ test("every existing resource scroll surface opts into the generic control", () 
       const items = value.split(/\s+/);
       for (const item of items.filter(name => classes.has(name))) {
         seen.add(item);
-        assert.ok(items.includes("qz-scroll"), `${source}: ${item} must opt into resource scrollbars`);
+        assert.ok(items.includes("zuri-scroll"), `${source}: ${item} must opt into resource scrollbars`);
       }
     }
   }
   assert.deepEqual([...seen].sort(), [...classes].sort());
-  assert.match(core, /\.qz-scroll:not\(\.qz-scroll--native\)\s*\{\s*scrollbar-width:\s*thin;/);
+  assert.match(core, /\.zuri-scroll:not\(\.zuri-scroll--native\)\s*\{\s*scrollbar-width:\s*thin;/);
   assert.doesNotMatch(core, /\.(?:data-preview|skills-list|skill-content|skill-editor|skill-settings-scroll)\b/);
 });

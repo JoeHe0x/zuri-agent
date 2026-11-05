@@ -10,7 +10,7 @@ import "../support/typescript-loader.mjs";
 
 const root = dirname(dirname(dirname(fileURLToPath(import.meta.url))));
 const reportPath = join(root, "tests/results/firefox-suite.json");
-const supplied = process.env.QINGZHOU_FIREFOX_EXTENSION_DIR;
+const supplied = process.env.ZURI_FIREFOX_EXTENSION_DIR;
 const packageDir = supplied || extensionOutputDirectory("firefox");
 const firefox = resolveFirefoxExecutable();
 const report = {
@@ -68,10 +68,10 @@ try {
 }
 
 function run(command, args) {
-  const env = { ...process.env, FIREFOX_EXECUTABLE: firefox.executablePath, QINGZHOU_FIREFOX_EXTENSION_DIR: packageDir };
-  delete env.QINGZHOU_TEST_EXTENSION_DIR;
-  delete env.QINGZHOU_EXTENSION_PATH;
-  delete env.QINGZHOU_PLAYWRIGHT_CHANNEL;
+  const env = { ...process.env, FIREFOX_EXECUTABLE: firefox.executablePath, ZURI_FIREFOX_EXTENSION_DIR: packageDir };
+  delete env.ZURI_TEST_EXTENSION_DIR;
+  delete env.ZURI_EXTENSION_PATH;
+  delete env.ZURI_PLAYWRIGHT_CHANNEL;
   return new Promise(resolve => {
     const child = spawn(command, args, { cwd: root, env, stdio: "inherit" });
     child.on("exit", code => resolve(code ?? 1));

@@ -10,7 +10,7 @@ from typing import Any
 from urllib.parse import parse_qs, urlparse
 
 from .cases import CaseSpec
-from .client import QingzhouMcpClient
+from .client import ZuriMcpClient
 from .fixtures import CATALOG, NEWS, POSTS, FixtureHandler
 
 
@@ -22,7 +22,7 @@ TOOL_RECOVERY_KEYS = {
 
 
 async def validate_case(
-    client: QingzhouMcpClient,
+    client: ZuriMcpClient,
     case: CaseSpec,
     run_tag: str,
     session_id: str,
@@ -320,10 +320,10 @@ async def validate_case(
         if not all(identifiers.values()):
             return {"success": False, "reason": "document pipeline identifiers are incomplete", "checks": checks}
         required_order = [
-            "qingzhou_documents__document_fetch",
-            "qingzhou_documents__document_parse",
-            "qingzhou_documents__document_read_chunk",
-            "qingzhou_documents__document_create",
+            "zuri_documents__document_fetch",
+            "zuri_documents__document_parse",
+            "zuri_documents__document_read_chunk",
+            "zuri_documents__document_create",
         ]
         used_in_order = [
             str(item.get("name") or "")
@@ -349,7 +349,7 @@ async def validate_case(
         checks["mcpCounts"] = {"serverCount": server_count, "toolCount": tool_count}
         if server_count is None or server_count < 0 or tool_count is None or tool_count < 0:
             return {"success": False, "reason": "MCP registry counts are missing or invalid", "checks": checks}
-        if tool_args_list(transcript, "qingzhou_mcp__mcp_call_tool"):
+        if tool_args_list(transcript, "zuri_mcp__mcp_call_tool"):
             return {"success": False, "reason": "MCP probe called an external tool unexpectedly", "checks": checks}
         return {"success": True, "checks": checks}
 
@@ -382,7 +382,7 @@ async def validate_case(
         if parse_tool_args(navigations[1][1]).get("url") != parse_tool_args(navigations[2][1]).get("url"):
             return failure("reload did not navigate to exactly the same URL", checks)
         expected_receipts = dict(zip(("open", "navigate", "reload", "redirect"),
-                                    ("QZ-first-1", "QZ-second-1", "QZ-second-2", "QZ-landed-1")))
+                                    ("ZURI-first-1", "ZURI-second-1", "ZURI-second-2", "ZURI-landed-1")))
         checks["navigationReads"] = []
         opened_id = safe_int((navigations[0][1].get("result") or {}).get("id"))
         for (index, navigation), (step, receipt) in zip(navigations, expected_receipts.items()):
@@ -715,7 +715,7 @@ async def validate_case(
 
 
 async def validate_journey_case(
-    client: QingzhouMcpClient,
+    client: ZuriMcpClient,
     case: CaseSpec,
     *,
     session_id: str,
@@ -863,7 +863,7 @@ async def validate_journey_case(
         checks["pluginId"] = manifest.get("id")
         if manifest.get("id") != expected_manifest["id"] or manifest.get("settings") != expected_manifest["settings"]:
             return failure("persisted plugin settings schema differs from the requested schema", checks)
-        setting_calls = tool_items(transcript, "qingzhou_management__manage_skill_settings")
+        setting_calls = tool_items(transcript, "zuri_management__manage_skill_settings")
         attempts = [
             (item, parse_tool_args(item)) for item in setting_calls
             if parse_tool_args(item).get("action") == "update"
@@ -875,7 +875,7 @@ async def validate_journey_case(
         if not checks["invalidAttemptRejected"] or not checks["correctedAttemptSucceeded"]:
             return failure("Agent did not recover from the intentional retryCount=99 validation error", checks)
         listed = await client.execute_tool(
-            "qingzhou_management__manage_skill_settings",
+            "zuri_management__manage_skill_settings",
             {"timeout": 30, "action": "list"},
             session_id=session_id,
         )
@@ -885,7 +885,7 @@ async def validate_journey_case(
             return failure("created Skill settings were not discoverable through the shared settings service", checks)
         setting_id = str(matches[0].get("id") or "")
         current = await client.execute_tool(
-            "qingzhou_management__manage_skill_settings",
+            "zuri_management__manage_skill_settings",
             {"timeout": 30, "action": "get", "settingId": setting_id},
             session_id=session_id,
         )

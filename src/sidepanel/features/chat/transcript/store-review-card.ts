@@ -70,7 +70,7 @@ export function createStoreReviewTranscriptCard(options: StoreReviewCardOptions)
     loaded = true;
     sync();
   }).catch(error => {
-    console.warn("[轻舟] Chrome Web Store review prompt could not be read:", error);
+    console.warn("[Zuri] Chrome Web Store review prompt could not be read:", error);
     if (revision === seenRevision) {
       state = emptyChromeStoreReviewRecord();
       loaded = true;
@@ -90,7 +90,7 @@ export function createStoreReviewTranscriptCard(options: StoreReviewCardOptions)
         installKnown = true;
         if (generation === syncGeneration) sync();
       }).catch(error => {
-        console.warn("[轻舟] Chrome Web Store install check failed:", error);
+        console.warn("[Zuri] Chrome Web Store install check failed:", error);
         install = { browser: "other", installType: "", updateUrl: "" };
         installKnown = true;
         if (generation === syncGeneration) sync();
@@ -144,12 +144,12 @@ export function createStoreReviewTranscriptCard(options: StoreReviewCardOptions)
     actionsRow.className = "store-review-actions";
     const review = reviewDocument.createElement("button");
     review.type = "button";
-    review.className = "qz-btn qz-btn--primary qz-btn--sm";
+    review.className = "zuri-btn zuri-btn--primary zuri-btn--sm";
     review.setAttribute("data-store-review-action", "review");
     review.addEventListener("click", () => { void runAction("reviewed"); });
     const dismiss = reviewDocument.createElement("button");
     dismiss.type = "button";
-    dismiss.className = "qz-btn qz-btn--ghost qz-btn--sm";
+    dismiss.className = "zuri-btn zuri-btn--ghost zuri-btn--sm";
     dismiss.setAttribute("data-store-review-action", "dismiss");
     dismiss.addEventListener("click", () => { void runAction("dismissed"); });
     actionsRow.append(review, dismiss);
@@ -189,7 +189,7 @@ export function createStoreReviewTranscriptCard(options: StoreReviewCardOptions)
         loaded = true;
         sync();
       } catch (error) {
-        console.warn("[轻舟] Chrome Web Store review prompt failed:", error);
+        console.warn("[Zuri] Chrome Web Store review prompt failed:", error);
         setPending(false);
       } finally {
         pendingAction = false;

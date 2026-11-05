@@ -499,7 +499,7 @@
     }
 
     async function runScrollAndGlitchCases(renderer) {
-      const frames = window.QingzhouMessageRenderingCases.buildScrollFrames();
+      const frames = window.ZuriMessageRenderingCases.buildScrollFrames();
       const { content, metrics } = renderMessageCase(renderer, "streamed code block scroll and layout", frames[0]);
       await nextFrame();
       let pre = codeBlockPres(content)[0];
@@ -577,10 +577,10 @@
 
     async function run() {
       const renderer = await installProductionRenderer();
-      for (const testCase of window.QingzhouMessageRenderingCases.buildMarkdownCases()) {
+      for (const testCase of window.ZuriMessageRenderingCases.buildMarkdownCases()) {
         runMarkdownCase(renderer, testCase);
       }
-      for (const testCase of window.QingzhouMessageRenderingCases.buildCodeCases()) {
+      for (const testCase of window.ZuriMessageRenderingCases.buildCodeCases()) {
         runCodeCase(renderer, testCase);
       }
       await runScrollAndGlitchCases(renderer);

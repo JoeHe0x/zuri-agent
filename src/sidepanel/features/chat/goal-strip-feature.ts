@@ -45,20 +45,20 @@ export function createGoalStripFeature(options: GoalStripOptions = {}) {
     const meta = goalSecondaryText(goal);
     const tooltip = [goalStatusLabel(goal.status), title, meta].filter(Boolean).join(" · ");
     strip.innerHTML = `
-      <div class="goal-pill ${statusClass} qz:flex qz:min-h-7.25 qz:items-center qz:gap-1.75 qz:py-0.75 qz:pr-0.75 qz:pl-2" title="${escapeHtml(tooltip)}">
+      <div class="goal-pill ${statusClass} zuri:flex zuri:min-h-7.25 zuri:items-center zuri:gap-1.75 zuri:py-0.75 zuri:pr-0.75 zuri:pl-2" title="${escapeHtml(tooltip)}">
         <svg class="goal-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true">
           <circle cx="8" cy="8" r="5.25"></circle>
           <circle cx="8" cy="8" r="1.55"></circle>
           <path d="M8 1.75v2M8 12.25v2M1.75 8h2M12.25 8h2"></path>
         </svg>
-        <div class="goal-body qz:grid qz:min-w-0 qz:flex-auto qz:gap-0.25">
-          <div class="goal-title-row qz:flex qz:min-w-0 qz:items-center qz:gap-1.5">
-            <span class="goal-label qz:flex-none">${escapeHtml(goalStatusLabel(goal.status))}</span>
-            <span class="goal-title qz:min-w-0 qz:truncate">${escapeHtml(title)}</span>
+        <div class="goal-body zuri:grid zuri:min-w-0 zuri:flex-auto zuri:gap-0.25">
+          <div class="goal-title-row zuri:flex zuri:min-w-0 zuri:items-center zuri:gap-1.5">
+            <span class="goal-label zuri:flex-none">${escapeHtml(goalStatusLabel(goal.status))}</span>
+            <span class="goal-title zuri:min-w-0 zuri:truncate">${escapeHtml(title)}</span>
           </div>
-          ${meta ? `<div class="goal-meta qz:min-w-0 qz:truncate">${escapeHtml(meta)}</div>` : ""}
+          ${meta ? `<div class="goal-meta zuri:min-w-0 zuri:truncate">${escapeHtml(meta)}</div>` : ""}
         </div>
-        <button class="qz-icon-btn qz-icon-btn--xs qz-icon-btn--danger goal-clear-btn" type="button" data-goal-action="clear" data-id="${escapeHtml(id)}" title="${tHtml("deleteGoal")}" aria-label="${tHtml("deleteGoal")}">
+        <button class="zuri-icon-btn zuri-icon-btn--xs zuri-icon-btn--danger goal-clear-btn" type="button" data-goal-action="clear" data-id="${escapeHtml(id)}" title="${tHtml("deleteGoal")}" aria-label="${tHtml("deleteGoal")}">
           <svg width="12" height="12" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
         </button>
       </div>
@@ -85,7 +85,7 @@ export function createGoalStripFeature(options: GoalStripOptions = {}) {
     });
     if (options.isCurrentSession?.(id)) renderCurrent();
     Promise.resolve(options.renderSessions?.({ requestFreshState: false })).catch((error) => {
-      console.warn("[轻舟] render sessions after local goal clear failed", error);
+      console.warn("[Zuri] render sessions after local goal clear failed", error);
     });
     return previous;
   }

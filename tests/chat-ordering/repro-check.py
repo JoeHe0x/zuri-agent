@@ -34,7 +34,7 @@ def render_trace(page):
     return page.evaluate("""
     () => {
       return {
-        traces: (window.__qingzhouPerf || [])
+        traces: (window.__zuriPerf || [])
           .filter(entry => ['chat.renderTranscript', 'chat.renderTranscript.reconcile', 'chat.livePatchTail'].includes(entry.name))
           .slice(-12)
           .map(entry => ({ name: entry.name, meta: entry.meta || {}, ms: entry.ms || 0 })),
@@ -75,7 +75,7 @@ def run(verbose=False):
     with serve_repo() as base_url, sync_playwright() as p:
         browser = p.chromium.launch(
             headless=True,
-            channel=os.environ.get("QINGZHOU_PLAYWRIGHT_CHANNEL", "chromium"),
+            channel=os.environ.get("ZURI_PLAYWRIGHT_CHANNEL", "chromium"),
         )
         page = browser.new_page(locale="zh-CN", viewport={"width": 1100, "height": 900})
         page.on("pageerror", lambda exc: result["pageErrors"].append(str(exc)))
@@ -84,7 +84,7 @@ def run(verbose=False):
         (() => {
           const listeners = { message: [], disconnect: [], changed: [] };
           const session = { id: 'sess-ordering-probe', title: 'Ordering probe', parentSessionId: 'root' };
-          const storage = { qz_data_consent: { version: 1, acceptedAt: 1 }, _sessions: {} };
+          const storage = { zuri_data_consent: { version: 1, acceptedAt: 1 }, _sessions: {} };
           const runtimes = {};
           const clone = value => value == null ? value : JSON.parse(JSON.stringify(value));
           const storageDelay = async keys => {
@@ -352,7 +352,7 @@ def run(verbose=False):
             updatedAt,
           });
           const makeRecord = transcript => ({
-            type: 'qz-browser-agent-session',
+            type: 'zuri-agent-session',
             version: 4,
             conversation: { type: 'conversation', version: 1, entries: [] },
             transcript,
@@ -540,7 +540,7 @@ def run(verbose=False):
             updatedAt: '2026-07-11 12:00:00',
           };
           window.__orderingStorage[`_session_${sessionId}`] = {
-            type: 'qz-browser-agent-session',
+            type: 'zuri-agent-session',
             version: 4,
             conversation: { type: 'conversation', version: 1, entries: [] },
             transcript: staleTranscript,
@@ -637,7 +637,7 @@ def run(verbose=False):
         page.evaluate("""
         () => {
           const makeRecord = (id, label) => ({
-            type: 'qz-browser-agent-session',
+            type: 'zuri-agent-session',
             version: 4,
             conversation: { type: 'conversation', version: 1, entries: [] },
             transcript: [
@@ -682,7 +682,7 @@ def run(verbose=False):
         })
         """)
         result["sameSessionDoubleClickTrace"] = page.evaluate("""
-        () => (window.__qingzhouPerf || [])
+        () => (window.__zuriPerf || [])
           .filter(entry => entry.name.startsWith('session.switch') && entry.meta?.sessionId === 'sess-switch-double')
           .map(entry => ({ name: entry.name, meta: entry.meta || {}, ms: entry.ms || 0 }))
         """)

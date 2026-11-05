@@ -143,7 +143,7 @@ test("malformed, reordered and excessive transfer frames fail before business di
   const received = [], errors = [], sent = [];
   const transport = createPortTransport({ limits, postMessage: frame => sent.push(frame), onMessage: message => received.push(message), onError: error => errors.push(error.code) });
   t.after(() => transport.dispose());
-  const frame = fields => ({ __qz_transport__: 1, ...fields });
+  const frame = fields => ({ __zuri_transport__: 1, ...fields });
   transport.receive(frame({ op: "hello" }));
   transport.receive(frame({ op: "begin", id: "too-large", bytes: 99_999, identity: {} }));
   assert.equal(errors.at(-1), "MESSAGE_TOO_LARGE");
