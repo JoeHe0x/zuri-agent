@@ -2036,7 +2036,18 @@ export function createSettingsFeature(options: SettingsFeatureOptions) {
     menuStep = "model";
     modelMenuList?.classList.toggle("hidden", !open);
     modelMenuTrigger?.setAttribute("aria-expanded", String(open));
-    if (open) void renderModelMenu();
+    if (open) {
+      alignModelMenu();
+      void renderModelMenu();
+    }
+  }
+
+  // The list is right-aligned to the trigger; keep its left edge inside the panel (12px gutter) like the context panel.
+  function alignModelMenu() {
+    if (!modelMenuList) return;
+    modelMenuList.style.right = "0px";
+    const shift = Math.ceil(12 - modelMenuList.getBoundingClientRect().left);
+    if (shift > 0) modelMenuList.style.right = `${-shift}px`;
   }
 
   // Levels the provider itself reports per model, filled while the model menu loads its lists.
@@ -2061,6 +2072,7 @@ export function createSettingsFeature(options: SettingsFeatureOptions) {
     const { option, options: choices, defaultValue } = effort;
     menuStep = "effort";
     modelMenuList.classList.remove("hidden");
+    alignModelMenu();
     modelMenuTrigger?.setAttribute("aria-expanded", "true");
     const stored = normalizeProviderModelOptions(config || {}, [option])[option.key];
     const current = choices.some(choice => choice.value === stored) ? stored : defaultValue;
@@ -2131,7 +2143,7 @@ export function createSettingsFeature(options: SettingsFeatureOptions) {
     };
     // Paint at once from cache/saved presets so the menu is never empty, then refine after loading.
     paint(providers.map(id => merge(id, isCustomProvider(id) ? [] : modelOptionsController.peek(keyFor(id))?.models)));
-    modelMenuList.querySelector("[aria-selected=true]")?.scrollIntoView({ block: "nearest" });
+    modelMenuList.querySelector("[aria-selected=true]")?.scrollIntoView({ block: "center" });
     const groups = await Promise.all(providers.map(async id => {
       if (isCustomProvider(id)) return merge(id);
       try { return merge(id, (await modelOptionsController.load(keyFor(id))).models); } catch { return merge(id); } // fall back to saved presets
@@ -2171,7 +2183,8 @@ export function createSettingsFeature(options: SettingsFeatureOptions) {
     (sameModel ? Promise.resolve() : switchModel(item)).then(() => { if (hasEffort) showEffortStep(); }, error => { setModelMenuOpen(false); fail(error); });
   }, { signal: options.signal });
   root.addEventListener("click", event => {
-    if (!currentModelIndicator?.contains(event.target as Node)) setModelMenuOpen(false);
+    // composedPath: picking a row repaints the list, which detaches event.target before this handler runs.
+    if (!currentModelIndicator || !event.composedPath().includes(currentModelIndicator)) setModelMenuOpen(false);
   }, { signal: options.signal });
   root.addEventListener("keydown", event => { if (event.key === "Escape") setModelMenuOpen(false); }, { signal: options.signal });
 

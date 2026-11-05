@@ -277,7 +277,7 @@
 .model-menu-item {
   flex: none;
   display: grid;
-  grid-template-columns: 16px minmax(0, 1fr);
+  grid-template-columns: 16px minmax(0, 1fr) auto;
   align-items: center;
   gap: 8px;
   padding: 5px 8px;
@@ -314,13 +314,18 @@
   background: color-mix(in srgb, var(--red) 14%, transparent);
   color: var(--red);
 }
-.model-menu-effort-item[aria-selected="true"]::after {
-  content: "✓";
+/* Outlined circle check, muted until the row is hovered (same as the tab picker). */
+.model-menu-item[aria-selected="true"]::after {
+  content: "";
   grid-column: 3;
   justify-self: end;
-  color: var(--text-primary);
-  font-size: 13px;
+  width: 18px;
+  height: 18px;
+  background: var(--text-secondary);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpath d='m8.5 12 2.3 2.3 4.8-5'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpath d='m8.5 12 2.3 2.3 4.8-5'/%3E%3C/svg%3E") center / contain no-repeat;
 }
+.model-menu-item[aria-selected="true"]:hover::after { background: var(--text-primary); }
 .model-menu-effort-badge {
   flex: none;
   padding: 1px 5px;
