@@ -33,8 +33,8 @@ const droppedPermissions = new Set(FIREFOX_DROPPED_PERMISSIONS);
 const FILE_ACCESS_TEXT = Object.freeze({
   en: "Open zuri in about:addons, open Permissions, enable Access local files on your computer, then retry.",
   zh_CN: "请在 about:addons 中打开Zuri，进入权限页，开启“访问您计算机上的本地文件”，然后重试。",
-  zh_TW: "請在 about:addons 中開啟輕舟，進入權限頁，開啟「存取您電腦上的本機檔案」，然後重試。",
-  ja: "about:addons で軽舟を開き、権限ページで「コンピューター上のローカルファイルへのアクセス」を有効にしてから再試行してください。",
+  zh_TW: "請在 about:addons 中開啟Zuri，進入權限頁，開啟「存取您電腦上的本機檔案」，然後重試。",
+  ja: "about:addons でZuriを開き、権限ページで「コンピューター上のローカルファイルへのアクセス」を有効にしてから再試行してください。",
   ko: "about:addons에서 zuri를 열고 권한 페이지에서 컴퓨터의 로컬 파일 액세스를 켠 다음 다시 시도하세요.",
   de: "Öffnen Sie zuri unter about:addons, öffnen Sie die Berechtigungen, aktivieren Sie den Zugriff auf lokale Dateien auf Ihrem Computer und versuchen Sie es erneut.",
   es: "Abra zuri en about:addons, abra Permisos, active el acceso a los archivos locales del equipo y vuelva a intentarlo.",

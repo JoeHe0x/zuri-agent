@@ -106,8 +106,8 @@ function assertChatSearchLifecycleContract() {
 }
 
 function assertSkillDetailSearchContract() {
-  assert.match(html, /id="skill-search-bar"[^>]+class="[^"]*\bqz-popover\b[^"]*\bchat-search-bar\b[^"]*\bskill-search-bar\b[^"]*\bhidden\b/, "skill search should reuse the shared floating search surface");
-  assert.match(html, /id="skill-search-input"[^>]+class="[^"]*\bqz-field\b[^"]*\bchat-search-input\b[^>]+type="search"/, "skill search should reuse the shared field and chat search input styles");
+  assert.match(html, /id="skill-search-bar"[^>]+class="[^"]*\bzuri-popover\b[^"]*\bchat-search-bar\b[^"]*\bskill-search-bar\b[^"]*\bhidden\b/, "skill search should reuse the shared floating search surface");
+  assert.match(html, /id="skill-search-input"[^>]+class="[^"]*\bzuri-field\b[^"]*\bchat-search-input\b[^>]+type="search"/, "skill search should reuse the shared field and chat search input styles");
   assert.match(css, /\.skill-detail\s*\{[\s\S]*position:\s*relative/, "skill search should anchor to the detail view");
   assert.match(css, /\.chat-search-hit\.skill-search-active/, "skill search should distinguish the active text match");
 

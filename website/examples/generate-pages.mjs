@@ -400,9 +400,9 @@ function readExport(file) {
   const html = fs.readFileSync(absolute, "utf8");
   const styles = [...html.matchAll(/<style>([\s\S]*?)<\/style>/g)].map((match) => match[1]);
   const runtime = html.match(/<script>([\s\S]*?)<\/script>/);
-  const exchange = html.match(/<script id="qingzhou-session-exchange" type="application\/json">[\s\S]*?<\/script>/);
+  const exchange = html.match(/<script id="zuri-session-exchange" type="application\/json">[\s\S]*?<\/script>/);
   const messages = html.match(/<main id="messages">([\s\S]*?)<\/main>/);
-  const labels = html.match(/<script type="application\/json" id="qingzhou-export-messages">[\s\S]*?<\/script>/);
+  const labels = html.match(/<script type="application\/json" id="zuri-export-messages">[\s\S]*?<\/script>/);
   if (styles.length < 2 || !runtime || !exchange || !messages || !labels) {
     throw new Error(`export ${file} is missing the transcript, stylesheet, or exchange script`);
   }
@@ -455,14 +455,14 @@ function adaptSessionScript(source) {
   const open = /^\(\(\)\s*=>\s*\{/.exec(source);
   if (!open || !source.endsWith("})();")) throw new Error("unexpected export runtime");
   let body = source.slice(open[0].length, -"})();".length);
-  body = replaceRequired(body, 'document.getElementById("qingzhou-export-messages")', 'root.getElementById("qingzhou-export-messages")');
+  body = replaceRequired(body, 'document.getElementById("zuri-export-messages")', 'root.getElementById("zuri-export-messages")');
   body = replaceRequired(body, "document.body.appendChild", "root.appendChild");
   body = replaceRequired(body, 'document.addEventListener("click"', 'root.addEventListener("click"');
-  if (body.includes("document.body") || body.includes('document.addEventListener("click"') || body.includes('document.getElementById("qingzhou-export-messages")')) {
+  if (body.includes("document.body") || body.includes('document.addEventListener("click"') || body.includes('document.getElementById("zuri-export-messages")')) {
     throw new Error("export runtime was not scoped to the shadow root. The extension export runtime changed. Update adaptSessionScript, then regenerate the example pages.");
   }
-  if (!body.includes('document.getElementById("qingzhou-session-cta")')) {
-    throw new Error('export runtime is missing document.getElementById("qingzhou-session-cta"). The extension export runtime changed. Update adaptSessionScript, then regenerate the example pages.');
+  if (!body.includes('document.getElementById("zuri-session-cta")')) {
+    throw new Error('export runtime is missing document.getElementById("zuri-session-cta"). The extension export runtime changed. Update adaptSessionScript, then regenerate the example pages.');
   }
   return `export function mountSessionView(root) {${body}}\n`;
 }
@@ -474,7 +474,7 @@ function lazyImages(html) {
 }
 
 function sessionView(part, root) {
-  return `<qz-session-view><template shadowrootmode="open"><link rel="stylesheet" href="${root}assets/examples/session-view${part.assetSuffix}.css"><link rel="stylesheet" href="${root}assets/examples/session-view-overrides.css">${part.labels}<main id="messages">${lazyImages(part.messages)}</main></template></qz-session-view>`;
+  return `<zuri-session-view><template shadowrootmode="open"><link rel="stylesheet" href="${root}assets/examples/session-view${part.assetSuffix}.css"><link rel="stylesheet" href="${root}assets/examples/session-view-overrides.css">${part.labels}<main id="messages">${lazyImages(part.messages)}</main></template></zuri-session-view>`;
 }
 
 // A group of examples that belong together (for example create and reuse) is
@@ -583,20 +583,20 @@ function detailPage(localeId, entry, part) {
   const view = pageView(entry, localeId);
   const root = localeId === "zh" ? "../../" : "../../../";
   const canonical = localeId === "zh"
-    ? `https://alibaba.github.io/qz-browser-agent/examples/${entry.slug}/`
-    : `https://alibaba.github.io/qz-browser-agent/examples/en/${entry.slug}/`;
+    ? `https://joehe0x.github.io/zuri-agent/examples/${entry.slug}/`
+    : `https://joehe0x.github.io/zuri-agent/examples/en/${entry.slug}/`;
   const alternates = localeId === "zh" && !hasSlug("en", entry.slug)
     ? `<link rel="canonical" href="${canonical}">
   <link rel="alternate" hreflang="en" href="${canonical}">
   <link rel="alternate" hreflang="zh-CN" href="${canonical}?lang=zh-CN">
   <link rel="alternate" hreflang="x-default" href="${canonical}">`
     : `<link rel="canonical" href="${canonical}">
-  <link rel="alternate" hreflang="en" href="${hasSlug("en", entry.slug) ? `https://alibaba.github.io/qz-browser-agent/examples/en/${entry.slug}/` : "https://alibaba.github.io/qz-browser-agent/?lang=en#examples"}">
-  <link rel="alternate" hreflang="zh-CN" href="${hasSlug("zh", entry.slug) ? `https://alibaba.github.io/qz-browser-agent/examples/${entry.slug}/` : "https://alibaba.github.io/qz-browser-agent/?lang=zh-CN#examples"}">
+  <link rel="alternate" hreflang="en" href="${hasSlug("en", entry.slug) ? `https://joehe0x.github.io/zuri-agent/examples/en/${entry.slug}/` : "https://joehe0x.github.io/zuri-agent/?lang=en#examples"}">
+  <link rel="alternate" hreflang="zh-CN" href="${hasSlug("zh", entry.slug) ? `https://joehe0x.github.io/zuri-agent/examples/${entry.slug}/` : "https://joehe0x.github.io/zuri-agent/?lang=zh-CN#examples"}">
   <link rel="alternate" hreflang="x-default" href="${canonical}">`;
   const pageLang = localeId === "zh" ? "zh-CN" : "en";
   return `<!DOCTYPE html>
-<html lang="en" data-example="${groupOf(entry)}" data-site-root="${root}" data-generated="qz-example" data-session="${entry.session || "default"}" data-session-view="${part.assetSuffix}">
+<html lang="en" data-example="${groupOf(entry)}" data-site-root="${root}" data-generated="zuri-example" data-session="${entry.session || "default"}" data-session-view="${part.assetSuffix}">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -610,13 +610,13 @@ function detailPage(localeId, entry, part) {
   <script src="${root}examples/catalog.js"></script>
   <script src="${root}assets/site.js" type="module"></script>
   <script src="${root}assets/examples-render.js" type="module"></script>
-  <title>${escapeHtml(view.title)} — qz</title>
+  <title>${escapeHtml(view.title)} — Zuri</title>
 </head>
 <body>
 <a class="skip-link" href="#main" data-i18n="skip">Skip to content</a>
 <header class="header wrap">
-  <a class="brand" href="${root}" aria-label="qz — Home" data-i18n-attributes="home"><img src="${root}assets/icon.png" width="32" height="32" alt=""><span>qz<span class="brand-caption"> / 轻舟</span></span></a>
-  <nav aria-label="Main navigation" data-i18n-attributes="nav"><a href="${root}#overview" data-i18n="navOverview">Data</a><a href="${root}#extend" data-i18n="navExtend">Skills</a><a href="${root}#agents" data-i18n="navAgents">For agents</a><a href="https://github.com/alibaba/qz-browser-agent" class="nav-github">GitHub ${GITHUB}</a></nav>
+  <a class="brand" href="${root}" aria-label="Zuri — Home" data-i18n-attributes="home"><img src="${root}assets/icon.png" width="32" height="32" alt=""><span>Zuri<span class="brand-caption"> / Zuri</span></span></a>
+  <nav aria-label="Main navigation" data-i18n-attributes="nav"><a href="${root}#overview" data-i18n="navOverview">Data</a><a href="${root}#extend" data-i18n="navExtend">Skills</a><a href="${root}#agents" data-i18n="navAgents">For agents</a><a href="https://github.com/JoeHe0x/zuri-agent" class="nav-github">GitHub ${GITHUB}</a></nav>
   <div class="header-actions"><button class="language" type="button" hidden="" aria-label="Switch to 简体中文" data-example-locale="${pageLang}" data-switch-href="${switchHref(localeId, entry.slug)}">中文</button><a class="button button-small" href="${STORE}" data-i18n="navStart">Install${ARROW}</a></div>
 </header>
 <main id="main" class="example-page wrap">
@@ -630,8 +630,8 @@ function detailPage(localeId, entry, part) {
       <div class="example-actions example-thread-bar">
         <p class="example-session-title">${escapeHtml(part.title)}</p>
         <div class="example-thread-cta">
-          <button id="qingzhou-session-cta" class="qz-btn qz-btn--primary qz-btn--xs session-export-cta" hidden type="button"></button>
-          <a class="qz-btn qz-btn--primary qz-btn--xs session-export-cta" id="example-store" href="${STORE}" target="_blank" rel="noopener" data-i18n="exampleDownload">${escapeHtml(en.download)}</a>
+          <button id="zuri-session-cta" class="zuri-btn zuri-btn--primary zuri-btn--xs session-export-cta" hidden type="button"></button>
+          <a class="zuri-btn zuri-btn--primary zuri-btn--xs session-export-cta" id="example-store" href="${STORE}" target="_blank" rel="noopener" data-i18n="exampleDownload">${escapeHtml(en.download)}</a>
         </div>
       </div>
       <div class="example-thread-body">
@@ -640,7 +640,7 @@ function detailPage(localeId, entry, part) {
     </div>
   </div>
 </main>
-<footer class="footer wrap"><a class="brand" href="${root}">qz</a><nav aria-label="Footer navigation" data-i18n-attributes="footer"><a href="https://github.com/alibaba/qz-browser-agent/blob/main/README.md" data-i18n="footerDocs" data-i18n-attributes="documentation">Documentation</a><a href="https://github.com/alibaba/qz-browser-agent/issues" data-i18n="footerIssues">Feedback</a><a href="https://github.com/alibaba/qz-browser-agent/blob/main/docs/permissions.md" data-i18n="footerPrivacy">Privacy</a><a href="${root}credits/" data-i18n="footerCredits">Credits</a><a href="https://github.com/alibaba/qz-browser-agent/blob/main/LICENSE">Apache-2.0</a></nav></footer>
+<footer class="footer wrap"><a class="brand" href="${root}">zuri</a><nav aria-label="Footer navigation" data-i18n-attributes="footer"><a href="https://github.com/JoeHe0x/zuri-agent/blob/main/README.md" data-i18n="footerDocs" data-i18n-attributes="documentation">Documentation</a><a href="https://github.com/JoeHe0x/zuri-agent/issues" data-i18n="footerIssues">Feedback</a><a href="https://github.com/JoeHe0x/zuri-agent/blob/main/docs/permissions.md" data-i18n="footerPrivacy">Privacy</a><a href="${root}credits/" data-i18n="footerCredits">Credits</a><a href="https://github.com/JoeHe0x/zuri-agent/blob/main/LICENSE">Apache-2.0</a></nav></footer>
 ${part.exchange}
 </body>
 </html>
@@ -696,25 +696,25 @@ function writeTranslations(copy) {
     source,
     "example-html:en",
     jsonEntries(copy.en.html, "      "),
-    '"agentRequirements": "Requires Node.js 22+ and Chrome on the same machine, with the qz extension and a model configured."',
+    '"agentRequirements": "Requires Node.js 22+ and Chrome on the same machine, with the Zuri extension and a model configured."',
   );
   source = upsertMarked(
     source,
     "example-html:zh",
     jsonEntries(copy["zh-CN"].html, "      "),
-    '"agentRequirements": "需要 Node.js 22+，以及同一台电脑上的 Chrome、轻舟扩展和已配置的模型。"',
+    '"agentRequirements": "需要 Node.js 22+，以及同一台电脑上的 Chrome、Zuri扩展和已配置的模型。"',
   );
   source = upsertMarked(
     source,
     "example-attr:en",
     jsonEntries(copy.en.attributes, "      "),
-    '"aria-label": "Enlarge the qz side panel"\n      }',
+    '"aria-label": "Enlarge the Zuri side panel"\n      }',
   );
   source = upsertMarked(
     source,
     "example-attr:zh",
     jsonEntries(copy["zh-CN"].attributes, "      "),
-    '"aria-label": "放大查看轻舟侧边栏"\n      }',
+    '"aria-label": "放大查看Zuri侧边栏"\n      }',
   );
   fs.writeFileSync(file, source);
 }
@@ -757,7 +757,7 @@ function removeGenerated(dir, slugs) {
     const indexPath = path.join(dir, entry.name, "index.html");
     if (!fs.existsSync(indexPath)) continue;
     const html = fs.readFileSync(indexPath, "utf8");
-    if (html.includes('data-generated="qz-example"')) fs.rmSync(path.join(dir, entry.name), { recursive: true });
+    if (html.includes('data-generated="zuri-example"')) fs.rmSync(path.join(dir, entry.name), { recursive: true });
   }
 }
 
@@ -799,7 +799,7 @@ const pages = localeIds.flatMap((localeId) => locales[localeId].map((entry) => (
 writeSharedSessionAssets(pages.map((page) => page.part));
 for (const page of pages) {
   const html = detailPage(page.localeId, page.entry, page.part);
-  const exchangeCount = html.split('id="qingzhou-session-exchange"').length - 1;
+  const exchangeCount = html.split('id="zuri-session-exchange"').length - 1;
   const slug = page.localeId === "zh" ? page.entry.slug : `en/${page.entry.slug}`;
   if (exchangeCount !== 1) throw new Error(`${slug} embeds ${exchangeCount} exchange payloads`);
   if (!html.includes(page.part.exchange)) throw new Error(`${slug} changed the exchange script`);

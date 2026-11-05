@@ -211,7 +211,7 @@ test("settings security policy lives under advanced and uses one save action", (
   );
   assert.match(
     html,
-    /<input id="cfg-context-window" type="text" class="[^"]*\bqz-field\b[^"]*\bcontext-window-input\b[^"]*\bhidden\b[^"]*"/,
+    /<input id="cfg-context-window" type="text" class="[^"]*\bzuri-field\b[^"]*\bcontext-window-input\b[^"]*\bhidden\b[^"]*"/,
     "custom context window input should stay collapsed until selected",
   );
   assertClassTokens(html, "context-window-input", ["zuri:h-8.5"], "custom context field preserves its 34px control height");

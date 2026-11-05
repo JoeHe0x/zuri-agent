@@ -87,8 +87,8 @@ recoverable. Background tasks keep running; the reopened panel initializes with 
 Chrome's extension-management labels independently follow Chrome's language, using base [manifest
 messages](../src/_locales/) and contributed manifest translations.
 
-Use `Zuri`, `輕舟` and `軽舟` for Simplified Chinese, Traditional Chinese and Japanese; other languages
-use lowercase `zuri`. Keep code symbols and user content unchanged. Ordinary empty chats show the
+Use `Zuri` in every language.
+Keep code symbols and user content unchanged. Ordinary empty chats show the
 localized `core.tagline`; initial task suggestions hide it. Keep the tagline natural in each
 language and preserve the suggestion's editable-draft behavior.
 

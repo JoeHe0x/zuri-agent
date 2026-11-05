@@ -15,11 +15,11 @@ const skins = ["sidepanel.css"].map(name => ({
 const publishButtonIndex = html.indexOf('id="btn-publish-skill-git"');
 const saveButtonIndex = html.indexOf('id="btn-save-skill-edit-top"');
 assert.ok(publishButtonIndex >= 0 && publishButtonIndex < saveButtonIndex, "Git publish command should sit immediately before Save");
-assert.match(html, /id="btn-publish-skill-git"[^>]+class="[^"]*\bqz-btn\b[^>]*>[\s\S]*?<circle cx="12" cy="12" r="3"[\s\S]*?<span[^>]*>提交 Git<\/span>/u, "publish should use the shared button and Lucide Git Commit geometry");
+assert.match(html, /id="btn-publish-skill-git"[^>]+class="[^"]*\bzuri-btn\b[^>]*>[\s\S]*?<circle cx="12" cy="12" r="3"[\s\S]*?<span[^>]*>提交 Git<\/span>/u, "publish should use the shared button and Lucide Git Commit geometry");
 assert.match(html, /id="skill-git-publish-confirm"[^>]+role="dialog"[^>]+aria-modal="true"/u, "publish confirmation should be modal and accessible");
 const backdropTag = html.match(/<button[^>]+class="([^"]*\bskill-git-publish-backdrop\b[^"]*)"[^>]*>/u);
 assert.ok(backdropTag, "publish confirmation should expose a dismissible backdrop button");
-assert.match(backdropTag[1], /\bqz-btn\b/u, "modal backdrop should remain inside the shared button system");
+assert.match(backdropTag[1], /\bzuri-btn\b/u, "modal backdrop should remain inside the shared button system");
 assert.match(html, /远端多出的文件不会删除。全部文件在一次 commit 中原子提交/u, "non-deletion and atomic semantics should be explicit");
 
 assert.match(feature, /request\("inspect_git_skill_publish_target"/u, "Side Panel should discover the target through Background API");

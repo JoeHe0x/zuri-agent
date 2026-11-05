@@ -33,7 +33,7 @@ spec.loader.exec_module(module)
 root = pathlib.Path(sys.argv[2])
 source = pathlib.Path(sys.argv[3])
 assert module.load_manifest(source) == json.loads((source / 'manifest.json').read_text(encoding='utf-8'))
-for locale, name in [('en', 'zuri'), ('en', 'Zuri'), ('zh_CN', 'Zuri'), ('zh_TW', '輕舟'), ('ja', '軽舟')]:
+for locale, name in [('en', 'zuri'), ('en', 'Zuri'), ('zh_CN', 'Zuri'), ('zh_TW', 'Zuri'), ('ja', 'Zuri')]:
     path = root / '_locales' / locale
     path.mkdir(parents=True, exist_ok=True)
     (path / 'messages.json').write_text(json.dumps({'extensionName': {'message': name}}), encoding='utf-8')

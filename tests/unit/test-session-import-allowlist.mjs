@@ -9,8 +9,8 @@ import { compileEmbeddedScript } from "../../scripts/build-extension.mjs";
 
 const DENIED = [
   "https://example.com/",
-  "https://alibaba.github.io/other-repo/",
-  "http://alibaba.github.io/qz-browser-agent/",
+  "https://joehe0x.github.io/other-repo/",
+  "http://joehe0x.github.io/zuri-agent/",
 ];
 
 test("pages outside the import allowlist keep the button hidden and the background rejects the import", async () => {

@@ -38,10 +38,10 @@ Write the three final results to the zuri Data table {table}, using branch as th
 作業を始める前に目標を create してください。data_store への永続的な書き込みが完了するたびに checkpoint を記録してください。完了前に list で重複がなく、ちょうど 9 件あることを確認してください。最後に目標を complete し、結果を日本語で簡潔に報告してください。
 """,
         "document_pipeline": """
-{base_url}/docs/sample.txt のテキストを取得し、軽舟の文書要約アーティファクトを作成してください。
+{base_url}/docs/sample.txt のテキストを取得し、Zuriの文書要約アーティファクトを作成してください。
 これはグローバル Skill「zuri-documents」の動作確認です。まず load_skill で zuri-documents を読み込み、その document_fetch、document_parse、document_read_chunk、document_create をこの順番で使ってください。open_tab、read_article、save_file で代用しないでください。
 テキストを取得・解析して最初の段落を読み、タイトルが Zuri regression document summary の txt アーティファクトを作成してください。ダウンロードは実行しないでください。
-処理結果を軽舟の Data テーブル {table} に保存し、dedupField は step にしてください。少なくとも step=document_pipeline_completed のレコードを 1 件作成し、fileId、docModelId、artifactId を含めてください。
+処理結果をZuriの Data テーブル {table} に保存し、dedupField は step にしてください。少なくとも step=document_pipeline_completed のレコードを 1 件作成し、fileId、docModelId、artifactId を含めてください。
 完了前にテーブルに 1 件以上あることを確認してください。最後の回答は日本語でお願いします。
 """,
         "parallel_subtasks": """
@@ -51,7 +51,7 @@ Write the three final results to the zuri Data table {table}, using branch as th
 - Gamma: {base_url}/parallel/gamma
 
 結果のフィールド名は branch、code、status、url にしてください。利用できる分岐の code と status は、ページで実際に確認した値をそのまま保存してください。利用できない分岐は status=unavailable、code=""（空文字列）とし、code を推測しないでください。
-最終的な 3 件の結果を軽舟の Data テーブル {table} に保存し、一意キーには branch を使ってください。完了前にちょうど 3 行あることを確認してください。最後の回答は日本語でお願いします。
+最終的な 3 件の結果をZuriの Data テーブル {table} に保存し、一意キーには branch を使ってください。完了前にちょうど 3 行あることを確認してください。最後の回答は日本語でお願いします。
 """,
     },
     "ar": {

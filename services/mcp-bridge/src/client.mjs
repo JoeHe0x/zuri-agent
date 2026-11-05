@@ -3,7 +3,7 @@ import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 import { PACKAGE_VERSION } from "./package-info.mjs";
 
-export const GUIDE_URL = "https://github.com/alibaba/qz-browser-agent/blob/main/services/mcp-bridge/README.md";
+export const GUIDE_URL = "https://github.com/JoeHe0x/zuri-agent/blob/main/services/mcp-bridge/README.md";
 export { INSTALL_URL } from "./package-info.mjs";
 export const SERVICE_NAME = "zuri-agent";
 export const PROTOCOL_VERSION = 1;

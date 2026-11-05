@@ -17,7 +17,7 @@ export function mountSessionView(root) {
   }
 
   // shared/session/session-import-copy.ts
-  var sessionImportLabelKeys = ["importQingzhou", "importing", "imported", "retryImport", "importFailedRetry"];
+  var sessionImportLabelKeys = ["importzuri", "importing", "imported", "retryImport", "importFailedRetry"];
   function readSessionImportLabels(value) {
     if (!value || typeof value !== "object" || Array.isArray(value)) return null;
     const record = value;
@@ -33,12 +33,12 @@ export function mountSessionView(root) {
     if (state.busy) return labels.importing;
     if (state.imported) return labels.imported;
     if (state.titled) return labels.retryImport;
-    return labels.importQingzhou;
+    return labels.importzuri;
   }
 
   // sidepanel/features/export/session-export-runtime.ts
   (() => {
-    const messages = JSON.parse(root.getElementById("qingzhou-export-messages")?.textContent || "{}");
+    const messages = JSON.parse(root.getElementById("zuri-export-messages")?.textContent || "{}");
     const t = (key) => typeof messages[key] === "string" ? messages[key] : key;
     let imageLightbox = null;
     function closeImageLightbox() {
@@ -58,7 +58,7 @@ export function mountSessionView(root) {
       image.src = source;
       image.alt = alt || t("images");
       let close = document.createElement("button");
-      close.className = "qz-icon-btn qz-icon-btn--md image-lightbox-close";
+      close.className = "zuri-icon-btn zuri-icon-btn--md image-lightbox-close";
       close.type = "button";
       close.title = t("close");
       close.setAttribute("aria-label", t("close"));
@@ -202,9 +202,9 @@ export function mountSessionView(root) {
     document.addEventListener("keydown", function(event) {
       if (event.key === "Escape") closeImageLightbox();
     });
-    let PROBE_TYPE = "qingzhou:session-export:probe";
-    let RESULT_TYPE = "qingzhou:session-export:result";
-    let cta = document.getElementById("qingzhou-session-cta");
+    let PROBE_TYPE = "zuri:session-export:probe";
+    let RESULT_TYPE = "zuri:session-export:result";
+    let cta = document.getElementById("zuri-session-cta");
     if (!cta) return;
     function useImportLabels(value) {
       const labels = readSessionImportLabels(value);
@@ -212,13 +212,13 @@ export function mountSessionView(root) {
       Object.assign(messages, labels);
     }
     function refreshImportButton() {
-      if (!(cta instanceof HTMLButtonElement) || !cta.hasAttribute("data-qingzhou-session-import")) return;
+      if (!(cta instanceof HTMLButtonElement) || !cta.hasAttribute("data-zuri-session-import")) return;
       cta.textContent = sessionImportButtonText({
         busy: cta.getAttribute("aria-busy") === "true",
-        imported: Boolean(cta.getAttribute("data-qingzhou-imported-session-id")),
+        imported: Boolean(cta.getAttribute("data-zuri-imported-session-id")),
         titled: Boolean(cta.title)
       }, {
-        importQingzhou: t("importQingzhou"),
+        importzuri: t("importzuri"),
         importing: t("importing"),
         imported: t("imported"),
         retryImport: t("retryImport"),
@@ -226,18 +226,18 @@ export function mountSessionView(root) {
       });
     }
     function enableImport() {
-      if (!cta || cta.hasAttribute("data-qingzhou-session-import")) return;
+      if (!cta || cta.hasAttribute("data-zuri-session-import")) return;
       let button = document.createElement("button");
       button.id = cta.id;
       button.className = cta.className;
       button.type = "button";
-      button.setAttribute("data-qingzhou-session-import", "");
-      button.textContent = t("importQingzhou");
+      button.setAttribute("data-zuri-session-import", "");
+      button.textContent = t("importzuri");
       cta.replaceWith(button);
       cta = button;
     }
     function updateImportState(data) {
-      if (!(cta instanceof HTMLButtonElement) || !cta.hasAttribute("data-qingzhou-session-import")) return;
+      if (!(cta instanceof HTMLButtonElement) || !cta.hasAttribute("data-zuri-session-import")) return;
       if (data.status === "working") {
         cta.disabled = true;
         cta.setAttribute("aria-busy", "true");
@@ -248,7 +248,7 @@ export function mountSessionView(root) {
       if (data.ok) {
         cta.disabled = true;
         cta.textContent = t("imported");
-        cta.dataset.qingzhouImportedSessionId = String(data.sessionId || "");
+        cta.dataset.zuriImportedSessionId = String(data.sessionId || "");
         return;
       }
       cta.disabled = false;
@@ -270,7 +270,7 @@ export function mountSessionView(root) {
     });
     window.postMessage({
       type: PROBE_TYPE,
-      requestId: "qz-export-" + Date.now().toString(36)
+      requestId: "zuri-export-" + Date.now().toString(36)
     }, "*");
   })();
 }

@@ -13,8 +13,8 @@ const skins = ["sidepanel.css"].map(name => ({
 
 assert.match(html, /id="btn-import-skills-git"[^>]*>Git 仓库<\/button>/u, "Skill import should expose Git repositories in the existing menu");
 assert.match(html, /id="git-skill-sources-panel"[^>]+aria-label="Git 仓库来源"/u, "Git sources should own one workbench subview");
-assert.match(html, /id="git-skill-source-url"[^>]+class="[^"]*\bqz-field\b/u, "repository URL should use the shared field primitive");
-assert.match(html, /id="btn-bind-git-skill-source"[^>]+class="[^"]*\bqz-btn\b[^"]*\bqz-btn--primary\b/u, "binding should use the shared primary command");
+assert.match(html, /id="git-skill-source-url"[^>]+class="[^"]*\bzuri-field\b/u, "repository URL should use the shared field primitive");
+assert.match(html, /id="btn-bind-git-skill-source"[^>]+class="[^"]*\bzuri-btn\b[^"]*\bzuri-btn--primary\b/u, "binding should use the shared primary command");
 assert.match(html, /class="[^"]*\bgit-skill-source-support\b[^"]*"[^>]*>支持 GitHub 与 GitLab，可粘贴仓库或目录页<\/p>/u, "supported platforms and directory URLs should be explicit");
 assert.match(ui, /source\.browseUrl \|\| source\.repositoryUrl/u, "subdirectory sources should open their selected tree page");
 assert.doesNotMatch(html, /git-skill-source-(?:modal|card)/u, "Git sources should remain an unframed workbench list");

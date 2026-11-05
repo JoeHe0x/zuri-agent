@@ -12,7 +12,7 @@ function siteUrl(relativeToSite) {
 function syncTitle() {
   const heading = document.querySelector(".example-page h1");
   const text = heading?.textContent?.replace(/\s+/g, " ").trim();
-  if (text) document.title = `${text} — qz`;
+  if (text) document.title = `${text} — Zuri`;
 }
 
 function bindMedia() {
@@ -106,7 +106,7 @@ function splitThreadScroll() {
 }
 
 function bindSessions() {
-  for (const host of document.querySelectorAll("qz-session-view")) {
+  for (const host of document.querySelectorAll("zuri-session-view")) {
     if (!host.shadowRoot) continue;
     mountSessionView(host.shadowRoot);
     prepareTables(host.shadowRoot);
@@ -119,13 +119,13 @@ function importLabel() {
 }
 
 function labelImportButton() {
-  const button = document.querySelector("#qingzhou-session-cta");
-  if (!(button instanceof HTMLButtonElement) || !button.hasAttribute("data-qingzhou-session-import")) return;
+  const button = document.querySelector("#zuri-session-cta");
+  if (!(button instanceof HTMLButtonElement) || !button.hasAttribute("data-zuri-session-import")) return;
   if (button.disabled || button.getAttribute("aria-busy") === "true") return;
-  if (button.dataset.qzLabeled) return;
+  if (button.dataset.zuriLabeled) return;
   const label = importLabel();
   if (!label) return;
-  button.dataset.qzLabeled = "1";
+  button.dataset.zuriLabeled = "1";
   if (button.textContent !== label) button.textContent = label;
 }
 
@@ -133,7 +133,7 @@ function bindImport() {
   const actions = document.querySelector(".example-actions");
   if (!actions) return;
   const sync = () => {
-    actions.classList.toggle("is-live", Boolean(actions.querySelector("[data-qingzhou-session-import]")));
+    actions.classList.toggle("is-live", Boolean(actions.querySelector("[data-zuri-session-import]")));
     labelImportButton();
   };
   sync();
@@ -159,7 +159,7 @@ function pinTranscriptToTop() {
     for (const body of bodies) {
       if (body.dataset.userScrolled === "true") continue;
       body.scrollTop = 0;
-      const messages = body.querySelector("qz-session-view")?.shadowRoot?.getElementById("messages");
+      const messages = body.querySelector("zuri-session-view")?.shadowRoot?.getElementById("messages");
       if (messages) messages.scrollTop = 0;
     }
   };
@@ -193,7 +193,7 @@ function pinTranscriptToTop() {
     body.addEventListener("wheel", mark, { passive: true });
     body.addEventListener("touchmove", mark, { passive: true });
     body.addEventListener("pointerdown", mark);
-    const root = body.querySelector("qz-session-view")?.shadowRoot;
+    const root = body.querySelector("zuri-session-view")?.shadowRoot;
     if (root) watchScrollKeys(root);
     root?.addEventListener("wheel", mark, { passive: true });
     root?.addEventListener("touchmove", mark, { passive: true });

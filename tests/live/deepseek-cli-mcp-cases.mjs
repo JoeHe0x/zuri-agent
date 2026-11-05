@@ -31,7 +31,7 @@ export const CASES = [
   },
   {
     id: "readme-review", kind: "export",
-    prompt: 'Compare README.md and README.zh-CN.md in https://github.com/alibaba/qz-browser-agent. Flag any differences in installation instructions and save a short Markdown review with source links.',
+    prompt: 'Compare README.md and README.zh-CN.md in https://github.com/JoeHe0x/zuri-agent. Flag any differences in installation instructions and save a short Markdown review with source links.',
     expectDownload: true,
   },
   {

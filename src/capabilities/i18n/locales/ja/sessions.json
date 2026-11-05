@@ -196,7 +196,7 @@
   "sessions.cancel": "キャンセル",
   "sessions.save": "保存",
   "sessions.taskView": "タスク表示",
-  "sessions.importZuriConversation": "軽舟チャットをインポート",
+  "sessions.importZuriConversation": "Zuriチャットをインポート",
   "sessions.close": "閉じる",
   "sessions.automationName": "自動実行の名前",
   "sessions.whatShouldItDoForExampleCheckCompetitorPrices": "何を実行しますか？例：競合の価格と新商品を毎日確認してテーブルに保存し、異常な変化を報告する。",

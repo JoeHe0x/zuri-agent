@@ -17,8 +17,8 @@ const literalEntry = { message: "$ZURI_LITERAL$", placeholders: { zuri_literal: 
 for (const [language, chromeLocale, brand, tagline] of [
   ["en", "en", "zuri", "A lighter way to get things done."],
   ["zh-CN", "zh_CN", "Zuri", "你的浏览器 AI 助手"],
-  ["zh-TW", "zh_TW", "輕舟", "你的瀏覽器 AI 助手"],
-  ["ja", "ja", "軽舟", "やりたいことを、軽やかに。"],
+  ["zh-TW", "zh_TW", "Zuri", "你的瀏覽器 AI 助手"],
+  ["ja", "ja", "Zuri", "やりたいことを、軽やかに。"],
   ["ar", "ar", "zuri", "أفق أوسع، وخطوة أخف."],
 ]) {
   test(`Chrome loads the generated ${language} catalog and resolves it through the real kernel`, async () => {

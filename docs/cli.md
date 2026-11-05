@@ -26,8 +26,8 @@ npx zuri-agent-extension@latest create "Summarize the current page." --stream
 ```
 
 `npx zuri-agent-extension@latest install` opens the same Chrome Web Store page. For a manual ZIP
-installation, download the [latest GitHub release](https://github.com/alibaba/qz-browser-agent/releases/latest)
-and follow the [manual installation steps](https://github.com/alibaba/qz-browser-agent/blob/main/README.md#manual-installation).
+installation, download the [latest GitHub release](https://github.com/JoeHe0x/zuri-agent/releases/latest)
+and follow the [manual installation steps](https://github.com/JoeHe0x/zuri-agent/blob/main/README.md#manual-installation).
 
 `connect` starts the local MCP service and opens its connection page in the default browser.
 The first new profile is named `default`;

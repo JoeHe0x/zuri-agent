@@ -15,7 +15,7 @@ const REVIEWED = new Map([
     files: /^(?:background\/service-worker|sidepanel\/(?:chunk-[\w.-]+|features\/export\/session-export-feature)|shared\/session\/session-exchange)\.js$/u,
     reason: "Escaped session JSON in an inert application/json element (renderSessionExchangeScript).",
   }],
-  ["script-tag:2c8330e12bfa9b63027205ff658c84f742ddf0d06b00186f6dcda2347b1e81cc", {
+  ["script-tag:de3324348e97bf5bee462167a28bc1a56c68218b1c43f0b07b66853c723e10be", {
     files: /^sidepanel\/(?:chunk-[\w.-]+|features\/export\/session-export-feature)\.js$/u,
     reason: "Offline HTML export embeds the audited, build-time session-export-runtime plus escaped messages.",
   }],
@@ -31,7 +31,7 @@ const REVIEWED = new Map([
     files: /^background\/(?:firefox\/page-command|service-worker)\.js$/u,
     reason: "Firefox-only emulation of CDP Runtime.callFunctionOn for the reviewed CDP callers, including explicit user/Agent page scripts. Compiles in the page realm only, never the isolated world or extension context.",
   }],
-  ["worker-source:890f3c5dc5be580fe67f809f64e6fe9556b44894fdd87172868660fa83fcd795", {
+  ["worker-source:c7901e04012410c2709bdf7d5f54b79d384f337e78a3dfb66288a44024a32872", {
     files: /^runner-sandbox\.js$/u,
     reason: "startWorkerRun creates a Blob Worker from the packaged, recursively audited inner-runner only.",
   }],
@@ -41,10 +41,10 @@ const REVIEWED = new Map([
     ["fd33ba99589746223f976d8fefb913d8fb665001c4f72964dc50b7609f7081a3", "capabilities/script/tools", "Page-script tool bridge carries Session/run identity and arguments to the run-owned evaluator."],
     ["d8437ba77796cdef3249f94639760a4ef2dcaa0f15b306c69909725881b748bb", "capabilities/script/tools", "Existing explicit-return page-script fallback uses the same run-owned evaluator."],
     ["2262d3ad0ea465f9ac9f74cece546f998cf578252c960a95aa886f2799d2f62f", "capabilities/tabs/page-mode", "Evaluates only the literal navigator.userAgent for mobile emulation."],
-    ["65929b0848c416804606d4a12b3715bc690342f7fccb678df2249009ec383e36", "capabilities/script/tools", "Entire createScriptTools factory with product-specific offscreen error text. Same explicit user/Agent page-script capability. Policy risk remains."],
+    ["79e49b25a77eafd232d3075b1d3c19154b9213068f3c3af774406ffc49f93665", "capabilities/script/tools", "Entire createScriptTools factory with product-specific offscreen error text. Same explicit user/Agent page-script capability. Policy risk remains."],
     ["e1026a3accc9f907512ec6d6eeed9728cfbd86b130ad009452f3bee13803b70c", "background/tools/element-runtime", "Isolated-world probe using the packaged ISOLATED_CONTENT_PROBE constant from isolated-page-calls; validates live context identity."],
     ["c56fb6154c392cf8fece033fcc496139904617749a4fb93acae372347b20b1fd", "background/tools/element-runtime", "Calls the packaged ISOLATED_CONTENT_INVOKE bridge constant; action parameters are passed as CDP values, not code."],
-    ["8e177aed927806daf6fc4e73005a6eaa450143a33981f607f0cb26a4eeb0f29b", "capabilities/accessibility/tools", "clearStaleOptionDisabled calls only the literal disabled-state predicate on resolved option/optgroup nodes through their owned document send; no model/page strings become code."],
+    ["1e8ba3aa1c1836c0d78f321b07dff73adc317f1ca7e196847eefec91640330db", "capabilities/accessibility/tools", "clearStaleOptionDisabled calls only the literal disabled-state predicate on resolved option/optgroup nodes through their owned document send; no model/page strings become code."],
     ["7f6e6f3165ecda0c11e2a89f1aabe046dff991b58099c2d8e982e0796566a3ab", "background/tools/element-runtime", "bindFindElementRefs resolves find_elements tokens through the packaged ISOLATED_CONTENT_INVOKE bridge with action resolveFindElement; token/action values travel as CDP arguments, not code."],
   ].map(([digest, module, reason]) => [`cdp-execution:${digest}`, {
     files: new RegExp(`^(?:background/service-worker|${module})\\.js$`, "u"), reason,
@@ -55,7 +55,7 @@ const REVIEWED = new Map([
     files: /^background\/tools\/element-runtime\.js$/u,
     reason: "Unbundled invokeBound: same ISOLATED_CONTENT_INVOKE bridge constant and value arguments as the bundled reviewed function.",
   }],
-  ["cdp-execution:f3b1d7fbbdc9be7986c55c8a3a1989d231c1a3e2fcb18fc8d8ac5415d1d994d0", {
+  ["cdp-execution:9007cda75359ab414faa8a99b7ff77d2473b73b7dde5b9711fbdeaaee3331510", {
     files: /^capabilities\/script\/tools\.js$/u,
     reason: "Unbundled createScriptTools: same reviewed page-script factory, without bundled shorthand expansion.",
   }],

@@ -196,7 +196,7 @@
   "sessions.cancel": "取消",
   "sessions.save": "儲存",
   "sessions.taskView": "任務檢視",
-  "sessions.importZuriConversation": "匯入輕舟聊天",
+  "sessions.importZuriConversation": "匯入Zuri聊天",
   "sessions.close": "關閉",
   "sessions.automationName": "排程任務名稱",
   "sessions.whatShouldItDoForExampleCheckCompetitorPrices": "要做什麼？例如：每天查看競品價格與新品，存入資料表，並回報異常變化。",

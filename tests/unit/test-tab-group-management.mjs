@@ -124,10 +124,10 @@ async function assertManagedGroupSurvivesLanguageSwitch() {
   const state = installChromeMock({ tabs: [{ id: 301, windowId: 3, groupId: -1 }, { id: 302, windowId: 3, groupId: -1 }] });
   globalThis.chrome.i18n = {
     getUILanguage: () => "ja",
-    getMessage: key => key === "zuri_language" ? "ja" : key === chromeMessageId("backend.notification.task") ? "軽舟のタスク" : "",
+    getMessage: key => key === "zuri_language" ? "ja" : key === chromeMessageId("backend.notification.task") ? "Zuriのタスク" : "",
   };
   const created = await ensureZuriTabGroupForWindow([301]);
-  assert.equal(created.group.title, "軽舟のタスク");
+  assert.equal(created.group.title, "Zuriのタスク");
 
   globalThis.chrome.i18n = { getUILanguage: () => "en" };
   const updated = await ensureZuriTabGroupForWindow([301, 302], { preferredGroupId: created.groupId });
@@ -139,7 +139,7 @@ async function assertManagedGroupSurvivesLanguageSwitch() {
 
 async function assertManagedGroupSurvivesLegacyBranding() {
   const { ensureZuriTabGroupForWindow } = await import("../../src/shared/tab-groups.js");
-  for (const title of ["Tâche Zuri", "Zuri のタスク", "輕舟任務"]) {
+  for (const title of ["Tâche Zuri", "Zuri のタスク", "Zuri任務"]) {
     const state = installChromeMock({
       tabs: [{ id: 401, windowId: 4, groupId: 9 }, { id: 402, windowId: 4, groupId: 5 }],
       groups: [{ id: 9, windowId: 4, title }, { id: 5, windowId: 4, title: "Zuri task" }],

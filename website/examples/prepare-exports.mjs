@@ -1,4 +1,4 @@
-// Copy qz session exports into the website and clear runtime.ownedTabs.
+// Copy Zuri session exports into the website and clear runtime.ownedTabs.
 // PNG and JPEG data URLs, in the exchange JSON and in the page around it, are re-encoded
 // to WebP when that is smaller. --scale (default 1) or --max-edge (longest side in px, never upscales) and --quality (default 80) tune it. With --webp, existing WebP images are re-encoded too (always lossy again, so use it once).
 // Re-encoding needs ffmpeg with libwebp on PATH.
@@ -8,7 +8,7 @@ import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { pathToFileURL } from "node:url";
 
-const SCRIPT_OPEN = /<script\s+id=(["'])qingzhou-session-exchange\1\s+type=(["'])application\/json\2>/u;
+const SCRIPT_OPEN = /<script\s+id=(["'])zuri-session-exchange\1\s+type=(["'])application\/json\2>/u;
 
 // A lazy [\s\S]*? over a payload with tens of MB of inline images overflows the regex stack,
 // so only the opening tag is matched and the closing tag is found with indexOf.
@@ -26,11 +26,11 @@ function findExchange(source) {
 export function clearOwnedTabs(html) {
   const source = String(html);
   const match = findExchange(source);
-  if (!match) throw new Error("missing qingzhou-session-exchange script");
+  if (!match) throw new Error("missing zuri-session-exchange script");
   const json = match[3];
   const header = json.slice(0, 256);
-  if (!/"format"\s*:\s*"qingzhou\.session"/.test(header) || !/"version"\s*:\s*1/.test(header)) {
-    throw new Error("exchange JSON does not start with qingzhou.session version 1");
+  if (!/"format"\s*:\s*"zuri\.session"/.test(header) || !/"version"\s*:\s*1/.test(header)) {
+    throw new Error("exchange JSON does not start with zuri.session version 1");
   }
   const span = findLastArrayProperty(json, "ownedTabs");
   if (!span) throw new Error("runtime ownedTabs array was not found");
@@ -221,8 +221,8 @@ function minifyExchangeJson(payload) {
     .replace(/\u2028/gu, "\\u2028")
     .replace(/\u2029/gu, "\\u2029");
   const header = json.slice(0, 256);
-  if (!header.includes('"format":"qingzhou.session"') || !header.includes('"version":1')) {
-    throw new Error("exchange JSON does not start with qingzhou.session version 1");
+  if (!header.includes('"format":"zuri.session"') || !header.includes('"version":1')) {
+    throw new Error("exchange JSON does not start with zuri.session version 1");
   }
   if (json.includes("\n")) throw new Error("exchange JSON was not minified");
   return json;
@@ -273,13 +273,13 @@ if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.ar
 }
 
 function runSelfTest() {
-  const raw = `<!doctype html><script id="qingzhou-session-exchange" type="application/json">{"format":"qingzhou.session","version":1,"session":{"title":"a \\u003c b \\u2028 \\u2029","ownedTabs":[1]},"runtime":{"ownedTabs":[{"url":"https://example.com"}]}}</script>`;
+  const raw = `<!doctype html><script id="zuri-session-exchange" type="application/json">{"format":"zuri.session","version":1,"session":{"title":"a \\u003c b \\u2028 \\u2029","ownedTabs":[1]},"runtime":{"ownedTabs":[{"url":"https://example.com"}]}}</script>`;
   const cleared = clearOwnedTabs(raw);
   if (!cleared.includes('"ownedTabs":[]')) throw new Error("ownedTabs was not emptied");
   if (!cleared.includes("\\u003c") || !cleared.includes("\\u2028") || !cleared.includes("\\u2029")) {
     throw new Error("JSON escapes changed");
   }
-  if (!cleared.includes('<script id="qingzhou-session-exchange" type="application/json">')) {
+  if (!cleared.includes('<script id="zuri-session-exchange" type="application/json">')) {
     throw new Error("script tag changed");
   }
   const again = clearOwnedTabs(cleared);
@@ -292,7 +292,7 @@ function runSelfTest() {
   if (png.status !== 0 || !png.stdout?.length) throw new Error("could not build a PNG fixture");
   const dataUrl = `data:image/png;base64,${png.stdout.toString("base64")}`;
   const fixture = {
-    format: "qingzhou.session",
+    format: "zuri.session",
     version: 1,
     session: {
       title: "a < b \u2028 \u2029",
@@ -301,7 +301,7 @@ function runSelfTest() {
     },
     runtime: { ownedTabs: [{ url: "https://example.com" }] },
   };
-  const source = `<!doctype html><script id="qingzhou-session-exchange" type="application/json">${JSON.stringify(fixture, null, 2)}</script><main id="messages"><img src="${dataUrl}"></main>`;
+  const source = `<!doctype html><script id="zuri-session-exchange" type="application/json">${JSON.stringify(fixture, null, 2)}</script><main id="messages"><img src="${dataUrl}"></main>`;
   const first = prepareExport(source);
   const second = prepareExport(first.html);
   if (second.html !== first.html) throw new Error("prepare was not stable");
@@ -313,7 +313,7 @@ function runSelfTest() {
   if (!preparedJson.includes("\\u003c") || !preparedJson.includes("\\u2028") || !preparedJson.includes("\\u2029")) {
     throw new Error("prepare dropped JSON escapes");
   }
-  if (!preparedJson.startsWith('{"format":"qingzhou.session","version":1')) {
+  if (!preparedJson.startsWith('{"format":"zuri.session","version":1')) {
     throw new Error("prepare moved format or version");
   }
   const urls = prepared.session.note.split(" ");

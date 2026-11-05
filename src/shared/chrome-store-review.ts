@@ -4,7 +4,7 @@
 export const CHROME_STORE_REVIEW_STORAGE_KEY = "zuri_chrome_store_review";
 export const CHROME_STORE_REVIEW_VERSION = 1;
 export const CHROME_STORE_REVIEW_TASK_THRESHOLD = 5;
-export const CHROME_WEB_STORE_REVIEWS_URL = "https://chromewebstore.google.com/detail/qz/dknbdgkgoinlgjpfebapkklbmjjgdblm/reviews";
+export const CHROME_WEB_STORE_REVIEWS_URL = "https://chromewebstore.google.com/detail/Zuri/dknbdgkgoinlgjpfebapkklbmjjgdblm/reviews";
 export const CHROME_WEB_STORE_UPDATE_URL = "https://clients2.google.com/service/update2/crx";
 
 export type ChromeStoreReviewStatus = "hidden" | "visible" | "done";

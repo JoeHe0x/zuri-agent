@@ -10,7 +10,7 @@ import test from "node:test";
 import { daemonPaths, ensureDaemon, findDaemon, stopDaemon } from "../../services/mcp-bridge/src/daemon.mjs";
 
 const fixturePid = 2147483000;
-const procStatus = state => `Name:\tqz-fixture\nState:\t${state}\nPid:\t${fixturePid}\n`;
+const procStatus = state => `Name:\tzuri-fixture\nState:\t${state}\nPid:\t${fixturePid}\n`;
 const osError = code => Object.assign(new Error(`Fixture ${code}`), { code });
 
 async function fixture(t) {
@@ -68,7 +68,7 @@ for (const scenario of [
   { name: "permission-denied PID", entry: { killError: "EPERM", status: procStatus("Z (zombie)") }, alive: true, reads: 0 },
   { name: "unavailable procfs", entry: { readError: "ENOENT" }, alive: true, reads: 1 },
   { name: "unreadable procfs", entry: { readError: "EACCES" }, alive: true, reads: 1 },
-  { name: "missing process state", entry: { status: "Name:\tqz-fixture\n" }, alive: true, reads: 1 },
+  { name: "missing process state", entry: { status: "Name:\tzuri-fixture\n" }, alive: true, reads: 1 },
   { name: "malformed process state", entry: { status: "State:\tZombie\n" }, alive: true, reads: 1 },
   { name: "malformed state line", entry: { status: "State:\nZ\n" }, alive: true, reads: 1 },
   { name: "non-Linux process", platform: "darwin", entry: { status: procStatus("Z (zombie)") }, alive: true, reads: 0 },

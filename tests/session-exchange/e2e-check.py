@@ -112,7 +112,7 @@ def serve_export_html(html):
 def open_routed_export(context, html):
     page = context.new_page()
     page.route(
-        "https://alibaba.github.io/**",
+        "https://joehe0x.github.io/**",
         lambda route: route.fulfill(
             status=200,
             content_type="text/html; charset=utf-8",
@@ -133,7 +133,7 @@ def expected_import_label(page):
 
 
 def assert_allowlisted_https_page_offers_import(context, html):
-    allowed_url = "https://alibaba.github.io/qz-browser-agent/examples/travel/"
+    allowed_url = "https://joehe0x.github.io/zuri-agent/examples/travel/"
     allowed = open_routed_export(context, html)
     try:
         allowed_errors = []
@@ -149,7 +149,7 @@ def assert_allowlisted_https_page_offers_import(context, html):
 
 
 def assert_unlisted_https_origin_hides_import(context, extension_page, html):
-    denied_url = "https://alibaba.github.io/other-repo/session.html"
+    denied_url = "https://joehe0x.github.io/other-repo/session.html"
     denied = open_routed_export(context, html)
     try:
         denied_errors = []

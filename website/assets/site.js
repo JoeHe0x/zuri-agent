@@ -2,7 +2,7 @@ import { translations } from './translations.js';
 
 // Progressive enhancement: the English page remains usable without JavaScript.
 const languageButton = document.querySelector('.language');
-const languageStorageKey = 'qz.website.language';
+const languageStorageKey = 'Zuri.website.language';
 const contentBindings = [...document.querySelectorAll('[data-i18n]')];
 const attributeBindings = [...document.querySelectorAll('[data-i18n-attributes]')];
 let locale = 'en';

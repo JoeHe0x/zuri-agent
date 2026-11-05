@@ -6,7 +6,7 @@ import { ensureTestExtension } from "../support/extension-build.mjs";
 
 const scenarios = [
   ["en-US", "en", "en", "Save", "zuri"], ["zh-CN", "zh-CN", "zh_CN", "保存配置", "Zuri"],
-  ["zh-TW", "zh-TW", "zh_TW", "儲存設定", "輕舟"], ["ja-JP", "ja", "ja", "保存", "軽舟"],
+  ["zh-TW", "zh-TW", "zh_TW", "儲存設定", "Zuri"], ["ja-JP", "ja", "ja", "保存", "Zuri"],
   ["ko-KR", "ko", "ko", "저장", "zuri"], ["es-MX", "es", "es", "Guardar", "zuri"],
   ["fr-FR", "fr", "fr", "Enregistrer", "zuri"], ["de-DE", "de", "de", "Speichern", "zuri"],
   ["pt-BR", "pt-BR", "pt_BR", "Salvar", "zuri"], ["ru-RU", "ru", "ru", "Сохранить", "zuri"],
@@ -233,7 +233,7 @@ for (const [locale, language, chromeLocale] of scenarios.filter(([,language]) =>
       const snapshot = { session: { id: "world-export", title: "User title / 用户标题" }, transcript: [
         { id: "user", type: "user", text: "用户内容 {name} <script>unchanged</script>" },
         { id: "error", type: "error", text: "Provider detail — unchanged" },
-        { id: "original-brand-text", type: "assistant", content: "Zuri / Zuri / 輕舟 / 軽舟 — original user-provided names" },
+        { id: "original-brand-text", type: "assistant", content: "Zuri / Zuri / Zuri / Zuri — original user-provided names" },
       ] };
       const exported = await page.evaluate(async value => {
         await window.zuriConversationBenchmark.runSnapshotRender(value, { debug: false, clearStorage: false });
@@ -260,7 +260,7 @@ for (const [locale, language, chromeLocale] of scenarios.filter(([,language]) =>
         const cta = offline.locator("#zuri-session-cta");
         await expect(cta).toBeVisible();
         await expect(cta).toHaveText({
-          ja: "軽舟にインポート", ko: "zuri로 가져오기", ar: "استيراد إلى zuri", hi: "zuri में इंपोर्ट करें",
+          ja: "Zuriにインポート", ko: "zuri로 가져오기", ar: "استيراد إلى zuri", hi: "zuri में इंपोर्ट करें",
         }[language]);
         expect(errors).toEqual([]);
       } finally { await recipient.close(); }

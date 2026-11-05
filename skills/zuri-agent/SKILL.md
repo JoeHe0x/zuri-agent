@@ -43,7 +43,7 @@ open -na "Google Chrome" --args --profile-directory="$ZURI_PROFILE_DIRECTORY" "$
 For an existing custom Chrome data directory, also pass
 `--user-data-dir="$ZURI_USER_DATA_DIR"` with that directory's path. Use the browser
 and Profile the user selected; ask if the target is unclear. Other platform examples
-are in the [shell pairing guide](https://github.com/alibaba/qz-browser-agent/blob/main/docs/cli.md#pair-a-selected-browser-from-the-shell).
+are in the [shell pairing guide](https://github.com/JoeHe0x/zuri-agent/blob/main/docs/cli.md#pair-a-selected-browser-from-the-shell).
 
 Add `--name work` to the URL command to assign that identifier to the Profile that
 opens it, including renaming an existing connection. Without a name, zuri preserves
@@ -66,7 +66,7 @@ If the extension is missing, direct the user to the
 and ask them to click **Add to Chrome** in the intended Profile.
 `npx --yes zuri-agent@latest install` opens the store listing.
 For manual installation, use the ZIP from the
-[latest GitHub release](https://github.com/alibaba/qz-browser-agent/releases/latest)
+[latest GitHub release](https://github.com/JoeHe0x/zuri-agent/releases/latest)
 and follow its loading instructions. After installation, have them complete the
 first-use data notice and configure their model in zuri, then open the pairing URL
 in that Profile and check `browsers --json` again.
@@ -268,4 +268,4 @@ only as requested, using `settings set KEY VALUE` or a JSON patch via stdin.
 Keep credentials out of command arguments and logs. `automations list` and
 `automations run ID` inspect or run an existing scheduled task.
 
-Command reference: https://github.com/alibaba/qz-browser-agent/blob/main/docs/cli.md
+Command reference: https://github.com/JoeHe0x/zuri-agent/blob/main/docs/cli.md

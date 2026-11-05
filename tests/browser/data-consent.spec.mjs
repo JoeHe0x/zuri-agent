@@ -102,7 +102,7 @@ for (const language of ["en", "zh-CN", "zh-TW", "ja", "ko", "es", "fr", "de", "p
     for (const [actual, expected] of result.strings) { expect(expected).not.toBe(""); expect(actual).toBe(expected); }
     expect(result.overflow).toBe(false);
     await expect(page.locator(".data-consent h1")).toHaveText(result.heading);
-    await expect(page.locator(".data-consent a")).toHaveAttribute("href", "https://github.com/alibaba/qz-browser-agent/blob/main/docs/permissions.md");
+    await expect(page.locator(".data-consent a")).toHaveAttribute("href", "https://github.com/JoeHe0x/zuri-agent/blob/main/docs/permissions.md");
     await page.locator("[data-consent-accept]").scrollIntoViewIfNeeded();
     await expect(page.locator("[data-consent-accept]")).toBeInViewport();
     await page.screenshot({ path: testInfo.outputPath("consent.png") });

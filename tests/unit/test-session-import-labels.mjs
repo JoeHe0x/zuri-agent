@@ -42,7 +42,7 @@ test("import button copy follows page language, then the extension language", as
 
     const catalog = {
       zuri_language: { message: "ja" },
-      [chromeMessageId("core.importZuri")]: { message: "軽舟にインポート" },
+      [chromeMessageId("core.importZuri")]: { message: "Zuriにインポート" },
       [chromeMessageId("core.importing")]: { message: "インポート中" },
       [chromeMessageId("core.imported")]: { message: "インポートしました" },
       [chromeMessageId("core.retryImport")]: { message: "再試行" },
@@ -58,7 +58,7 @@ test("import button copy follows page language, then the extension language", as
       if (href.endsWith("_locales/en/messages.json")) return new Response(JSON.stringify({ zuri_language: { message: "en" } }), { status: 200 });
       return new Response("missing", { status: 404 });
     };
-    assert.equal((await createSessionImportLabels("ja")).importZuri, "軽舟にインポート");
+    assert.equal((await createSessionImportLabels("ja")).importZuri, "Zuriにインポート");
     assert.equal((await createSessionImportLabels("en")).importZuri, "Continue in zuri", "page English wins over the extension language");
   } finally {
     globalThis.fetch = previousFetch;

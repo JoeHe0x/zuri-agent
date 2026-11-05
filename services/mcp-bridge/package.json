@@ -7,10 +7,10 @@
   "bin": { "zuri": "src/bin.mjs" },
   "files": ["src/*.mjs", "src/catalog.json", "README.md", "LICENSE"],
   "license": "Apache-2.0",
-  "homepage": "https://alibaba.github.io/qz-browser-agent/",
-  "bugs": { "url": "https://github.com/alibaba/qz-browser-agent/issues" },
+  "homepage": "https://joehe0x.github.io/zuri-agent/",
+  "bugs": { "url": "https://github.com/JoeHe0x/zuri-agent/issues" },
   "keywords": ["browser-agent", "cli", "mcp", "chrome", "automation"],
   "publishConfig": { "access": "public", "registry": "https://registry.npmjs.org/" },
-  "repository": { "type": "git", "url": "https://github.com/alibaba/qz-browser-agent.git", "directory": "services/mcp-bridge" },
+  "repository": { "type": "git", "url": "https://github.com/JoeHe0x/zuri-agent.git", "directory": "services/mcp-bridge" },
   "dependencies": { "@modelcontextprotocol/sdk": "1.31.0" }
 }

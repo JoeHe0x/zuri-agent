@@ -14,7 +14,7 @@ const SESSION_EXCHANGE_LOOPBACK_HOSTS = [
  */
 export const SESSION_EXCHANGE_HTTPS_ALLOWLIST = [
   {
-    hostname: "alibaba.github.io",
+    hostname: "joehe0x.github.io",
     pathnamePrefix: "/zuri-agent/",
   },
 ] as const;

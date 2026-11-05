@@ -8,6 +8,6 @@
   "browser-permissions.name.history": "閲覧履歴",
   "browser-permissions.name.desktopCapture": "画面録画",
   "browser-permissions.name.downloads.open": "ダウンロードしたファイルを開く",
-  "browser-permissions.required": "軽舟のサイドパネルで「{permission}」を許可してから、もう一度お試しください。",
+  "browser-permissions.required": "Zuriのサイドパネルで「{permission}」を許可してから、もう一度お試しください。",
   "browser-permissions.denied": "「{permission}」が許可されなかったため、操作をキャンセルしました。必要な場合は再試行して許可してください。"
 }

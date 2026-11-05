@@ -1,5 +1,5 @@
 {
   "manifest.extensionName": "Zuri Agent",
-  "manifest.extensionDescription": "軽舟はブラウザーで使えるAIエージェントのワークスペースです。",
+  "manifest.extensionDescription": "Zuriはブラウザーで使えるAIエージェントのワークスペースです。",
   "manifest.switchModel": "モデルのプリセットをすばやく切り替える"
 }

@@ -114,15 +114,15 @@ for (const [path, source] of sidepanelSources) {
     if (tag.includes("${inputType") && tag.includes("zuri-radio") && tag.includes("zuri-checkbox")) continue;
     if (name === "textarea" && editorTextareaIds.has(id)) continue;
     if (type === "checkbox") {
-      assert.match(classes, /\bqz-(?:checkbox|switch)\b/u, `${location} checkbox must use zuri-checkbox or zuri-switch`);
+      assert.match(classes, /\bzuri-(?:checkbox|switch)\b/u, `${location} checkbox must use zuri-checkbox or zuri-switch`);
       continue;
     }
     if (type === "radio") {
-      assert.match(classes, /\bqz-radio\b/u, `${location} radio must use zuri-radio`);
+      assert.match(classes, /\bzuri-radio\b/u, `${location} radio must use zuri-radio`);
       continue;
     }
-    assert.match(classes, /\bqz-field\b/u, `${location} field must use zuri-field`);
-    if (name === "select") assert.match(classes, /\bqz-select\b/u, `${location} select must use zuri-select`);
+    assert.match(classes, /\bzuri-field\b/u, `${location} field must use zuri-field`);
+    if (name === "select") assert.match(classes, /\bzuri-select\b/u, `${location} select must use zuri-select`);
   }
 }
 

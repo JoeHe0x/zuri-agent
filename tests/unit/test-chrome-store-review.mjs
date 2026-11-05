@@ -178,7 +178,7 @@ async function mountCard({
 
 test("the fifth successful root-session finish is the first time the prompt becomes visible", () => {
   assert.equal(CHROME_STORE_REVIEW_TASK_THRESHOLD, 5);
-  assert.equal(CHROME_WEB_STORE_REVIEWS_URL, "https://chromewebstore.google.com/detail/qz/dknbdgkgoinlgjpfebapkklbmjjgdblm/reviews");
+  assert.equal(CHROME_WEB_STORE_REVIEWS_URL, "https://chromewebstore.google.com/detail/Zuri/dknbdgkgoinlgjpfebapkklbmjjgdblm/reviews");
   let state = emptyChromeStoreReviewRecord();
   state = recordCompletedTask(state, { sessionId: "chat", runId: "run-1", endedAt: "t1" }).record;
   assert.equal(state.status, "hidden");
