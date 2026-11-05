@@ -4,7 +4,7 @@ import type { ProviderDefinition } from './provider-catalog.js';
 import { PRODUCT_PROVIDERS } from '../product/providers.js';
 import { withTimeout } from './transport.js';
 
-interface ModelOption { id: string; label: string; ownedBy: string; priority: number | null; releaseDate: string; }
+interface ModelOption { id: string; label: string; ownedBy: string; priority: number | null; releaseDate: string; efforts?: string[]; defaultEffort?: string; }
 function asRecord(value: unknown): Record<string, unknown> { return value && typeof value === 'object' ? value as Record<string, unknown> : {}; }
 
 export async function listProviderModels(provider: string, providerDef: ProviderDefinition, apiKey: string, signal?: AbortSignal) {
@@ -114,6 +114,7 @@ function normalizeModelList(input: unknown, providerDef: Partial<ProviderDefinit
       ownedBy,
       priority,
       releaseDate,
+      ...modelEfforts(item),
     });
   }
   if (providerDef.compareModels) return models.sort((a, b) => providerDef.compareModels!(a, b, providerDef));
@@ -128,6 +129,17 @@ function normalizeModelList(input: unknown, providerDef: Partial<ProviderDefinit
   }
   if (providerDef.modelsSort === "source") return models;
   return models.sort((a, b) => a.id.localeCompare(b.id));
+}
+
+/** Effort levels a provider reports per model (Codex `supported_reasoning_levels`); a second pass reads back the normalized `efforts`. */
+function modelEfforts(item: unknown) {
+  const record = asRecord(item);
+  const levels = Array.isArray(record.supported_reasoning_levels) ? record.supported_reasoning_levels.map(level => asRecord(level).effort)
+    : Array.isArray(record.efforts) ? record.efforts : [];
+  const efforts = levels.map(level => String(level || "").trim().toLowerCase()).filter(Boolean);
+  if (!efforts.length) return {};
+  const defaultEffort = String(record.default_reasoning_level || record.defaultEffort || "").trim().toLowerCase();
+  return { efforts, ...(defaultEffort ? { defaultEffort } : {}) };
 }
 
 function getModelListId(item: Record<string, unknown>, providerDef: Partial<ProviderDefinition> = {}) {

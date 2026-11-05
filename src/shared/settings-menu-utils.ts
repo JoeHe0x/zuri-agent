@@ -28,8 +28,8 @@ export function groupProviderChoices(providers: readonly ProviderSummary[], loca
     .map(group => ({ ...group, providers: group.providers.sort(compare) }));
 }
 
-export interface ModelOptionInput { id?: unknown; label?: unknown; name?: unknown; ownedBy?: unknown; meta?: unknown }
-export interface ModelOption { id: string; label: string; meta: string; index: number; search: string; compactSearch: string }
+export interface ModelOptionInput { id?: unknown; label?: unknown; name?: unknown; ownedBy?: unknown; meta?: unknown; efforts?: unknown; defaultEffort?: unknown }
+export interface ModelOption { id: string; label: string; meta: string; index: number; search: string; compactSearch: string; efforts?: string[]; defaultEffort?: string }
 
 export function normalizeModelOptions(models: readonly (string | ModelOptionInput)[] = []) {
   const seen = new Set();
@@ -54,6 +54,9 @@ export function normalizeModelOptions(models: readonly (string | ModelOptionInpu
       index,
       search: modelSearchText(`${modelId} ${label} ${meta}`),
       compactSearch: compactModelSearchText(`${modelId} ${label} ${meta}`),
+      ...(typeof model === "object" && model && Array.isArray(model.efforts) && model.efforts.length
+        ? { efforts: model.efforts.map(String), ...(model.defaultEffort ? { defaultEffort: String(model.defaultEffort) } : {}) }
+        : {}),
     });
   });
   return options;

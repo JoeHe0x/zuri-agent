@@ -8,7 +8,13 @@ export default {
   },
   deepseek: {
     override: true,
-    requestDefaults: { thinking: { type: "enabled" }, reasoning_effort: "high" },
+    requestDefaults: { thinking: { type: "enabled" } },
+    reasoningEffortParam: "reasoning_effort",
+    // shortcut: stored under Codex's key like Claude Pro/Max; DeepSeek maps medium/xhigh itself, so only its own levels are offered.
+    modelOptions: [{
+      key: "codexReasoningEffort", label: "Effort", defaultValue: "high",
+      options: [{ value: "low", label: "Low" }, { value: "high", label: "High" }, { value: "max", label: "Max" }],
+    }],
   },
   opencodego: {
     override: true,

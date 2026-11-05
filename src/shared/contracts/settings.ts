@@ -35,6 +35,8 @@ export interface SkillSetting extends Omit<SkillSettings, "fields"> {
 export interface ProviderModelOption {
   key: string; label: string; defaultValue: string;
   options: readonly { value: string; label: string }[];
+  /** Per-model limits, first matching `match` (a RegExp source tested on the model id) wins; a model matching none has no such option. */
+  modelRules?: readonly { match: string; values?: readonly string[]; defaultValue?: string }[];
 }
 export interface ProviderAuthPresentation { label: string; hint?: string }
 /** Stable group identity; labels are localized when Background creates a config snapshot. */

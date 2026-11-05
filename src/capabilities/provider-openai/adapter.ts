@@ -20,6 +20,7 @@ import {
 } from "#sdk/background/providers";
 import { normalizeLlmFailure } from "#sdk/background/providers";
 
+import { normalizeProviderModelOptions } from '#sdk/shared/models';
 import type { ModelMessage, ModelToolCall } from '#sdk/shared/models';
 import type { RuntimeConfig } from '#sdk/background/providers';
 import type { ProviderDefinition } from '#sdk/background/providers';
@@ -893,6 +894,10 @@ function buildRequestBody(config: RuntimeConfig, messages: ModelMessage[], tools
     messages: convertOpenAiMessagesForRequest(messages, config, providerDef),
     stream,
   };
+  const effortParam = providerDef.reasoningEffortParam;
+  if (effortParam && !Object.prototype.hasOwnProperty.call(modelParameters, effortParam)) {
+    body[effortParam] = normalizeProviderModelOptions(config, providerDef.modelOptions).codexReasoningEffort;
+  }
   if (!Object.prototype.hasOwnProperty.call(modelParameters, outputTokenParam)) {
     body[outputTokenParam] = resolveRequestMaxOutputTokens(options);
   }

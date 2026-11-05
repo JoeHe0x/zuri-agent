@@ -3,4 +3,4 @@ export type { ModelCapability, ModelCapabilityMatch, ModelCapabilityContribution
 export type { ModelMessage, ModelToolCall } from "../../shared/contracts/model-message.js";
 export { completeCustomProviderEndpoint, normalizeCustomProtocol, suggestCustomProviderEndpoint } from "../../shared/models/custom-provider-endpoint.js";
 export { MODEL_PARAMETER_SUGGESTIONS, formatModelParameterValue, normalizeModelParameters, parseModelParameterEntries, serializeModelParameters } from "../../shared/models/model-parameters.js";
-export { normalizeProviderModelOptions } from "../../shared/models/provider-options.js";
+export { normalizeProviderModelOptions, resolveModelOption } from "../../shared/models/provider-options.js";

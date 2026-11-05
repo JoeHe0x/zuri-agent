@@ -758,7 +758,7 @@ async function settingsCompleteConfigForUpdate(input: SettingsInput = {}, signal
     modelParameters: Object.prototype.hasOwnProperty.call(input, "modelParameters")
       ? rawPatch.modelParameters
       : (modelIdentityChanged ? {} : current.modelParameters),
-    codexReasoningEffort: codexProvider
+    codexReasoningEffort: providerSummary?.modelOptions?.length
       ? (Object.prototype.hasOwnProperty.call(input, "codexReasoningEffort") ? rawPatch.codexReasoningEffort : (sameProvider ? current.codexReasoningEffort : "medium"))
       : "",
     customProtocol: customProvider

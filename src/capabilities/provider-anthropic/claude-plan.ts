@@ -1,7 +1,7 @@
 import { chatAnthropic, chatStreamAnthropic } from "./adapter.js";
 import { resolveClaudeAuth } from "./auth.js";
 import { modelOptions } from "./options.js";
-import { normalizeProviderModelOptions } from "#sdk/shared/models";
+import { normalizeProviderModelOptions, resolveModelOption } from "#sdk/shared/models";
 import type { ModelMessage } from "#sdk/shared/models";
 import type { ProviderDefinition, ModelEvent, ModelOptions, RuntimeConfig } from "#sdk/background/providers";
 
@@ -11,11 +11,18 @@ const BETAS = "claude-code-20250219,oauth-2025-04-20,interleaved-thinking-2025-0
 // Keeps custom tool names (e.g. "read", "bash") from colliding with Claude Code's built-in tools.
 const TOOL_PREFIX = "_";
 
+function effortDefaults(model: string, config: RuntimeConfig) {
+  const resolved = resolveModelOption(modelOptions[0], model);
+  if (!resolved) return {};
+  const effort = normalizeProviderModelOptions(config, modelOptions).codexReasoningEffort;
+  return { output_config: { effort: resolved.options.some(choice => choice.value === effort) ? effort : resolved.defaultValue } };
+}
+
 async function prepare(messages: ModelMessage[], signal: AbortSignal | undefined, options: ModelOptions, config: RuntimeConfig) {
   const { token } = await resolveClaudeAuth(signal);
   return {
     messages: [{ role: "system", content: CLAUDE_CODE_IDENTITY } as ModelMessage, ...messages],
-    options: { ...options, providerDefinition: { ...options.providerDefinition, anthropicToolPrefix: TOOL_PREFIX, anthropicRequestDefaults: { ...options.providerDefinition?.anthropicRequestDefaults, output_config: { effort: normalizeProviderModelOptions(config, modelOptions).codexReasoningEffort } } } as ProviderDefinition, baseHeaders: { ...options.baseHeaders, "x-app": "cli" }, headers: { ...options.headers, Authorization: `Bearer ${token}`, "anthropic-beta": BETAS } },
+    options: { ...options, providerDefinition: { ...options.providerDefinition, anthropicToolPrefix: TOOL_PREFIX, anthropicRequestDefaults: { ...options.providerDefinition?.anthropicRequestDefaults, ...effortDefaults(config.model ?? "", config) } } as ProviderDefinition, baseHeaders: { ...options.baseHeaders, "x-app": "cli" }, headers: { ...options.headers, Authorization: `Bearer ${token}`, "anthropic-beta": BETAS } },
   };
 }
 

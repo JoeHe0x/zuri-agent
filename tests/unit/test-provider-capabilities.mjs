@@ -6,6 +6,7 @@ import { listProviderModels } from '../../src/background/llm/model-directory.js'
 import { getProviderDef, getProviderEndpoint, listProviderSummaries } from '../../src/background/llm/provider-catalog.js';
 import { normalizeConfig, getConfig, saveConfig } from '../../src/background/llm/config.js';
 import { clearCodexAuth, getCodexAuthStatus, startCodexDeviceLogin, pollCodexDeviceLogin } from '../../src/capabilities/provider-codex/auth.js';
+import { resolveModelOption } from '../../src/shared/models/provider-options.js';
 import { withLanguage } from '../../src/shared/i18n/index.js';
 
 const definition = { label: 'Independent', api: 'local', protocol: 'local', requiresApiKey: false };
@@ -157,7 +158,7 @@ test('legacy Codex saved options and auth status stay wire-compatible through de
     storage.llmConfig.codexReasoningEffort = removed;
     assert.equal((await getConfig()).codexReasoningEffort, 'medium');
   }
-  assert.equal(normalizeConfig({ provider: 'deepseek', codexReasoningEffort: 'high' }).codexReasoningEffort, '');
+  assert.equal(normalizeConfig({ provider: 'openai', codexReasoningEffort: 'high' }).codexReasoningEffort, '');
   const saved = await saveConfig({ ...config, codexReasoningEffort: 'max' });
   assert.equal(storage.llmConfig.codexReasoningEffort, 'max');
   assert.equal(saved.presets[0].codexReasoningEffort, 'max');
@@ -221,4 +222,27 @@ test('login operations reject late success when an adapter ignores cancellation'
     controller.abort(); complete({ status: 'complete' });
     await assert.rejects(pending, { name: 'AbortError' });
   }
+});
+
+test('Claude Pro/Max effort levels and defaults follow each model', () => {
+  const [option] = getProviderDef('claudeplan').modelOptions;
+  const levels = model => resolveModelOption(option, model)?.options.map(choice => choice.value).join(',');
+  assert.equal(levels('claude-sonnet-5-5'), 'low,medium,high,xhigh,max');
+  assert.equal(levels('claude-opus-4-8'), 'low,medium,high,xhigh,max');
+  assert.equal(levels('claude-opus-4-6'), 'low,medium,high,max');
+  assert.equal(levels('claude-opus-4-5-20251101'), 'low,medium,high');
+  assert.equal(levels('claude-haiku-4-5'), undefined);
+  assert.equal(resolveModelOption(option, 'claude-opus-5-5').defaultValue, 'medium');
+  assert.equal(resolveModelOption(option, 'claude-fable-5-1').defaultValue, 'high');
+});
+
+test('model lists keep the effort levels a provider reports per model', async () => {
+  const codexRows = { models: [
+    { slug: 'gpt-x', display_name: 'GPT X', default_reasoning_level: 'Medium', supported_reasoning_levels: [{ effort: 'low' }, { effort: 'Medium' }, { effort: 'high' }] },
+    { slug: 'gpt-y', display_name: 'GPT Y' },
+  ] };
+  const { models } = await listProviderModels('independent', { ...definition, listModels: ({ normalize }) => normalize(codexRows) }, '');
+  assert.deepEqual(models.find(model => model.id === 'gpt-x').efforts, ['low', 'medium', 'high']);
+  assert.equal(models.find(model => model.id === 'gpt-x').defaultEffort, 'medium');
+  assert.equal('efforts' in models.find(model => model.id === 'gpt-y'), false);
 });

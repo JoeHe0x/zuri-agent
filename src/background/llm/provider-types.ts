@@ -36,6 +36,8 @@ export interface ProviderDefinition {
   staticModels?: (string | { id: string; label?: string; ownedBy?: string; priority?: number })[];
   defaultContextWindow?: number;
   requestDefaults?: Record<string, unknown>;
+  /** Body field that carries the selected effort option for OpenAI-compatible requests. */
+  reasoningEffortParam?: string;
   /** Static service headers; authentication remains owned by the protocol adapter. */
   requestHeaders?: Readonly<Record<string, string>>;
   anthropicRequestDefaults?: Record<string, unknown>;

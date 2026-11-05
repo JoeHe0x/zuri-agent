@@ -8,3 +8,12 @@ export function normalizeProviderModelOptions(config: Record<string, unknown>, o
     return [option.key, choice?.value ?? option.defaultValue];
   }));
 }
+
+/** Choices and default of an option for one model; null when the option's model rules exclude it. */
+export function resolveModelOption(option: ProviderModelOption, model: string) {
+  if (!option.modelRules) return { options: option.options, defaultValue: option.defaultValue };
+  const rule = option.modelRules.find(item => new RegExp(item.match).test(model));
+  if (!rule) return null;
+  const { values } = rule;
+  return { options: values ? option.options.filter(choice => values.includes(choice.value)) : option.options, defaultValue: rule.defaultValue ?? option.defaultValue };
+}

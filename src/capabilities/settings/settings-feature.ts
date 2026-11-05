@@ -1,7 +1,7 @@
 import { t, getLocale } from "./i18n.js";
 import type { UiActivation, UiSettingsPort, UiSettingsSection } from "#sdk/sidepanel";
 import { providerIconSvg } from "./provider-icons.js";
-import { normalizeProviderModelOptions } from "#sdk/shared/models";
+import { normalizeProviderModelOptions, resolveModelOption } from "#sdk/shared/models";
 import type { ModelCapabilityMatch } from "#sdk/shared/models";
 import { optionalSessionId as normalizeSessionIdValue } from "#sdk/sidepanel/sessions";
 import type { SettingsConfig, ModelConfiguration, ModelPreset, ProviderAuthStatus, ProviderDeviceLogin, ProviderLoginPoll, ProviderSummary, SkillSetting, CustomProviderProtocol } from "#sdk/shared/settings";
@@ -2039,15 +2039,34 @@ export function createSettingsFeature(options: SettingsFeatureOptions) {
     if (open) void renderModelMenu();
   }
 
+  // Levels the provider itself reports per model, filled while the model menu loads its lists.
+  const reportedEfforts = new Map<string, { efforts: string[]; defaultEffort?: string }>();
+
+  function modelEffort(provider: string, model: string) {
+    const [option] = providerSummary(provider)?.modelOptions || [];
+    const resolved = option && resolveModelOption(option, model);
+    if (!resolved) return null;
+    const reported = reportedEfforts.get(`${provider}\n${model}`);
+    if (!reported) return { option, ...resolved };
+    const options = resolved.options.filter(choice => reported.efforts.includes(choice.value));
+    if (!options.length) return null;
+    const preferred = [reported.defaultEffort, resolved.defaultValue].find(value => options.some(choice => choice.value === value));
+    return { option, options, defaultValue: preferred ?? options[0].value };
+  }
+
   // Step two: pick the effort of the model just chosen (providers without model options skip it).
   function showEffortStep(config = lastSettingsConfig) {
-    const [option] = providerSummary(String(config?.provider || ""))?.modelOptions || [];
-    if (!modelMenuList || !option) return setModelMenuOpen(false);
+    const effort = modelEffort(String(config?.provider || ""), String(config?.model || ""));
+    if (!modelMenuList || !effort) return setModelMenuOpen(false);
+    const { option, options: choices, defaultValue } = effort;
     menuStep = "effort";
     modelMenuList.classList.remove("hidden");
     modelMenuTrigger?.setAttribute("aria-expanded", "true");
-    const current = normalizeProviderModelOptions(config || {}, [option])[option.key];
-    modelMenuList.replaceChildren(menuTitle(option.label), ...option.options.map(choice => {
+    const stored = normalizeProviderModelOptions(config || {}, [option])[option.key];
+    const current = choices.some(choice => choice.value === stored) ? stored : defaultValue;
+    // A level the new model lacks must not stay saved, even if this menu is dismissed.
+    if (current !== stored) setProviderOption({ optionKey: option.key, optionValue: current }).catch(() => {});
+    modelMenuList.replaceChildren(menuTitle(option.label), ...choices.map(choice => {
       const item = document.createElement("button");
       item.type = "button";
       item.className = "model-menu-item model-menu-effort-item";
@@ -2056,7 +2075,7 @@ export function createSettingsFeature(options: SettingsFeatureOptions) {
       item.dataset.optionKey = option.key;
       item.dataset.optionValue = choice.value;
       const name = Object.assign(document.createElement("span"), { textContent: choice.label });
-      const badge = choice.value === option.defaultValue ? t("effortRecommended") : choice.value === "max" ? t("effortMoreUsage") : "";
+      const badge = choice.value === defaultValue ? t("effortRecommended") : choice.value === "max" ? t("effortMoreUsage") : "";
       item.append(name, ...(badge ? [Object.assign(document.createElement("em"), { textContent: badge, className: choice.value === "max" ? "is-warn" : "" })] : []));
       return item;
     }));
@@ -2087,6 +2106,9 @@ export function createSettingsFeature(options: SettingsFeatureOptions) {
     };
     const merge = (id: string, models: readonly { id: string; label?: string }[] = []) => ({ id, models: [...new Map([...models, ...saved(id)].map(model => [model.id, model] as const).reverse()).values()].reverse() });
     const paint = (groups: { id: string; models: { id: string; label?: string }[] }[]) => {
+      for (const group of groups) for (const model of group.models as { id: string; efforts?: string[]; defaultEffort?: string }[]) {
+        if (model.efforts) reportedEfforts.set(`${group.id}\n${model.id}`, { efforts: model.efforts, defaultEffort: model.defaultEffort });
+      }
       if (menuStep !== "model") return;
       const scrollTop = modelMenuList.scrollTop;
       modelMenuList.replaceChildren(menuTitle(t("modelMenuTitle")), ...groups.flatMap(group => group.models.map(({ id: model, label }) => {
@@ -2143,7 +2165,7 @@ export function createSettingsFeature(options: SettingsFeatureOptions) {
       setProviderOption(item.dataset).catch(fail);
       return;
     }
-    const hasEffort = (providerSummary(item.dataset.provider || "")?.modelOptions || []).length > 0;
+    const hasEffort = Boolean(modelEffort(item.dataset.provider || "", item.dataset.model || ""));
     if (!hasEffort) setModelMenuOpen(false);
     const sameModel = item.dataset.provider === lastSettingsConfig?.provider && item.dataset.model === lastSettingsConfig?.model;
     (sameModel ? Promise.resolve() : switchModel(item)).then(() => { if (hasEffort) showEffortStep(); }, error => { setModelMenuOpen(false); fail(error); });
@@ -2170,8 +2192,9 @@ export function createSettingsFeature(options: SettingsFeatureOptions) {
     const text = `${getProviderDisplayName(provider)} - ${model}`;
     const label = document.createElement("span");
     label.textContent = model;
-    const [effort] = providerSummary(provider)?.modelOptions || [];
-    const effortLabel = effort?.options.find(choice => choice.value === normalizeProviderModelOptions(config || {}, [effort])[effort.key])?.label;
+    const effort = modelEffort(provider, String(config?.model || ""));
+    const stored = effort && normalizeProviderModelOptions(config || {}, [effort.option])[effort.option.key];
+    const effortLabel = effort && (effort.options.find(choice => choice.value === stored) || effort.options.find(choice => choice.value === effort.defaultValue))?.label;
     const badge = effortLabel ? Object.assign(document.createElement("span"), { className: "model-menu-effort-badge", textContent: effortLabel }) : null;
     modelMenuTrigger.replaceChildren(providerBadge(provider, model), label, ...(badge ? [badge] : []));
     currentModelIndicator.title = text;

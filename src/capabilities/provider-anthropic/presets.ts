@@ -1,14 +1,14 @@
 import { t } from "./i18n.js";
 import type { ProviderDefinition } from "#sdk/background/providers";
 import { clearClaudeAuth, getClaudeAuthStatus, pollClaudeLogin, startClaudeLogin } from "./auth.js";
+import { CLAUDE_PLAN_MODELS, claudePlanLimits } from "./model-ids.js";
 import { listModels } from "./models.js";
 import { modelOptions } from "./options.js";
 
 const BASE_URL = "https://api.anthropic.com";
 
-const OWNED_BY = "Claude Pro/Max · 200K · image";
-const STATIC_MODELS = ["claude-fable-5-1", "claude-opus-5-5", "claude-sonnet-5-5", "claude-haiku-5-5"]
-  .map((id, index, ids) => ({ id, ownedBy: OWNED_BY, priority: (ids.length - index) * 100 }));
+const STATIC_MODELS = CLAUDE_PLAN_MODELS
+  .map((id, index, ids) => ({ id, ownedBy: `Claude Pro/Max · ${claudePlanLimits(id).label} · image`, priority: (ids.length - index) * 100 }));
 
 export default {
   claudeplan: {
