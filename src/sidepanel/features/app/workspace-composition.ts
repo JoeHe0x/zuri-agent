@@ -174,6 +174,8 @@ export function createWorkspaceComposition(options: WorkspaceOptions) {
       if (event.type === "plugin_registry_update") skillToolCatalog.handleUpdate(event);
       ui.emit(event);
     }, onUiEvent: extensions.notify,
+    // A task waiting for input in another session (for example one started from a chat channel) would otherwise be invisible.
+    onWaitingElsewhere: waiting => root.getElementById("btn-more")?.classList.toggle("has-waiting", waiting),
   });
   port.onMessage(eventRouter.handle);
   appShell = createAppShellFeature({ root, sidePanelApi: globalThis.chrome?.sidePanel, tabs, ui,

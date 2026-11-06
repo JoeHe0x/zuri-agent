@@ -56,9 +56,11 @@
     "mathjax-full": "3.2.2",
     "partial-json": "0.1.7",
     "pdfjs-dist": "4.10.38",
+    "qrcode-generator": "2.0.4",
     "tabulator-tables": "6.5.2",
     "turndown": "7.2.4",
     "turndown-plugin-gfm": "1.0.2",
+    "ws": "^8.22.1",
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
   },
   "overrides": {

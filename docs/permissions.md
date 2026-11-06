@@ -48,9 +48,10 @@ your question; keep credentials and personal task content out of public issues.
 ## Browser access
 
 This guide explains the 20 permissions and host permission in [manifest.json](../src/manifest.json).
-`history`, `bookmarks`, `desktopCapture`, and `downloads.open` are optional: Chrome requests them
-when the user activates the feature. All other permissions, including `geolocation`, are declared
-at installation. Chrome, operating system, and website restrictions still apply.
+`desktopCapture` and `downloads.open` are optional: Chrome requests them when the user activates
+the feature. All other permissions, including `bookmarks`, `history`, and `geolocation`, are declared
+at installation, so a task started from a message channel never waits for a permission prompt.
+Firefox keeps `bookmarks` and `history` optional. Chrome, operating system, and website restrictions still apply.
 
 ## Permission use
 
@@ -71,8 +72,8 @@ at installation. Chrome, operating system, and website restrictions still apply.
 | `downloads.open` | Open saved files from Artifacts; `capabilities/sessions/artifacts/artifacts-feature.ts` | Files |
 | `desktopCapture` | Let the user choose a screen or window when recording a case; `sidepanel/features/chat/case-recording-feature.ts` | Optional recording |
 | `geolocation` | Serve the `get_location` tool after first-use consent; `background/services/location.ts` | Tool request |
-| `bookmarks` | Search and manage bookmarks; `capabilities/bookmarks/tools.ts` | Optional tools |
-| `history` | Search browsing history; `capabilities/bookmarks/tools.ts` | Optional tools |
+| `bookmarks` | Search and manage bookmarks; `capabilities/bookmarks/tools.ts` | Tools |
+| `history` | Search browsing history; `capabilities/bookmarks/tools.ts` | Tools |
 | `clipboardWrite` | Copy answers, code, tables, and exported page content | UI actions |
 | `notifications` | Show explicit reminders and task completion notifications; `background/services/chrome-notifications.ts` | Optional notifications |
 | `declarativeNetRequest` | Apply provider headers and authorized Skill network rules to extension requests; `background/services/provider-header-rules.ts`, `background/skills/skill-network.ts` | Network access |

@@ -6,7 +6,9 @@ import { createSessionSupervisor } from "../../src/background/session/supervisor
 const manifest = JSON.parse(await readFile(new URL("../../src/manifest.json", import.meta.url)));
 assert.ok(manifest.permissions.includes("geolocation"));
 assert.ok(manifest.permissions.includes("downloads"));
-assert.deepEqual(manifest.optional_permissions.toSorted(), ["bookmarks", "desktopCapture", "downloads.open", "history"]);
+// Chrome asks for these only from a click in the browser, which a task started from WeCom cannot make, so they are granted at install.
+assert.ok(manifest.permissions.includes("bookmarks") && manifest.permissions.includes("history"));
+assert.deepEqual(manifest.optional_permissions.toSorted(), ["desktopCapture", "downloads.open"]);
 assert.ok(manifest.optional_permissions.every(permission => !manifest.permissions.includes(permission)));
 const grants = new Set();
 globalThis.chrome = {

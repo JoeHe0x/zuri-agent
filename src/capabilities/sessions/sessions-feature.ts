@@ -81,6 +81,13 @@ export function isSessionListSnapshotSoftTimeout(error: unknown) {
   return !code && /^list_sessions timed out$/i.test(String(fields(error).message || "").trim());
 }
 
+// Channel names are product names, so they are not localized.
+const BUBBLE = (path: string) => `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${path}</svg>`;
+const CHANNEL_BADGES: Record<string, { label: string; icon: string }> = {
+  weixin: { label: "微信", icon: BUBBLE('<path d="M9 4C5.1 4 2 6.6 2 9.8c0 1.8 1 3.4 2.6 4.4L4 16.5l2.6-1.4c.8.2 1.5.3 2.4.3 3.9 0 7-2.6 7-5.8S12.9 4 9 4Z"/><path d="M16 11.500c3 .2 6 2.200 6 5 0 1.400-.8 2.600-2 3.400l.5 2-2.300-1.200c-.7.200-1.400.3-2.200.3-3 0-5.500-1.800-5.900-4.100"/>') },
+  wecom: { label: "企业微信", icon: BUBBLE('<path d="M12 3C7 3 3 6.600 3 11c0 2.400 1.200 4.500 3.100 6L5.500 21l3.700-2c.9.300 1.800.4 2.800.4 5 0 9-3.600 9-8.400S17 3 12 3Z"/><circle cx="12" cy="11" r="2.500"/>') },
+};
+
 export function createSessionsFeature(options: SessionsOptions) {
   const root = options.root || document;
   const lifetime = options.signal;
@@ -948,7 +955,8 @@ async function loadSessionsList({ requestFreshState = false } = {}) {
   const parentIds = new Set(list.map(session => session.parentSessionId));
   const visible = list.filter(session => {
     const summary = normalizeSessionListSummary(session.listSummary);
-    return summary.messageCount || summary.artifactCount || parentIds.has(session.id);
+    // messageCount is only written when a transcript is saved, so a running task started elsewhere has lastType before it has a count.
+    return summary.messageCount || summary.lastType || summary.artifactCount || parentIds.has(session.id);
   });
   const searchState = filterSessionsForSearch(visible, searchQuery);
   if (searchState.searchActive && searchState.list.length === 0) {
@@ -1320,6 +1328,8 @@ function renderSessionTreeCard(node: TreeNode, focusSessionId: string | null | u
   const runtimeMeta = buildSessionRuntimeMeta(s, runtime);
   const trackerProgress = buildSessionTrackerProgress(runtime);
   const goalChipHtml = buildSessionGoalChip(runtime, s.id);
+  const channel = CHANNEL_BADGES[String(s.source || "").replace(/^channel:/, "")];
+  const channelBadgeHtml = channel ? `<span class="zuri-pill session-channel-badge">${channel.icon}${escapeHtml(channel.label)}</span>` : "";
   const workingTab = buildSessionWorkingTabLine(runtime);
   const recentLine = buildSessionRecentLine(s);
   const artifactSummary = artifactsFeature.getSummaryFromRecord(s);
@@ -1351,6 +1361,7 @@ function renderSessionTreeCard(node: TreeNode, focusSessionId: string | null | u
       <div class="session-card-body">
         <div class="session-card-title-row">
           <div class="session-card-title" title="${escapeHtmlAttribute(s.title)}">${escapeHtml(s.title)}</div>
+          ${channelBadgeHtml}
           ${artifactChipHtml}
           ${goalChipHtml}
           <div class="session-card-actions" aria-label="${escapeHtmlAttribute(t("taskActions"))}">

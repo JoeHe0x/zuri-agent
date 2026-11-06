@@ -98,7 +98,7 @@ export function createMcpRuntime({
         "submit_wait_form", "cancel_wait", "get_user_input", "respond_to_user_input", "get_session_state", "get_session_snapshot",
         "get_messages", "get_history", "stop_session", "clear_goal", "list_tools",
         "execute_tool", "list_data_tables", "list_skills", "get_skill", "get_skill_resource",
-        "delete_data_table", "export_data_table", "list_image_collections", "delete_image_collection", "export_image_collection",
+        "delete_data_table", "export_data_table", "list_image_collections", "delete_image_collection", "export_image_collection", "read_image_collection",
         "list_downloads", "export_skill", "get_settings", "update_settings",
         "get_config", "save_config", "get_runtime_config", "set_runtime_config", "list_plugins",
         "refresh_skill_registry", "list_automations", "run_automation", "get_trace", "clear_trace",

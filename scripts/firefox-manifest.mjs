@@ -71,6 +71,10 @@ export function firefoxManifest(manifest) {
       if (!next.permissions.includes(permission)) next.permissions.push(permission);
     }
   }
+  // Firefox keeps them optional: bookmarks needs its own data-collection consent.
+  const movedToOptional = ["history", "bookmarks"].filter(permission => next.permissions?.includes(permission));
+  next.permissions = next.permissions?.filter(permission => !movedToOptional.includes(permission));
+  next.optional_permissions = [...(next.optional_permissions || []), ...movedToOptional];
   if (Array.isArray(next.optional_permissions)) {
     next.optional_permissions = next.optional_permissions.filter(permission => !droppedPermissions.has(permission));
     if (!next.optional_permissions.length) delete next.optional_permissions;

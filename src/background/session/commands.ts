@@ -220,7 +220,7 @@ async function listSessionsRuntime({ limit = 100, excludeSessionId = "" } = {}) 
 }
 
 
-async function createSessionRuntime({ title = "", firstMessage = "", parentSessionId = ROOT_SESSION_ID }: Fields = {}, signal?: AbortSignal) {
+async function createSessionRuntime({ title = "", firstMessage = "", parentSessionId = ROOT_SESSION_ID, source = "" }: Fields = {}, signal?: AbortSignal) {
   await sessionRuntimeReady;
   signal?.throwIfAborted();
   const message = String(firstMessage || "").trim();
@@ -231,6 +231,7 @@ async function createSessionRuntime({ title = "", firstMessage = "", parentSessi
     parentSessionId: normalizedParentId,
     titleSource: normalizedParentId === ROOT_SESSION_ID
       ? (String(title || "").trim() ? "manual" : "first_message") : "fixed",
+    source,
   });
   signal?.throwIfAborted();
   broadcast({ type: "session_created", session, firstMessage: message });
@@ -903,6 +904,7 @@ function createSessionFromApi(params: Fields = {}, signal?: AbortSignal) {
     title: params.title || "",
     firstMessage: params.firstMessage || params.text || "",
     parentSessionId: params.parentSessionId || ROOT_SESSION_ID,
+    source: params.source,
   }, signal);
 }
 
