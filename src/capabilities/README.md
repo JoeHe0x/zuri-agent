@@ -248,6 +248,15 @@ Put actions such as reloading the UI in `afterSave`. It runs only when every gro
 save succeeds and the submitted revision still matches the current draft. Previously saved groups on
 the same tab also receive the callback; check the signal again after each `await`.
 
+## Defer a rarely used tool
+
+Set `group` (`"sessions"`, `"media"`, `"network"`, or `"browser"`) on a tool the model needs only
+occasionally. The Agent leaves a group's schemas out of each request until the model calls
+`enable_tools({ group })`; calling the tool earlier fails with a recovery to `enable_tools`. Other
+callers, such as the MCP bridge, still see every tool. Add a new group name in
+`src/shared/tools/tool-groups.ts` and mention it in the `enable_tools` text. See
+[token optimization](../../docs/token-optimization.md).
+
 ## Replace an existing tool
 
 To replace a package's tool, provide a complete tool definition with `replaces: "tabs/open_tab"` and

@@ -8,11 +8,86 @@ Findings come from reading the code; none are measured on a live run yet.
 
 | Cause | Where | Effect |
 | --- | --- | --- |
-| No prompt caching on the Anthropic path | `src/capabilities/provider-anthropic/adapter.ts` | System prompt (about 9k tokens), 65+ tool schemas, and history billed at full price each step. |
-| Large tool results | `MAX_TOOL_RESULT_CHARS = 20000` in `src/background/llm/message-projection.ts` | One page observation is 5–14k tokens, resent on every later step. |
-| Late trimming of old results | `_pruneOldToolResultsIfNeeded` in `src/background/agent/agent.ts` | Old results are protected up to 20% of the compaction threshold and trimmed only at run end. Stale DOM and AX trees stay in context. |
-| All tools and prompt sections sent every step | `getToolSchemas` in `src/background/tools/runtime.ts`, `prompts/en.ts` | Fixed overhead of 10k+ tokens, mostly unrelated to the task. |
+| No prompt caching on the Anthropic path | `src/capabilities/provider-anthropic/adapter.ts` | System prompt (about 9k tokens), 45 tool schemas, and history billed at full price each step. |
+| Large tool results | `MAX_TOOL_RESULT_CHARS` in `src/background/llm/message-projection.ts` (20000, unchanged) | `get_ax_tree` is 0.8–2.6k tokens (measured). `read_article`, `read_dom`, and Network reads can be larger; they are bounded only by their `limit` argument and this cap. |
+| Late trimming of old results | `_pruneOldToolResultsIfNeeded` in `src/background/agent/agent.ts` | It runs in the `finally` of a run, and the latest two user rounds are protected. Inside one run nothing is trimmed, so stale DOM and AX trees stay in context for every step. |
+| All tools and prompt sections sent every step | `getToolSchemas` in `src/background/tools/runtime.ts`, `prompts/en.ts` | Fixed overhead of about 23k tokens (measured, see Footprint), mostly unrelated to the task. Tool groups (shipped item 10) cut the tool part by 27%. |
 | Compaction tied to the window size | `compaction.ts` | With a large window the context grows to hundreds of thousands of tokens before it shrinks. |
+
+## Analysis: comparison with agent-browser
+
+`agent-browser` (`/mnt/c/Code/agent-browser`) is a CLI that an agent drives through a shell, so its
+output is the only thing that enters the context. Its design keeps each step's addition small and
+discardable. The table lists what it does and where Zuri differs.
+
+| Area | agent-browser | Zuri before this change |
+| --- | --- | --- |
+| Page observation default | `snapshot -i` lists interactive elements only; `-c`, `-s <selector>`, `--depth` narrow it (`cli/src/native/snapshot.rs`). | `get_ax_tree` defaults to depth 16, 120 nodes, 40 actions, with no interactive-only mode. |
+| Repeated observation | `snapshot --delta` returns the full tree once, then only changes, and falls back to the full tree when the delta exceeds 70% (`native/actions.rs`). | No delta. A small page change re-sends the whole tree. |
+| Output cap | `--max-output` truncates and tells the model how to raise it (`output.rs`). | 20000 characters per result, clipped in the middle. |
+| Action results | One status line. The model asks for page state when it needs it. | Also small: `pageAfter` carries URL and title only. No change needed. |
+| Instruction loading | A 50-line stub; the 258-line core guide and references load on request (`skills get core --ref ...`). | The full system prompt (about 27 KB) and 45 tool schemas on every step. |
+| Cost rules in the prompt | "Prefer snapshots. Never screenshot to check that an element exists or the page loaded." Also `screenshot --if-changed`. | The multimodal prompt recommends a screenshot after structural inspection. No rule about its cost. |
+| Text without a browser | `read <url>` fetches markdown over HTTP, with `--outline` and `--filter`. | `read_article` needs an open tab. |
+| Regression check | `evals/context-footprint.ts` measures bytes and an estimated token count. | The `cache_usage` trace only; no footprint check. |
+
+### Root cause by layer
+
+1. **Timing (largest).** Old results were trimmed only when a run ended. Inside a run every step
+   resends every earlier observation, so tokens grow with the square of the step count. The
+   existing exception, replacing a result when the same call repeats with identical arguments,
+   misses the common case of the same tab read with a different root or limit.
+2. **Tool defaults.** Observations are large and have no incremental form. Each one is the biggest
+   item in the context.
+3. **Flow.** The fixed prefix is resent on every step, and prompt chapters and tools load whether
+   or not the task uses them. Prompt caching hides most of this on Anthropic and does nothing for
+   providers that do not cache.
+4. **Prompt wording (smallest).** Chapter 3 orders the model to inspect with `get_ax_tree`, then
+   `read_article`, then `find_elements`, and the visual protocol recommends screenshots. The
+   wording nudges toward more observation but does not force it.
+
+Findings come from reading both code bases. Neither is measured on a live run.
+
+## Measured
+
+Measured on 2026-11-10 with the real-Chromium harness in `tests/support/ax-viewport-harness.mjs` on
+the fixtures in `tests/fixtures/ax-snapshot/`. Tokens are characters divided by four.
+
+| Fixture | `get_ax_tree` default result | `uid:` references in it | Result with short refs |
+| --- | --- | --- | --- |
+| books-home | 1,480 | 508 (34%) | 1,055 |
+| books-catalogue | 1,104 | 412 (37%) | 759 |
+| long-list | 1,295 | 442 (34%) | 925 |
+| viewport-dense-form | 2,387 | 496 (21%) | 1,972 |
+| pizza-form | 623 | 184 (29%) | 468 |
+| viewport-article | 877 | 160 (18%) | 742 |
+
+- The default scope is the viewport and folds omitted regions (`truncated, 209 more`), so one
+  observation is small. The `actions` list the tool builds internally is not returned to the model.
+- Every node line carries `target=uid:t1.s00001.4`. That reference is 18–37% of the result.
+  `agent-browser` uses `@e4`. A short reference form is the largest remaining saving per observation
+  and needs the target resolver to expand it against the latest snapshot.
+- Per-step cost model, an estimate with a 23k-token prefix and 1.2–2k tokens of history added per
+  step: over 20 steps the prefix is 464k input tokens and the history is 228–380k, so the prefix is
+  55–67% of the input without caching. With caching the prefix is billed at the read price, and a
+  cache miss (a pause longer than five minutes, or a provider without prefix caching) returns it to full
+  price.
+- Retained images: up to 8 image messages stay in the request (`IMAGE_MESSAGE_RECENT_LIMIT`), and
+  `IMAGE_MAX_EDGE` is 2048 pixels. Images are not measured here.
+- Resident Skills are injected in full on every step and have no size limit in the code.
+
+## Footprint
+
+`tests/unit/test-context-footprint.mjs` estimates the fixed per-step prefix as characters divided by
+four and fails when it grows past a budget. Measured on 2026-11-10 with the English prompt:
+
+| Part | Tokens | Note |
+| --- | --- | --- |
+| System prompt kernel | about 5,200 | `SYSTEM_PROMPT` without runtime configuration, Skills, or the context snapshot. |
+| 45 tool schemas | about 18,000 (32 tools, about 13,100, by default) | Largest: `run_script` 1,227, `data_store` 1,139, `manage_sessions` 1,101, `act_on_screen` 795, `get_ax_tree` 699, `screenshot` 663. |
+
+Tool schemas are three times the system prompt. The Agent defers 13 of the 45 (shipped item 10), so
+the default prefix is about 5,300 + 13,100 tokens instead of 5,300 + 18,000.
 
 ## Shipped
 
@@ -37,6 +112,30 @@ Findings come from reading the code; none are measured on a live run yet.
 5. **Cache hit rate in the UI.** The context ring tooltip shows `ctx 57k/64k · cache 92%` instead of
    the window percentage. `Agent` sends `cacheHitRate` with each `context_usage` event.
 
+6. **Observation window.** `_sendWindowPruning` keeps the newest three results of `get_ax_tree` and
+   `find_elements` (any tab, any arguments) and replaces older ones with the placeholder in batches
+   of two. `read_article` and `read_dom` are exempt: they return page content the model may still
+   need after it moves to another page.
+   It works on the request copy, so stored messages are unchanged, and it applies inside a run,
+   where the end-of-run prune does not. The prefix changes once per batch, like image pruning.
+7. **Result cap kept at 20000.** An earlier 8000 cap clipped the middle of long articles, so the
+   cap stays at 20000 characters, the same as `agent-browser`'s `--max-output` default. A view
+   tool's output is far below it, so the cap saves little there.
+
+8. **Screenshot cost rule.** The multimodal prompt tells the model not to take a screenshot only to
+   check that an element exists or that a page has loaded (English and Chinese).
+9. **Footprint check.** `test-context-footprint.mjs` (see Footprint).
+
+10. **Tool groups.** A tool may declare `group` (`sessions`, `media`, `network`, `browser`; see
+    `src/shared/tools/tool-groups.ts`). The Agent's run profile sets `tools.deferGroups`, which
+    removes tools of unloaded groups from the schemas, about 4.9k tokens per step. The model calls
+    `enable_tools({group})` once; it reuses the `skill.loaded` effect path, so loaded groups persist
+    with the session and the cache is rewritten once per load. Calling a deferred tool fails with
+    `TOOL_FORBIDDEN_BY_RUN_PROFILE` and a recovery to `enable_tools`. Page tools, tabs, `run_script`,
+    `wait_for_user`, and `data_store` stay in the default set. Child sessions start with no groups
+    loaded. MCP listings and other callers without `deferGroups` see every tool. Not yet checked with
+    a live model: whether it reaches a deferred tool without extra steps.
+
 Scope by provider: only item 1 is Anthropic-specific. It covers the `anthropic` protocol, which
 includes Kimi Code. OpenAI-compatible endpoints (OpenAI, DeepSeek, Fireworks, and similar) cache an
 identical prefix automatically and take no markers; Codex already sends `prompt_cache_key`. Items 2
@@ -54,20 +153,39 @@ the cache (`write` high, `hitRate` near 0); later calls should show a `hitRate` 
 points to unstable prefix content, such as Skill list order or system prompt text. The UI does not
 show the rate yet, and the session codec drops OpenAI `prompt_tokens_details`, so only the trace has it.
 
+Summarize a saved trace with `node scripts/cache-usage-report.mjs <trace-file>`: it prints the overall hit
+rate and the number of steps that rewrote a large part of the cache.
+
+## Checked and not changed
+
+- **Shorter tool descriptions.** `run_script` carries a sample skeleton, the visual-sequence rule, and
+  the last-screenshot promotion note. Removing them saves about 400 tokens (2% of the tool schemas),
+  but `tests/unit/test-run-script-source.mjs` pins each of them as part of the tool contract. The
+  `data_store` parameter descriptions are 8–98 tokens each and carry the required-field rules, so
+  they are already compact. `manage_sessions` is large because of its automation fields and is
+  available only in root sessions. Grouping, not rewording, is the saving.
+- **Short element references.** Replacing `uid:t1.s00001.4` with `@4` saves 15–30% of an observation,
+  but the snapshot id in the reference is what rejects a stale target. A short form must be resolved
+  against the snapshot it came from, or an old `@4` would act on a different element after a new
+  snapshot. Design it together with the resolver and its stale-target tests.
+
 ## Plan
 
-Run in order. Check the cache hit rate (see Measuring) before starting steps 2–4.
+Run in order. Check the cache hit rate (see Measuring) before starting steps 2–4. Add to step 1 an
+interactive-only mode and a delta mode for `get_ax_tree`, modelled on `snapshot -i` and `--delta`,
+and add a prompt rule against screenshots taken only to confirm that an element exists or a page loaded.
+Add a footprint check modelled on `evals/context-footprint.ts` before step 3.
 
-1. **Limit tool results at the source.** Lower the default cap to about 4000–6000 characters. Store
+1. **Limit tool results at the source (cap stays at 20000, shipped item 7).** Store
    the remainder in a Data table or document and return a prefix, the total length, and a stable
    id. Reuse an existing chunk protocol for paging. Set smaller default node count and depth for
    `get_ax_tree` and `read_dom`.
-2. **Clear superseded observations (partly shipped, item 4).** When a tab has a newer observation (AX tree, DOM,
+2. **Clear superseded observations (partly shipped, items 4 and 6).** When a tab has a newer observation (AX tree, DOM,
    screenshot), replace the older one with a placeholder. Clear in batches that free enough tokens to
    pay for one cache rewrite (Anthropic's `clear_at_least`). Count protection in recent tool calls
    instead of user rounds, and lower the 20% / 50% ratios. Keep the URL or id so the observation can
    be fetched again.
-3. **Load tools and prompt sections on demand.** Keep every tool name and schema position fixed in
+3. **Load prompt sections on demand (tools: shipped item 10).** Keep every tool name and schema position fixed in
    the request prefix, because a changed tool list invalidates the whole cache. Defer the full
    description of rarely used tools and append it to the messages when the model asks for it, as
    Anthropic's tool search does. Expose about 3–5 frequent tools in full. Reuse `load_skill` and

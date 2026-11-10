@@ -74,6 +74,7 @@ await assertStandaloneCompactionBlocksFollowUpRuns();
 await assertFailedCompactionRollsBackStagedMessages();
 await assertAgentUsesStableToolResultPruning();
 await assertAgentSupersedesRepeatedObservations();
+await assertSendWindowDropsOldObservationsInBatches();
 await assertAgentLimitsImageMessagesWithinOneRound();
 await assertImageMessageLimitBoundaries();
 await assertImageMessageLimitInvalidatesUsageAnchor();
@@ -1538,6 +1539,30 @@ function userWithImages(text, count, origin = "user") {
 
 function countImages(messages) {
   return messages.reduce((count, message) => count + (Array.isArray(message?.content) ? message.content.filter(part => part?.type === "image_url").length : 0), 0);
+}
+
+async function assertSendWindowDropsOldObservationsInBatches() {
+  const agent = await createBudgetTestAgent("observation-window", { contextWindow: 26000 });
+  agent._toolModelPolicy = name => ({ supersedable: name === "get_ax_tree" });
+  const turn = i => [
+    { role: "assistant", content: null, tool_calls: [{ id: `ax_${i}`, type: "function", function: { name: "get_ax_tree", arguments: JSON.stringify({ root: `uid:${i}` }) } }] },
+    { role: "tool", tool_call_id: `ax_${i}`, content: `tree ${i}` },
+  ];
+  const sentTools = () => agent._buildSendMessages(null).filter(m => m.role === "tool").map(m => m.content);
+  agent.messages = [system(), ...[1, 2, 3].flatMap(turn)];
+  assert.equal(sentTools().filter(c => c.startsWith("tree")).length, 3, "the newest three observations are kept");
+  agent.messages.push(...turn(4), ...turn(5));
+  const sent = sentTools();
+  assert.deepEqual(sent.map(c => c.startsWith("tree")), [false, false, true, true, true], "the oldest two are dropped as one batch");
+  assert.equal(agent.messages.some(m => m.trim), false, "projection must not rewrite stored messages");
+
+  agent._toolModelPolicy = () => ({ supersedable: true });
+  const read = i => [
+    { role: "assistant", content: null, tool_calls: [{ id: `read_${i}`, type: "function", function: { name: "read_article", arguments: "{}" } }] },
+    { role: "tool", tool_call_id: `read_${i}`, content: `article ${i}` },
+  ];
+  agent.messages = [system(), ...[1, 2, 3, 4, 5, 6].flatMap(read)];
+  assert.equal(sentTools().filter(c => c.startsWith("article")).length, 6, "article text is content, not a stale view, so it stays");
 }
 
 async function assertAgentSupersedesRepeatedObservations() {

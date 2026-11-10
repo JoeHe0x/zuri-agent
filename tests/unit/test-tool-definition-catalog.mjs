@@ -83,7 +83,9 @@ async function assertCoreMetadataCoverage() {
     assert.ok(registered.size > before, `${file} must register at least one tool`);
   }
   const runtime = await import("../../src/background/tools/runtime.js");
-  const visible = runtime.getToolSchemas().map(schema => schema.function.name);
+  // enable_tools is listed only for runs that defer tool groups; load every group to see all visible tools.
+  const { TOOL_GROUPS, toolGroupLoadName } = await import("../../src/shared/tools/tool-groups.js");
+  const visible = runtime.getToolSchemas({ runProfile: { tools: { deferGroups: true } }, loadedPluginSkillNames: TOOL_GROUPS.map(toolGroupLoadName) }).map(schema => schema.function.name);
   assert.ok(visible.length > 0, "the model-facing tool catalog must not be empty");
   assert.ok(registered.has("open_tab"), "the catalog must include browser tools");
   assert.ok(registered.has("document_parse"), "the catalog must include hidden host tools");

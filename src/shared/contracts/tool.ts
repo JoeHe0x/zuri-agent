@@ -1,4 +1,5 @@
 import type { ToolBrowserPermission } from "../browser-permissions.js";
+import type { ToolGroup } from "../tools/tool-groups.js";
 
 /** Cross-context schema and capability types; executable definitions bind only in their owning runtime. */
 type ParameterType = "string" | "number" | "integer" | "boolean" | "object" | "array" | "null";
@@ -117,6 +118,8 @@ export interface ToolDefinition<S extends ToolSchema, Result, Context, Signal> {
   familyId?: string;
   rendererId?: string;
   hidden?: boolean;
+  /** Deferred until `enable_tools` loads the group; omitted means always available. */
+  group?: ToolGroup;
   /** Provider still requests these fields; their established runtime fallback is retained. */
   defaultableFields?: readonly (keyof S["properties"])[];
 }

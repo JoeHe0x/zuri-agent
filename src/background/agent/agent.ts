@@ -144,6 +144,11 @@ const KEEP_RECENT_TOKENS = 40000;  // Recent tokens retained during compaction
 const TOOL_RESULT_RECENT_ROUNDS = 2;
 const IMAGE_MESSAGE_RECENT_LIMIT = 8;
 const IMAGE_PRUNE_BATCH = 4;
+// Page-state views (AX tree, element search) go stale as the page changes; keep the newest few and drop older ones in batches.
+// Content reads (read_article, read_dom) stay: the model may still need an earlier page's text.
+const WINDOWED_OBSERVATION_TOOLS = new Set(["get_ax_tree", "find_elements"]);
+const OBSERVATION_RECENT_LIMIT = 3;
+const OBSERVATION_PRUNE_BATCH = 2;
 const TOOL_RESULT_PROTECT_RATIO = 0.2;
 const TOOL_RESULT_PRUNE_BATCH_RATIO = 0.5;
 const FOLLOW_UP_RUN_HANDOFF_DELAY_MS = 160;
@@ -1361,6 +1366,7 @@ export class Agent {
     const profile = await buildRunProfile({
       sessionId: this.sessionId,
       canManageSessions,
+      deferToolGroups: true,
       config: runtimeConfig,
       platformInfo,
     });
@@ -1894,6 +1900,15 @@ export class Agent {
       if (hasImages) imageIndex++;
       if (message?.trim === true || (hasImages && imageIndex <= imageDrop)) pruned.add(message);
     }
+    const toolNames = new Map<string, string>();
+    for (const message of messages) {
+      if (message?.role !== "assistant" || !Array.isArray(message.tool_calls)) continue;
+      for (const toolCall of message.tool_calls) toolNames.set(String(toolCall?.id || ""), normalizeToolCallName(toolCall));
+    }
+    const observations = messages.filter(message => message?.role === "tool" && !pruned.has(message)
+      && WINDOWED_OBSERVATION_TOOLS.has(toolNames.get(String(message.tool_call_id || "")) || ""));
+    const observationDrop = observations.length > OBSERVATION_RECENT_LIMIT ? Math.ceil((observations.length - OBSERVATION_RECENT_LIMIT) / OBSERVATION_PRUNE_BATCH) * OBSERVATION_PRUNE_BATCH : 0;
+    for (const message of observations.slice(0, observationDrop)) pruned.add(message);
     return pruned;
   }
 

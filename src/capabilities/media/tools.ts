@@ -472,6 +472,7 @@ function assertSelectedImageSource(candidate: ImageMetadata = {}, observed: Imag
 
 registerTool({
   name: "collect_images",
+  group: "media",
   behavior: { parallelTab: true, uidTargets: args => (Array.isArray(args.targets) ? args.targets : []) },
   get description() { return toolT("collectImagesDescription"); },
   get parameters() { return {
@@ -651,6 +652,7 @@ registerTool({
 
 registerTool({
   name: "read_image_asset",
+  group: "media",
   requires: { images: true },
   model: { pageContext: false, get imagePrompt() { return toolT("readImagePrompt"); } },
   get description() { return toolT("readImageAssetDescription"); },

@@ -61,6 +61,7 @@ import {
   toolIdentity as normalizeToolIdentity,
 } from "../../shared/tools/tool-metadata.js";
 import { toolIdentityEventFields } from "../../shared/tools/tool-identity.js";
+import { loadedToolGroups } from "../../shared/tools/tool-groups.js";
 import {
   diagnosticTrace,
   formatTraceFields,
@@ -467,7 +468,7 @@ function getLocalizedToolSchemas(options: ToolOptions, snapshot: ReturnType<type
   const policy = normalizeToolPolicy(options);
   const builtinSchemas = [...snapshot.entries()]
     .filter(([, tool]) => !tool.hidden)
-    .filter(([name]) => isToolAllowedByPolicy(name, policy))
+    .filter(([name]) => isToolAllowedByPolicy(name, policy) && !policy.deferred.has(name))
     .map(([, tool]) => adaptToolSchemaForPolicy(tool.model, tool.schema, policy));
   const skillSchemas = isToolAllowedByPolicy("run_script", policy)
     ? getActiveSkillToolSchemasSync(options)
@@ -787,9 +788,19 @@ function normalizeToolPolicy(options: ToolContext = {}) {
       if (tool.requires?.tools?.some(dependency => disabled.has(dependency))) disabled.add(name);
     }
   } while (disabled.size !== previousSize);
+  // Only runs that can call enable_tools defer groups; MCP listings and other callers see every tool.
+  if (profile?.tools?.deferGroups !== true) disabled.add("enable_tools");
+  const deferred = new Map<string, string>();
+  if (profile?.tools?.deferGroups === true) {
+    const loaded = loadedToolGroups(options.loadedPluginSkillNames);
+    for (const [name, tool] of coreToolDefinitions.entries()) {
+      if (tool.group && !loaded.has(tool.group)) deferred.set(name, tool.group);
+    }
+  }
   return {
     profile,
     disabled,
+    deferred,
     vision: profile?.features?.imageInput !== false,
   };
 }
@@ -799,6 +810,14 @@ function isToolAllowedByPolicy(name: string, policy: ToolPolicy) {
 }
 
 function assertToolAllowedByPolicy(name: string, policy: ToolPolicy) {
+  const group = policy.deferred.get(name);
+  if (group && isToolAllowedByPolicy(name, policy)) {
+    throw new ToolExecutionError(
+      "TOOL_FORBIDDEN_BY_RUN_PROFILE",
+      `${name} is in the "${group}" tool group, which is not enabled. Call enable_tools({group:"${group}"}) first, then call ${name} again.`,
+      { tool: name, group, recovery: { tool: "enable_tools", args: { group } } },
+    );
+  }
   if (isToolAllowedByPolicy(name, policy)) return;
   throw new ToolExecutionError(
     "TOOL_FORBIDDEN_BY_RUN_PROFILE",

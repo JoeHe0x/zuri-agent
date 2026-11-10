@@ -8,9 +8,10 @@ const DEFAULT_MAX_OUTPUT_TOKENS = 32768;
 export async function buildRunProfile({
   sessionId = "",
   canManageSessions = true,
+  deferToolGroups = false,
   config,
   platformInfo = {},
-}: { sessionId?: string; canManageSessions?: boolean; config: RuntimeConfig; platformInfo?: { os?: string } }) {
+}: { sessionId?: string; canManageSessions?: boolean; deferToolGroups?: boolean; config: RuntimeConfig; platformInfo?: { os?: string } }) {
   const llmConfig = config;
   const detectedPlatformInfo = platformInfo;
   const maxOutputTokens = resolveRunProfileMaxOutputTokens(
@@ -51,6 +52,7 @@ export async function buildRunProfile({
     },
     tools: {
       disabled: disabledTools,
+      deferGroups: deferToolGroups,
     },
   };
 }

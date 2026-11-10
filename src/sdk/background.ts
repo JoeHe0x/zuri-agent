@@ -46,7 +46,7 @@ export type ToolErrorConstructor = new (code: string, message: string, details?:
 
 export interface ToolRunProfile {
   platform?: { os?: string } | null; features?: { imageInput?: boolean; toolImages?: boolean; screenshots?: boolean };
-  tools?: { disabled?: readonly string[] }; session?: { canManageSessions?: boolean; kind?: string }; model?: { id?: string };
+  tools?: { disabled?: readonly string[]; deferGroups?: boolean }; session?: { canManageSessions?: boolean; kind?: string }; model?: { id?: string };
 }
 
 import type { GetToolRuntimeDependencies, ToolSkillsRuntime, ModelService, SkillService } from "./background/services.js";

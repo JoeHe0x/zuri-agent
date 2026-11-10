@@ -20,6 +20,7 @@ export function registerBookmarksHistoryTools({
 }: BookmarkDependencies) {
   registerTool({
   name: "manage_bookmarks",
+  group: "browser",
   requires: { browserPermission: "bookmarks" },
   get description() { return toolT("manageBookmarksDescription"); },
   get parameters() { return {
@@ -131,6 +132,7 @@ export function registerBookmarksHistoryTools({
 
   registerTool({
   name: "browse_history",
+  group: "browser",
   requires: { browserPermission: "history" },
   get description() { return toolT("browseHistoryDescription"); },
   get parameters() { return {

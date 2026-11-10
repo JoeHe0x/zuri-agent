@@ -461,6 +461,7 @@ async function getNetworkBody(tabId: number, requestId: string, maxBytes = DEFAU
 
 registerTool({
   name: "read_console_messages",
+  group: "network",
   get description() { return toolT("readConsoleMessagesDescription"); },
   get parameters() { return {
     type: "object",
@@ -505,6 +506,7 @@ registerTool({
 
 registerTool({
   name: "network_watch",
+  group: "network",
   get description() { return toolT("networkWatchDescription"); },
   get parameters() { return {
     type: "object",
@@ -530,6 +532,7 @@ registerTool({
 
 registerTool({
   name: "network_recent",
+  group: "network",
   get description() { return toolT("networkRecentDescription"); },
   get parameters() { return {
     type: "object",
@@ -574,6 +577,7 @@ registerTool({
 
 registerTool({
   name: "network_body",
+  group: "network",
   get description() { return toolT("networkBodyDescription"); },
   get parameters() { return {
     type: "object",
@@ -604,6 +608,7 @@ registerTool({
 
 registerTool({
   name: "wait_for_response",
+  group: "network",
   get description() { return toolT("waitForResponseDescription"); },
   get parameters() { return {
     type: "object",
@@ -698,6 +703,7 @@ registerTool({
 
 registerTool({
   name: "wait_for_network_idle",
+  group: "network",
   get description() { return toolT("waitForNetworkIdleDescription"); },
   get parameters() { return {
     type: "object",

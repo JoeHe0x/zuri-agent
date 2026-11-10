@@ -275,6 +275,7 @@ async function sendBrowserAlert({ title, message, level, dedupeKey, sessionId = 
 
 registerTool({
   name: "send_alert",
+  group: "browser",
   get description() { return modelT("notifyUser"); },
   get parameters() { return {
     type: "object",

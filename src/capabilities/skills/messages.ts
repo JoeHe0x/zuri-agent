@@ -15,6 +15,7 @@ export default defineMessages("skills", {
   reorderSecurityPoliciesShort: { "zh-CN": "调整安全策略", en: "Reorder rules" },
   loadSkill: { "zh-CN": "加载技能", en: "Load skill" },
   loadSkillShort: { "zh-CN": "加载技能", en: "Load skill" },
+  enableTools: { "zh-CN": "启用工具组", en: "Enable tools" },
   readSkillResource: { "zh-CN": "读取技能资源", en: "Read skill resource" },
   readSkillResourceShort: { "zh-CN": "读取技能资源", en: "Read skill resource" },
   createSkill: { "zh-CN": "创建技能", en: "Create skill" },

@@ -23,6 +23,14 @@ const messages = defineMessages("skills-model", {
     "zh-CN": "加载指定 Skill 的完整 Markdown 指令（content）、资源索引（resources，含 plugin.json、scripts、references 等）及运行环境说明，并在当前会话激活该 Skill 声明的扩展工具。需要读取单个资源文件内容时，调用 load_skill_resource(name, path)。",
     en: "Load a Skill's full Markdown instructions (content), resource index (resources, including plugin.json, scripts, and references), and runtime guidance, and activate its declared Skill tools for the current session. Call load_skill_resource(name, path) to read an individual resource file.",
   },
+  enableTools: {
+    "zh-CN": "启用一组默认未加载的工具，下一步即可调用。分组：sessions（manage_sessions、manage_goal）；media（collect_images、read_image_asset）；network（network_watch、network_recent、network_body、wait_for_response、wait_for_network_idle、read_console_messages）；browser（manage_bookmarks、browse_history、list_downloads、download_url、send_alert、get_location）。需要其中的工具而当前工具列表里没有时先调用本工具；同一分组只需启用一次。",
+    en: "Enable a group of tools that are not loaded by default; call them from the next step. Groups: sessions (manage_sessions, manage_goal); media (collect_images, read_image_asset); network (network_watch, network_recent, network_body, wait_for_response, wait_for_network_idle, read_console_messages); browser (manage_bookmarks, browse_history, list_downloads, download_url, send_alert, get_location). Call this first when you need one of these tools and it is not in the current tool list; a group needs enabling once."
+  },
+  enableToolsGroup: {
+    "zh-CN": "要启用的工具分组。",
+    en: "Tool group to enable."
+  },
   skillName: {
     "zh-CN": "必填。Skill 名称。",
     en: "Required Skill name.",

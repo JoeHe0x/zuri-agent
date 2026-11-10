@@ -16,6 +16,7 @@ import { getSkillDisplayName, isBase64SkillResource, isSkillDocumentResource, sk
 import { findSkillManifestResource, parseSkillManifest } from "#sdk/shared/skills";
 
 import { trace as toolTrace } from "#sdk/background/tools";
+import { TOOL_GROUPS, isToolGroup, toolGroupLoadName } from "#sdk/shared/tool-groups";
 
 /** Registers nested LLM analysis and Skill discovery/authoring tools. */
 export function registerAnalysisSkillsTools({
@@ -120,6 +121,20 @@ registerTool({
       ...summarizeSkillMcpFields(skill),
     };
   },
+});
+
+registerTool({
+  name: "enable_tools",
+  get description() { return modelT("enableTools"); },
+  get parameters() { return {
+    type: "object",
+    properties: { group: { type: "string", enum: TOOL_GROUPS, description: modelT("enableToolsGroup") } },
+    required: ["group"],
+  } as const; },
+  // Loaded groups persist and reach the tool list through the same path as loaded Skill names.
+  effects: ({ group }) => isToolGroup(group)
+    ? [{ type: "skill.loaded", name: toolGroupLoadName(group), displayName: "", hasPluginManifest: false }] : [],
+  execute: async ({ group }) => ({ group, enabled: true }),
 });
 
 registerTool({

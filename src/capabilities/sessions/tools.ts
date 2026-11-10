@@ -28,6 +28,7 @@ export function registerSessionTools({
 }: SessionToolsHost) {
 registerTool({
   name: "manage_sessions",
+  group: "sessions",
   requires: { rootSession: { code: "SESSION_TOOL_FORBIDDEN", get message() { return "manage_sessions is only available in user-created root sessions. Agent-created child sessions and automation sessions cannot create, list, wait for, or delete other sessions."; } } },
   get description() { return modelT(sessionAutomationsEnabled() ? "manageSessions" : "manageSessionsWithoutAutomations"); },
   get parameters() { return {
@@ -352,6 +353,7 @@ export default ((host) => {
   registerGoalTools(host);
   host.registerTool({
     name: "get_location",
+    group: "browser",
     get title() { return t("getLocation"); },
     get description() { return modelT("getLocation"); },
     parameters: { type: "object", properties: {} },

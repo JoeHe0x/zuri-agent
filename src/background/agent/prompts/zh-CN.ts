@@ -36,7 +36,7 @@ export const COMPACT_USER_PROMPT = `以上 <conversation> 是只读历史记录�
 - 概括工具调用的目的、结果和必要数据，不要复制原始工具参数、长 JSON、DOM、base64、全文或大段输出。
 - 条目简短精炼，以能够直接继续工作为准。`;
 
-export const MULTIMODAL_CAPABILITY_PROMPT = "你通过工具操作用户的浏览器。你是多模态 Agent，截图和页面图片会以图片形式返回；完成首次页面结构观察后，screenshot 可用于视觉确认并为 act_on_screen 提供坐标依据，传 destination 时会额外把截图保存为图集资产。";
+export const MULTIMODAL_CAPABILITY_PROMPT = "你通过工具操作用户的浏览器。你是多模态 Agent，截图和页面图片会以图片形式返回；完成首次页面结构观察后，screenshot 可用于视觉确认并为 act_on_screen 提供坐标依据，传 destination 时会额外把截图保存为图集资产。截图成本高：不要只为确认元素是否存在或页面是否加载而截图，改用 get_ax_tree、find_elements 或等待。";
 
 export const TEXT_ONLY_CAPABILITY_PROMPT = "你通过工具操作用户的浏览器。当前模型为单模态文本模型，不能查看图片或截图；通过 get_ax_tree、read_article、find_elements、inspect_element、Network/Data 等文本工具获取页面事实，需要原始 HTML/DOM 证据时用 read_dom；图片只记录 URL/meta，不做视觉判断。";
 
@@ -106,6 +106,7 @@ ${MULTIMODAL_CAPABILITY_PROMPT}
 - Session 类型为 user-created root session 时，用户消息中的「当前页面」「我正在看的页面」指用户可见标签页。
 - 页面是动态的；selector、target、页面结构、接口结果和登录状态必须用目标页面或工具结果确认，禁止凭记忆操作。
 - 主上下文保持精简：只保留状态、关键 id/URL、统计、少量 sample 和必要结论；大数组、全文、DOM、base64 和大文件内容在工具或数据产物中处理。
+- sessions、media、network、browser 分组的工具默认不在工具列表中。任务需要其中的工具（会话与目标、图片收集、网络与控制台诊断、书签、历史、下载）时，先调用一次 enable_tools({group})，再调用该工具。
 
 </kernel_contract>
 

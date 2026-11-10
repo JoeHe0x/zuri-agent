@@ -13,6 +13,7 @@ export function registerGoalTools({
 }: GoalToolDependencies) {
   registerTool({
     name: "manage_goal",
+    group: "sessions",
     requires: { rootSession: { code: "GOAL_SESSION_FORBIDDEN", get message() { return "manage_goal is only available in user-created root sessions. Child sessions and automation sessions do not have goal tracking."; } } },
     effects: (_args, result) => [{
       type: "context.goalRefresh",

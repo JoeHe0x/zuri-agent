@@ -6,6 +6,7 @@ import type { CapabilityMetadata } from "#sdk/shared/metadata";
 const tools = () => Object.freeze({
   manage_skill_settings: toolMeta(t("manageSkillConfiguration"), ["settings"], { shortTitle: t("manageSkillConfigurationShort"), profileFamily: "settings", resultFamily: "settings", familyId: "settings", labelerId: "settings", titleRule: { field: "action", normalize: "lowercase", values: { list: t("readSkillConfigurationShort"), get: t("readSkillConfigurationShort"), update: t("updateSkillConfigurationShort"), reorder: t("reorderSecurityPoliciesShort") }, fallback: "action" } }),
   load_skill: skillTool(t("loadSkill"), { shortTitle: t("loadSkillShort") }),
+  enable_tools: skillTool(t("enableTools")),
   load_skill_resource: skillTool(t("readSkillResource"), { shortTitle: t("readSkillResourceShort") }),
   create_skill: skillTool(t("createSkill")),
   edit_skill_resource: skillTool(t("editSkillResource"), { shortTitle: t("editSkillResourceShort"), detailLayout: "wide" }),
