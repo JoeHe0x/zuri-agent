@@ -19,6 +19,18 @@ const messages = defineMessages("skills-model", {
     "zh-CN": "可选待分析数据文本（追加在 prompt 之后，最长 300,000 字符）。",
     en: "Optional data text to analyze (appended after prompt, up to 300,000 chars).",
   },
+  listSkills: {
+    "zh-CN": "列出可加载 Skill 的名称、描述和范围；可传 url 筛选匹配的站点 Skill，全局和常驻 Skill 仍保留。用 load_skill({name}) 加载指令并激活工具。",
+    en: "List available Skills with their names, descriptions and scopes. An optional url filters site Skills while keeping global and resident Skills. Use load_skill({name}) to load instructions and activate tools.",
+  },
+  listSkillsScope: {
+    "zh-CN": "技能范围，默认 all。",
+    en: "Skill scope. Default: all.",
+  },
+  listSkillsUrl: {
+    "zh-CN": "可选页面 URL，用于筛选匹配的站点 Skill；全局和常驻 Skill 不受影响。",
+    en: "Optional page URL for matching site Skills; global and resident Skills remain available.",
+  },
   loadSkill: {
     "zh-CN": "加载指定 Skill 的完整 Markdown 指令（content）、资源索引（resources，含 plugin.json、scripts、references 等）及运行环境说明，并在当前会话激活该 Skill 声明的扩展工具。需要读取单个资源文件内容时，调用 load_skill_resource(name, path)。",
     en: "Load a Skill's full Markdown instructions (content), resource index (resources, including plugin.json, scripts, and references), and runtime guidance, and activate its declared Skill tools for the current session. Call load_skill_resource(name, path) to read an individual resource file.",
