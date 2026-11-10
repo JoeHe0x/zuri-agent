@@ -112,6 +112,10 @@ import { createToolEventRouter } from "./tools/event-router.js";
 import { createBackgroundApi } from "./background-api.js";
 import { createMcpRuntime } from "./mcp/mcp-runtime.js";
 import { createMcpTransport } from "./transports/mcp.js";
+import { createChannelRuntime, type ChannelRuntime } from "./channels/channel-runtime.js";
+import { createChannelStorage } from "./channels/channel-store.js";
+import { wecomAdapter } from "./channels/wecom-socket.js";
+import { weixinAdapter } from "./channels/weixin-socket.js";
 import { createSidepanelTransport } from "./transports/sidepanel.js";
 import { createRuntimeMessageTransport } from "./transports/runtime-message.js";
 import { createSidepanelChannel } from "./transports/sidepanel-channel.js";
@@ -850,6 +854,17 @@ const connectMcp = createMcpConnectPage({
 });
 
 const backgroundApi = createBackgroundApi({
+  channels: {
+    list: () => channelAdapters.map(({ id, label, fields, login }) => ({ id, label, fields, login: Boolean(login) })),
+    status: (id: string) => getChannelRuntime(id).status(),
+    getConfig: (id: string) => getChannelRuntime(id).getConfig(),
+    saveConfig: (id: string, input: Parameters<ChannelRuntime["saveConfig"]>[0]) => getChannelRuntime(id).saveConfig(input).then(() => getChannelRuntime(id).status()),
+    loginStart: (id: string) => getChannelRuntime(id).loginStart(),
+    loginPoll: (id: string, ticket: string) => getChannelRuntime(id).loginPoll(ticket),
+    approve: (id: string, senderId: string) => getChannelRuntime(id).approve(senderId),
+    deny: (id: string, senderId: string) => getChannelRuntime(id).deny(senderId),
+    remove: (id: string, senderId: string) => getChannelRuntime(id).remove(senderId),
+  },
   system: {
     connectMcp,
     mcpConnectionStatus: (sender: chrome.runtime.MessageSender) => {
@@ -930,6 +945,7 @@ const backgroundApi = createBackgroundApi({
     listImageCollections: mcpResources.listImageCollections,
     deleteImageCollection: mcpResources.deleteImageCollection,
     exportImageCollection: mcpResources.exportImageCollection,
+    readImageCollection: mcpResources.readImageCollection,
     listDownloads: mcpResources.listDownloads,
   },
   artifacts: {
@@ -1047,6 +1063,34 @@ function getMcpBridge() {
   });
 }
 dataConsent.whenAccepted.then(getMcpBridge).catch(error => console.debug("[zuri] MCP bridge startup failed:", error));
+
+// The worker can be recycled while the bot is connected; this alarm wakes it and the startup below reconnects.
+const CHANNELS_ALARM = "zuri-channels-keepalive";
+chrome.alarms?.onAlarm?.addListener(alarm => { if (alarm.name === CHANNELS_ALARM) void dataConsent.whenAccepted.then(() => Promise.all([...channelWanted].map(id => getChannelRuntime(id).ensure()))).catch(() => {}); });
+// A new chat platform is one adapter file and one entry here.
+const channelAdapters = [wecomAdapter, weixinAdapter];
+const channelStorage = createChannelStorage(chrome.storage.local);
+const channelRuntimes = new Map<string, ChannelRuntime>();
+const channelWanted = new Set<string>();
+function getChannelRuntime(id: string) {
+  const adapter = channelAdapters.find(item => item.id === id);
+  if (!adapter) throw new Error(`Unknown channel: ${id}`);
+  let runtime = channelRuntimes.get(id);
+  if (!runtime) channelRuntimes.set(id, runtime = createChannelRuntime({
+    ...adapter,
+    dispatch: mcpTransport.dispatch,
+    suggest: conversation => pageSuggestions.suggest(undefined, [], conversation),
+    store: channelStorage(id),
+    onStatus: status => broadcast({ type: "channels_status_changed", status }),
+    // One alarm serves every channel: it stays while any of them wants a connection.
+    keepAlive: wanted => {
+      if (wanted) channelWanted.add(id); else channelWanted.delete(id);
+      if (channelWanted.size) chrome.alarms?.create(CHANNELS_ALARM, { periodInMinutes: 1 }); else void chrome.alarms?.clear(CHANNELS_ALARM);
+    },
+  }));
+  return runtime;
+}
+dataConsent.whenAccepted.then(() => Promise.all(channelAdapters.map(({ id }) => getChannelRuntime(id).start()))).catch(error => console.debug("[zuri] message channel startup failed:", error));
 
 chrome.tabs.onRemoved.addListener((tabId) => {
   void releaseTabCdp(tabId);

@@ -73,13 +73,18 @@
   stroke: currentColor;
 }
 
+#btn-more {
+  position: relative;
+}
+
 #btn-update-notice {
   position: relative;
   color: var(--accent-strong, var(--accent));
   background: var(--accent-subtle);
 }
 
-#btn-update-notice::after {
+#btn-update-notice::after,
+#btn-more.has-waiting::after {
   content: "";
   position: absolute;
   top: 5px;

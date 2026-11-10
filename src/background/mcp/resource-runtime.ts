@@ -131,6 +131,26 @@ export function createMcpResourceRuntime(overrides: Partial<ResourceDependencies
     return { collection: table.name, format: "zip", rows: rows.length, images: rows.length - missingImages, missingImages, ...download };
   }
 
+  /** The first images of a collection as base64, for callers that forward them (chat channels). */
+  async function readImageCollection(params: Params = {}, signal?: AbortSignal) {
+    const table = await requireTable(params.collection, true, signal);
+    const limit = Math.min(Math.max(Math.trunc(Number(params.limit)) || 6, 1), 20);
+    const images: { filename: string; mimeType: string; base64: string }[] = [];
+    for (const [index, row] of (await allRows(table, signal)).entries()) {
+      if (images.length >= limit) break;
+      signal?.throwIfAborted();
+      const assetId = typeof row.data.assetId === "string" ? row.data.assetId.trim() : "";
+      const asset = assetId && assetId.length <= 180 ? await deps.getImage(assetId, { touch: false }) : null;
+      if (!asset?.blob) continue;
+      const bytes = new Uint8Array(await asset.blob.arrayBuffer());
+      let binary = "";
+      for (let offset = 0; offset < bytes.length; offset += 0x8000) binary += String.fromCharCode(...bytes.subarray(offset, offset + 0x8000));
+      const mimeType = asset.mimeType || asset.blob.type;
+      images.push({ filename: `${safeMcpFilename(String(row.data.title || `image-${index + 1}`)).replace(/\.[a-z\d]{2,8}$/i, "")}.${imageExtension(mimeType)}`, mimeType, base64: btoa(binary) });
+    }
+    return { collection: table.name, images };
+  }
+
   function spreadsheet(format: "csv" | "xlsx", name: string, columns: string[], rows: Record<string, unknown>[]) {
     return deps.encodeDocument({ format, title: name, sheets: [{
       name: safeSheetName(name), columns,
@@ -139,7 +159,7 @@ export function createMcpResourceRuntime(overrides: Partial<ResourceDependencies
   }
 
   return { listDataTables: listTables, deleteDataTable: deleteTable, exportDataTable: exportTable,
-    listImageCollections, deleteImageCollection, exportImageCollection,
+    listImageCollections, deleteImageCollection, exportImageCollection, readImageCollection,
     listDownloads: (params: Params = {}) => deps.queryDownloads(params) };
 }
 

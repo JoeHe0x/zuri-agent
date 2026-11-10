@@ -31,6 +31,7 @@ interface RouterOptions extends Partial<Pick<Navigation, "isCurrentSession" | "a
   onTransportError?(event: PortMessage): void;
   onEvent?(event: PortMessage): void;
   onUiEvent?(event: PortMessage): void;
+  onWaitingElsewhere?(waiting: boolean): void;
   runStates: ReturnType<typeof createChatRunController>["states"];
   getCurrentTab?(): string; getCurrentSessionId?(): string | null;
   replaceTranscript?: Navigation["replaceTranscriptFromRuntime"];
@@ -345,6 +346,7 @@ export function createSidepanelEventRouter(options: RouterOptions) {
     const changed = change.runtimeChanged || change.transcriptChanged || change.recordChanged || change.artifactsChanged;
     if (changed) {
       options.syncKeepAlive?.();
+      options.onWaitingElsewhere?.(sessionState.someRuntime((runtime, id) => runtime.status === "waiting_user" && !options.isCurrentSession?.(id)));
       options.onUiEvent?.({ type: "ui_sessions_refresh", delay: 120 });
       const nextRuntime = sessionState.getRuntime(sessionId);
       const queueChanged = previousQueueSignature !== queuedFollowups.itemsSignature(

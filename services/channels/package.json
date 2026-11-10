@@ -1,0 +1,10 @@
+{
+  "name": "zuri-agent-channels",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Chat-app gateway for zuri: a message becomes a browser task and the reply returns to the chat",
+  "type": "module",
+  "engines": { "node": ">=22" },
+  "bin": { "zuri-channels": "src/bin.mjs" },
+  "license": "Apache-2.0"
+}

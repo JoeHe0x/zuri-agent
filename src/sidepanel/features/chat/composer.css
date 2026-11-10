@@ -1085,6 +1085,12 @@
   row-gap: 6px;
 }
 
+/* Zero flex-basis keeps a long model name from wrapping the send button onto a second row; the name ellipsizes instead. */
+.input-wrapper > [data-ui-slot="composer-meta"] {
+  flex: 1 1 0;
+  justify-content: flex-end;
+}
+
 /* Shared-tab, Skill and element chips sit inside the box, above the text; the box grows to fit. */
 .input-wrapper > .mention-chips {
   order: -2;

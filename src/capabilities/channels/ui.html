@@ -1,0 +1,40 @@
+<template id="channels-template">
+  <section data-ref="section" class="hidden zuri:flex zuri:flex-col zuri:gap-3 zuri:min-w-0">
+    <label data-ref="channel-label" class="zuri-field-label"></label>
+    <select data-ref="channel" class="zuri-field zuri-select"></select>
+    <p data-ref="intro" class="zuri:m-0 zuri:text-[12px] zuri:leading-[1.5] zuri:text-muted-foreground"></p>
+    <p data-ref="status" class="zuri:m-0 zuri:text-[13px] zuri:font-[650]" role="status"></p>
+    <label class="zuri:flex zuri:items-center zuri:gap-2 zuri:text-[13px]">
+      <input data-ref="enabled" type="checkbox">
+      <span data-ref="enable-label"></span>
+    </label>
+    <label class="zuri:flex zuri:items-center zuri:gap-2 zuri:text-[13px]">
+      <input data-ref="auto-allow" type="checkbox">
+      <span data-ref="auto-allow-label"></span>
+    </label>
+    <p data-ref="auto-allow-hint" class="zuri:m-0 zuri:text-[12px] zuri:leading-[1.5] zuri:text-muted-foreground"></p>
+    <label class="zuri:flex zuri:items-center zuri:gap-2 zuri:text-[13px]">
+      <input data-ref="progress" type="checkbox">
+      <span data-ref="progress-label"></span>
+    </label>
+    <label class="zuri:flex zuri:items-center zuri:gap-2 zuri:text-[13px]">
+      <input data-ref="suggest" type="checkbox">
+      <span data-ref="suggest-label"></span>
+    </label>
+    <div data-ref="fields" class="zuri:flex zuri:flex-col zuri:gap-2"></div>
+    <div data-ref="login-block" class="hidden zuri:flex zuri:flex-col zuri:gap-2">
+      <button data-ref="login-button" type="button" class="zuri-btn zuri-btn--secondary zuri:self-start"></button>
+      <img data-ref="login-qr" alt="" class="hidden zuri:size-[200px] zuri:self-start zuri:rounded-md zuri:bg-white zuri:p-2 zuri:[image-rendering:pixelated]">
+      <p data-ref="login-status" class="zuri:m-0 zuri:text-[12px] zuri:leading-[1.5] zuri:text-muted-foreground" role="status"></p>
+    </div>
+    <div data-ref="pending-block" class="hidden zuri:flex zuri:flex-col zuri:gap-2">
+      <h4 data-ref="pending-title" class="zuri:m-0 zuri:text-[13px] zuri:font-[650]"></h4>
+      <p data-ref="pending-hint" class="zuri:m-0 zuri:text-[12px] zuri:text-muted-foreground"></p>
+      <ul data-ref="pending-list" class="zuri:m-0 zuri:p-0 zuri:list-none zuri:flex zuri:flex-col zuri:gap-2"></ul>
+    </div>
+    <div class="zuri:flex zuri:flex-col zuri:gap-2">
+      <h4 data-ref="allowed-title" class="zuri:m-0 zuri:text-[13px] zuri:font-[650]"></h4>
+      <ul data-ref="allowed-list" class="zuri:m-0 zuri:p-0 zuri:list-none zuri:flex zuri:flex-col zuri:gap-2"></ul>
+    </div>
+  </section>
+</template>

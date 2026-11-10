@@ -33,6 +33,7 @@ export const ZURI_MCP_METHODS = Object.freeze([
   "list_image_collections",
   "delete_image_collection",
   "export_image_collection",
+  "read_image_collection",
   "list_downloads",
   "list_skills",
   "get_skill",
@@ -96,6 +97,7 @@ export function createMcpTransport(api: BackgroundApi, { bridge = {} }: { bridge
       case "list_image_collections": return call("data.listImageCollections");
       case "delete_image_collection": return call("data.deleteImageCollection", params, signal);
       case "export_image_collection": return call("data.exportImageCollection", params, signal);
+      case "read_image_collection": return call("data.readImageCollection", params, signal);
       case "list_downloads": return call("data.listDownloads", params);
       case "list_skills": return call("skills.list", params);
       case "get_skill":

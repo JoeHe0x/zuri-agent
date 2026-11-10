@@ -20,11 +20,11 @@
     "clipboardWrite",
     "notifications",
     "declarativeNetRequest",
-    "unlimitedStorage"
+    "unlimitedStorage",
+    "history",
+    "bookmarks"
   ],
   "optional_permissions": [
-    "history",
-    "bookmarks",
     "desktopCapture",
     "downloads.open"
   ],

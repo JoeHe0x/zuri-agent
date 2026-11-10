@@ -1750,3 +1750,10 @@
   scrollbar-gutter: stable;
 }
 }
+
+.session-channel-badge {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}

@@ -4,5 +4,11 @@
     "file": "cfworker.LICENSE.md",
     "source": "https://github.com/cfworker/cfworker/blob/5409fdc2bd144f68e8b28c61c71fcb16600000a6/LICENSE.md",
     "sha256": "376944252ab78ca6b41aee44ddea8894927ee67891e77e61eb9d59af63e35094"
+  },
+  "qrcode-generator": {
+    "version": "2.0.4",
+    "file": "qrcode-generator.LICENSE",
+    "source": "https://github.com/kazuhikoarase/qrcode-generator/blob/517b9e6c3882f3ad28e4f776bbf1e1495869dc4c/LICENSE",
+    "sha256": "3a850fa5f08101db6f40676c2786e10bd2cd5fff7b12ffdf1e0c434d4e49d90c"
   }
 }

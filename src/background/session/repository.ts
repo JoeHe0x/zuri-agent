@@ -654,7 +654,8 @@ function normalizeTitleSource(value: unknown, parentSessionId: unknown) {
 }
 
 function normalizeSessionSource(value: unknown) {
-  return String(value || "").trim() === "automation" ? "automation" : "";
+  const source = String(value || "").trim();
+  return source === "automation" || /^channel:[a-z0-9_-]{1,32}$/.test(source) ? source : "";
 }
 
 function hasListSummary(summary: SessionListSummary | null | undefined) {
