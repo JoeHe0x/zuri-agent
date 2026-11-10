@@ -10,11 +10,14 @@ import type { SessionGoal } from '../../shared/contracts/session-runtime.js';
 
 export type UserWaitTarget = { sessionId: string; waitId: string };
 
+import type { PageObservation } from '../../shared/contracts/page-observation.js';
 export interface UserWaitRuntime {
   beginUserWait(sessionId: string, options: { waitId: string; runId: string; signal?: AbortSignal; onSettled(reason: string): void }): Promise<unknown>;
   resolveUserWait(input: UserWaitTarget & { payload?: unknown }): unknown;
   rejectUserWait(input: UserWaitTarget): unknown;
   isWaitingForUser(sessionId: string): boolean;
+  observePopup?(input: { sessionId: string; runId?: string | null; signal?: AbortSignal; openerTabId: number }): Promise<{ result: Promise<PageObservation>; dispose(): void }>;
+  beginPopupCapture?(input: { sessionId: string; runId?: string | null; signal?: AbortSignal; openerTabId: number }): { observed?(): Promise<PageObservation[]>; dispose(): void };
 }
 
 export interface ToolEvent { type: string; sessionId?: string; [field: string]: unknown }
@@ -53,6 +56,8 @@ export type GoalUpdateInput = Partial<Pick<SessionGoal, 'objective' | 'criteria'
 
 /** Finite caller-owned port. Session commands retain all persistence and run authority. */
 export interface ToolSessionCommands extends UserWaitRuntime {
+  beginPopupCapture(input: { sessionId: string; runId?: string | null; signal?: AbortSignal; openerTabId: number }): { observed?(): Promise<PageObservation[]>; dispose(): void };
+  observePopup(input: { sessionId: string; runId?: string | null; signal?: AbortSignal; openerTabId: number }): Promise<{ result: Promise<PageObservation>; dispose(): void }>;
   getTabAliases(sessionId: string): Record<string, number>;
   reserveTabAlias(input: { sessionId: string; runId?: string | null; signal?: AbortSignal; alias: string }): Promise<object>;
   commitTabAlias(input: { sessionId: string; runId?: string | null; signal?: AbortSignal; reservation: object; tabId: number }): void;

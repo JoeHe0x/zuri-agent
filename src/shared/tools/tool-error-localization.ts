@@ -474,6 +474,16 @@ function isFailurePayload(payload: Record<string, unknown>, context: FailureCont
   return hasLocalizedToolFailureCode(payload.code || context.code || "");
 }
 
+export function localizeToolTimeoutMessage(tool: string, details: Record<string, unknown> = {}) {
+  const actionTool = String(details.tool || tool);
+  if (details.status === "not_started") return t("toolFailure.timeoutBeforeExecution", { tool: actionTool });
+  if (details.status === "unconfirmed") return t("toolFailure.timeoutUnconfirmed", { tool: actionTool });
+  if (details.status === "completed" && details.pending) {
+    return t("toolFailure.timeoutAfterExecution", { tool: actionTool, pending: String(details.pending) });
+  }
+  return t("toolFailure.toolTimeout", { tool });
+}
+
 function localizeByCode(code: string, details: Record<string, unknown> = {}) {
   const message = ERROR_CATALOG[code]?.message;
   if (message) {
@@ -515,7 +525,7 @@ function localizeByCode(code: string, details: Record<string, unknown> = {}) {
     case "SECURITY_GUARDRAIL_BLOCKED":
       return securityGuardrailMessage(details);
     case "TOOL_TIMEOUT":
-      return t("toolFailure.toolTimeout", { tool: String(tool) });
+      return localizeToolTimeoutMessage(String(tool), details);
     case "UNSUPPORTED_ELEMENT_ACTION":
       return t("toolFailure.elementAction", { action: String(action || t("toolFailure.unknownAction")) });
     case "MISSING_SESSION_ID":

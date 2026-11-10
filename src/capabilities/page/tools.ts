@@ -1,5 +1,6 @@
 import { toolT } from "./tool-messages.js";
 import { t } from "./i18n.js";
+export { sameElementGeometry, waitForElementReady } from "./element-readiness.js";
 import type { ToolExtension, ToolExtensionAPI } from "#sdk/background";
 import { isElementReply, type ElementReply } from "#sdk/shared/browser";
 import type { SecurityGuardrails } from "#sdk/shared/security";

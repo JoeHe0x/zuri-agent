@@ -1,15 +1,36 @@
 /** Background extension API. Runtime services are supplied by the owning host. */
+import type { ToolErrorDetails } from "../shared/contracts/tool-error.js";
+import type { ToolResultPresentation } from "../shared/contracts/tool-result-presentation.js";
+import type { PageObservation } from "../shared/contracts/page-observation.js";
 import type { SkillActivationContext } from "../shared/skills/skill-manifest.js";
 import type { ToolDefinition, ToolSchema } from "../shared/contracts/tool.js";
 export type { ToolSchema, ToolArguments, ToolParameter } from "../shared/contracts/tool.js";
 
 export type ToolExecutionPhase = "injection" | "readiness" | "extraction" | "cdp" | "measurement" | "normalization" | "postprocess";
+/** Host-only execution evidence. Only a triggered wait shares it with its action. */
+export interface ToolOperationEvidence {
+  prepare(details: ToolErrorDetails): void;
+  dispatch(): void;
+  confirm(): void;
+  snapshot(): ToolErrorDetails;
+  close(): void;
+}
+
 
 export interface ToolContext extends SkillActivationContext {
   dynamicContext?: SkillActivationContext | null;
   skillExecution?: { plugin: import("../shared/skills/skill-manifest.js").SkillManifest; config?: Record<string, unknown> };
   sessionId?: string;
   runId?: string | null;
+  /** Execution mode supplied by the owning Session, inherited by nested calls. */
+  externalDrive?: boolean;
+  /** The caller's page reference, before resolving it to a browser tab. */
+  requestedTabRef?: string | number;
+  /** Host-owned absolute deadline shared by preparation and result observation. */
+  deadlineAt?: number;
+  operation?: ToolOperationEvidence;
+  /** Host-owned, call-local presentation; never part of the business result. */
+  resultPresentation?: ToolResultPresentation;
   /** Call-scoped cancellation, including the tool deadline. */
   signal?: AbortSignal;
   /** Observation execution preserves the working tab; ordered commit may select the observed tab. */
@@ -26,6 +47,10 @@ export interface ToolContext extends SkillActivationContext {
   /** Publish an immutable completed stage for this call's existing hard deadline. */
   reportPartial?(result: Record<string, unknown>, pending: string): void;
   /** Opaque live invocation identity carried only by nested script transports. */
+  /** Confirm already-observed task popups within this call's deadline; never waits for future pages. */
+  observedPopups?(): Promise<PageObservation[]>;
+  /** Host-only nested dispatch. The live parent owns cancellation and recording. */
+  invokeTool?(name: string, args: Record<string, unknown>, options?: { signal?: AbortSignal; operation?: ToolOperationEvidence }): Promise<unknown>;
   toolExecutionId?: string;
   /** Call-local diagnostic accumulator. End the measurement in a finally block. */
   measurePhase?(phase: ToolExecutionPhase): () => void;

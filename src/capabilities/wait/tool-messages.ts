@@ -95,6 +95,12 @@ const messages = defineMessages("wait-tools", {
     "zh-CN": "等待标签页加载完成，返回 status、url、title。already_complete 只表示调用时页面已完成加载，不证明上一动作成功或失败。仅需视觉确认弹窗或验证码时传 screenshot:true。",
     en: "Wait for a tab to finish loading, returning status, url, and title. already_complete means the page was already loaded when called; it does not prove the preceding action succeeded or failed. Pass screenshot:true only for visual checks such as dialogs or CAPTCHAs.",
   },
+  waitForPopupTitle: { "zh-CN": "等待新页面", en: "Wait for popup" },
+  waitForPopupDescription: {
+    "zh-CN": "等待 tabRef 指定页由任务动作触发打开的新标签页，并在绑定会话归属后返回 Tab（不会认领用户手动打开的标签页）。可传 trigger:{name,args} 先挂载监听再执行动作；拿到 Tab 后可按需调用 wait_for_load。",
+    en: "Wait for a new tab opened by a task action in tabRef and return its Tab after claiming session ownership (user-opened tabs are never claimed). Pass trigger:{name,args} to arm the listener before invoking the action; call wait_for_load afterward if needed.",
+  },
+  waitForPopupAlias: { "zh-CN": "为新标签页设置的可选 tabAlias。", en: "Optional tabAlias to assign to the new tab." },
   waitForNavigationTabId: {
     "zh-CN": "目标标签页 ID；省略时使用当前任务工作标签页。",
     en: "Target tab ID. Defaults to the current task's working tab.",

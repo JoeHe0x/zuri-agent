@@ -69,6 +69,8 @@ export type ToolBatchTabPolicy =
 
 /** Build-time behavior only. External manifests and tool results cannot grant these roles. */
 export interface ToolBehavior {
+  /** A passive event listener may overlap the action whose outcome it observes. */
+  passiveWait?: boolean | ((args: Readonly<Record<string, unknown>>) => boolean);
   /** Evaluated once during batch planning. True (or a thrown predicate) overrides parallel roles and waits for preceding commits. */
   barrier?: boolean | ((args: Readonly<Record<string, unknown>>) => boolean);
   /** Pure observations eligible for bounded execution on distinct explicit tabs. */
@@ -86,6 +88,10 @@ export interface ToolBehavior {
   uidTargets?: (args: Readonly<Record<string, unknown>>) => readonly unknown[];
   /** Trusted hard-timeout fallback; the runtime owns cancellation and revalidation. */
   timeoutResult?: { kind: "read" | "action" | "navigation"; pending: string };
+  /** The handler reports its dispatch and acknowledgement through context.operation. */
+  reportsExecution?: boolean;
+  /** Opens child pages while retaining the parent's execution context. */
+  mayOpenPopup?: boolean | ((args: Readonly<Record<string, unknown>>) => boolean);
   /** Reject actions that may unload the page hosting a nested script. */
   mayUnloadPage?: boolean | ((args: Readonly<Record<string, unknown>>) => boolean);
   /** Promote the tool's image into the enclosing script's latest observation. */
@@ -106,6 +112,8 @@ export interface ToolDefinition<S extends ToolSchema, Result, Context, Signal> {
   requires?: { browserPermission?: ToolBrowserPermission; images?: boolean; rootSession?: { code: string; message: string }; tools?: readonly string[] };
   /** Trusted tab lifecycle role; ordinary result payloads cannot grant ownership. */
   workingTab?: "created" | "clear" | "claim" | ((args: ToolArguments<S>) => "update" | "claim");
+  /** Trusted tab lifecycle role; ordinary result payloads cannot grant ownership. */
+  tabLifecycle?: "created" | "clear" | "claim" | ((args: ToolArguments<S>) => "update" | "claim");
   effects?(args: ToolArguments<S>, result: Result): readonly ToolEffect[];
   /** Pure boundary checks may preserve domain-specific errors before schema validation. */
   validateArgs?(args: Record<string, unknown>): undefined;

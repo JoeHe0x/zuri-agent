@@ -2,6 +2,8 @@ import { toolT } from "./tool-messages.js";
 import { t } from "./i18n.js";
 import type { ToolExtension } from "#sdk/background";
 import { delayTimeout, pageWaitTimeout } from "#sdk/background/tools";
+import { runWaitWithTrigger, waitTriggerParameter, type WaitTrigger } from "#sdk/background/tools";
+import { bindCreatedTabResult, createdTabResultId } from "#sdk/shared/browser";
 /** Wait for user actions, navigation, page elements, or a specified time. */
 
 import {
@@ -421,6 +423,54 @@ registerTool({
       answers,
     };
   },
+});
+
+registerTool({
+  name: "wait_for_popup",
+  // A trigger may finish before the browser reports and persists its popup.
+  // Keep that authority until this bounded wait settles; passive waits cannot claim tabs.
+  behavior: { parallelTab: true, passiveWait: true, mayOpenPopup: (args: Record<string, unknown>) => !args.trigger },
+  tabLifecycle: "created",
+  get description() { return toolT("waitForPopupDescription"); },
+  get parameters() { return {
+    type: "object",
+    properties: {
+      tabRef: { type: "integer", description: toolT("waitForNavigationTabId") },
+      tabId: { type: "integer" },
+      timeout: { type: "number", description: toolT("waitForNavigationTimeout") },
+      tabAlias: { type: "string", description: toolT("waitForPopupAlias") },
+      trigger: waitTriggerParameter,
+    },
+    required: ["tabRef"],
+  } as const; },
+  page: "owned",
+  timeout: pageWaitTimeout,
+  execute: async (input, signal, context = {}) => runWaitWithTrigger({
+    tool: "wait_for_popup",
+    timeoutMs: Number(input.timeout) ? Number(input.timeout) * 1000 : 10000,
+    signal,
+    context,
+    trigger: input.trigger as WaitTrigger | undefined,
+    details: { tabRef: input.tabRef },
+  }, async current => {
+    const sessions = getToolRuntimeDependencies(context).sessions;
+    if (!sessions?.observePopup) throw new ToolExecutionError("TOOL_EXECUTION_FAILED", "Popup observation is unavailable.");
+    const observation = await sessions.observePopup({
+      openerTabId: Number(input.tabId || input.tabRef),
+      sessionId: String(context.sessionId || ""),
+      runId: context.runId,
+      signal: current,
+    });
+    return {
+      ...observation,
+      result: observation.result.then(tab => {
+        if (!input.tabAlias) return tab;
+        const id = createdTabResultId(tab);
+        if (!id) throw new ToolExecutionError("INVALID_CONTENT_RESPONSE", "Popup observation has no creation authority.");
+        return bindCreatedTabResult({ ...tab, tabRef: String(input.tabAlias) }, id);
+      }),
+    };
+  }),
 });
 
 registerTool({
