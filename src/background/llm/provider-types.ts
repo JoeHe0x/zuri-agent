@@ -10,7 +10,7 @@ export interface ProviderAuth extends ProviderAuthPresentation {
   poll(loginId: string, signal?: AbortSignal): Promise<ProviderLoginPoll>;
   clear(): Promise<ProviderAuthStatus>;
 }
-export interface ProviderModelOptionEntry { id: string; label: string; ownedBy: string; priority: number | null; releaseDate: string }
+export interface ProviderModelOptionEntry { contextWindow?: number; maxOutputTokens?: number; vision?: boolean; id: string; label: string; ownedBy: string; priority: number | null; releaseDate: string }
 export interface ProviderModelDiscovery {
   provider: string; definition: ProviderDefinition; apiKey: string; signal?: AbortSignal;
   normalize(input: unknown): ProviderModelOptionEntry[];
@@ -31,6 +31,10 @@ export interface ProviderDefinition {
   /** Hide the settings preview without changing request routing or saved configuration. */
   hideEndpoint?: boolean;
   baseUrl?: string;
+  /** Default editable API URL, stored in customEndpoint with a fixed protocol. */
+  editableEndpoint?: string;
+  /** Model discovery returns authoritative capability metadata. */
+  modelsIncludeCapabilities?: boolean;
   modelsEndpoint?: string;
   staticModelCount?: number;
   staticModels?: (string | { id: string; label?: string; ownedBy?: string; priority?: number })[];

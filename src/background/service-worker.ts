@@ -1,6 +1,6 @@
 import { initializeLanguage, whenLanguageReady, readLanguagePreference, saveLanguagePreference, getAvailableLanguages } from "../shared/i18n/index.js";
 import { firefoxExtension } from "../shared/product-text.js";
-import { matchConfiguredModelCapabilities } from "../shared/models/model-capabilities.js";
+import { matchProviderModelCapabilities as matchConfiguredModelCapabilities } from "./llm/model-directory.js";
 import { createContentLanguageSnapshot } from "../shared/i18n/content.js";
 import { createSessionImportLabels } from "./services/session-import-labels.js";
 import { t } from "../shared/i18n/backend.js";

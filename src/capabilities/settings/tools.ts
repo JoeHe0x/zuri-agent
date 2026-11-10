@@ -14,7 +14,7 @@ import type { SettingsConfig } from "#sdk/shared/settings";
 interface AlertRateState { timestamps: number[]; dedupe: Record<string, unknown> }
 import { requireToolFields } from "#sdk/background/tools";
 import { getZuriManageGuardrailsToolDescription, ZURI_MANAGE_GUARDRAILS_TOOL_PARAMETERS, getZuriManageSkillSettingsToolDescription, ZURI_MANAGE_SKILL_SETTINGS_TOOL_PARAMETERS, getZuriManageSettingsToolDescription, ZURI_MANAGE_SETTINGS_TOOL_PARAMETERS } from "./embedded-skill.js";
-import { matchConfiguredModelCapabilities } from "#sdk/background/models";
+import { matchConfiguredModelCapabilities } from "#sdk/background/model-discovery";
 import { normalizeModelParameters } from "#sdk/shared/models";
 import {
   getSecurityGuardrails,
@@ -744,9 +744,10 @@ async function settingsCompleteConfigForUpdate(input: SettingsInput = {}, signal
   const sameProvider = targetProvider === current.provider;
   const modelChanged = Object.prototype.hasOwnProperty.call(input, "model");
   const providerChanged = Object.prototype.hasOwnProperty.call(input, "provider") && !sameProvider;
-  const modelIdentityChanged = providerChanged
-    || (modelChanged && String(rawPatch.model || "").trim() !== String(current.model || "").trim());
   const providerSummary = settingsProviderSummary(targetProvider);
+  const endpointChanged = Object.hasOwn(rawPatch, "customEndpoint") && String(rawPatch.customEndpoint || "").trim() !== current.customEndpoint;
+  const modelIdentityChanged = providerChanged || (providerSummary?.editableEndpoint && endpointChanged)
+    || (modelChanged && String(rawPatch.model || "").trim() !== String(current.model || "").trim());
   const codexProvider = Boolean(providerSummary?.auth);
   const customProvider = targetProvider === "custom";
   const model = modelChanged ? rawPatch.model : (providerChanged ? "" : current.model);
@@ -765,10 +766,10 @@ async function settingsCompleteConfigForUpdate(input: SettingsInput = {}, signal
     customProtocol: customProvider
       ? (Object.prototype.hasOwnProperty.call(input, "customProtocol") ? rawPatch.customProtocol : (sameProvider ? current.customProtocol : "openai"))
       : "",
-    customEndpoint: customProvider
+    customEndpoint: customProvider || providerSummary?.editableEndpoint
       ? (Object.prototype.hasOwnProperty.call(input, "customEndpoint") || Object.prototype.hasOwnProperty.call(input, "endpoint")
           ? rawPatch.customEndpoint
-          : (sameProvider ? current.customEndpoint : ""))
+          : (sameProvider ? current.customEndpoint : providerSummary?.editableEndpoint || ""))
       : "",
     customPresetName: customProvider
       ? (Object.prototype.hasOwnProperty.call(input, "customPresetName") ? rawPatch.customPresetName : (sameProvider ? current.customPresetName : ""))
@@ -797,11 +798,11 @@ function settingsApiKeyForProvider({ input, rawPatch, current, targetProvider, c
   return String(providerApiKeys[targetProvider] || "").trim();
 }
 
-async function applySettingsModelCapabilityDefaults(input: SettingsInput, config: { provider: string; model?: unknown; contextWindow?: unknown; vision?: unknown }, modelIdentityChanged = false, signal?: AbortSignal) {
+async function applySettingsModelCapabilityDefaults(input: SettingsInput, config: { provider: string; model?: unknown; customEndpoint?: unknown; apiKey?: unknown; contextWindow?: unknown; vision?: unknown }, modelIdentityChanged = false, signal?: AbortSignal) {
   if (!modelIdentityChanged) return config;
   const hasExplicitContextWindow = Object.prototype.hasOwnProperty.call(input, "contextWindow");
   const hasExplicitVision = Object.prototype.hasOwnProperty.call(input, "vision");
-  if (hasExplicitContextWindow && hasExplicitVision) return config;
+  if (hasExplicitContextWindow && hasExplicitVision && !settingsProviderSummary(config.provider)?.modelsIncludeCapabilities) return config;
 
   const provider = config.provider;
   const modelName = String(config.model || "").trim();
@@ -813,7 +814,7 @@ async function applySettingsModelCapabilityDefaults(input: SettingsInput, config
 
   let match = null;
   try {
-    match = await matchConfiguredModelCapabilities({ model: modelName, provider }, signal);
+    match = await matchConfiguredModelCapabilities({ model: modelName, provider, customEndpoint: String(config.customEndpoint || ""), apiKey: String(config.apiKey || "") }, signal);
   } catch (err) {
     signal?.throwIfAborted();
     toolTrace(`[settings] model capability match failed provider=${provider || ""} model=${modelName}: ${err instanceof Error ? err.message : String(err)}`);

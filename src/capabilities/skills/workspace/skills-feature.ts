@@ -11,6 +11,7 @@ import {
   normalizeModernSkill,
   normalizeSkill,
   skillMatchesName,
+  skillEntriesByIdentity,
   normalizeSkillLookup,
   SKILL_SCOPE_GLOBAL,
   SKILL_SCOPE_RESIDENT,
@@ -688,10 +689,10 @@ export function createSkillsFeature(options: SkillsOptions) {
       setSkillsStatus(t("importFailedIsABuiltInSkillAndCannotBe", { name: String(builtinNames[0]) }), "error");
       return { ok: false as const, count: 0, names: [] };
     }
-    const existingModern = snapshot.skills;
-    const expected = Object.fromEntries(rows.map(skill => [skill.name, existingModern.find(item => skillMatchesName(item, skill.name)) || null]));
+    const existingModern = Object.fromEntries(snapshot.skills.map(skill => [skill.name, skill]));
+    const expected = Object.fromEntries(rows.map(skill => [skill.name, skillEntriesByIdentity(existingModern, skill.name)[0]?.skill || null]));
     const conflictNames = rows
-      .filter(skill => existingModern.some(item => normalizeSkillLookup(item.name) === normalizeSkillLookup(skill.name)))
+      .filter(skill => expected[skill.name])
       .map(skill => skill.name);
     if (conflictNames.length) {
       const sample = conflictNames.slice(0, 6).join(", ");
@@ -923,7 +924,7 @@ export function createSkillsFeature(options: SkillsOptions) {
   }
 
   function showSkillDetail(name: string) {
-    const rawSkill = allSkillsCache.find(s => skillMatchesName(s, name));
+    const rawSkill = allSkillsCache.find(s => s.name === name) || allSkillsCache.find(s => skillMatchesName(s, name));
     if (!rawSkill) return false;
     const skill = normalizeSkill(rawSkill);
     const displayName = getSkillDisplayName(skill) || skill.name;
@@ -2837,7 +2838,7 @@ export function createSkillsFeature(options: SkillsOptions) {
 
   $<HTMLButtonElement>("#btn-delete-skill").addEventListener("click", async () => {
     const name = currentSkillName || $("#skill-detail-name").textContent;
-    const current = allSkillsCache.find(s => skillMatchesName(s, name));
+    const current = allSkillsCache.find(s => s.name === name);
     if (isBuiltinSkill(current)) {
       setSkillsStatus(t("builtInSkillsCannotBeDeleted"), "error");
       return;

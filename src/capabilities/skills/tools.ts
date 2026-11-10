@@ -27,7 +27,7 @@ export function registerAnalysisSkillsTools({
   publishSkillRegistryChange,
   summarizeToolArgsForTrace,
   models: { chat: llmChat },
-  skills: { list: listSkills, load: loadSkill, save: saveSkill, update: updateSkill, delete: deleteSkill, loadResource: loadSkillResource },
+  skills: { list: listSkills, load: loadSkill, loadByIdentity: loadSkillByIdentity, save: saveSkill, update: updateSkill, delete: deleteSkill, loadResource: loadSkillResource },
 }: AnalysisSkillsHost) {
 registerTool({
   name: "ask_llm",
@@ -259,13 +259,19 @@ async function executeListSkillsAction({ scope = "all" } = {}, context: ToolCont
   const filtered = normalizedScope === "all"
     ? skills
     : skills.filter(skill => String(skill.scope || "global") === normalizedScope);
-  const names = filtered.map(skill => skill.name).filter(Boolean).sort((a, b) => a.localeCompare(b));
+  const items = filtered
+    .map(skill => ({
+      name: skill.name,
+      displayName: getSkillDisplayName(skill) || skill.name,
+    }))
+    .filter(item => item.name)
+    .sort((a, b) => a.name.localeCompare(b.name) || a.displayName.localeCompare(b.displayName));
   return {
     action: "list_skills",
     scope: normalizedScope,
-    count: names.length,
-    names,
-    items: names.map(name => ({ name })),
+    count: items.length,
+    names: items.map(item => item.name),
+    items,
   };
 }
 
@@ -293,7 +299,7 @@ async function executeCreateSkillAction({ name, displayName, description, conten
       details: { name },
     };
   }
-  const existing = await loadSkill(name, context.language);
+  const existing = await loadSkillByIdentity(name);
   toolTrace(`[skill] create existing name=${name || ""} exists=${existing ? 1 : 0} elapsedMs=${Date.now() - startedAt}`);
   if (existing) {
     return {

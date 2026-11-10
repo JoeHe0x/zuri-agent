@@ -52,6 +52,11 @@ export interface ProviderSummary {
   endpoint?: string;
   /** Presentation only; the request URL remains available to Background and configuration tools. */
   hideEndpoint?: boolean;
+  /** Default API URL a non-custom provider lets the user change (kept in customEndpoint). */
+  editableEndpoint?: string;
+  protocol?: string;
+  /** Model discovery returns authoritative context window, output and vision metadata. */
+  modelsIncludeCapabilities?: boolean;
   group?: ProviderGroup;
   modelOptions?: readonly ProviderModelOption[];
 }

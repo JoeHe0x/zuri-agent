@@ -1,10 +1,12 @@
 import { t } from "../../shared/i18n/backend.js";
-import { buildProviderBaseHeaders } from './provider-catalog.js';
+import { buildProviderBaseHeaders, getProviderDef } from './provider-catalog.js';
 import type { ProviderDefinition } from './provider-catalog.js';
+import { matchConfiguredModelCapabilities } from '../../shared/models/model-capabilities.js';
+import type { ModelCapabilityMatch } from '../../shared/contracts/model-capabilities.js';
 import { PRODUCT_PROVIDERS } from '../product/providers.js';
 import { withTimeout } from './transport.js';
 
-interface ModelOption { id: string; label: string; ownedBy: string; priority: number | null; releaseDate: string; efforts?: string[]; defaultEffort?: string; }
+interface ModelOption { contextWindow?: number; maxOutputTokens?: number; vision?: boolean; id: string; label: string; ownedBy: string; priority: number | null; releaseDate: string; efforts?: string[]; defaultEffort?: string; }
 function asRecord(value: unknown): Record<string, unknown> { return value && typeof value === 'object' ? value as Record<string, unknown> : {}; }
 
 export async function listProviderModels(provider: string, providerDef: ProviderDefinition, apiKey: string, signal?: AbortSignal) {
@@ -44,6 +46,28 @@ export async function listProviderModels(provider: string, providerDef: Provider
   const { response, text } = await readModelResponse(providerDef.modelsEndpoint, buildModelListHeaders(providerDef, apiKey), signal);
   if (!response.ok) throw new Error(`${providerDef.label} Models API ${response.status}: ${text.slice(0, 300)}`);
   return { provider, providerLabel: providerDef.label, models: normalizeModelList(parseModelResponse(text, providerDef.label), providerDef) };
+}
+
+export async function matchProviderModelCapabilities(config: { provider?: string; model?: string; customEndpoint?: string; apiKey?: string } = {}, signal?: AbortSignal): Promise<ModelCapabilityMatch> {
+  const definition = getProviderDef(config);
+  if (!definition.modelsIncludeCapabilities || !config.model) return matchConfiguredModelCapabilities(config, signal);
+  const { models } = await listProviderModels(config.provider || "", definition, config.apiKey || "", signal);
+  const model = models.find(entry => entry.id === config.model);
+  return {
+    matched: !!model && (model.contextWindow !== undefined || model.maxOutputTokens !== undefined || model.vision !== undefined),
+    model: config.model || "", matchedId: model?.id || "",
+    contextWindow: model?.contextWindow ?? null, maxOutputTokens: model?.maxOutputTokens ?? null, vision: model?.vision ?? null,
+    source: definition.label, providerId: config.provider || "", providerLabel: definition.label,
+  };
+}
+
+function normalizedCapabilities(item: Record<string, unknown>) {
+  const positive = (value: unknown): value is number => typeof value === "number" && Number.isSafeInteger(value) && value > 0;
+  return {
+    ...(positive(item.contextWindow) ? { contextWindow: item.contextWindow } : {}),
+    ...(positive(item.maxOutputTokens) ? { maxOutputTokens: item.maxOutputTokens } : {}),
+    ...(typeof item.vision === "boolean" ? { vision: item.vision } : {}),
+  };
 }
 
 export async function validateProviderApiKey(providerDef: ProviderDefinition, apiKey: string, signal?: AbortSignal) {
@@ -100,7 +124,7 @@ function normalizeModelList(input: unknown, providerDef: Partial<ProviderDefinit
       ? String(item.owned_by || item.ownedBy || item.owner || "").trim()
       : "";
     const label = typeof item === "object" && item
-      ? String(item.label || item.name || id).trim()
+      ? String(item.label || item.name || item.display_name || id).trim()
       : id;
     const priority = typeof item === "object" && item && typeof item.priority === "number"
       ? item.priority
@@ -114,6 +138,7 @@ function normalizeModelList(input: unknown, providerDef: Partial<ProviderDefinit
       ownedBy,
       priority,
       releaseDate,
+      ...(typeof item === "object" ? normalizedCapabilities(item) : {}),
       ...modelEfforts(item),
     });
   }

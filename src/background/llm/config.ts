@@ -241,8 +241,8 @@ export function normalizeConfig(config: ConfigInput = {}) {
     modelParameters: normalizeModelParameters(config.modelParameters),
     ...normalizeModelOptions(config, providerDef),
     customProtocol: customProvider ? normalizeCustomProtocol(config.customProtocol) : "",
-    customEndpoint: customProvider
-      ? normalizeCustomEndpoint(config.customEndpoint || config.endpoint, config.customProtocol)
+    customEndpoint: customProvider || providerDef.editableEndpoint
+      ? (customProvider ? normalizeCustomEndpoint(config.customEndpoint || config.endpoint, config.customProtocol) : getProviderEndpoint(providerDef))
       : "",
     customPresetName: customProvider ? normalizeCustomPresetName(config.customPresetName) : "",
     contextWindow: parseContextWindow(config.contextWindow, providerDef.defaultContextWindow),
@@ -281,7 +281,7 @@ function getModelConnectionSnapshot(config: ConfigInput = {}) {
     customProtocol: isCustomProvider(provider) ? normalizeCustomProtocol(config.customProtocol) : "",
     customEndpoint: isCustomProvider(provider)
       ? normalizeCustomEndpoint(config.customEndpoint, config.customProtocol)
-      : "",
+      : getProviderDef(config).editableEndpoint ? getProviderEndpoint(getProviderDef(config)) : "",
   };
 }
 
@@ -295,8 +295,8 @@ function modelConnectionSnapshotsEqual(a: ConnectionSnapshot, b: ConnectionSnaps
 
 async function validateConfigBeforeSave(config: ReturnType<typeof normalizeConfig>, { validateConnection = true, signal }: { validateConnection?: boolean; signal?: AbortSignal } = {}) {
   const providerDef = getProviderDef(config);
-  if (providerDef.custom) {
-    const endpoint = normalizeCustomEndpoint(config.customEndpoint, config.customProtocol);
+  if (providerDef.custom || providerDef.editableEndpoint) {
+    const endpoint = getProviderEndpoint(providerDef);
     if (!endpoint) {
       throw new Error(t("settings.endpointRequired"));
     }
@@ -393,6 +393,8 @@ function presetConfigKey(config: ConfigInput | ModelPreset = {}) {
     const endpoint = normalizeCustomEndpoint(config.customEndpoint, protocol).toLowerCase();
     return `${provider}::${protocol}::${endpoint}::${model}`;
   }
+  const editable = getProviderDef(config);
+  if (editable.editableEndpoint) return `${provider}::${getProviderEndpoint(editable).toLowerCase()}::${model}`;
   // Sign-in providers share one account, so a provider keeps a single preset and switching models edits it.
   if (getProviderDef({ provider }).auth) return provider;
   return `${provider}::${model}`;

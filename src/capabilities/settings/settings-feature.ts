@@ -227,7 +227,7 @@ export function createSettingsFeature(options: SettingsFeatureOptions) {
   const providerPicker = createProviderPicker({ root, signal: options.signal });
   const modelOptionsController = createModelOptionsController({
     cacheLimit: 24,
-    loadModels: ({ provider, apiKey }) => request("list_models", { provider, apiKey }, 30000),
+    loadModels: ({ provider, apiKey, customEndpoint }) => request("list_models", { provider, apiKey, customEndpoint }, 30000),
   });
   const modelPresetSwitcher = createModelPresetSwitcher({
     root, signal: options.signal,
@@ -1327,6 +1327,12 @@ export function createSettingsFeature(options: SettingsFeatureOptions) {
   customEndpointInput?.addEventListener("focus", syncCustomEndpointCompletion, { signal: options.signal });
   customEndpointInput?.addEventListener("blur", () => applyCustomEndpointCompletion(), { signal: options.signal });
   customEndpointInput?.addEventListener("keydown", handleCustomEndpointKeydown, { signal: options.signal });
+  // A gateway URL decides which models and limits exist, so a changed URL reloads the list.
+  customEndpointInput?.addEventListener("change", () => {
+    if (!sectionActive || isCustomProvider() || !providerHasEditableEndpoint()) return;
+    resetModelCapabilityMatch();
+    void loadProviderModels({ force: true });
+  }, { signal: options.signal });
 
   const floatingBall = $<HTMLInputElement>("#cfg-floating-ball");
   void chrome.storage.local.get("floatingBallEnabled").then(items => { if (floatingBall) floatingBall.checked = items.floatingBallEnabled !== false; }).catch(() => {});
@@ -1448,7 +1454,7 @@ export function createSettingsFeature(options: SettingsFeatureOptions) {
     updateModelClearButton();
     renderProviderOptions({}, provider);
     populateCustomProtocol(customProtocols?.find(item => item.id === "openai")?.id || customProtocols?.[0]?.id);
-    $<HTMLInputElement>("#cfg-custom-endpoint")!.value = "";
+    $<HTMLInputElement>("#cfg-custom-endpoint")!.value = providerSummary(provider)?.editableEndpoint || "";
     $<HTMLInputElement>("#cfg-custom-preset-name")!.value = "";
     setActiveContextWindowPreset("");
     $<HTMLInputElement>("#cfg-context-window")!.value = "";
@@ -1813,7 +1819,7 @@ export function createSettingsFeature(options: SettingsFeatureOptions) {
       _modelParametersSnapshot: modelParameters.snapshot,
       ...readProviderOptions(),
       customProtocol: isCustomProvider(provider) ? $<HTMLSelectElement>("#cfg-custom-protocol")!.value : "",
-      customEndpoint: isCustomProvider(provider) ? $<HTMLInputElement>("#cfg-custom-endpoint")!.value : "",
+      customEndpoint: providerHasEditableEndpoint(provider) ? $<HTMLInputElement>("#cfg-custom-endpoint")!.value : "",
       customPresetName: isCustomProvider(provider) ? $<HTMLInputElement>("#cfg-custom-preset-name")!.value : "",
       contextWindow: $<HTMLInputElement>("#cfg-context-window")!.value,
       trimOldToolResults: $<HTMLInputElement>("#cfg-trim-old-tool-results")!.checked,
@@ -1832,7 +1838,7 @@ export function createSettingsFeature(options: SettingsFeatureOptions) {
       modelParameters: config._modelParametersSnapshot || serializeModelParameters(config.modelParameters),
       providerOptions: JSON.stringify(normalizeProviderModelOptions(config, providerSummary(provider)?.modelOptions)),
       customProtocol: isCustomProvider(provider) ? normalizeCustomProtocol(config.customProtocol) : "",
-      customEndpoint: isCustomProvider(provider) ? String(config.customEndpoint || "").trim() : "",
+      customEndpoint: providerHasEditableEndpoint(provider) ? String(config.customEndpoint || providerSummary(provider)?.editableEndpoint || "").trim() : "",
       customPresetName: isCustomProvider(provider) ? String(config.customPresetName || "").trim() : "",
       contextWindow: normalizeContextWindowText(config.contextWindow),
       trimOldToolResults: config.trimOldToolResults !== false && config.trimOldToolResults !== "false",
@@ -1849,7 +1855,7 @@ export function createSettingsFeature(options: SettingsFeatureOptions) {
     if (config._modelParametersError) {
       return { valid: false, message: config._modelParametersError };
     }
-    if (isCustomProvider(provider)) {
+    if (providerHasEditableEndpoint(provider)) {
       const endpoint = String(config.customEndpoint || "").trim();
       if (!endpoint) return { valid: false, message: t("endpointCannotBeEmpty") };
       if (!isValidHttpEndpointText(endpoint)) return { valid: false, message: t("endpointMustBeAnHttpSUrl") };
@@ -2337,6 +2343,11 @@ export function createSettingsFeature(options: SettingsFeatureOptions) {
     return String(provider || "").trim().toLowerCase() === "custom";
   }
 
+  /** Custom, or a built-in provider (e.g. a local gateway) whose API URL the user may change. */
+  function providerHasEditableEndpoint(provider = $<HTMLSelectElement>("#cfg-provider")?.value) {
+    return isCustomProvider(provider) || Boolean(providerSummary(provider)?.editableEndpoint);
+  }
+
   function getRememberedProviderApiKey(provider: string) {
     if (!providerNeedsApiKey(provider)) return "";
     const keyMap = lastSettingsConfig?.providerApiKeys;
@@ -2382,8 +2393,9 @@ export function createSettingsFeature(options: SettingsFeatureOptions) {
     const provider = providerOverride || $<HTMLSelectElement>("#cfg-provider")?.value || "";
     const box = $("#custom-provider-box");
     if (!box) return;
-    const visible = isCustomProvider(provider);
+    const visible = providerHasEditableEndpoint(provider);
     box.classList.toggle("hidden", !visible);
+    box.querySelectorAll(".custom-option-row:not(.full)").forEach(row => row.classList.toggle("hidden", !isCustomProvider(provider)));
     if (visible) updateCustomEndpointPlaceholder();
     syncCustomEndpointCompletion();
   }
@@ -2431,10 +2443,10 @@ export function createSettingsFeature(options: SettingsFeatureOptions) {
     const field = $("#cfg-provider-endpoint");
     if (!field) return;
     const provider = $<HTMLSelectElement>("#cfg-provider")?.value || "";
-    const endpoint = isCustomProvider(provider)
+    const endpoint = providerHasEditableEndpoint(provider)
       ? completeCustomProviderEndpoint(
         $<HTMLInputElement>("#cfg-custom-endpoint")?.value || "",
-        $<HTMLSelectElement>("#cfg-custom-protocol")?.value,
+        isCustomProvider(provider) ? $<HTMLSelectElement>("#cfg-custom-protocol")?.value : providerSummary(provider)?.protocol,
       )
       : providerSummary(provider)?.endpoint || "";
     field.textContent = providerSummary(provider)?.hideEndpoint ? "" : endpoint;
@@ -2721,9 +2733,10 @@ export function createSettingsFeature(options: SettingsFeatureOptions) {
     const ticket = settingsSaveTicket();
     if (isCustomProvider(provider)) return;
     const seq = ++modelCapabilityMatchSeq;
+    const connection = providerHasEditableEndpoint(provider) ? { provider, customEndpoint: $<HTMLInputElement>("#cfg-custom-endpoint")?.value || "" } : { provider };
     let match;
     try {
-      ({ match } = await request("match_model_capabilities", { model: modelName, provider }, 10000));
+      ({ match } = await request("match_model_capabilities", { model: modelName, ...connection }, providerSummary(provider)?.modelsIncludeCapabilities ? 30000 : 10000));
     } catch (err) {
       if (seq === modelCapabilityMatchSeq) {
         console.warn("[Zuri] model capability match failed", err);
@@ -2864,6 +2877,7 @@ export function createSettingsFeature(options: SettingsFeatureOptions) {
     const input = {
       provider,
       apiKey,
+      ...(providerHasEditableEndpoint(provider) ? { customEndpoint: $<HTMLInputElement>("#cfg-custom-endpoint")?.value.trim() || "" } : {}),
       credentialVersion: hashModelCachePart(credentialSource),
       refresh: force,
     };
