@@ -8,9 +8,10 @@ import { delimiter, join } from "node:path";
 import { renderError, renderHelp, renderResult, renderInputNotice, sanitizeTerminalText } from "../../services/mcp-bridge/src/terminal.mjs";
 import { defaultShell, optionTerminator, shellArgument, shellQuote } from "../../services/mcp-bridge/src/shell.mjs";
 import { parseCommand } from "../../services/mcp-bridge/src/args.mjs";
+import { COMMANDS, commandOptions } from "../../services/mcp-bridge/src/commands.mjs";
 
 const taskId = "2d02892a-1111-4222-8333-0123456789ab";
-const task = { id: taskId, title: "杭州网页研究与城市景点整理", status: "running", running: true };
+const task = { sessionId: taskId, title: "杭州网页研究与城市景点整理", status: "running", running: true };
 const parsed = action => ({ command: "tasks", action });
 const snapshot = {
   sessionId: taskId, session: task, status: "completed", runtime: { status: "completed" },
@@ -35,7 +36,7 @@ function fits(text, width) {
   assert.ok(!text.endsWith("\n\n"));
 }
 
-test("help recommends direct creation, optional titles, waiting, and contextual commands", () => {
+test("help separates browser scripts from built-in agent commands and keeps their arguments explicit", () => {
   const general = renderHelp();
   assert.match(general, /create "PROMPT"/);
   assert.match(general, /--stream/);
@@ -51,14 +52,25 @@ test("help recommends direct creation, optional titles, waiting, and contextual 
   assert.match(renderHelp("send"), /--steer/);
   assert.match(renderHelp("send"), /next safe boundary/);
   assert.match(renderHelp("send"), /next run/);
-  for (const name of ["", "create", "tasks", "show", "cancel", "submit", "approve", "reject", "watch", "connect", "install", "status", "stop", "mcp", "send", "data", "images", "skills", "settings", "automations", "browsers"]) {
-    assert.doesNotMatch(renderHelp(name), /zuri run|zuri tasks (create|list|get|stop)|Legacy|--prompt|--args|--client-id/);
+  assert.match(renderHelp("script"), /zuri script --session ID \[FILE\|-\] \[--args JSON\]/);
+  assert.match(renderHelp("script"), /outside the page/);
+  for (const action of ["create", "list", "show", "cancel"]) assert.match(renderHelp("session"), new RegExp(`zuri session ${action}`));
+  for (const name of ["", "session", "script", "create", "tasks", "show", "cancel", "submit", "approve", "reject", "watch", "connect", "install", "status", "mcp", "send", "data", "images", "skills", "settings", "automations", "browsers", "cleanup"]) {
+    const commandReference = name ? renderHelp(name) : Object.values(COMMANDS).flatMap(command => command.help || []).join("\n");
+    assert.doesNotMatch(commandReference, /zuri run|zuri tasks (create|list|get|stop)|zuri exec\b|zuri tools\b|Legacy|--prompt|--tab\b|--client-id/);
+    if (name) {
+      assert.equal(commandOptions(name).includes("args"), name === "script", "only scripts accept --args");
+      if (name !== "script") {
+        assert.doesNotMatch(commandReference, /--args\b/);
+        assert.throws(() => parseCommand([name, "--args", "{}", "--help"]), error => error.code === "INVALID_ARGUMENTS");
+      }
+    }
     for (const width of [40, 80]) fits(renderHelp(name, { width }), width);
   }
 });
 
 test("task lists preserve complete IDs and real statuses at wide and narrow widths", () => {
-  const sessions = [task, { ...task, id: "second", title: "Compare 👩🏽‍💻 laptops", status: "waiting_user", running: true }];
+  const sessions = [task, { ...task, sessionId: "second", title: "Compare 👩🏽‍💻 laptops", status: "waiting_user", running: true }];
   for (const width of [40, 80]) {
     const result = renderResult(parsed("list"), { sessions }, { width });
     assert.match(result, /Tasks · 2/);
@@ -249,8 +261,8 @@ test("connection, install, and service results offer concise next steps", () => 
   assert.match(renderResult({ command: "status" }, { running: true, connected: false }), /browser disconnected/);
   const updateAvailable = renderResult({ command: "status" }, { running: true, connected: true, clientCount: 2, updateAvailable: true });
   assert.match(updateAvailable, /Service update available/);
-  assert.match(updateAvailable, /zuri stop && zuri connect/);
-  assert.match(renderResult({ command: "stop" }, { stopped: false }), /already stopped/);
+  assert.match(updateAvailable, /Compatible connections remain in use/);
+  assert.doesNotMatch(updateAvailable, /zuri stop|zuri connect(?! uri)/);
   assert.match(renderResult({ command: "install" }, { opened: true, url: "https://example.com" }), /Click Add to Chrome/);
 });
 
@@ -313,11 +325,16 @@ test("OSC strings use BEL and both string terminators, including C1 and unfinish
 });
 
 test("errors retain actionable details and respect plain and color output", () => {
-  const payload = { ok: false, error: { code: "connection_pending", message: "Open the connection page in Chrome.",
-    url: "http://127.0.0.1:18765/zuri-connect", hint: "Then run zuri connect again.", guide: "https://example.com/guide" } };
+  const payload = { ok: false, error: { code: "CONNECTION_PENDING", message: "No browser operation was submitted.",
+    details: { stage: "browser-connection", attemptedBrowsers: ["Chrome", "Firefox", "Edge"], operationSubmitted: false },
+    url: "http://127.0.0.1:18765/zuri-connect", hint: "Then retry the command.", guide: "https://example.com/guide" } };
   const plain = renderError(payload, { width: 40 });
-  assert.match(plain, /Waiting for Chrome/);
-  assert.match(plain, /Then run zuri connect again/);
+  assert.match(plain, /Waiting for browser extension/);
+  assert.match(plain, /Stage  browser-connection/);
+  assert.match(plain, /Browsers tried  Chrome, Firefox, Edge/);
+  assert.match(plain, /No browser operation was submitted/);
+  assert.doesNotMatch(plain, /Waiting for Chrome|operationSubmitted/);
+  assert.match(plain, /Then retry the command/);
   const colored = renderError(payload, { color: true, width: 40 });
   assert.match(colored, /\x1b\[33m/);
   assert.equal(stripVTControlCharacters(colored), plain);
@@ -326,8 +343,26 @@ test("errors retain actionable details and respect plain and color output", () =
   fits(renderError(), 40);
 });
 
+test("offline connection diagnostics identify only the selected profile and show no launcher attempts", () => {
+  const payload = { code: "CLIENT_OFFLINE", message: "The selected browser is not responding. No browser operation was submitted.",
+    hint: "Open the URL in the selected browser profile, then retry.",
+    details: { stage: "browser-connection", selectedBrowser: { name: "Work\x1b]52;c;SECRET\x07", clientId: taskId },
+      attemptedBrowsers: [], operationSubmitted: false } };
+  for (const width of [40, 80]) {
+    const text = renderError(payload, { width });
+    assert.match(text, /Stage  browser-connection/);
+    assert.match(text, /Browser  Work/);
+    assert.ok(text.replace(/\s/g, "").includes(taskId));
+    assert.match(text, /Browsers tried  None/);
+    assert.match(text.replace(/\n/g, " "), /No browser operation was submitted/);
+    assert.doesNotMatch(text, /Chrome|Firefox|Edge|SECRET|\x1b/);
+    fits(text, width);
+  }
+  assert.match(renderError({ code: "CONNECTION_PENDING", details: { attemptedBrowsers: [] } }), /Browsers tried  None/);
+});
+
 test("suggested shell commands use placeholders for untrusted identifiers", () => {
-  const output = renderResult(parsed("create"), { session: { id: "task; touch /tmp/bad", title: "Task" }, started: true });
+  const output = renderResult(parsed("create"), { session: { sessionId: "task; touch /tmp/bad", title: "Task" }, started: true });
   assert.match(output, /Task  task; touch \/tmp\/bad/);
   assert.match(output, /zuri show TASK_ID/);
   assert.match(output, /zuri cancel TASK_ID/);
@@ -339,8 +374,8 @@ test("suggested shell commands use placeholders for untrusted identifiers", () =
 test("help advertises task-centric commands and omits removed CLI entry points", () => {
   for (const topic of ["", "show", "submit", "skills"]) {
     const help = renderHelp(topic);
-    assert.doesNotMatch(help, /zuri (?:input|tools|call|logs|downloads)\b/);
-    assert.doesNotMatch(help, /^\s+(?:input|tools|call|logs|downloads)\s/m);
+    assert.doesNotMatch(help, /zuri (?:input|call|logs|downloads)\b/);
+    assert.doesNotMatch(help, /^\s+(?:input|call|logs|downloads)\s/m);
   }
   assert.match(renderHelp("show"), /TASK_ID/);
 });
@@ -369,11 +404,11 @@ test("Windows command hints identify PowerShell and escape every supported apost
   assert.match(notice, /PowerShell 7\.3\+/);
 });
 
-const powershell = process.env.ZURI_TEST_PWSH || "pwsh";
+const powershell = process.env.QZ_TEST_PWSH || "pwsh";
 const powershellProbe = spawnSync(powershell, ["-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "$PSVersionTable.PSVersion.ToString()"], { encoding: "utf8", timeout: 15000 });
 for (const shell of ["posix", "powershell"]) {
   const skip = shell === "posix" ? process.platform === "win32"
-    : process.platform !== "win32" && powershellProbe.error?.code === "ENOENT" ? "PowerShell is not installed" : false;
+    : (powershellProbe.error || powershellProbe.status !== 0) ? "PowerShell 7.3+ is not installed" : false;
   test(`${shell} generated commands roundtrip through a native Node process without executing argument contents`, { skip }, t => {
     if (shell === "powershell") {
       assert.equal(powershellProbe.status, 0, powershellProbe.stderr || powershellProbe.error?.message);

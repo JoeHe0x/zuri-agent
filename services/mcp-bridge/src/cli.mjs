@@ -3,8 +3,9 @@ import { realpathSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { setTimeout as delay } from "node:timers/promises";
 import { GUIDE_URL, INSTALL_URL, ZuriError, withToolClient, readHealth } from "./client.mjs";
-import { ensureDaemon, findDaemon, stopDaemon } from "./daemon.mjs";
+import { cleanupDaemons, ensureDaemon, findDaemon, stopDaemon } from "./daemon.mjs";
 import { openBrowser } from "./open-browser.mjs";
+import { connectionUri, prepareConnection, prepareService } from "./connection.mjs";
 import { parseCommand } from "./args.mjs";
 import { renderError, renderHelp, renderResult, renderInputNotice, sanitizeTerminalText } from "./terminal.mjs";
 import { TASK_NOT_FOUND_MESSAGE, waitForTask } from "./task-stream.mjs";
@@ -40,11 +41,11 @@ async function stdinText({ signal } = {}) {
   });
 }
 
-const UPGRADE_HINT = "Use the latest CLI. After current tasks finish, run npx --yes zuri-agent@latest stop (disconnects all browsers), update and reload the zuri extension, then run npx --yes zuri-agent@latest connect.";
+const UPGRADE_HINT = "Update the installed CLI and browser extension, then retry the command.";
 
 function requirePairingSupport(health) {
-  if (health?.features?.browserPairing !== 1) throw new ZuriError("upgrade_required",
-    "This zuri service is unsupported. Upgrade the CLI and extension, then run zuri stop and zuri connect.",
+  if (health?.features?.browserPairing !== 1) throw new ZuriError("UPGRADE_REQUIRED",
+    "This zuri service is unsupported. Update the CLI and extension, then retry the command.",
     { hint: UPGRADE_HINT });
 }
 
@@ -65,7 +66,7 @@ function selectClient(health, selector = "", { allowEmpty = false } = {}) {
 }
 
 function connectionRequired() {
-  return new ZuriError("not_connected", "Run zuri connect to start the local service and connect Chrome. If zuri is not installed, run zuri install.");
+  return new ZuriError("NOT_CONNECTED", "Run zuri connect uri and open its URL in the browser profile with zuri installed. Session and script commands prepare their connection automatically.");
 }
 
 function recoveryCommand(command, sessionId, clientId, stream = false) {
@@ -110,90 +111,56 @@ async function dispatchCommand(parsed, dependencies) {
   const healthReader = dependencies.readHealth || readHealth;
   if (command === "install") return { result: await open(INSTALL_URL) };
   if (command === "stop") return { result: await (dependencies.stopDaemon || stopDaemon)() };
+  if (command === "cleanup") {
+    const result = await (dependencies.cleanupDaemons || cleanupDaemons)({ signal: dependencies.signal });
+    if (result.skipped) throw new ZuriError("CLEANUP_INCOMPLETE",
+      `Stopped ${result.stopped} zuri services and removed ${result.removedFiles} runtime files; ${result.skipped} entries could not be cleaned.`,
+      { ...result, hint: "Check the reported entries, then retry zuri cleanup." });
+    return { result };
+  }
   if (command === "connect") {
-    const running = await (dependencies.ensureDaemon || ensureDaemon)(options.port === undefined ? {} : { preferredPort: options.port });
-    requirePairingSupport(running.health);
-    if (options.port !== undefined && Number(new URL(running.endpoint).port) !== options.port) throw new ZuriError("port_mismatch",
-      `The local service is already running at ${running.endpoint}.`, { endpoint: running.endpoint,
-        hint: "Use its current address, or run zuri stop before connecting on a different port." });
-    const bindingUrl = new URL("/zuri-connect", running.endpoint);
-    if (options.name !== undefined) bindingUrl.searchParams.set("name", options.name);
-    const connectUrl = bindingUrl.href;
-    if (options["no-open"] || options.name !== undefined) {
-      dependencies.signal?.throwIfAborted();
-      const opened = options["no-open"] ? false : Boolean((await open(connectUrl))?.opened);
-      return { result: { endpoint: running.endpoint, url: connectUrl, mcpUrl: `${running.endpoint}/mcp`, opened } };
-    }
-    const deadline = Date.now() + timeoutSeconds * 1000;
-    let selected = selectClient(running.health, options["client-id"], { allowEmpty: true });
-    const probe = async health => {
-      const chosen = selected || selectClient(health, "", { allowEmpty: true });
-      const clients = (health?.status?.clients || []).filter(client => client.clientId === chosen);
-      for (const client of clients) {
-        dependencies.signal?.throwIfAborted();
-        const timeoutMs = Math.min(2000, deadline - Date.now());
-        if (timeoutMs <= 0) return false;
-        const timeout = AbortSignal.timeout(timeoutMs);
-        try {
-          // A lease can outlive a stopped poller. Confirm a real extension round trip.
-          await dependencies.callTool(running.endpoint, "zuri_call", {
-            method: "ping", clientId: client.clientId, timeoutSeconds: timeoutMs / 1000,
-          }, { timeoutMs, signal: dependencies.signal ? AbortSignal.any([dependencies.signal, timeout]) : timeout });
-          selected = client.clientId;
-          return true;
-        } catch (error) {
-          dependencies.signal?.throwIfAborted();
-          if (error.code === "connection_error" || (!timeout.aborted
-            && !["BRIDGE_NOT_CONNECTED", "BRIDGE_CLIENT_OFFLINE", "BRIDGE_CLIENT_DISCONNECTED", "BRIDGE_REQUEST_TIMEOUT", -32001].includes(error.code))) throw error;
-        }
-      }
-      return false;
-    };
-    const result = health => ({ result: { connected: true, mcpUrl: `${running.endpoint}/mcp`, clients: health.status.clients, clientId: selected } });
-    if (await probe(running.health)) return result(running.health);
-    if (options["client-id"]) throw new ZuriError("client_offline", "The selected browser is not responding. Reconnect it from its extension settings.");
-    dependencies.signal?.throwIfAborted();
-    await open(connectUrl);
-    while (Date.now() < deadline) {
-      dependencies.signal?.throwIfAborted();
-      const health = await healthReader(running.endpoint).catch(() => null);
-      if (health && health.instanceId !== running.instanceId) throw new ZuriError("connection_changed", "The local service changed. Run zuri connect again.", { url: connectUrl });
-      if (health && await probe(health)) return result(health);
-      await delay(200, undefined, { signal: dependencies.signal });
-    }
-    throw new ZuriError("connection_pending", "zuri is waiting for Chrome. Open the connection URL in the Chrome profile with zuri installed and confirm the connection in zuri. Then run zuri connect again.", { url: connectUrl });
+    const running = await (dependencies.prepareService || prepareService)({ options }, dependencies);
+    const url = (dependencies.connectionUri || connectionUri)(running, options);
+    return { result: { connected: Boolean(running.health.status?.connected), url, instanceId: running.instanceId } };
   }
   // Validate JSON before connecting; malformed arguments cannot cause browser actions.
   let args = {};
   if (command === "submit" || (command === "settings" && action === "set" && id === undefined)) {
     const source = options.args === "-" ? await (dependencies.readStdin || stdinText)({ signal: dependencies.signal }) : options.args ?? "{}";
     try { args = JSON.parse(source); }
-    catch { throw new ZuriError("invalid_arguments", "Pass a JSON object, or - to read one from stdin."); }
-    if (!args || Array.isArray(args) || typeof args !== "object") throw new ZuriError("invalid_arguments", `${command === "submit" ? "Answers" : "Settings"} must be a JSON object.`);
+    catch { throw new ZuriError("INVALID_ARGUMENTS", "Pass a JSON object, or - to read one from stdin."); }
+    if (!args || Array.isArray(args) || typeof args !== "object") throw new ZuriError("INVALID_ARGUMENTS", `${command === "submit" ? "Answers" : "Settings"} must be a JSON object.`);
   }
   let config;
   if (command === "settings" && action === "set") config = settingsPatch(id, options.value, args);
   let prompt = options.prompt || "";
   if (((command === "tasks" && action === "create") || command === "send") && prompt === "-") {
     prompt = await (dependencies.readStdin || stdinText)({ signal: dependencies.signal });
-    if (!prompt.trim()) throw new ZuriError("invalid_arguments", "The prompt read from stdin is empty.");
+    if (!prompt.trim()) throw new ZuriError("INVALID_ARGUMENTS", "The prompt read from stdin is empty.");
   }
   dependencies.signal?.throwIfAborted();
   const resource = resourceRequest(parsed, config);
-  const running = await find();
+  const sessionId = ["send", "watch", "submit", "approve", "reject"].includes(command) || command === "tasks" && ["get", "stop"].includes(action) ? id : options.session || "";
+  const prepared = !["status", "browsers", "mcp"].includes(command)
+    ? await (dependencies.prepareConnection || prepareConnection)({ options, timeoutSeconds, sessionId }, dependencies) : null;
+  const running = prepared?.running || (["mcp", "browsers"].includes(command) ? await (dependencies.ensureDaemon || ensureDaemon)() : await find());
   if (command === "status") return { result: running ? { running: true, endpoint: running.endpoint, updateAvailable: running.updateAvailable === true, ...(running.health.features?.browserPairing === 1 ? {} : { updateRequired: true, hint: UPGRADE_HINT }), ...running.health.status } : { running: false, connected: false } };
   if (!running) throw connectionRequired();
-  if (command === "mcp") return options.json ? { result: { url: `${running.endpoint}/mcp` } } : { text: `${running.endpoint}/mcp\n` };
+  if (command === "mcp") {
+    const url = new URL("/mcp", running.endpoint);
+    if (options.profile) url.searchParams.set("profile", options.profile);
+    return options.json ? { result: { url: url.href } } : { text: `${url.href}\n` };
+  }
   const call = dependencies.callTool;
   requirePairingSupport(running.health);
   if (command === "browsers") {
     if (action === "list") return { result: running.health.status };
     const browser = running.health.status?.browsers?.find(browser => browser.clientId === id || browser.name === id);
-    if (!browser) throw new ZuriError("client_not_found", `No registered browser named ${id}. Run zuri browsers to inspect names and UUIDs.`);
+    if (!browser) throw new ZuriError("CLIENT_NOT_FOUND", `No registered browser named ${id}. Run zuri browsers to inspect names and UUIDs.`);
     return { result: await call(running.endpoint, "zuri_forget_browser", { clientId: browser.clientId }, { timeoutMs: timeoutSeconds * 1000, signal: dependencies.signal }) };
   }
   // Resolve names once. Every subsequent operation carries this profile UUID.
-  const clientId = selectClient(running.health, options["client-id"]);
+  const clientId = prepared.clientId;
   parsed.presentation = { ...parsed.presentation, clientId };
   options["client-id"] = clientId;
   const common = { timeoutSeconds, ...(clientId ? { clientId } : {}) };
@@ -206,9 +173,9 @@ async function dispatchCommand(parsed, dependencies) {
       }, { timeoutMs: seconds * 1000, signal });
     } catch (error) {
       signal?.throwIfAborted();
-      if (error.name === "TimeoutError" || error.code === -32001 || error.code === "timeout" || error.code === "BRIDGE_REQUEST_TIMEOUT"
-        || (error.code === "tool_error" && /BRIDGE_REQUEST_TIMEOUT/.test(error.message))) {
-        throw new ZuriError("request_timeout", "Reading the task status timed out. The browser task may still be running.");
+      if (error.name === "TimeoutError" || error.code === -32001 || error.code === "TIMEOUT" || error.code === "BRIDGE_REQUEST_TIMEOUT"
+        || (error.code === "TOOL_ERROR" && /BRIDGE_REQUEST_TIMEOUT/.test(error.message))) {
+        throw new ZuriError("REQUEST_TIMEOUT", "Reading the task status timed out. The browser task may still be running.");
       }
       throw error;
     }
@@ -225,10 +192,10 @@ async function dispatchCommand(parsed, dependencies) {
         getSnapshot: ({ timeoutSeconds: seconds, signal }) => readSnapshot(sessionId, seconds, signal),
       });
     } catch (error) {
-      const code = error.name === "TimeoutError" ? "timeout" : error.name === "AbortError" ? "interrupted" : error.code || "task_wait_failed";
-      if (code === "task_deleted") throw new ZuriError(code, error.message, { ...error.details, ...missingTaskDetails(sessionId, clientId) });
-      const changed = code === "task_changed";
-      throw new ZuriError(code, code === "timeout"
+      const code = error.name === "TimeoutError" ? "TIMEOUT" : error.name === "AbortError" ? "INTERRUPTED" : error.code || "TASK_WAIT_FAILED";
+      if (code === "TASK_DELETED") throw new ZuriError(code, error.message, { ...error.details, ...missingTaskDetails(sessionId, clientId) });
+      const changed = code === "TASK_CHANGED";
+      throw new ZuriError(code, code === "TIMEOUT"
         ? "Stopped watching after the configured --timeout. The browser task may still be running." : error.message,
       { ...error.details, sessionId, ...(clientId ? { clientId } : {}), hint: changed ? "Inspect the task conversation before sending another message:" : "Continue watching the same task:",
         command: recoveryCommand(changed ? "show" : "watch", sessionId, clientId, !changed) });
@@ -241,7 +208,7 @@ async function dispatchCommand(parsed, dependencies) {
     }, requestOptions);
     if (options.wait && result?.accepted === true) {
       if (typeof result.clientMessageId !== "string" || !result.clientMessageId.trim()) {
-        throw new ZuriError("invalid_response", "The message was accepted without a tracking ID. Inspect the task before sending it again.", {
+        throw new ZuriError("INVALID_RESPONSE", "The message was accepted without a tracking ID. Inspect the task before sending it again.", {
           sessionId: id, hint: "Continue watching the same task:", command: recoveryCommand("watch", id, clientId, true),
         });
       }
@@ -257,13 +224,13 @@ async function dispatchCommand(parsed, dependencies) {
     if (!waitId || command === "approve") {
       input = await call(running.endpoint, "zuri_get_user_input", { ...common, sessionId: id }, requestOptions);
       if (!waitId) {
-        if (!input?.waiting || !input?.waitId) throw new ZuriError("not_waiting", "This task has no pending input.", { sessionId: id });
+        if (!input?.waiting || !input?.waitId) throw new ZuriError("NOT_WAITING", "This task has no pending input.", { sessionId: id });
         waitId = input.waitId;
       }
     }
     if (command === "approve" && input?.waiting && input.waitId === waitId && input.kind === "location_consent") {
       if (!Number.isInteger(input.consentVersion) || input.consentVersion < 1) {
-        throw new ZuriError("invalid_response", "The location notice has no valid consent version. Run zuri show to review the current request.", { sessionId: id });
+        throw new ZuriError("INVALID_RESPONSE", "The location notice has no valid consent version. Run zuri show to review the current request.", { sessionId: id });
       }
       consentVersion = input.consentVersion;
       await dependencies.onUserInput?.(input);
@@ -294,35 +261,32 @@ async function dispatchCommand(parsed, dependencies) {
   }
   let result = await call(running.endpoint, name, parameters, requestOptions);
   if (command === "tasks" && action === "get" && result?.session === null) {
-    throw new ZuriError("task_not_found", TASK_NOT_FOUND_MESSAGE, missingTaskDetails(id, clientId));
+    throw new ZuriError("TASK_NOT_FOUND", TASK_NOT_FOUND_MESSAGE, missingTaskDetails(id, clientId));
   }
   if (command === "tasks" && action === "create" && options.wait) {
-    const sessionId = result?.session?.id || result?.sessionId;
-    if (!sessionId) throw new ZuriError("invalid_response", "The task was created without an ID. Run zuri tasks to find it before retrying.");
+    const sessionId = result?.session?.sessionId || result?.sessionId || result?.session?.id;
+    if (!sessionId) throw new ZuriError("INVALID_RESPONSE", "The task was created without an ID. Run zuri tasks to find it before retrying.");
     await dependencies.onTaskCreated?.(result);
     result = { ...result, snapshot: await observe(sessionId) };
   }
   return { result };
 }
 
-export function errorPayload(error) {
-  if (error.code === "invalid_arguments") return { ok: false, error: {
-    code: error.code, message: error.message,
-    hint: "With npm, use npm run zuri -- <command> [options]. Run zuri --help for usage.",
-  } };
-  const interrupted = error.name === "AbortError" || error.code === "interrupted";
-  const timeout = error.name === "TimeoutError" || error.code === -32001 || error.code === "timeout";
-  const code = interrupted ? "interrupted" : timeout ? "timeout" : error.code || "connection_error";
-  const payload = { code, message: interrupted ? "Stopped waiting. A started browser task may still be running."
-    : timeout && error.code !== "timeout" ? "The request timed out. A started browser task may still be running." : error.message, ...error.details };
-  if (!payload.hint && (timeout || interrupted)) payload.hint = "Run zuri tasks to inspect the task before repeating the command.";
-  if (!payload.hint && code === "BRIDGE_REQUEST_TIMEOUT") payload.hint = "The browser operation may still be running. Check the task before repeating the command.";
-  if (!payload.hint && code === "BRIDGE_CLIENT_REQUIRED") payload.hint = "Run zuri status to list browser IDs, then repeat with --client ID.";
-  if (["not_connected", "connection_error", "connection_unavailable", "connection_pending", "connection_changed", "browser_open_failed", "BRIDGE_NOT_CONNECTED", "BRIDGE_CLOSED"].includes(code)) {
-    Object.assign(payload, { guide: GUIDE_URL, install: INSTALL_URL,
-      hint: payload.hint || "Run zuri install if the extension is missing, then zuri connect. See the GitHub guide for setup." });
+export function errorPayload(error, { script = false } = {}) {
+  const interrupted = error.name === "AbortError" || error.code === "INTERRUPTED";
+  const timeout = error.name === "TimeoutError" || error.code === -32001 || error.code === "TIMEOUT";
+  const code = String(interrupted ? "INTERRUPTED" : timeout ? "TIMEOUT" : error.code || "CONNECTION_ERROR").toUpperCase();
+  const { hint: detailHint, ...details } = error.details || {};
+  const payload = { code, message: interrupted ? script
+    ? "Script request interrupted. Its session and tabs are preserved; check the page state before continuing."
+    : "Stopped waiting. A started browser task may still be running."
+    : timeout && error.code !== "TIMEOUT" ? "The request timed out. A started browser task may still be running." : error.message,
+    ...(error.hint || detailHint ? { hint: error.hint || detailHint } : {}) };
+  if (["NOT_CONNECTED", "CONNECTION_ERROR", "CONNECTION_UNAVAILABLE", "CONNECTION_PENDING", "CONNECTION_CHANGED", "BROWSER_OPEN_FAILED", "BRIDGE_NOT_CONNECTED", "BRIDGE_CLOSED"].includes(code)) {
+    Object.assign(details, { guide: GUIDE_URL, install: INSTALL_URL });
   }
-  return { ok: false, error: payload };
+  if (Object.keys(details).length) payload.details = details;
+  return payload;
 }
 
 export async function main(argv = process.argv.slice(2), dependencies = {}) {
@@ -331,9 +295,9 @@ export async function main(argv = process.argv.slice(2), dependencies = {}) {
   const env = dependencies.env || process.env;
   // Preserve explicit machine output even when argument validation itself fails.
   let mode = outputMode({ json: argv.includes("--json"), plain: argv.includes("--plain"), "no-color": argv.includes("--no-color") }, stdout, env);
-  let live;
+  let live, parsed;
   try {
-    const parsed = parseCommand(argv);
+    parsed = parseCommand(argv);
     mode = outputMode(parsed.options, stdout, env);
     if (parsed.command === "help") {
       const help = renderHelp(parsed.helpTopic, mode);
@@ -360,7 +324,7 @@ export async function main(argv = process.argv.slice(2), dependencies = {}) {
     const payload = errorPayload(error);
     if (mode.json) stdout.write(`${JSON.stringify(payload)}\n`);
     else stderr.write(renderError(payload, { ...mode, color: mode.color && Boolean(stderr.isTTY) }));
-    return payload.error.code === "invalid_arguments" ? 2 : payload.error.code === "interrupted" ? 130 : 1;
+    return payload.code === "INVALID_ARGUMENTS" ? 2 : payload.code === "INTERRUPTED" ? 130 : 1;
   }
 }
 

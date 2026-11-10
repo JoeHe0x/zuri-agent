@@ -15,6 +15,7 @@ export class ZuriError extends Error {
     this.details = details;
   }
 }
+export { ZuriError as QzError };
 
 export function localUrl(value) {
   let url;

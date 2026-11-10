@@ -848,9 +848,14 @@ const mcpManagement = createMcpManagementRuntime({
 let mcpBridge: ReturnType<typeof startZuriMcpBridge> | undefined;
 const connectMcp = createMcpConnectPage({
   extensionId: chrome.runtime.id,
+  ready: sessionRuntimeReady,
   assertConsent: dataConsent.assertAccepted,
   connect: (input, assertCurrent) => getMcpBridge().connect(input, assertCurrent),
+  status: () => getMcpBridge().status(),
   getTab: tabId => chrome.tabs.get(tabId),
+  listTabs: () => chrome.tabs.query({}),
+  createTab: () => chrome.tabs.create({}),
+  removeTab: tabId => chrome.tabs.remove(tabId),
 });
 
 const backgroundApi = createBackgroundApi({
@@ -866,7 +871,8 @@ const backgroundApi = createBackgroundApi({
     remove: (id: string, senderId: string) => getChannelRuntime(id).remove(senderId),
   },
   system: {
-    connectMcp,
+    connectMcp: (sender: chrome.runtime.MessageSender) => connectMcp.connect(sender),
+    closeMcpConnectPage: (sender: chrome.runtime.MessageSender) => connectMcp.close(sender),
     mcpConnectionStatus: (sender: chrome.runtime.MessageSender) => {
       assertMcpSettingsSender(sender, chrome.runtime.id);
       return mcpBridge?.status() || getZuriMcpConnectionStatus();
@@ -1031,7 +1037,7 @@ const backgroundApi = createBackgroundApi({
     stream: sidepanelChannel.recordStreamTrace,
   },
 }, path => {
-  if (["system.ready", "system.contentLanguage", "system.sessionImportLabels", "system.ping", "system.acceptDataConsent", "exchange.revealForImport", "ui.sidePanelOpen", "system.mcpConnectionStatus", "system.disconnectMcp", "sessions.stop"].includes(path)) return;
+  if (["system.ready", "system.contentLanguage", "system.sessionImportLabels", "system.ping", "system.acceptDataConsent", "exchange.revealForImport", "ui.sidePanelOpen", "system.mcpConnectionStatus", "system.disconnectMcp", "sessions.stop", "system.connectMcp", "system.closeMcpConnectPage"].includes(path)) return;
   dataConsent.assertAccepted();
 });
 

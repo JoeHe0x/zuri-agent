@@ -76,7 +76,9 @@ class ZuriMcpBridgeRuntime {
   private nameRevision = 0;
   private initial: Promise<void> = Promise.resolve();
   private alarmUpdate: Promise<unknown> = Promise.resolve();
-  private requests = new Map<string, Promise<void>>();
+  private requests = new Map<string, {
+    controller: AbortController; connectionId: string; sessionId: string; settled: Promise<void>;
+  }>();
   private storageListener = (changes: Record<string, chrome.storage.StorageChange>, area: string) => {
     if (area !== "local" || !changes[BRIDGE_STORAGE_KEY] || !this.started) return;
     const next = record(changes[BRIDGE_STORAGE_KEY].newValue);
@@ -424,18 +426,48 @@ class ZuriMcpBridgeRuntime {
     const id = String(request.id || "");
     const connectionId = this.connectionId;
     const key = `${connectionId}:${id}`;
-    if (!id || this.requests.has(key) || !this.current(generation)) return;
-    const work = (async () => {
+    if (!id || !this.current(generation)) return;
+    if (request.method === "cancel_request") {
+      this.requests.get(key)?.controller.abort(failure("INTERRUPTED", "The browser operation was interrupted."));
+      return;
+    }
+    if (this.requests.has(key)) return;
+    const method = String(request.method || "");
+    const params = record(request.params);
+    const sessionId = method === "execute_tool" && typeof params.sessionId === "string" ? params.sessionId.trim() : "";
+    const predecessors = sessionId ? [...this.requests.values()]
+      .filter(entry => entry.connectionId === connectionId && entry.sessionId === sessionId && entry.controller.signal.aborted)
+      .map(entry => entry.settled) : [];
+    const requestAbort = new AbortController();
+    const onConnectionAbort = () => requestAbort.abort(signal.reason);
+    let settle!: () => void;
+    const entry = { controller: requestAbort, connectionId, sessionId,
+      settled: new Promise<void>(resolve => { settle = resolve; }) };
+    this.requests.set(key, entry);
+    void (async () => {
       let payload: Record<string, unknown>;
       const started = Date.now();
       try {
         this.check(generation);
         if (!this.deps.dispatch) throw new Error("zuri dispatcher is unavailable");
-        const result = await bounded(Promise.resolve(this.deps.dispatch({ id, method: String(request.method || ""), params: record(request.params), raw: request, signal })), signal,
-          Math.max(1000, Math.min(600_000, Number(request.timeoutMs) || config.requestTimeoutMs)));
+        signal.addEventListener("abort", onConnectionAbort, { once: true });
+        const dispatchSignal = AbortSignal.any([signal, requestAbort.signal]);
+        const dispatch = this.deps.dispatch;
+        const result = await bounded((async () => {
+          // A cancelled call retains its session lease until its dispatcher finishes cleanup.
+          if (predecessors.length) await Promise.all(predecessors);
+          dispatchSignal.throwIfAborted();
+          return dispatch({ id, method, params, raw: request, signal: dispatchSignal });
+        })(), signal,
+          Math.max(1000, Math.min(600_000, Number(request.timeoutMs) || config.requestTimeoutMs)),
+          () => requestAbort.abort(failure("BRIDGE_REQUEST_TIMEOUT", "The browser operation timed out.")));
+        dispatchSignal.throwIfAborted();
         payload = { ok: true, result };
       } catch (error) {
         payload = { ok: false, error: error instanceof Error ? error.message : String(error), code: record(error).code || "", details: errorDetails(error) };
+      } finally {
+        settle();
+        this.requests.delete(key);
       }
       this.check(generation);
       // Results are bound to the exact service/worker lease that dequeued the request.
@@ -443,8 +475,7 @@ class ZuriMcpBridgeRuntime {
         clientId: config.clientId, pairingToken: config.pairingToken, instanceId: config.instanceId, connectionId,
         requestId: id, ...payload, durationMs: Date.now() - started,
       }, signal, 15_000);
-    })().catch(() => {}).finally(() => this.requests.delete(key));
-    this.requests.set(key, work);
+    })().catch(() => {});
   }
   private async json(endpoint: string, path: string, body: unknown, signal: AbortSignal, timeoutMs: number): Promise<Record<string, unknown>> {
     return bounded((async () => {
@@ -465,13 +496,17 @@ class ZuriMcpBridgeRuntime {
   }
 }
 
-function bounded<T>(promise: Promise<T>, signal: AbortSignal, ms: number): Promise<T> {
+function bounded<T>(promise: Promise<T>, signal: AbortSignal, ms: number, onTimeout?: () => void): Promise<T> {
   if (signal.aborted) return Promise.reject(signal.reason || cancelled());
   return new Promise((resolve, reject) => {
     const onAbort = () => finish(signal.reason || cancelled());
-    const timer = setTimeout(() => finish(failure("MCP_CONNECTION_UNAVAILABLE", "The local service timed out. Run zuri connect to retry.")), ms);
+    const timer = setTimeout(() => {
+      onTimeout?.();
+      finish(failure("MCP_CONNECTION_UNAVAILABLE", "The local service timed out. Run zuri connect to retry."));
+    }, ms);
     const finish = (error: unknown, value?: T) => {
-      clearTimeout(timer); signal.removeEventListener("abort", onAbort);
+      clearTimeout(timer);
+      signal.removeEventListener("abort", onAbort);
       if (error) reject(error); else resolve(value as T);
     };
     signal.addEventListener("abort", onAbort, { once: true });

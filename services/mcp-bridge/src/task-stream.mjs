@@ -72,7 +72,7 @@ export async function waitForTask({ sessionId, clientId, timeoutSeconds = null, 
     const requestDeadline = Date.now() + milliseconds;
     const requestExpiresFirst = deadline === null || requestDeadline < deadline;
     const requestTimeout = Object.assign(new Error(`Reading task ${sessionId} timed out after ${requestTimeoutSeconds} seconds. Check the browser connection, then resume watching this task.`),
-      { code: "request_timeout" });
+      { code: "REQUEST_TIMEOUT" });
     // A request timeout ends observation too. One controller preserves the first reason,
     // and equal deadlines belong to the total timer. Downstream keeps its full request budget.
     const requestTimer = requestExpiresFirst ? setTimeout(() => controller.abort(requestTimeout), milliseconds) : null;
