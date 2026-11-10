@@ -267,5 +267,7 @@
   "settings.addSiteRateLimitShort": "Добавить лимит",
   "settings.removeSiteRateLimitShort": "Удалить лимит",
   "settings.updateModelSettingsShort": "Обновить настройки",
-  "settings.floatingBall": "Плавающая кнопка"
+  "settings.floatingBall": "Плавающая кнопка",
+  "settings.optionalApiKey": "Ключ API (необязательно)",
+  "settings.optionalGatewayKeyHint": "Для прямого локального подключения оставьте поле пустым. Для подключения по локальной сети или удалённого подключения укажите ключ шлюза."
 }

@@ -5,7 +5,7 @@ import {
 } from "#sdk/shared/settings";
 
 export interface ModelOptionsInput {
-  provider?: string; endpoint?: string; customEndpoint?: string; credentialVersion?: string;
+  provider?: string; endpoint?: string; customEndpoint?: string; customProtocol?: string; credentialVersion?: string;
   apiKey?: string; refresh?: boolean;
   /** Concurrent lists (the model menu loads every provider) neither supersede nor are superseded by the selected provider's load. */
   independent?: boolean;
@@ -87,6 +87,7 @@ export function createModelOptionsController(options: ModelOptionsControllerOpti
 function cacheKey(input: ModelOptionsInput) {
   return [
     String(input.provider || ""),
+    String(input.customProtocol || ""),
     String(input.endpoint || input.customEndpoint || ""),
     String(input.credentialVersion || (input.apiKey ? "key" : "no-key")),
   ].join("\u001d");

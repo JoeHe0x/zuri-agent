@@ -267,5 +267,7 @@
   "settings.addSiteRateLimitShort": "दर सीमा जोड़ें",
   "settings.removeSiteRateLimitShort": "दर सीमा हटाएँ",
   "settings.updateModelSettingsShort": "सेटिंग्स अपडेट करें",
-  "settings.floatingBall": "फ़्लोटिंग बटन"
+  "settings.floatingBall": "फ़्लोटिंग बटन",
+  "settings.optionalApiKey": "API कुंजी (वैकल्पिक)",
+  "settings.optionalGatewayKeyHint": "सीधे स्थानीय कनेक्शन के लिए खाली छोड़ें। LAN या दूरस्थ कनेक्शन के लिए गेटवे कुंजी का उपयोग करें।"
 }

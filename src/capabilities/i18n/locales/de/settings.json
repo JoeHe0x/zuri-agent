@@ -267,5 +267,7 @@
   "settings.addSiteRateLimitShort": "Rate begrenzen",
   "settings.removeSiteRateLimitShort": "Ratenlimit aufheben",
   "settings.updateModelSettingsShort": "Optionen ändern",
-  "settings.floatingBall": "Schwebende Schaltfläche"
+  "settings.floatingBall": "Schwebende Schaltfläche",
+  "settings.optionalApiKey": "API-Schlüssel (optional)",
+  "settings.optionalGatewayKeyHint": "Bei einer direkten lokalen Verbindung leer lassen. Für eine LAN- oder Remoteverbindung den Gateway-Schlüssel verwenden."
 }

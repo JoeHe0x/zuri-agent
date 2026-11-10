@@ -267,5 +267,7 @@
   "settings.addSiteRateLimitShort": "Limitar frequência",
   "settings.removeSiteRateLimitShort": "Remover limite",
   "settings.updateModelSettingsShort": "Atualizar ajustes",
-  "settings.floatingBall": "Botão flutuante"
+  "settings.floatingBall": "Botão flutuante",
+  "settings.optionalApiKey": "Chave de API (opcional)",
+  "settings.optionalGatewayKeyHint": "Deixe em branco para uma conexão local direta. Use a chave do gateway para uma conexão LAN ou remota."
 }

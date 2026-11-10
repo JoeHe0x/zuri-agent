@@ -267,5 +267,7 @@
   "settings.addSiteRateLimitShort": "إضافة حد للطلبات",
   "settings.removeSiteRateLimitShort": "حذف حد للطلبات",
   "settings.updateModelSettingsShort": "تحديث الإعدادات",
-  "settings.floatingBall": "الزر العائم"
+  "settings.floatingBall": "الزر العائم",
+  "settings.optionalApiKey": "مفتاح API (اختياري)",
+  "settings.optionalGatewayKeyHint": "اتركه فارغًا للاتصال المحلي المباشر. استخدم مفتاح البوابة للاتصال عبر الشبكة المحلية أو عن بُعد."
 }

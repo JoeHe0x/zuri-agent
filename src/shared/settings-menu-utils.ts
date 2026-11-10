@@ -28,8 +28,14 @@ export function groupProviderChoices(providers: readonly ProviderSummary[], loca
     .map(group => ({ ...group, providers: group.providers.sort(compare) }));
 }
 
-export interface ModelOptionInput { id?: unknown; label?: unknown; name?: unknown; ownedBy?: unknown; meta?: unknown; efforts?: unknown; defaultEffort?: unknown }
-export interface ModelOption { id: string; label: string; meta: string; index: number; search: string; compactSearch: string; efforts?: string[]; defaultEffort?: string }
+export interface ModelOptionInput {
+  id?: unknown; label?: unknown; name?: unknown; ownedBy?: unknown; meta?: unknown; efforts?: unknown; defaultEffort?: unknown;
+  contextWindow?: unknown; maxOutputTokens?: unknown; vision?: unknown;
+}
+export interface ModelOption {
+  id: string; label: string; meta: string; index: number; search: string; compactSearch: string; efforts?: string[]; defaultEffort?: string;
+  contextWindow?: number; maxOutputTokens?: number; vision?: boolean;
+}
 
 export function normalizeModelOptions(models: readonly (string | ModelOptionInput)[] = []) {
   const seen = new Set();
@@ -47,10 +53,14 @@ export function normalizeModelOptions(models: readonly (string | ModelOptionInpu
     const meta = typeof model === "object" && model
       ? String(model.ownedBy || model.meta || "").trim()
       : "";
+    const metadata: ModelOptionInput = typeof model === "object" && model ? model : {};
     options.push({
       id: modelId,
       label: label || modelId,
       meta: meta === modelId ? "" : meta,
+      ...(positiveTokenLimit(metadata.contextWindow) ? { contextWindow: metadata.contextWindow } : {}),
+      ...(positiveTokenLimit(metadata.maxOutputTokens) ? { maxOutputTokens: metadata.maxOutputTokens } : {}),
+      ...(typeof metadata.vision === "boolean" ? { vision: metadata.vision } : {}),
       index,
       search: modelSearchText(`${modelId} ${label} ${meta}`),
       compactSearch: compactModelSearchText(`${modelId} ${label} ${meta}`),
@@ -62,12 +72,15 @@ export function normalizeModelOptions(models: readonly (string | ModelOptionInpu
   return options;
 }
 
+function positiveTokenLimit(value: unknown): value is number {
+  return typeof value === "number" && Number.isSafeInteger(value) && value > 0;
+}
+
 export function computeModelSuggestionState({
   query = "",
   options = [],
-  limit = 8,
   showAllOnExactMatch = false,
-}: { query?: string; options?: readonly ModelOption[]; limit?: number; showAllOnExactMatch?: boolean } = {}) {
+}: { query?: string; options?: readonly ModelOption[]; showAllOnExactMatch?: boolean } = {}) {
   const normalizedOptions = Array.isArray(options) ? options : [];
   const matchedOptions = filterModelOptions(query, normalizedOptions);
   const exactMatch = shouldHideUniqueExactModelSuggestion(query, matchedOptions);
@@ -75,7 +88,7 @@ export function computeModelSuggestionState({
   const hidden = !useAllOptions && exactMatch;
   const visibleOptions = hidden
     ? []
-    : (useAllOptions ? normalizedOptions : matchedOptions).slice(0, limit);
+    : useAllOptions ? normalizedOptions : matchedOptions;
   return {
     hidden,
     exactMatch,

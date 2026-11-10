@@ -267,5 +267,7 @@
   "settings.addSiteRateLimitShort": "Limitar frecuencia",
   "settings.removeSiteRateLimitShort": "Quitar límite",
   "settings.updateModelSettingsShort": "Actualizar ajustes",
-  "settings.floatingBall": "Botón flotante"
+  "settings.floatingBall": "Botón flotante",
+  "settings.optionalApiKey": "Clave API (opcional)",
+  "settings.optionalGatewayKeyHint": "Déjala vacía para una conexión local directa. Usa la clave de la pasarela para una conexión LAN o remota."
 }

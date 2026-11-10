@@ -54,6 +54,10 @@ Complete unknown capabilities through the provider's discovery implementation. S
 uses saved configuration. Save validates those settings locally. Unknown context windows require
 explicit configuration; unknown image support is treated as unavailable.
 
+Custom OpenAI and Anthropic endpoints also try their Models API. A supplied key uses the selected
+protocol's authentication header; an empty key sends no credential. Discovery failure leaves manual
+model entry and saving available. Model menus show all matching entries in a scrollable list.
+
 Service labels and authentication hints may use getters to resolve the current language when a
 summary is read. Keep model IDs, user names and parameter values unchanged. Declare menu grouping in
 the preset; settings renders the shared catalog. See [localization](localization.md).

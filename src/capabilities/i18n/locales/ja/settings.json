@@ -267,5 +267,7 @@
   "settings.addSiteRateLimitShort": "レート制限を追加",
   "settings.removeSiteRateLimitShort": "レート制限を削除",
   "settings.updateModelSettingsShort": "設定を更新",
-  "settings.floatingBall": "フローティングボタン"
+  "settings.floatingBall": "フローティングボタン",
+  "settings.optionalApiKey": "API キー（任意）",
+  "settings.optionalGatewayKeyHint": "ローカル接続では空欄にできます。LAN またはリモート接続ではゲートウェイのキーを入力してください。"
 }

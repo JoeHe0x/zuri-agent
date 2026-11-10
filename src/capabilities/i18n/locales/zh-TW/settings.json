@@ -267,5 +267,7 @@
   "settings.addSiteRateLimitShort": "新增站點流控",
   "settings.removeSiteRateLimitShort": "移除站點流控",
   "settings.updateModelSettingsShort": "更新模型設定",
-  "settings.floatingBall": "浮動球"
+  "settings.floatingBall": "浮動球",
+  "settings.optionalApiKey": "API 金鑰（選填）",
+  "settings.optionalGatewayKeyHint": "直接連線本機時可留空；連線區域網路或遠端閘道時，請填寫閘道金鑰。"
 }

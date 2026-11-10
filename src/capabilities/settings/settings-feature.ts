@@ -61,7 +61,6 @@ import { createModelOptionsController } from "./model-options.js";
 import { createModelPresetSwitcher } from "./model-preset-switcher.js";
 import { createProviderPicker } from "./provider-picker.js";
 
-const MODEL_SUGGESTION_LIMIT = 8;
 const CONTEXT_WINDOW_CUSTOM_VALUE = "__custom";
 const SKILL_SETTINGS_SEARCH_THRESHOLD = 6;
 
@@ -160,6 +159,8 @@ export function createSettingsFeature(options: SettingsFeatureOptions) {
   let modelParameterSuggestionOptions: string[] = [];
   let modelParameterSuggestionActiveIndex = -1;
   let modelCapabilityMatchSeq = 0;
+  let currentModelMaxOutputTokens: number | undefined;
+  let modelCapabilitiesNeedRefresh = false;
   let modelListTimer: ReturnType<typeof setTimeout> | null = null;
   let modelListNeedsReload = false;
   let currentModelOptions: ModelOption[] = [];
@@ -227,7 +228,7 @@ export function createSettingsFeature(options: SettingsFeatureOptions) {
   const providerPicker = createProviderPicker({ root, signal: options.signal });
   const modelOptionsController = createModelOptionsController({
     cacheLimit: 24,
-    loadModels: ({ provider, apiKey, customEndpoint }) => request("list_models", { provider, apiKey, customEndpoint }, 30000),
+    loadModels: ({ provider, apiKey, customEndpoint, customProtocol }) => request("list_models", { provider, apiKey, customEndpoint, customProtocol }, 30000),
   });
   const modelPresetSwitcher = createModelPresetSwitcher({
     root, signal: options.signal,
@@ -1324,6 +1325,8 @@ export function createSettingsFeature(options: SettingsFeatureOptions) {
 
   const customEndpointInput = $<HTMLInputElement>("#cfg-custom-endpoint");
   customEndpointInput?.addEventListener("input", syncCustomEndpointCompletion, { signal: options.signal });
+  customEndpointInput?.addEventListener("input", handleEditableEndpointChange, { signal: options.signal });
+  customEndpointInput?.addEventListener("change", handleEditableEndpointChange, { signal: options.signal });
   customEndpointInput?.addEventListener("focus", syncCustomEndpointCompletion, { signal: options.signal });
   customEndpointInput?.addEventListener("blur", () => applyCustomEndpointCompletion(), { signal: options.signal });
   customEndpointInput?.addEventListener("keydown", handleCustomEndpointKeydown, { signal: options.signal });
@@ -1343,18 +1346,27 @@ export function createSettingsFeature(options: SettingsFeatureOptions) {
   $<HTMLSelectElement>("#cfg-custom-protocol")!.addEventListener("change", () => {
     updateCustomEndpointPlaceholder();
     applyCustomEndpointCompletion();
+    scheduleProviderModelsLoad();
   }, { signal: options.signal });
 
   setModelParameterRows({});
 
   $<HTMLInputElement>("#cfg-apikey")!.addEventListener("input", () => {
     syncProviderAuthUi();
-    if (!sectionActive || hasProviderAuth() || isCustomProvider()) return;
+    if (!sectionActive || hasProviderAuth()) return;
+    if (providerSummary()?.modelsIncludeCapabilities) {
+      clearConfiguredModelCapabilities();
+      markSettingsPresetDirtyIfNeeded();
+    }
     scheduleProviderModelsLoad();
   }, { signal: options.signal });
   $<HTMLInputElement>("#cfg-apikey")!.addEventListener("change", () => {
     syncProviderAuthUi();
-    if (!sectionActive || hasProviderAuth() || isCustomProvider()) return;
+    if (!sectionActive || hasProviderAuth()) return;
+    if (providerSummary()?.modelsIncludeCapabilities) {
+      clearConfiguredModelCapabilities();
+      markSettingsPresetDirtyIfNeeded();
+    }
     loadProviderModels({ force: true });
   }, { signal: options.signal });
 
@@ -1373,7 +1385,7 @@ export function createSettingsFeature(options: SettingsFeatureOptions) {
     product.populate(config);
     resetModelCapabilityMatch();
     renderSettingsPresetOptions();
-    populateModelFields(config, !providerNeedsApiKey(provider) ? "" : (config.apiKey || ""));
+    populateModelFields(config, !providerUsesApiKey(provider) ? "" : (config.apiKey || ""));
     requestRateLimit = config.requestRateLimit === true;
     $<HTMLInputElement>("#cfg-debug-mode")!.checked = config.debugMode === true;
     setDebugMode(config.debugMode === true);
@@ -1450,6 +1462,8 @@ export function createSettingsFeature(options: SettingsFeatureOptions) {
     $<HTMLInputElement>("#cfg-apikey")!.value = getRememberedProviderApiKey(provider);
     setSettingsModelSelection("");
     setModelParameterRows({});
+    currentModelMaxOutputTokens = undefined;
+    modelCapabilitiesNeedRefresh = false;
     lastSettingsModel = "";
     updateModelClearButton();
     renderProviderOptions({}, provider);
@@ -1811,7 +1825,7 @@ export function createSettingsFeature(options: SettingsFeatureOptions) {
     const modelParameters = readModelParameterDraft();
     return {
       provider,
-      apiKey: !providerNeedsApiKey(provider) ? "" : $<HTMLInputElement>("#cfg-apikey")!.value,
+      apiKey: !providerUsesApiKey(provider) ? "" : $<HTMLInputElement>("#cfg-apikey")!.value,
       model: getSettingsModelId(),
       modelLabel: getSettingsModelLabel(),
       modelParameters: modelParameters.value,
@@ -1822,6 +1836,7 @@ export function createSettingsFeature(options: SettingsFeatureOptions) {
       customEndpoint: providerHasEditableEndpoint(provider) ? $<HTMLInputElement>("#cfg-custom-endpoint")!.value : "",
       customPresetName: isCustomProvider(provider) ? $<HTMLInputElement>("#cfg-custom-preset-name")!.value : "",
       contextWindow: $<HTMLInputElement>("#cfg-context-window")!.value,
+      maxOutputTokens: currentModelMaxOutputTokens,
       trimOldToolResults: $<HTMLInputElement>("#cfg-trim-old-tool-results")!.checked,
       vision: $<HTMLSelectElement>("#cfg-vision")!.value === "true",
       requestRateLimit,
@@ -1833,7 +1848,7 @@ export function createSettingsFeature(options: SettingsFeatureOptions) {
     const provider = String(config.provider || "fireworks").trim().toLowerCase();
     return {
       provider,
-      apiKey: !providerNeedsApiKey(provider) ? "" : String(config.apiKey || "").trim(),
+      apiKey: !providerUsesApiKey(provider) ? "" : String(config.apiKey || "").trim(),
       model: String(config.model || "").trim(),
       modelParameters: config._modelParametersSnapshot || serializeModelParameters(config.modelParameters),
       providerOptions: JSON.stringify(normalizeProviderModelOptions(config, providerSummary(provider)?.modelOptions)),
@@ -1841,6 +1856,7 @@ export function createSettingsFeature(options: SettingsFeatureOptions) {
       customEndpoint: providerHasEditableEndpoint(provider) ? String(config.customEndpoint || providerSummary(provider)?.editableEndpoint || "").trim() : "",
       customPresetName: isCustomProvider(provider) ? String(config.customPresetName || "").trim() : "",
       contextWindow: normalizeContextWindowText(config.contextWindow),
+      maxOutputTokens: normalizeMaxOutputTokens(config.maxOutputTokens),
       trimOldToolResults: config.trimOldToolResults !== false && config.trimOldToolResults !== "false",
       vision: config.vision === true || config.vision === "true",
       requestRateLimit: config.requestRateLimit === true || config.requestRateLimit === "true",
@@ -1943,8 +1959,8 @@ export function createSettingsFeature(options: SettingsFeatureOptions) {
     if (providerPresentation(snapshot.provider).managedAuth) {
       return providerPresentation(snapshot.provider).authenticated === true;
     }
+    if (providerHasEditableEndpoint(snapshot.provider) && !snapshot.customEndpoint) return false;
     if (!providerNeedsApiKey(snapshot.provider)) return true;
-    if (isCustomProvider(snapshot.provider)) return Boolean(snapshot.apiKey && snapshot.customEndpoint);
     return Boolean(snapshot.apiKey);
   }
 
@@ -2278,11 +2294,13 @@ export function createSettingsFeature(options: SettingsFeatureOptions) {
     $<HTMLInputElement>("#cfg-apikey")!.value = apiKey;
     setSettingsModelSelection(config.model, config.modelLabel);
     setModelParameterRows(config.modelParameters);
+    currentModelMaxOutputTokens = normalizeMaxOutputTokens(config.maxOutputTokens);
+    modelCapabilitiesNeedRefresh = false;
     lastSettingsModel = getSettingsModelId();
     updateModelClearButton();
     renderProviderOptions(config, provider);
     populateCustomProtocol(config.customProtocol);
-    $<HTMLInputElement>("#cfg-custom-endpoint")!.value = config.customEndpoint || "";
+    $<HTMLInputElement>("#cfg-custom-endpoint")!.value = config.customEndpoint || providerSummary(provider)?.editableEndpoint || "";
     $<HTMLInputElement>("#cfg-custom-preset-name")!.value = config.customPresetName || "";
     $<HTMLInputElement>("#cfg-context-window")!.value = formatContextWindowInput(config.contextWindow);
     syncContextWindowPresetToInput();
@@ -2307,7 +2325,28 @@ export function createSettingsFeature(options: SettingsFeatureOptions) {
   }
 
   function providerNeedsApiKey(provider: string) {
-    return providerSummary(provider)?.requiresApiKey !== false && !providerPresentation(provider).managedAuth;
+    return providerSummary(provider)?.requiresApiKey !== false && providerUsesApiKey(provider);
+  }
+
+  function providerUsesApiKey(provider: string) {
+    return !hasProviderAuth(provider) && !providerPresentation(provider).managedAuth;
+  }
+
+  function providerHasEditableEndpoint(provider = $<HTMLSelectElement>("#cfg-provider")?.value) {
+    return isCustomProvider(provider) || Boolean(providerSummary(provider)?.editableEndpoint);
+  }
+
+  function normalizeMaxOutputTokens(value: unknown) {
+    return typeof value === "number" && Number.isSafeInteger(value) && value > 0 ? value : undefined;
+  }
+
+  function modelDiscoveryInput(provider = $<HTMLSelectElement>("#cfg-provider")!.value) {
+    return {
+      provider,
+      apiKey: providerUsesApiKey(provider) ? $<HTMLInputElement>("#cfg-apikey")!.value.trim() : "",
+      customEndpoint: providerHasEditableEndpoint(provider) ? $<HTMLInputElement>("#cfg-custom-endpoint")!.value.trim() : "",
+      customProtocol: isCustomProvider(provider) ? $<HTMLSelectElement>("#cfg-custom-protocol")!.value : "",
+    };
   }
 
   function populateProviderChoices() {
@@ -2343,13 +2382,8 @@ export function createSettingsFeature(options: SettingsFeatureOptions) {
     return String(provider || "").trim().toLowerCase() === "custom";
   }
 
-  /** Custom, or a built-in provider (e.g. a local gateway) whose API URL the user may change. */
-  function providerHasEditableEndpoint(provider = $<HTMLSelectElement>("#cfg-provider")?.value) {
-    return isCustomProvider(provider) || Boolean(providerSummary(provider)?.editableEndpoint);
-  }
-
   function getRememberedProviderApiKey(provider: string) {
-    if (!providerNeedsApiKey(provider)) return "";
+    if (!providerUsesApiKey(provider) || providerHasEditableEndpoint(provider)) return "";
     const keyMap = lastSettingsConfig?.providerApiKeys;
     if (!keyMap || typeof keyMap !== "object" || Array.isArray(keyMap)) return "";
     return String(keyMap[String(provider || "").trim().toLowerCase()] || "").trim();
@@ -2357,8 +2391,8 @@ export function createSettingsFeature(options: SettingsFeatureOptions) {
 
   function getPresetApiKeyForSettings(preset: Partial<ModelPreset> = {}) {
     const provider = preset.provider || "fireworks";
-    if (!providerNeedsApiKey(provider)) return "";
-    if (isCustomProvider(provider)) return String(preset.apiKey || "").trim() || getRememberedProviderApiKey(provider);
+    if (!providerUsesApiKey(provider)) return "";
+    if (providerHasEditableEndpoint(provider)) return String(preset.apiKey || "").trim();
     return getRememberedProviderApiKey(provider) || String(preset.apiKey || "").trim();
   }
 
@@ -2379,13 +2413,19 @@ export function createSettingsFeature(options: SettingsFeatureOptions) {
     const apiKeyInput = $<HTMLInputElement>("#cfg-apikey");
     const apiKeyField = $("#cfg-apikey-field");
     if (!apiKeyInput) return;
-    const managedAuth = !providerNeedsApiKey(provider);
+    const managedAuth = !providerUsesApiKey(provider);
+    const optionalKey = !managedAuth && !providerNeedsApiKey(provider);
     if (managedAuth && apiKeyInput.value) apiKeyInput.value = "";
     apiKeyInput.disabled = managedAuth;
-    apiKeyInput.placeholder = providerPresentation(provider).apiKeyPlaceholder || (isCustomProvider(provider) ? "API Key" : "sk-...");
+    apiKeyInput.placeholder = providerPresentation(provider).apiKeyPlaceholder || (optionalKey ? t("optionalApiKey") : isCustomProvider(provider) ? "API Key" : "sk-...");
     apiKeyInput.title = providerPresentation(provider).apiKeyTitle || "";
     apiKeyInput.setAttribute("aria-disabled", String(managedAuth));
     apiKeyField?.classList.toggle("hidden", managedAuth);
+    const hint = $("#cfg-apikey-hint");
+    if (hint) {
+      hint.textContent = optionalKey && providerSummary(provider)?.editableEndpoint ? t("optionalGatewayKeyHint") : "";
+      hint.classList.toggle("hidden", !hint.textContent);
+    }
     product.sync();
   }
 
@@ -2403,8 +2443,24 @@ export function createSettingsFeature(options: SettingsFeatureOptions) {
   function updateCustomEndpointPlaceholder() {
     const endpointInput = $<HTMLInputElement>("#cfg-custom-endpoint");
     if (!endpointInput) return;
+    const defaultEndpoint = providerSummary()?.editableEndpoint;
+    if (defaultEndpoint) {
+      endpointInput.placeholder = defaultEndpoint;
+      return;
+    }
     const protocol = normalizeCustomProtocol($<HTMLSelectElement>("#cfg-custom-protocol")?.value);
     endpointInput.placeholder = suggestCustomProviderEndpoint("https://example.com", protocol)?.value || "https://example.com/api";
+  }
+
+  function handleEditableEndpointChange() {
+    if (!providerHasEditableEndpoint()) return;
+    // An edited address is a new credential destination; presets restore their own key.
+    $<HTMLInputElement>("#cfg-apikey")!.value = "";
+    if (providerSummary()?.editableEndpoint) {
+      clearConfiguredModelCapabilities();
+    }
+    scheduleProviderModelsLoad();
+    markSettingsPresetDirtyIfNeeded();
   }
 
   function handleCustomEndpointKeydown(event: KeyboardEvent) {
@@ -2462,6 +2518,7 @@ export function createSettingsFeature(options: SettingsFeatureOptions) {
     }
     input.value = suggestion.value;
     syncCustomEndpointCompletion();
+    scheduleProviderModelsLoad();
     if (animate) {
       input.classList.remove("is-auto-completed");
       void input.offsetWidth;
@@ -2690,15 +2747,21 @@ export function createSettingsFeature(options: SettingsFeatureOptions) {
   }
 
   function clearModelScopedSettings() {
-    resetModelCapabilityMatch();
-    setActiveContextWindowPreset("");
-    $<HTMLInputElement>("#cfg-context-window")!.value = "";
-    $<HTMLSelectElement>("#cfg-vision")!.value = "false";
+    clearConfiguredModelCapabilities();
     setModelParameterRows({});
     currentSettingsActivePresetId = "";
     $<HTMLSelectElement>("#cfg-preset")!.value = "";
-    updateContextWindowHint();
     updatePresetButtons();
+  }
+
+  function clearConfiguredModelCapabilities() {
+    resetModelCapabilityMatch();
+    currentModelMaxOutputTokens = undefined;
+    modelCapabilitiesNeedRefresh = true;
+    setActiveContextWindowPreset("");
+    $<HTMLInputElement>("#cfg-context-window")!.value = "";
+    $<HTMLSelectElement>("#cfg-vision")!.value = "false";
+    updateContextWindowHint();
   }
 
   function clearModelNameInput() {
@@ -2727,31 +2790,52 @@ export function createSettingsFeature(options: SettingsFeatureOptions) {
 
   function resetModelCapabilityMatch() {
     modelCapabilityMatchSeq += 1;
+    modelCapabilitiesNeedRefresh = false;
   }
 
   async function applyConfiguredModelCapabilityMatch(modelName: string, provider: string, { markDirty = true } = {}) {
     const ticket = settingsSaveTicket();
     if (isCustomProvider(provider)) return;
     const seq = ++modelCapabilityMatchSeq;
-    const connection = providerHasEditableEndpoint(provider) ? { provider, customEndpoint: $<HTMLInputElement>("#cfg-custom-endpoint")?.value || "" } : { provider };
-    let match;
+    const connection = modelDiscoveryInput(provider);
+    const dynamicCapabilities = providerSummary(provider)?.modelsIncludeCapabilities === true;
+    if (dynamicCapabilities && modelListLoading) {
+      modelCapabilitiesNeedRefresh = true;
+      return;
+    }
+    const modelOption = dynamicCapabilities ? currentModelOptions.find(option => option.id === modelName) : undefined;
+    modelCapabilitiesNeedRefresh = false;
+    let match: Pick<ModelCapabilityMatch, "matched" | "contextWindow" | "maxOutputTokens" | "vision">;
     try {
-      ({ match } = await request("match_model_capabilities", { model: modelName, ...connection }, providerSummary(provider)?.modelsIncludeCapabilities ? 30000 : 10000));
+      if (modelOption) {
+        match = {
+          matched: modelOption.contextWindow !== undefined || modelOption.maxOutputTokens !== undefined || modelOption.vision !== undefined,
+          contextWindow: modelOption.contextWindow ?? null,
+          maxOutputTokens: modelOption.maxOutputTokens ?? null,
+          vision: modelOption.vision ?? null,
+        };
+      } else {
+        ({ match } = await request("match_model_capabilities", { model: modelName, ...connection }, dynamicCapabilities ? 30000 : 10000));
+      }
     } catch (err) {
       if (seq === modelCapabilityMatchSeq) {
         console.warn("[Zuri] model capability match failed", err);
       }
       return;
     }
-    if (seq !== modelCapabilityMatchSeq || !match.matched || ticket.generation !== settingsGeneration
-      || getSettingsModelId() !== modelName || $<HTMLSelectElement>("#cfg-provider")!.value !== provider) return;
-    if (match.contextWindow) {
-      $<HTMLInputElement>("#cfg-context-window")!.value = formatContextWindowInput(match.contextWindow);
+    const currentConnection = modelDiscoveryInput();
+    if (seq !== modelCapabilityMatchSeq || ticket.generation !== settingsGeneration
+      || getSettingsModelId() !== modelName || currentConnection.provider !== provider
+      || currentConnection.customEndpoint !== connection.customEndpoint || currentConnection.apiKey !== connection.apiKey) return;
+    if (!match.matched && !dynamicCapabilities) return;
+    if (match.contextWindow || dynamicCapabilities) {
+      $<HTMLInputElement>("#cfg-context-window")!.value = match.contextWindow ? formatContextWindowInput(match.contextWindow) : "";
       syncContextWindowPresetToInput();
     }
-    if (typeof match.vision === "boolean") {
+    if (typeof match.vision === "boolean" || dynamicCapabilities) {
       $<HTMLSelectElement>("#cfg-vision")!.value = match.vision ? "true" : "false";
     }
+    if (dynamicCapabilities) currentModelMaxOutputTokens = normalizeMaxOutputTokens(match.maxOutputTokens);
     updateContextWindowHint();
     if (markDirty) markSettingsPresetDirtyIfNeeded();
   }
@@ -2849,7 +2933,8 @@ export function createSettingsFeature(options: SettingsFeatureOptions) {
     if (!sectionActive) return;
     modelListNeedsReload = false;
     const provider = $<HTMLSelectElement>("#cfg-provider")!.value || "fireworks";
-    const apiKey = !providerNeedsApiKey(provider) ? "" : $<HTMLInputElement>("#cfg-apikey")!.value.trim();
+    const connection = modelDiscoveryInput(provider);
+    const { apiKey } = connection;
     const modelInput = $<HTMLInputElement>("#cfg-model");
     if (!modelInput) return null;
     if (providerPresentation(provider).manualModels) {
@@ -2859,11 +2944,11 @@ export function createSettingsFeature(options: SettingsFeatureOptions) {
       modelInput.setAttribute("title", providerPresentation(provider).modelHint || "");
       return;
     }
-    if (isCustomProvider(provider)) {
+    if (isCustomProvider(provider) && !isValidHttpEndpointText(completeCustomProviderEndpoint(connection.customEndpoint, connection.customProtocol))) {
       modelListLoading = false;
-      modelListError = t("enterModelNamesManuallyForCustomEndpoints");
+      modelListError = "";
       applyModelOptions([]);
-      modelInput.setAttribute("title", t("enterModelNamesManuallyForCustomEndpoints"));
+      modelInput.removeAttribute("title");
       return;
     }
     if (providerPresentation(provider).managedAuth && providerPresentation().authenticated !== true) {
@@ -2875,9 +2960,7 @@ export function createSettingsFeature(options: SettingsFeatureOptions) {
     }
     const credentialSource = providerPresentation(provider).credentialSource ?? apiKey;
     const input = {
-      provider,
-      apiKey,
-      ...(providerHasEditableEndpoint(provider) ? { customEndpoint: $<HTMLInputElement>("#cfg-custom-endpoint")?.value.trim() || "" } : {}),
+      ...connection,
       credentialVersion: hashModelCachePart(credentialSource),
       refresh: force,
     };
@@ -2893,6 +2976,7 @@ export function createSettingsFeature(options: SettingsFeatureOptions) {
     }
     modelListLoading = true;
     modelListError = "";
+    applyModelOptions([], false);
     modelInput.setAttribute("title", t("loadingModelList"));
     syncModelSuggestionsVisibility();
     try {
@@ -2908,7 +2992,9 @@ export function createSettingsFeature(options: SettingsFeatureOptions) {
       return normalizedModels;
     } catch (err) {
       modelListLoading = false;
-      modelListError = product.modelError(provider, err);
+      modelListError = isCustomProvider(provider)
+        ? t("noModelListAvailableYouCanEnterANameManually")
+        : product.modelError(provider, err);
       applyModelOptions([]);
       modelInput.removeAttribute("title");
       console.warn("[Zuri] list models failed", err);
@@ -2925,6 +3011,9 @@ export function createSettingsFeature(options: SettingsFeatureOptions) {
   function applyModelOptions(options: readonly ModelOption[] = [], reconcile = true) {
     currentModelOptions = options.slice();
     if (reconcile) reconcileSettingsModelSelection(currentModelOptions);
+    if (reconcile && modelCapabilitiesNeedRefresh && currentModelOptions.length && getSettingsModelId()) {
+      void applyConfiguredModelCapabilityMatch(getSettingsModelId(), $<HTMLSelectElement>("#cfg-provider")!.value);
+    }
     syncModelSuggestionsVisibility();
   }
 
@@ -3036,7 +3125,6 @@ export function createSettingsFeature(options: SettingsFeatureOptions) {
     const suggestionState = computeModelSuggestionState({
       query,
       options: currentModelOptions,
-      limit: MODEL_SUGGESTION_LIMIT,
       showAllOnExactMatch: modelSuggestionsShowAll,
     });
     if (suggestionState.hidden) {
@@ -3078,7 +3166,8 @@ export function createSettingsFeature(options: SettingsFeatureOptions) {
     }
     menu.innerHTML = filteredModelOptions.map((model, index) => {
       const active = index === modelSuggestionActiveIndex;
-      const meta = model.meta ? `<span class="zuri-combobox-option-meta model-suggestion-meta">${escapeHtml(model.meta)}</span>` : "";
+      const details = [model.meta, model.contextWindow ? formatContextWindowInput(model.contextWindow) : "", typeof model.vision === "boolean" ? t(model.vision ? "imageSupport" : "text") : ""].filter(Boolean).join(" · ");
+      const meta = details ? `<span class="zuri-combobox-option-meta model-suggestion-meta">${escapeHtml(details)}</span>` : "";
       return `
         <button
           id="cfg-model-option-${index}"
@@ -3250,9 +3339,10 @@ export function createSettingsFeature(options: SettingsFeatureOptions) {
       && fields._modelParametersSnapshot === serializeModelParameters(preset.modelParameters)
       && JSON.stringify(normalizeProviderModelOptions(fields, providerSummary(presetProvider)?.modelOptions)) === JSON.stringify(normalizeProviderModelOptions(preset, providerSummary(presetProvider)?.modelOptions))
       && fields.customProtocol === (isCustomProvider(presetProvider) ? normalizeCustomProtocol(preset.customProtocol) : "")
-      && String(fields.customEndpoint || "").trim() === (isCustomProvider(presetProvider) ? String(preset.customEndpoint || "").trim() : "")
+      && String(fields.customEndpoint || "").trim() === (providerHasEditableEndpoint(presetProvider) ? String(preset.customEndpoint || providerSummary(presetProvider)?.editableEndpoint || "").trim() : "")
       && String(fields.customPresetName || "").trim() === (isCustomProvider(presetProvider) ? String(preset.customPresetName || "").trim() : "")
       && normalizeContextWindowText(fields.contextWindow) === normalizeContextWindowText(preset.contextWindow)
+      && normalizeMaxOutputTokens(fields.maxOutputTokens) === normalizeMaxOutputTokens(preset.maxOutputTokens)
       && fields.trimOldToolResults === (preset.trimOldToolResults !== false)
       && fields.vision === Boolean(preset.vision);
   }
