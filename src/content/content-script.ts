@@ -2051,26 +2051,14 @@ const errorMessage = (error: unknown) => error instanceof Error ? error.message 
       return { ...getElementSummary(target), fillMode, contentEditable: target.isContentEditable };
     },
 
-    async readElementActionState({ selector, index = 0 }) {
-      // Let page event handlers commit or roll back native actions; background tabs may not paint.
-      await new Promise<void>(resolve => {
-        const timeout = window.setTimeout(() => {
-          window.cancelAnimationFrame(frame);
-          resolve();
-        }, 50);
-        const frame = window.requestAnimationFrame(() => {
-          window.clearTimeout(timeout);
-          resolve();
-        });
-      });
+    async readElementActionState({ selector = "", index = 0, value }: ContentRequest) {
+      await settleElementAction();
       const targetResult = queryElement(selector, index);
       if ("error" in targetResult) return targetResult;
       const { element: el } = targetResult;
       return {
-        ...getElementSummary(el),
-        value: getElementValue(el, true),
-        focused: elementHasFocus(el),
-        checked: "checked" in el ? !!el.checked : undefined,
+        ...elementActionState(el),
+        ...(value !== undefined ? { valueMatches: fillValueMatches(el, value) } : {}),
       };
     },
 
@@ -2101,7 +2089,7 @@ const errorMessage = (error: unknown) => error instanceof Error ? error.message 
       return getElementInspection(el);
     },
 
-    actOnElement({ selector, index = 0, action, elementAction = "", value = "", key = "", submit = false }) {
+    async actOnElement({ selector = "", index = 0, action = "", elementAction = "", value = "", key = "", submit = false }: ContentRequest) {
       const op = String(elementAction || action || "").trim();
       const targetResult = queryElement(selector, index);
       if ("error" in targetResult) return targetResult;
@@ -2126,7 +2114,7 @@ const errorMessage = (error: unknown) => error instanceof Error ? error.message 
       }
 
       if (op === "fill") {
-        const filled = setElementValue(el, value, submit);
+        const filled = await setElementValue(el, value, submit);
         if ("error" in filled) return filled;
         return { action: op, selector, index, filled: true, submitted: submit, fill: filled, element: getElementSummary(el) };
       }
@@ -2282,6 +2270,64 @@ const errorMessage = (error: unknown) => error instanceof Error ? error.message 
 
   // DOM helpers
 
+  function settleElementAction() {
+    // Let page handlers commit native actions; background tabs may not paint.
+    return new Promise<void>(resolve => {
+      const timeout = window.setTimeout(() => { window.cancelAnimationFrame(frame); resolve(); }, 50);
+      const frame = window.requestAnimationFrame(() => { window.clearTimeout(timeout); resolve(); });
+    });
+  }
+
+  function elementActionState(el: Element) {
+    return {
+      ...getElementSummary(el),
+      value: getElementValue(el, true),
+      focused: el.isConnected && elementHasFocus(el),
+      checked: "checked" in el ? !!el.checked : undefined,
+    };
+  }
+
+  function fillValueMatches(el: Element, expected: string): boolean | null {
+    if (!(el instanceof HTMLElement && el.isContentEditable)) return getElementValue(el, true) === expected;
+    const text = editableText(el);
+    return text === null ? null : text === normalizeLineBreaks(expected).replace(/\u00a0/g, " ");
+  }
+
+  /** Logical editing lines, not innerText's extra paragraph spacing. Keep empty blocks. */
+  function editableText(root: HTMLElement, block = true): string | null {
+    const blocks: string[] = [];
+    let inline: string | null = null;
+    const children = Array.from(root.childNodes).filter(child => child.nodeType !== Node.COMMENT_NODE);
+    for (const [index, child] of children.entries()) {
+      if (child.nodeType === Node.TEXT_NODE) {
+        inline = (inline ?? "") + normalizeLineBreaks(child.textContent).replace(/\u00a0/g, " ");
+        continue;
+      }
+      if (!(child instanceof HTMLElement) || child.contentEditable === "false"
+        || ["IMG", "INPUT", "TEXTAREA", "SELECT", "TABLE"].includes(child.tagName)) return null;
+      if (child.tagName === "BR") {
+        inline = (inline ?? "") + (block && index === children.length - 1 ? "" : "\n");
+        continue;
+      }
+      const display = getComputedStyle(child).display;
+      if (!["block", "flow-root", "list-item", "inline", "contents"].includes(display)) return null;
+      const childBlock = ["block", "flow-root", "list-item"].includes(display);
+      const text = editableText(child, childBlock);
+      if (text === null) return null;
+      if (childBlock) {
+        if (inline !== null) blocks.push(inline);
+        blocks.push(text);
+        inline = null;
+      } else inline = (inline ?? "") + text;
+    }
+    if (inline !== null) blocks.push(inline);
+    return blocks.join("\n");
+  }
+
+  function staleElementError(el: Element) {
+    return toolError("ELEMENT_STALE", "Element is no longer connected to the document", getElementSummary(el));
+  }
+
   /**
    * Dispatch the full pointer and mouse event sequence for a click:
    *   pointerover → pointerenter → mouseover → mouseenter
@@ -2331,7 +2377,7 @@ const errorMessage = (error: unknown) => error instanceof Error ? error.message 
     el.dispatchEvent(new MouseEvent("click", { ...commonProps, buttons: 0 }));
   }
 
-  function setElementValue(el: Element, value: unknown, submit = false) {
+  async function setElementValue(el: Element, value: unknown, submit = false) {
     if (isDisabled(el)) {
       return toolError("ELEMENT_DISABLED", "Element is disabled", getElementSummary(el));
     }
@@ -2345,7 +2391,7 @@ const errorMessage = (error: unknown) => error instanceof Error ? error.message 
 
     const text = String(value ?? "");
     let target = el;
-    let richText = null;
+    let richText: { method: string; expected?: unknown; structure?: unknown; attempts?: unknown[]; warning?: string } | null = null;
     target.focus();
     if (el instanceof HTMLElement && el.isContentEditable) {
       target = getContentEditableRoot(el);
@@ -2365,7 +2411,14 @@ const errorMessage = (error: unknown) => error instanceof Error ? error.message 
     target.dispatchEvent(new Event("input", { bubbles: true }));
     target.dispatchEvent(new Event("change", { bubbles: true }));
 
-    if (submit) {
+    await settleElementAction();
+    if (!target.isConnected) return staleElementError(target);
+    const matches = fillValueMatches(target, text);
+    if (matches === false) return toolError("ELEMENT_VALUE_MISMATCH", "Element did not retain the requested value", getElementSummary(target));
+    if (matches === null && richText) richText.warning = "The editor's value could not be verified.";
+
+    const submitted = submit && matches === true && !richText?.warning;
+    if (submitted) {
       const form = target.closest("form");
       if (form) {
         form.requestSubmit ? form.requestSubmit() : form.submit();
