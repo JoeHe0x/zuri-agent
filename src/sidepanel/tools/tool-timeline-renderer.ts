@@ -33,8 +33,8 @@ interface Family {
   batches: Batch[]; latestIndex: number;
 }
 declare global {
-  var __ZURI_TOOL_TIMELINE_TRACE: boolean | undefined;
-  var __ZURI_TOOL_TIMELINE_TRACE_BUFFER: Record<string, unknown>[] | undefined;
+  var __QINGZHOU_TOOL_TIMELINE_TRACE: boolean | undefined;
+  var __QINGZHOU_TOOL_TIMELINE_TRACE_BUFFER: Record<string, unknown>[] | undefined;
 }
 import { commitRendererTree, disposeRendererTree, preserveRendererSubtree } from "./renderer-host.js";
 import { parseBeijingDateTime } from "../../shared/time-utils.js";
@@ -71,12 +71,14 @@ import { enrichSkillToolIdentity } from "./skill-tool-ui-registry.js";
 
 const TOOL_TIMELINE_STEP_MODE_LIMIT = 12;
 const TOOL_FAMILY_BATCH_PREVIEW_LIMIT = 3;
-const TOOL_TIMELINE_TRACE_STORAGE_KEY = "zuri.toolTimelineTrace";
+const TOOL_TIMELINE_TRACE_STORAGE_KEY = "qingzhou.toolTimelineTrace";
 const TOOL_TIMELINE_TRACE_BUFFER_LIMIT = 120;
 const transientClassTimers = new WeakMap<HTMLElement, Map<string, number>>();
 const thinkingTimelineGroupViewStateByKey = new Map<string, ThinkingState>();
 
-export function groupConsecutiveToolTranscriptEntries(history: Entry[]) {
+export function groupConsecutiveToolTranscriptEntries(history: Entry[], options: { groupTools?: boolean } = {}) {
+  // Direct drive shows every call, including each batch item, as its own card.
+  const groupTools = options.groupTools !== false;
   const out: Entry[] = [];
   let currentUserKey = "";
   let turnOrdinal = 0;
@@ -93,16 +95,23 @@ export function groupConsecutiveToolTranscriptEntries(history: Entry[]) {
         runId: turn.runId,
       }));
     }
-    const visibleTools = visibleTimelineTools(turn.tools);
+    const visibleTools = groupTools ? visibleTimelineTools(turn.tools) : turn.tools;
     if (visibleTools.length) {
       const presentationAnchor = `${turn.key}:tools`;
-      out.push(visibleTools.length >= 2
-        ? createToolTimelineGroupEntry(visibleTools, {
+      if (groupTools && visibleTools.length >= 2) {
+        out.push(createToolTimelineGroupEntry(visibleTools, {
           uiKey: presentationAnchor,
           presentationAnchor,
           runId: turn.runId,
-        })
-        : { ...visibleTools[0], _toolPresentationAnchor: presentationAnchor });
+        }));
+      } else if (groupTools) {
+        out.push({ ...visibleTools[0], _toolPresentationAnchor: presentationAnchor });
+      } else {
+        visibleTools.forEach((tool, index) => {
+          const anchor = `${presentationAnchor}:${tool.toolCallId || tool._uiKey || index}`;
+          out.push({ ...tool, _toolPresentationAnchor: anchor });
+        });
+      }
     }
     for (const assistant of turn.assistants) {
       if (String(assistant?.content || "").trim() || assistant?.streaming) out.push(assistant);
@@ -243,7 +252,7 @@ export function createThinkingTimelineGroupElement(entry: Entry, options: Timeli
   if (rememberedState?.userToggled) el.dataset.userToggled = "true";
   el.dataset.activeThinkingKey = thinkingTimelineEntryKey(activeThought);
   el.innerHTML = `
-    <button class="zuri-chiphead thinking-group-summary ${running ? "thinking-group-summary-running" : ""}" type="button" aria-expanded="${shouldExpand ? "true" : "false"}">
+    <button class="qz-chiphead thinking-group-summary ${running ? "thinking-group-summary-running" : ""}" type="button" aria-expanded="${shouldExpand ? "true" : "false"}">
       <span class="thinking-dot ${thinkingTimelineDotClass(state)}" aria-hidden="true"></span>
       <span class="thinking-group-title">${escapeHtml(title)}</span>
       <span class="thinking-group-preview">${renderThinkingSummaryPreview(preview, running)}</span>
@@ -470,9 +479,9 @@ function renderThinkingTimelineSlotNav(index: number, thoughts: Entry[]) {
   if (total <= 1) return "";
   return `
     <div class="timeline-pager thinking-group-slot-nav" aria-label="${tHtml("switchReasoning")}">
-      <button class="zuri-icon-btn zuri-icon-btn--secondary zuri-icon-btn--xs timeline-pager-btn thinking-group-nav-btn" type="button" data-thinking-nav-direction="-1" aria-label="${tHtml("previousReasoning")}" title="${tHtml("previousReasoning")}"${index <= 0 ? " disabled" : ""}>‹</button>
+      <button class="qz-icon-btn qz-icon-btn--secondary qz-icon-btn--xs timeline-pager-btn thinking-group-nav-btn" type="button" data-thinking-nav-direction="-1" aria-label="${tHtml("previousReasoning")}" title="${tHtml("previousReasoning")}"${index <= 0 ? " disabled" : ""}>‹</button>
       <span>${escapeHtml(String(index + 1))}/${escapeHtml(String(total))}</span>
-      <button class="zuri-icon-btn zuri-icon-btn--secondary zuri-icon-btn--xs timeline-pager-btn thinking-group-nav-btn" type="button" data-thinking-nav-direction="1" aria-label="${tHtml("nextReasoning")}" title="${tHtml("nextReasoning")}"${index >= total - 1 ? " disabled" : ""}>›</button>
+      <button class="qz-icon-btn qz-icon-btn--secondary qz-icon-btn--xs timeline-pager-btn thinking-group-nav-btn" type="button" data-thinking-nav-direction="1" aria-label="${tHtml("nextReasoning")}" title="${tHtml("nextReasoning")}"${index >= total - 1 ? " disabled" : ""}>›</button>
     </div>
   `;
 }
@@ -603,7 +612,7 @@ export function createToolTimelineGroupElement(entry: Entry, options: TimelineOp
 
   el.dataset.activeToolKey = toolTimelineEntryKey(activeTool);
   el.innerHTML = `
-    <button class="zuri-chiphead tool-summary tool-timeline-summary ${tone !== "success" ? `tool-timeline-summary-${tone}` : ""}" type="button" aria-expanded="${shouldExpand ? "true" : "false"}">
+    <button class="qz-chiphead tool-summary tool-timeline-summary ${tone !== "success" ? `tool-timeline-summary-${tone}` : ""}" type="button" aria-expanded="${shouldExpand ? "true" : "false"}">
       <span class="dot ${statusClass}" title="${tone === "incomplete" ? tHtml("toolResultIncomplete") : ""}"></span>
       <span class="tool-name">${escapeHtml(title)}</span>
       <span class="tool-args-preview">${escapeHtml(preview)}</span>
@@ -616,10 +625,10 @@ export function createToolTimelineGroupElement(entry: Entry, options: TimelineOp
       <div class="tool-timeline-slot"></div>
       <div class="tool-timeline-footer">
         <div class="tool-timeline-footer-row">
-          <button class="zuri-btn zuri-btn--ghost zuri-btn--inline tool-timeline-raw-btn hidden" type="button" aria-expanded="false">${tHtml("viewRawData")}</button>
+          <button class="qz-btn qz-btn--ghost qz-btn--inline tool-timeline-raw-btn hidden" type="button" aria-expanded="false">${tHtml("viewRawData")}</button>
           <span class="tool-timeline-footer-spacer"></span>
           ${duration ? `<time class="tool-timeline-duration">${tHtml("elapsedTime", { duration })}</time>` : ""}
-          <button class="zuri-btn zuri-btn--ghost zuri-btn--inline tool-timeline-collapse-btn" type="button">${tHtml("collapse")}</button>
+          <button class="qz-btn qz-btn--ghost qz-btn--inline tool-timeline-collapse-btn" type="button">${tHtml("collapse")}</button>
         </div>
         <div class="tool-timeline-raw-panel hidden"></div>
       </div>
@@ -794,19 +803,19 @@ function traceToolTimeline(stage: string, payload: Record<string, unknown> = {})
     ...payload,
   };
   try {
-    const buffer = Array.isArray(globalThis.__ZURI_TOOL_TIMELINE_TRACE_BUFFER)
-      ? globalThis.__ZURI_TOOL_TIMELINE_TRACE_BUFFER
+    const buffer = Array.isArray(globalThis.__QINGZHOU_TOOL_TIMELINE_TRACE_BUFFER)
+      ? globalThis.__QINGZHOU_TOOL_TIMELINE_TRACE_BUFFER
       : [];
     buffer.push(entry);
     if (buffer.length > TOOL_TIMELINE_TRACE_BUFFER_LIMIT) {
       buffer.splice(0, buffer.length - TOOL_TIMELINE_TRACE_BUFFER_LIMIT);
     }
-    globalThis.__ZURI_TOOL_TIMELINE_TRACE_BUFFER = buffer;
+    globalThis.__QINGZHOU_TOOL_TIMELINE_TRACE_BUFFER = buffer;
   } catch {
     // Trace should never affect the UI path.
   }
   try {
-    console.debug("[Zuri tool-timeline]", stage, entry);
+    console.debug("[轻舟 tool-timeline]", stage, entry);
   } catch {
     // Ignore consoles that are unavailable in test harnesses.
   }
@@ -814,7 +823,7 @@ function traceToolTimeline(stage: string, payload: Record<string, unknown> = {})
 
 function isToolTimelineTraceEnabled() {
   try {
-    if (globalThis.__ZURI_TOOL_TIMELINE_TRACE === true) return true;
+    if (globalThis.__QINGZHOU_TOOL_TIMELINE_TRACE === true) return true;
     const value = globalThis.localStorage?.getItem?.(TOOL_TIMELINE_TRACE_STORAGE_KEY);
     return value === "1" || value === "true" || value === "on";
   } catch {
@@ -931,7 +940,7 @@ function renderToolFamilyTab(family: Family, activeFamilyId: string) {
   const active = family.id === activeFamilyId;
   const state = toolTimelineFamilyState(family);
   return `
-    <button class="zuri-pill tool-family-row ${active ? "active" : ""}" type="button" role="listitem" data-tool-family-id="${escapeHtml(family.id)}" data-tool-timeline-index="${family.latestIndex}" aria-current="${active ? "true" : "false"}" title="${escapeHtml(toolFamilySummary(family))}">
+    <button class="qz-pill tool-family-row ${active ? "active" : ""}" type="button" role="listitem" data-tool-family-id="${escapeHtml(family.id)}" data-tool-timeline-index="${family.latestIndex}" aria-current="${active ? "true" : "false"}" title="${escapeHtml(toolFamilySummary(family))}">
       <span class="mini-dot ${state}" title="${state === "incomplete" ? tHtml("toolResultIncomplete") : ""}"></span>
       <span class="tool-family-title">${escapeHtml(family.shortLabel || family.label)}</span>
       <span class="tool-family-count">${escapeHtml(String(family.items.length))}</span>
@@ -967,7 +976,7 @@ function renderToolFamilyBatch(batch: Batch, activeIndex: number) {
   const indexes = toolFamilyBatchIndexes(batch);
   const active = indexes.includes(Number(activeIndex));
   return `
-    <button class="zuri-pill tool-family-batch ${active ? "active" : ""}" type="button" data-tool-family-id="${escapeHtml(batch.familyId)}" data-tool-timeline-index="${batch.latestIndex}" data-tool-timeline-indexes="${escapeHtml(indexes.join(","))}" title="${escapeHtml(batchSummary(batch))}">
+    <button class="qz-pill tool-family-batch ${active ? "active" : ""}" type="button" data-tool-family-id="${escapeHtml(batch.familyId)}" data-tool-timeline-index="${batch.latestIndex}" data-tool-timeline-indexes="${escapeHtml(indexes.join(","))}" title="${escapeHtml(batchSummary(batch))}">
       <span>${escapeHtml(toolTimelineActionLabel(batch.latestTool || batch.name))}</span>
       <b>${escapeHtml(batch.count > 1 ? `×${batch.count}` : "1")}</b>
       ${batch.target ? `<em>${escapeHtml(batch.target)}</em>` : ""}
@@ -1111,7 +1120,7 @@ function summarizeTimelineTarget(value: unknown) {
 function renderToolTimelineStep(tool: Entry, index: number, active = false) {
   const state = resolveTimelineToolState(tool);
   return `
-    <button class="zuri-pill tool-timeline-step ${state}${active ? " active" : ""}" type="button" data-tool-timeline-index="${index}" title="${escapeHtml(tool.name || "")}">
+    <button class="qz-pill tool-timeline-step ${state}${active ? " active" : ""}" type="button" data-tool-timeline-index="${index}" title="${escapeHtml(tool.name || "")}">
       <span class="mini-dot" title="${state === "incomplete" ? tHtml("toolResultIncomplete") : ""}"></span>
       <span>${escapeHtml(toolTimelineActionLabel(tool))}</span>
     </button>
@@ -1313,9 +1322,9 @@ function renderToolTimelineSlotNav(index: number, tools: Entry[], mode = "steps"
   const nextTitle = familyMode ? t("nextInFamily") : t("nextCall");
   return `
     <div class="timeline-pager tool-timeline-slot-nav" data-timeline-mode="${escapeHtml(familyMode ? "family" : "steps")}" aria-label="${tHtml("switchToolDetails")}">
-      <button class="zuri-icon-btn zuri-icon-btn--secondary zuri-icon-btn--xs timeline-pager-btn tool-timeline-nav-btn" type="button" data-timeline-nav-direction="-1" aria-label="${tHtml("previousCall")}" title="${escapeHtml(previousTitle)}"${previousIndex === index ? " disabled" : ""}>‹</button>
+      <button class="qz-icon-btn qz-icon-btn--secondary qz-icon-btn--xs timeline-pager-btn tool-timeline-nav-btn" type="button" data-timeline-nav-direction="-1" aria-label="${tHtml("previousCall")}" title="${escapeHtml(previousTitle)}"${previousIndex === index ? " disabled" : ""}>‹</button>
       <span title="${escapeHtml(position.title)}" data-position-scope="${escapeHtml(position.scope)}">${escapeHtml(String(position.current))}/${escapeHtml(String(position.total))}</span>
-      <button class="zuri-icon-btn zuri-icon-btn--secondary zuri-icon-btn--xs timeline-pager-btn tool-timeline-nav-btn" type="button" data-timeline-nav-direction="1" aria-label="${tHtml("nextCall")}" title="${escapeHtml(nextTitle)}"${nextIndex === index ? " disabled" : ""}>›</button>
+      <button class="qz-icon-btn qz-icon-btn--secondary qz-icon-btn--xs timeline-pager-btn tool-timeline-nav-btn" type="button" data-timeline-nav-direction="1" aria-label="${tHtml("nextCall")}" title="${escapeHtml(nextTitle)}"${nextIndex === index ? " disabled" : ""}>›</button>
     </div>
   `;
 }

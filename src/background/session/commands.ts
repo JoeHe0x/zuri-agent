@@ -1900,8 +1900,8 @@ async function deleteSessionRuntime(sessionId: string, meta: Fields = {}, signal
       }
     },
   });
-  const stopped = Boolean(snapshot.hadTask || object(snapshot.liveState).isStreaming);
-  const hadRuntime = Boolean(snapshot.hadAgent || snapshot.hadTask);
+  const stopped = Boolean(snapshot?.hadTask || object(snapshot?.liveState).isStreaming);
+  const hadRuntime = Boolean(snapshot?.hadAgent || snapshot?.hadTask);
 
   await sessionTabs.closeOwnedTabsAfterTerminal(id, "delete_session").catch((err) => {
     console.debug("[Zuri] close deleted session owned tabs failed:", errorMessage(err));

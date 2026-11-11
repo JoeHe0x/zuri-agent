@@ -22,6 +22,7 @@ import type { ScreenshotOptions, PageState } from "./page-observation.js";
 import type { ToolExtensionAPI, ToolExtensionRuntime, NetworkWatchOptions, PreparedNavigation } from "../../sdk/background.js";
 import { withToolCallLifecycle } from "./call-lifecycle.js";
 import contributions from "#capabilities/tools";
+import { isDriveToolDiscoverable, toolSignature } from "../mcp/external-drive.js";
 import type { ElementReply, PagePoint } from "../../shared/contracts/page-content.js";
 type Fields = Record<string, unknown>;
 type RuntimeTool = ToolDefinition<ToolSchema, unknown, ToolContext, AbortSignal> & ReturnType<typeof normalizeToolIdentity> & { source: "core" | "plugin"; plugin?: SkillManifest; selectionRenderer?: SkillRenderer };
@@ -464,6 +465,23 @@ export function getToolSchemas(options: ToolOptions = {}) {
   const snapshot = isCoreToolSnapshot(options.toolRegistrySnapshot) ? options.toolRegistrySnapshot : coreToolDefinitions.snapshot(options.language);
   return withLanguage(snapshot.language, () => getLocalizedToolSchemas({ ...options, language: snapshot.language }, snapshot));
 }
+function listContextTools(context: ToolContext, names?: readonly string[], options?: { skillName: string }): { tools: Fields[] } {
+  if (options) context = { ...context, loadedPluginSkillNames: [options.skillName] };
+  const allowed = getToolSchemas(context).filter(schema => context.externalDrive !== true
+    || isDriveToolDiscoverable(schema.function.name)).filter(schema => !options
+      || getSkillToolDefinition(schema.function.name, context)?.plugin.skillName === options.skillName);
+  if (names || options) {
+    const index = new Map(allowed.map(schema => [schema.function.name, schema.function]));
+    const requested = [...new Set(names ?? index.keys())];
+    for (const name of requested) if (!index.has(name)) throw new ToolExecutionError("UNKNOWN_TOOL", `Unknown or unavailable tool: ${name}`, { name });
+    return { tools: requested.map(name => {
+      const outputSchema = getSkillToolDefinition(name, context)?.tool.outputSchema;
+      return { ...index.get(name)!, ...(outputSchema !== undefined ? { outputSchema } : {}) };
+    }) };
+  }
+  return { tools: allowed.map(schema => toolSignature(schema.function)) };
+}
+
 
 function getLocalizedToolSchemas(options: ToolOptions, snapshot: ReturnType<typeof coreToolDefinitions.snapshot>) {
   const policy = normalizeToolPolicy(options);
@@ -615,7 +633,7 @@ export async function executeTool(name: string, args: unknown, signal?: AbortSig
           }
           const pageAccess = resolvePageAccess(selectedDefinition, args);
           if (signal?.aborted) throw new ToolExecutionError("OPERATION_ABORTED", "Operation aborted before tool execution");
-          const policy = selectedDefinition.behavior?.timeoutResult;
+          const policy = resolveTimeoutResult(selectedDefinition, args);
           if (policy?.kind === "action") reportPartial({ tabId: args.tabId, status: "unconfirmed" }, policy.pending);
           if (policy?.kind === "read" && Number(args.tabId) > 0
             && !elementTargetsOf(selectedDefinition, args).some(isUidElementTarget)) {
@@ -633,8 +651,11 @@ export async function executeTool(name: string, args: unknown, signal?: AbortSig
             await capabilityBridges.preparePage?.(Number(args.tabId), name, signal, callContext);
           }
           if (signal.aborted) throw new ToolExecutionError("OPERATION_ABORTED", "Operation aborted before tool execution");
-          return withToolCallLifecycle(callContext, async scoped => selectedDefinition.execute(args, scoped.signal,
-            withToolRuntimeContext(scoped, getToolRuntimeDependencies(callContext))));
+          return withToolCallLifecycle(callContext, async scoped => {
+            scoped.listTools = (names, options) => listContextTools(scoped, names, options);
+            return selectedDefinition.execute(args, scoped.signal,
+              withToolRuntimeContext(scoped, getToolRuntimeDependencies(callContext)));
+          });
         },
         signal,
         timeoutMs,
@@ -953,7 +974,7 @@ function withTimeoutAliases(args: unknown, definition: RuntimeTool) {
 async function finishTimedOutTool(definition: RuntimeTool, partial: ToolPartialResult, signal: AbortSignal | undefined, language: string, timeoutError: ToolExecutionError, context: ToolContext) {
   let result = partial.result;
   let pending = partial.pending;
-  const kind = definition.behavior?.timeoutResult?.kind;
+  const kind = resolveTimeoutResult(definition, record(result))?.kind;
   const tabId = Number(result.tabId || result.id);
   if (tabId > 0) {
     await assertTabAllowedBySecurityGuardrails(tabId, { tool: definition.name, source: "timeout" });
@@ -1027,10 +1048,15 @@ function resolvePageAccess(definition: RuntimeTool, args: Fields) {
   return typeof definition.page === "function" ? definition.page(args) : definition.page || false;
 }
 
+function resolveTimeoutResult(definition: RuntimeTool, args: Fields): { kind: "read" | "action" | "navigation"; pending: string } | undefined {
+  const policy = definition.behavior?.timeoutResult;
+  return typeof policy === "function" ? policy(args) : policy;
+}
+
 function needsCommittedPage(definition: RuntimeTool, args: Fields) {
   const access = resolvePageAccess(definition, args);
   return shouldResolveSessionTabTarget(definition, args)
-    && (access === "readOnly" || (access === "owned" && definition.behavior?.timeoutResult?.kind === "read"));
+    && (access === "readOnly" || (access === "owned" && resolveTimeoutResult(definition, args)?.kind === "read"));
 }
 
 function shouldResolveSessionTabTarget(definition: RuntimeTool, args: Fields = {}) {

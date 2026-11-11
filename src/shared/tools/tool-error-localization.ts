@@ -320,6 +320,7 @@ const BATCH_TAB_REFERENCE_REASONS: Readonly<Record<string, { label: BackendMessa
   ambiguous_target: { label: "toolError.BATCH_TAB_REFERENCE_ERROR.ambiguousTarget.label", message: "toolError.BATCH_TAB_REFERENCE_ERROR.ambiguousTarget.message" },
   conflicting_target: { label: "toolError.BATCH_TAB_REFERENCE_ERROR.conflictingTarget.label", message: "toolError.BATCH_TAB_REFERENCE_ERROR.conflictingTarget.message" },
   outside_batch: { label: "toolError.BATCH_TAB_REFERENCE_ERROR.outsideBatch.label", message: "toolError.BATCH_TAB_REFERENCE_ERROR.outsideBatch.message" },
+  no_alias: { label: "toolError.BATCH_TAB_REFERENCE_ERROR.noAlias.label", message: "toolError.BATCH_TAB_REFERENCE_ERROR.noAlias.message" },
 });
 
 function batchTabReferenceReason(details: Record<string, unknown> = {}) {

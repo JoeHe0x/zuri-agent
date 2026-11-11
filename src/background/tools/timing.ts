@@ -14,6 +14,10 @@ export function scriptTimeout(args: Record<string, unknown>, name: string): numb
   });
   return seconds <= 0 ? 0 : Math.max(1, Math.floor(seconds * 1000));
 }
+export function orchestrationTimeout(args: Record<string, unknown>, name: string): number {
+  return scriptTimeout({ ...args, timeout: args.timeout ?? 120 }, name);
+}
+
 
 export function sessionWaitTimeout(args: Record<string, unknown>): ToolTimeout {
   if (args.action !== "wait") return DEFAULT_TOOL_TIMEOUT;

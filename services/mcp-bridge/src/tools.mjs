@@ -5,14 +5,19 @@ import { AjvJsonSchemaValidator } from "@modelcontextprotocol/sdk/validation/ajv
 import { BridgeError } from "./state.mjs";
 import { waitForTask } from "./task-stream.mjs";
 import { PACKAGE_VERSION } from "./package-info.mjs";
-
+import { driveGuide } from "./drive-guide.mjs";
+import { driveExtensionTimeoutSeconds } from "./drive-timeout.mjs";
+export { driveExtensionTimeoutSeconds } from "./drive-timeout.mjs";
 // Public MCP tools use the extension's version 1 wire protocol.
 export const TOOL_CATALOG = JSON.parse(readFileSync(new URL("./catalog.json", import.meta.url), "utf8"))
   .map(tool => ({ ...tool, inputSchema: { ...tool.inputSchema, additionalProperties: false } }));
 const schemaValidator = new AjvJsonSchemaValidator();
-const definitions = new Map(TOOL_CATALOG.map(tool => [tool.name, {
-  tool, validate: schemaValidator.getValidator(tool.inputSchema),
-}]));
+const definitions = new Map(TOOL_CATALOG.flatMap(tool => [
+  [tool.name, { tool, validate: schemaValidator.getValidator(tool.inputSchema) }],
+  ...(tool.name.startsWith("zuri_") ? [
+    ["qingzhou_" + tool.name.slice("zuri_".length), { tool, validate: schemaValidator.getValidator(tool.inputSchema) }],
+  ] : []),
+]));
 const taskInputResults = new Set([
   "zuri_get_session_snapshot", "zuri_get_session_state", "zuri_send_message",
   "zuri_respond_to_user_input", "zuri_continue_task", "zuri_submit_wait_form", "zuri_cancel_wait",
@@ -50,8 +55,9 @@ function argumentsWithDefaults(definition, input) {
   }));
 }
 
-export async function executeMcpTool(state, name, input = {}, { signal, onTaskUpdate } = {}) {
-  const args = validateMcpToolInput(name, input);
+export async function executeMcpTool(state, rawName, input = {}, { signal, onTaskUpdate, clientName } = {}) {
+  const name = rawName.startsWith("qingzhou_") ? "zuri_" + rawName.slice("qingzhou_".length) : rawName;
+  const args = validateMcpToolInput(rawName, input);
   if (name === "zuri_bridge_status") return state.status();
   if (name === "zuri_forget_browser") return state.forgetBrowser(args.clientId);
   if (name === "zuri_get_tool_job") return state.getJob(args.jobId, args.includeResult);
@@ -62,12 +68,12 @@ export async function executeMcpTool(state, name, input = {}, { signal, onTaskUp
   const connectionSignal = state.signal(connection.controller.signal);
   const operationSignal = signal ? AbortSignal.any([connectionSignal, signal]) : connectionSignal;
   operationSignal.throwIfAborted();
-  const result = await executeBrowserTool(state, name, args, { signal: operationSignal, connectionSignal, onTaskUpdate });
+  const result = await executeBrowserTool(state, name, args, { signal: operationSignal, connectionSignal, onTaskUpdate, clientName });
   return args.clientId && (observableTools.has(name) || taskInputResults.has(name) || ["zuri_list_sessions", "zuri_get_user_input", "zuri_stop_session", "zuri_abort_session"].includes(name)) && result && typeof result === "object" && !Array.isArray(result)
     ? { ...result, clientId: args.clientId } : result;
 }
 
-async function executeBrowserTool(state, name, args, { signal, connectionSignal, onTaskUpdate }) {
+async function executeBrowserTool(state, name, args, { signal, connectionSignal, onTaskUpdate, clientName }) {
   const observe = observableTools.has(name) && (name === "zuri_watch_task" || args.wait || args.stream);
   const asyncTool = name === "zuri_execute_tool" && args.wait === false;
   const options = { timeoutSeconds: args.timeoutSeconds, clientId: args.clientId, signal };
@@ -116,11 +122,35 @@ async function executeBrowserTool(state, name, args, { signal, connectionSignal,
   }
   if (name === "zuri_follow_up") params.images ||= [];
   if (name === "zuri_submit_wait_form") params.answers ||= {};
+  if (name === "zuri_create_drive_session") {
+    const displayName = String(clientName || "").trim();
+    if (displayName) params.clientName = displayName;
+  }
   if (name === "zuri_execute_tool") {
+    const scriptApiVersion = params.scriptApiVersion;
+    if (scriptApiVersion != null) {
+      const capabilities = await state.callExtension("capabilities", {}, options);
+      if (capabilities?.scriptApiVersion !== scriptApiVersion) {
+        throw Object.assign(new BridgeError("UPGRADE_REQUIRED", "The connected extension does not support this script API. No script was executed."), {
+          hint: "Update the CLI and extension together, then reconnect before running the script.",
+        });
+      }
+    }
     delete params.wait;
-    params.args ||= {};
-    return asyncTool ? { ...state.startExtensionJob("execute_tool", params, { ...options, connectionSignal }), sessionId: args.sessionId, clientId }
-      : state.callExtension("execute_tool", params, options);
+    if (!Array.isArray(params.calls)) params.args ||= {};
+    const displayName = String(clientName || "").trim();
+    if (displayName) params.clientName = displayName;
+    const requestTimeout = driveExtensionTimeoutSeconds(params, args.timeoutSeconds || state.requestTimeoutSeconds || 180);
+    const callOptions = { ...options, timeoutSeconds: requestTimeout, cancelOnAbort: !asyncTool };
+    const invoke = () => asyncTool
+      ? { ...state.startExtensionJob("execute_tool", params, { ...callOptions, connectionSignal }), sessionId: args.sessionId, clientId }
+      : state.callExtension("execute_tool", params, callOptions);
+    try {
+      return await invoke();
+    } catch (error) {
+      if (error?.code === "DRIVE_SESSION_BUSY") return await invoke();
+      throw error;
+    }
   }
   const method = name === "zuri_abort_session" ? "stop_session" : name.slice("zuri_".length);
   let result = await state.callExtension(method, params, options);
@@ -165,35 +195,125 @@ export function validateMcpToolInput(name, input = {}) {
   }
 }
 
-export function resultToContent(result) {
-  if (result == null) return [];
-  if (Array.isArray(result)) return result.flatMap(resultToContent);
-  return [{ type: "text", text: typeof result === "string" ? result : JSON.stringify(result, null, 2) }];
+function imageEntries(value) {
+  if (!value || typeof value !== "object" || Array.isArray(value) || !Array.isArray(value.images)) return [];
+  return value.images.filter(image => image && typeof image.data === "string" && typeof image.mimeType === "string");
 }
 
-export function createMcpServer(state) {
-  const server = new Server({ name: "zuri-agent-mcp-bridge", version: PACKAGE_VERSION }, {
-    capabilities: { tools: {} }, instructions: "Control zuri tasks and browser tools through the local bridge.",
+function withoutImages(value) {
+  if (!imageEntries(value).length) return value;
+  const { images: _images, ...rest } = value;
+  return rest;
+}
+
+function imageBlock(image, meta) {
+  return {
+    type: "image",
+    data: image.data,
+    mimeType: image.mimeType,
+    ...(meta && Object.keys(meta).length ? { _meta: meta } : {}),
+  };
+}
+
+function peelCallImages(value, callId, sink) {
+  const images = imageEntries(value);
+  if (!images.length) return value;
+  const placeholders = images.map((image, offset) => {
+    const meta = { ...(callId ? { id: callId } : {}), index: offset };
+    sink.push(imageBlock(image, meta));
+    return meta;
   });
-  server.setRequestHandler(ListToolsRequestSchema, async () => ({ tools: TOOL_CATALOG }));
+  return { ...withoutImages(value), images: placeholders };
+}
+
+export function resultToContent(result, { toolResult = false } = {}) {
+  if (result == null) return [];
+  if (Array.isArray(result)) return result.flatMap(item => resultToContent(item));
+  if (typeof result !== "object") return [{ type: "text", text: String(result) }];
+  const nested = [];
+  let body = result;
+  if (toolResult && Array.isArray(result.results)) {
+    body = {
+      ...result,
+      results: result.results.map(item => {
+        if (!item || typeof item !== "object" || Array.isArray(item)) return item;
+        const callId = String(item.id || "");
+        return peelCallImages(item, callId, nested);
+      }),
+    };
+  }
+  const top = toolResult ? imageEntries(body) : [];
+  if (!top.length && !nested.length) {
+    return [{ type: "text", text: JSON.stringify(body) }];
+  }
+  return [
+    { type: "text", text: JSON.stringify(top.length ? withoutImages(body) : body) },
+    ...top.map(image => imageBlock(image)),
+    ...nested,
+  ];
+}
+
+const DRIVE_TOOL_NAMES = [
+  "zuri_guide", "zuri_create_drive_session", "zuri_list_drive_sessions", "zuri_get_drive_session",
+  "zuri_stop_session", "zuri_execute_tool", "zuri_list_tools", "zuri_get_tool", "zuri_bridge_status",
+];
+const GUIDE_TOOL = {
+  name: "zuri_guide",
+  description: "Return the zuri CLI direct-drive guide as an optional reference.",
+  inputSchema: {
+    type: "object",
+    additionalProperties: false,
+    properties: {},
+  },
+};
+const DRIVE_INSTRUCTIONS = "先用 zuri_create_drive_session 或 qingzhou_create_drive_session 或 zuri session create --title TITLE 创建带可读标题的会话，后续每次执行工具或脚本都传入该 sessionId（CLI 必传 --session，缺失退出码为 2，不会自动建会话）；list_tools/get_tool 查询基础目录无需会话。页面工具必传 tabRef（open_tab 设置的可选 tabAlias，或 open_tab / list_tabs 返回的 tabRef）。通过 zuri_execute_tool（单工具、calls 批次或 run_script 外层编排）执行操作，页面内 DOM 求值使用 evaluate。Create a session with a readable title using zuri_create_drive_session or qingzhou_create_drive_session or zuri session create --title TITLE, then pass that sessionId on every tool or script execution (CLI calls require --session; omitting it exits 2 and does not create a session). list_tools/get_tool can inspect the base catalog without a session. Page tools require tabRef (an optional tabAlias from open_tab, or the tabRef returned by open_tab or list_tabs). Orchestrate with zuri_execute_tool (single tool, calls batch, or outer run_script) and use evaluate for in-page DOM execution.";
+
+export function mcpCatalogProfile({ clientName = "", profile = "" } = {}) {
+  const explicit = String(profile || "").trim().toLowerCase();
+  if (explicit === "full" || explicit === "drive") return explicit;
+  return clientName === "zuri-cli" || clientName === "qz-cli" ? "full" : "drive";
+}
+
+export function driveToolCatalog() {
+  const byName = new Map(TOOL_CATALOG.map(tool => [tool.name, tool]));
+  return DRIVE_TOOL_NAMES.map(name => name === "zuri_guide" ? GUIDE_TOOL : byName.get(name)).filter(Boolean);
+}
+
+export function createMcpServer(state, { clientName = "", profile = "" } = {}) {
+  const catalogProfile = mcpCatalogProfile({ clientName, profile });
+  const server = new Server({ name: "zuri-agent-mcp-bridge", version: PACKAGE_VERSION }, {
+    capabilities: { tools: {} },
+    instructions: catalogProfile === "drive" ? DRIVE_INSTRUCTIONS : "Control zuri tasks and browser tools through the local bridge.",
+  });
+  server.setRequestHandler(ListToolsRequestSchema, async () => ({
+    tools: catalogProfile === "drive" ? driveToolCatalog() : TOOL_CATALOG,
+  }));
   server.setRequestHandler(CallToolRequestSchema, async (request, extra) => {
     try {
       let progress = 0;
       const progressToken = request.params._meta?.progressToken;
-      const result = await executeMcpTool(state, request.params.name, request.params.arguments || {}, { signal: extra.signal,
+      const input = { ...(request.params.arguments || {}) };
+      if (request.params.name === "zuri_guide" || request.params.name === "qingzhou_guide") {
+        return { content: [{ type: "text", text: driveGuide() }] };
+      }
+      if (catalogProfile === "drive" && (request.params.name === "zuri_list_sessions" || request.params.name === "qingzhou_list_sessions")) {
+        if (!String(input.scope || "").trim()) input.scope = "session";
+      }
+      if ((request.params.name === "zuri_execute_tool" || request.params.name === "qingzhou_execute_tool") && !String(input.sessionId || "").trim()) {
+        throw new BridgeError("DRIVE_SESSION_REQUIRED", "Pass sessionId from zuri session create (MCP: zuri_create_drive_session). CLI calls require --session. This call does not create a session.");
+      }
+      const result = await executeMcpTool(state, request.params.name, input, { signal: extra.signal, clientName,
         onTaskUpdate: progressToken === undefined ? undefined : event => extra.sendNotification({
           method: "notifications/progress", params: { progressToken, progress: ++progress,
             message: ["text", "replace"].includes(event.type) ? event.text : JSON.stringify(event),
             _meta: { "zuri/task-event": event } },
         }).catch(() => {}),
       });
-      return { content: resultToContent(result) };
+      return { content: resultToContent(result, { toolResult: request.params.name === "zuri_execute_tool" || request.params.name === "qingzhou_execute_tool" }) };
     } catch (error) {
-      const message = error.message || String(error);
-      const value = typeof error.code === "string" && error.code ? {
-        code: error.code, message,
-        ...(error.details && Object.keys(error.details).length ? { details: error.details } : {}),
-      } : message;
+      const value = { code: String(error.code || "TOOL_EXECUTION_FAILED").toUpperCase(), message: error.message || String(error),
+        ...(error.hint ? { hint: error.hint } : {}),
+        ...(error.details && Object.keys(error.details).length ? { details: error.details } : {}) };
       return { isError: true, content: resultToContent(value) };
     }
   });

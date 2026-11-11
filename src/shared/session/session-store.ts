@@ -22,6 +22,11 @@ export const ACTIVE_CONVERSATION_PREFIX = "_active_conversation_";
 export const SESSION_TRANSCRIPT_CHECKPOINT_PREFIX = "_session_transcript_checkpoint_";
 export const ROOT_SESSION_ID = "0";
 
+export function normalizeDriveClientName(value: unknown) {
+  const name = String(value ?? "").replace(/\s+/gu, " ").trim();
+  return (name === "zuri-cli" || name === "qz-cli" ? "CLI" : name || "MCP").slice(0, 40);
+}
+
 export function genSessionId() {
   return crypto.randomUUID().replaceAll("-", "");
 }

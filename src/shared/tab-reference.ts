@@ -6,6 +6,11 @@ export function tabReferenceId(value: unknown): number | null {
   const number = typeof value === "number" ? value : typeof value === "string" && /^\d+$/.test(value) ? Number(value) : NaN;
   return Number.isSafeInteger(number) && number > 0 ? number : null;
 }
+/** Discovery may introduce a reference; an explicit caller reference is never rewritten to an ID. */
+export function pageReferenceForResult(requested: string | number | undefined, discoveredId: number): string | number {
+  return requested ?? discoveredId;
+}
+
 
 export function normalizeTabAliases(value: unknown, ownedTabIds: readonly number[]): Record<string, number> {
   if (!value || typeof value !== "object" || Array.isArray(value)) return {};

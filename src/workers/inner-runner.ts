@@ -1,4 +1,4 @@
-import { safeValueForMessage, installSecurityGuards } from "../shared/script-runtime.js";
+import { safeValueForMessage, scriptValue, scriptToolArguments, installSecurityGuards, formatScriptErrorTrace, createZuriSdk } from "../shared/script-runtime.js";
 import type { FetchResult, InnerWorkerInput, InnerWorkerOutput, ScriptEnvelope, ScriptFailure, ToolBridgeResponse, TraceRow, WorkerExecute } from '../shared/contracts/inner-runner.js';
 
 type ToolCall = { toolName: string; resolve(response: Extract<ToolBridgeResponse, {ok: true}>): void; reject(error: unknown): void };
@@ -63,12 +63,12 @@ async function runInnerScript(payload: WorkerExecute) {
   const startedAt = Date.now();
   const traceRows: TraceRow[] = [];
   const artifacts: unknown[] = [];
+  const observations = new WeakMap<object, unknown>();
   const source = String(payload.source || "");
-  const input = payload.scriptArgs && typeof payload.scriptArgs === "object" ? payload.scriptArgs : {};
+  const input = payload.scriptArgs;
   const args = input;
   const tabId = null;
   let seq = 0;
-  pushTrace("inner.start", [{ sourceLength: source.length }]);
 
   function traceText(value: unknown) {
     try {
@@ -104,9 +104,8 @@ async function runInnerScript(payload: WorkerExecute) {
   function callTool(name: string, args: unknown = {}) {
     const toolName = String(name || "").trim();
     if (!toolName) throw new Error("tools call requires a tool name");
-    const toolArgs = args && typeof args === "object" && !Array.isArray(args) ? { ...args } : {};
-    const safeToolArgs = safeValueForMessage(toolArgs);
-    pushTrace("tool.start", [toolName, toolArgs]);
+    const toolArgs: Record<string, unknown> = isRecord(args) && !Array.isArray(args) ? { ...args } : {};
+    const safeToolArgs = scriptToolArguments(toolName, toolArgs);
     const callId = "inner_tool_" + Date.now() + "_" + (++seq);
     send({
       type: "tool_call",
@@ -118,22 +117,24 @@ async function runInnerScript(payload: WorkerExecute) {
       pendingToolCalls.set(callId, {
         toolName,
         resolve(response) {
-          pushTrace("tool.end", [toolName, response.result]);
           addToolArtifacts(response.artifacts || response.artifact);
-          resolve(response.result);
+          const result = payload.strictResult && response.resultFormat === "receipt" && isRecord(response.result)
+            ? response.result.result : response.result;
+          if (result && typeof result === "object" && response.observation) {
+            observations.set(result, response.observation);
+          }
+          resolve(result);
         },
-        reject(error) {
-          pushTrace("tool.error", [toolName, failure(error).message || error]);
-          reject(error);
-        },
+        reject,
       });
     });
   }
 
   const tool = callTool;
+  const zuri = createZuriSdk(callTool);
+  const qz = zuri;
   const tools = new Proxy(Object.create(null), {
     get(_target, prop) {
-      if (prop === "then") return undefined;
       if (prop === Symbol.toStringTag) return "RunScriptInnerTools";
       if (prop === "$call") return callTool;
       if (prop === "$list") return () => callTool("__list_tools__", {});
@@ -147,11 +148,12 @@ async function runInnerScript(payload: WorkerExecute) {
   const restoreConsole = patchConsole(pushTrace);
   const restoreSecurity = installSecurityGuards(payload.securityGuardrails || {});
   try {
-    const fn = new Function("input", "args", "$plugin", "tools", "tool", "trace", "log", "tabId", "\"use strict\"; return (async () => {\n" + source + "\n})();");
-    const result = await fn(input, args, input.$plugin || {}, tools, tool, trace, log, tabId);
+    const fn = new Function("input", "args", "$plugin", "tools", "tool", "trace", "log", "tabId", "zuri", "qz", "\"use strict\"; return (async () => {\n" + source + "\n})();");
+    const result = await fn(input, args, isRecord(input) ? input.$plugin || {} : {}, tools, tool, trace, log, tabId, zuri, qz);
+    const value = payload.strictResult ? scriptValue(result) : result;
     send({
       type: "result",
-      result: makeEnvelope(true, result, null, traceRows, artifacts, startedAt),
+      result: makeEnvelope(true, value, null, traceRows, artifacts, startedAt, payload.strictResult),
     });
   } catch (error) {
     decorateSyntaxError(error, source);
@@ -339,9 +341,9 @@ function findRawNewlineInQuotedString(text: string) {
   return -1;
 }
 
-function makeEnvelope(ok: boolean, result: unknown, thrown: unknown, traceRows: TraceRow[], artifacts: unknown[], startedAt: number): ScriptEnvelope {
+function makeEnvelope(ok: boolean, result: unknown, thrown: unknown, traceRows: TraceRow[], artifacts: unknown[], startedAt: number, strictResult = false): ScriptEnvelope {
   const error = thrown == null ? null : failure(thrown);
-  const safeResult = ok && result !== undefined ? safeValueForMessage(result) : null;
+  const safeResult = ok && result !== undefined ? strictResult ? scriptValue(result) : safeValueForMessage(result) : null;
   const out: ScriptEnvelope = {
     __runScriptEnvelope: true,
     ok,

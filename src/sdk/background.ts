@@ -2,7 +2,7 @@
 import type { ToolErrorDetails } from "../shared/contracts/tool-error.js";
 import type { ToolResultPresentation } from "../shared/contracts/tool-result-presentation.js";
 import type { PageObservation } from "../shared/contracts/page-observation.js";
-import type { SkillActivationContext } from "../shared/skills/skill-manifest.js";
+import type { SkillActivationContext, SkillManifest } from "../shared/skills/skill-manifest.js";
 import type { ToolDefinition, ToolSchema } from "../shared/contracts/tool.js";
 export type { ToolSchema, ToolArguments, ToolParameter } from "../shared/contracts/tool.js";
 
@@ -19,7 +19,7 @@ export interface ToolOperationEvidence {
 
 export interface ToolContext extends SkillActivationContext {
   dynamicContext?: SkillActivationContext | null;
-  skillExecution?: { plugin: import("../shared/skills/skill-manifest.js").SkillManifest; config?: Record<string, unknown> };
+  skillExecution?: { plugin: SkillManifest; config?: Record<string, unknown>; resultMode?: "receipt" | "value" };
   sessionId?: string;
   runId?: string | null;
   /** Execution mode supplied by the owning Session, inherited by nested calls. */
@@ -51,6 +51,8 @@ export interface ToolContext extends SkillActivationContext {
   observedPopups?(): Promise<PageObservation[]>;
   /** Host-only nested dispatch. The live parent owns cancellation and recording. */
   invokeTool?(name: string, args: Record<string, unknown>, options?: { signal?: AbortSignal; operation?: ToolOperationEvidence }): Promise<unknown>;
+  /** Policy-filtered catalog; skillName previews a Skill load with its full tool contracts. */
+  listTools?(names?: readonly string[], options?: { skillName: string }): { tools: Record<string, unknown>[] };
   toolExecutionId?: string;
   /** Call-local diagnostic accumulator. End the measurement in a finally block. */
   measurePhase?(phase: ToolExecutionPhase): () => void;
