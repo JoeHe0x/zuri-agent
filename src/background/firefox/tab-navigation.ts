@@ -9,7 +9,7 @@ interface NavigationHost {
   webRequest?: {
     onBeforeRequest: Event<Request>;
     onBeforeRedirect: Event<Request & { redirectUrl: string }>;
-    onErrorOccurred: Event<Request>;
+    onErrorOccurred: Event<Request & { error?: string }>;
     onHeadersReceived: Event<Request & { statusCode: number }>;
   };
   webNavigation?: { onCommitted: Event<{ tabId: number; frameId: number; url: string }> };
@@ -36,7 +36,11 @@ export function installFirefoxTabNavigation(browser: NavigationHost) {
   const finish = (details: Request) => {
     if (pending.get(details.tabId)?.requestId === details.requestId) pending.delete(details.tabId);
   };
-  requests.onErrorOccurred.addListener(finish, filter);
+  requests.onErrorOccurred.addListener(details => {
+    // Firefox cancels the old load before announcing its replacement request.
+    // Keep the document pending across that handoff; this is not a terminal failure.
+    if (details.error !== "NS_BINDING_CANCELLED_OLD_LOAD") finish(details);
+  }, filter);
   requests.onHeadersReceived.addListener(details => {
     if (details.statusCode === 204 || details.statusCode === 205) finish(details);
   }, filter);
