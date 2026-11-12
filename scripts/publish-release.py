@@ -301,7 +301,7 @@ def assert_isolated_prepared_source(origin_repo: Path) -> None:
         raise SystemExit("prepared release source must be an isolated export, not a Git worktree")
     result = subprocess.run(
         ["git", "rev-parse", "--is-inside-work-tree"], cwd=REPO_DIR,
-        text=True, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
+        text=True, encoding="utf-8", errors="replace", stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
     )
     if result.returncode == 0 and result.stdout.strip() == "true":
         raise SystemExit("prepared release source must be an isolated export, not a Git worktree")
@@ -317,7 +317,7 @@ def run_commit_publisher(args: argparse.Namespace) -> int:
             raise SystemExit("release compilation requires npm; install the documented Node toolchain")
         result = subprocess.run(
             [npm, "ci", "--include=dev", "--no-audit", "--no-fund"],
-            cwd=snapshot, text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+            cwd=snapshot, text=True, encoding="utf-8", errors="replace", stdout=subprocess.PIPE, stderr=subprocess.PIPE,
         )
         if result.returncode:
             raise SystemExit(f"failed to install dependencies from the release commit lockfile: {result.stderr.strip()}")
@@ -409,7 +409,7 @@ def compile_extension_sources(extension_dir: Path, *, bundle: bool, browser: str
         command,
         cwd=REPO_DIR,
         check=False,
-        text=True,
+        text=True, encoding="utf-8", errors="replace",
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
     )
@@ -431,7 +431,7 @@ def refresh_dependency_provenance(extension_dir: Path, minification: dict[str, o
     result = subprocess.run(
         [shutil.which("node") or "node", str(REPO_DIR / "scripts/vendor/assets.mjs"), "--refresh",
          "--extension-dir", str(extension_dir), "--transform", str(minification.get("tool") or "release")],
-        cwd=REPO_DIR, check=False, text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+        cwd=REPO_DIR, check=False, text=True, encoding="utf-8", errors="replace", stdout=subprocess.PIPE, stderr=subprocess.PIPE,
     )
     if result.returncode:
         raise SystemExit(f"failed to audit packaged dependencies: {result.stderr.strip() or result.stdout.strip()}")
@@ -442,7 +442,7 @@ def run_git(args: list[str]) -> str:
         ["git", *args],
         cwd=REPO_DIR,
         check=True,
-        text=True,
+        text=True, encoding="utf-8", errors="replace",
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
     )
@@ -549,7 +549,7 @@ def assert_no_remote_code(extension_dir: Path) -> None:
         [node, str(script), str(extension_dir)],
         cwd=REPO_DIR,
         check=False,
-        text=True,
+        text=True, encoding="utf-8", errors="replace",
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
     )
@@ -561,7 +561,7 @@ def assert_no_remote_code(extension_dir: Path) -> None:
 def check_store_package(package: Path, report: Path) -> None:
     result = subprocess.run(
         [shutil.which("node") or "node", str(REPO_DIR / "scripts/check-store.mjs"), str(package), str(report)],
-        cwd=REPO_DIR, check=False, text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+        cwd=REPO_DIR, check=False, text=True, encoding="utf-8", errors="replace", stdout=subprocess.PIPE, stderr=subprocess.PIPE,
     )
     if result.returncode:
         raise SystemExit(f"storecheck blocked the Web Store package; see {report}:\n{result.stderr or result.stdout}")
@@ -570,7 +570,7 @@ def check_store_package(package: Path, report: Path) -> None:
 def audit_reviewable_code(extension_dir: Path) -> str:
     result = subprocess.run(
         [shutil.which("node") or "node", str(REPO_DIR / "scripts/check-reviewable-code.mjs"),
-         "--json", str(extension_dir)], cwd=REPO_DIR, check=False, text=True,
+         "--json", str(extension_dir)], cwd=REPO_DIR, check=False, text=True, encoding="utf-8", errors="replace",
         stdout=subprocess.PIPE, stderr=subprocess.PIPE,
     )
     if result.returncode:
