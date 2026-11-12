@@ -13,7 +13,7 @@ test("Firefox saves tool, document artifact and MCP downloads with intact bytes"
   // exposes the MCP download producer in the same real Firefox background realm.
   await build({ stdin: { contents: `
     import { downloadMcpFile } from "./src/background/mcp/file-download.ts";
-    globalThis.__qzDownloadMcpFile = downloadMcpFile;
+    globalThis.__zuriDownloadMcpFile = downloadMcpFile;
   `, resolveDir: resolve(".") }, bundle: true, format: "iife", target: "es2022", outfile: join(extensionDir, "download-probe.js") });
   const manifestPath = join(extensionDir, "manifest.json");
   const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
@@ -24,7 +24,7 @@ test("Firefox saves tool, document artifact and MCP downloads with intact bytes"
     "browser.download.useDownloadDir": true, "browser.download.alwaysOpenPanel": false,
   } });
   const call = (name, args) => session.extension("background", `
-    return await view.__qzFirefoxPageTools.execute(${JSON.stringify(name)},
+    return await view.__zuriFirefoxPageTools.execute(${JSON.stringify(name)},
       Cu.cloneInto(${JSON.stringify(args)}, content), undefined,
       Cu.cloneInto({sessionId:"firefox-downloads",runId:"run",source:"agent"}, content));
   `);
@@ -41,13 +41,13 @@ test("Firefox saves tool, document artifact and MCP downloads with intact bytes"
     return readFile(item.filename);
   };
   try {
-    await expect.poll(() => session.extension("background", "return !!view.__qzFirefoxPageTools && !!view.__qzDownloadMcpFile;")).toBe(true);
+    await expect.poll(() => session.extension("background", "return !!view.__zuriFirefoxPageTools && !!view.__zuriDownloadMcpFile;")).toBe(true);
     for (const size of [1024, 150 * 1024, 600 * 1024]) {
       const text = "轻舟 🌿\n" + "x".repeat(size);
       const saved = await call("save_file", { content: text, filename: `text-${size}.md` });
       expect((await completed(saved.downloadId)).toString("utf8")).toBe(text);
       const downloaded = await session.extension("background", `
-        return await view.__qzDownloadMcpFile(Cu.cloneInto({
+        return await view.__zuriDownloadMcpFile(Cu.cloneInto({
           bytes:Uint8Array.from({length:${size}}, (_, index) => index % 256),
           filename:"binary-${size}.bin",mimeType:"application/octet-stream"
         }, content));
