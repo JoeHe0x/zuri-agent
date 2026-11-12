@@ -10,5 +10,11 @@
     "file": "qrcode-generator.LICENSE",
     "source": "https://github.com/kazuhikoarase/qrcode-generator/blob/517b9e6c3882f3ad28e4f776bbf1e1495869dc4c/LICENSE",
     "sha256": "3a850fa5f08101db6f40676c2786e10bd2cd5fff7b12ffdf1e0c434d4e49d90c"
+  },
+  "playwright-internal": {
+    "version": "1.61.1",
+    "file": "playwright.LICENSE",
+    "source": "https://github.com/microsoft/playwright/blob/39e3553a4f283a41134d75d7e404484bd9e6865a/LICENSE",
+    "sha256": "45873d00a0dd243596deb4aa23b2493b3d1f0671921bf2538ea431d7380220eb"
   }
 }
