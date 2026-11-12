@@ -67,6 +67,7 @@ Firefox keeps `bookmarks` and `history` optional. Chrome, operating system, and 
 | `debugger` | Use CDP to operate pages, capture screenshots, inspect requests, and print PDFs; `background/tools/cdp-runtime.ts` and tools | Page operations |
 | `activeTab` | Access a page after user interaction and provide a screenshot fallback for the task's target; `capabilities/media/tools.ts` | Screenshots |
 | `offscreen` | Bridge sandboxed scripts, keep background work alive, and convert images; `background/services/offscreen-document.ts` | Scripts and conversion |
+| `webNavigation` | Report whether a click or key press navigated the page; `background/tools/page-navigation.ts` | Tools |
 | `alarms` | Schedule tasks, reminders, and background maintenance; `background/automation/runtime.ts` | Scheduling |
 | `downloads` | Save files, documents, and exports; file tools, Artifacts, and export features | Files |
 | `downloads.open` | Open saved files from Artifacts; `capabilities/sessions/artifacts/artifacts-feature.ts` | Files |

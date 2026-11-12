@@ -56,7 +56,7 @@ for (const watchNetwork of [false, true]) test(`tab navigation commits before re
     await cp(await ensureTestExtension(), extension, { recursive: true });
     const manifestPath = join(extension, "manifest.json");
     const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
-    expect(manifest.permissions).not.toContain("webNavigation");
+    expect(manifest.permissions).toContain("webNavigation");
     // Exercise explicit reader installation before document_idle, independently of manifest injection.
     manifest.content_scripts = manifest.content_scripts.filter(entry => !entry.js?.some(path => path.endsWith('/content-script.js')));
     await writeFile(join(extension, "navigation-test-worker.js"), `import "./${manifest.background.service_worker}";
