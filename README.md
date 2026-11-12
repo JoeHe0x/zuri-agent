@@ -45,6 +45,8 @@ After you change the source, run `npm run build` again and reload the extension 
 **Providers and context**
 
 - Claude Pro/Max sign-in provider with account model discovery.
+- Magpie gateway with discovered model capabilities, and model discovery for custom providers that
+  keeps each provider's credentials isolated.
 - Anthropic prompt caching, batched image pruning for a stable prompt prefix, and a `cache_usage` trace.
 - Superseded page observations are replaced at once.
 
@@ -52,6 +54,13 @@ After you change the source, run `npm run build` again and reload the extension 
 
 - Built-in `find-skills`, `task-retrospective` and `site-memory` Skills. `site-memory` keeps and
   corrects per-site notes through `skill-workbench`.
+- Skills resolve by exact id. An ambiguous display name is rejected, and truncated ids stay distinct.
+
+**Reliability and Firefox**
+
+- Fill, click and key-press reports state whether the page received the input.
+- Sessions report cumulative token usage.
+- Firefox keeps a pending navigation when a load is replaced, and file downloads use blob URLs.
 
 ## License
 
