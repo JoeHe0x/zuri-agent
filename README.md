@@ -62,6 +62,13 @@ After you change the source, run `npm run build` again and reload the extension 
 - Sessions report cumulative token usage.
 - Firefox keeps a pending navigation when a load is replaced, and file downloads use blob URLs.
 
+**CLI**
+
+- Pair several browser profiles with one CLI. `zuri connect --no-open --name work --json` prints a
+  connection URL for a specific profile, `zuri browsers` lists the paired browsers, and
+  `--client work` selects one when several are online.
+- Connection state tolerates Windows filesystem races.
+
 ## License
 
 Apache-2.0. See [LICENSE](LICENSE).
