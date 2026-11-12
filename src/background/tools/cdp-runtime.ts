@@ -17,12 +17,18 @@ interface CdpState {
   /** Latest tool context, used to reach the Session when a page dialog opens between tool calls. */
   context?: ToolContext;
 }
+/** In-process adapter authority; never serialized into CDP parameters or tool results. */
+export interface DebuggerCommandScope {
+  signal?: AbortSignal;
+  check(): void;
+}
 interface DebuggerApi {
   onEvent?: { addListener(listener: (source: chrome.debugger.DebuggerSession, method: string, params?: object) => void): void };
   onDetach?: { addListener(listener: (source: chrome.debugger.Debuggee, reason: string) => void): void };
   attach(target: chrome.debugger.Debuggee, version: string): Promise<void>;
   detach(target: chrome.debugger.Debuggee): Promise<void>;
   sendCommand(target: chrome.debugger.DebuggerSession, method: string, params?: object): Promise<unknown>;
+  sendCommandWithScope?(target: chrome.debugger.DebuggerSession, method: string, params: object, scope: DebuggerCommandScope): Promise<unknown>;
 }
 interface RunAccess { sessionId: string; runId: string; context: ToolContext }
 interface CdpHost {
@@ -554,7 +560,11 @@ export function createCdpRuntime({
     const finishPhase = context.measurePhase?.("cdp");
     try {
       const target = sessionId ? { ...state.target, sessionId } : state.target;
-      const result = await debuggerApi.sendCommand(target, method, params);
+      const result = await (debuggerApi.sendCommandWithScope
+        ? debuggerApi.sendCommandWithScope(target, method, params, {
+          signal: context.signal, check: () => { assertStateActive(state); check(); },
+        })
+        : debuggerApi.sendCommand(target, method, params));
       assertStateActive(state);
       check();
       return result;
