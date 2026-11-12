@@ -642,6 +642,13 @@ export async function executeTool(name: string, args: unknown, signal?: AbortSig
           }
           if (needsCommittedPage(selectedDefinition, args) && Number(args.tabId) > 0) {
             await waitForPageCommit(Number(args.tabId), signal);
+            // Firefox can report complete before its committed document finishes parsing.
+            if (selectedDefinition.behavior?.targetLookup) {
+              await elementRuntime.prepareCssTargets(Number(args.tabId), elementTargetsOf(selectedDefinition, args), {
+                index: parameters.properties.index ? Number(args.index) || 0 : 0,
+                includeShadow: selectedDefinition.behavior?.targetLookup === "openShadow",
+              }, callContext);
+            }
             // Revalidate even if the blank finished between admission and this wait.
             // It may have become a restricted page or lost its task ownership.
             Object.assign(args, await withSessionOwnedTarget(selectedDefinition, args, parameters, context, signal));
@@ -1056,7 +1063,8 @@ function resolveTimeoutResult(definition: RuntimeTool, args: Fields): { kind: "r
 function needsCommittedPage(definition: RuntimeTool, args: Fields) {
   const access = resolvePageAccess(definition, args);
   return shouldResolveSessionTabTarget(definition, args)
-    && (access === "readOnly" || (access === "owned" && resolveTimeoutResult(definition, args)?.kind === "read"));
+    && (access === "readOnly" || (access === "owned" && (resolveTimeoutResult(definition, args)?.kind === "read"
+      || (Boolean(definition.behavior?.targetLookup) && elementTargetsOf(definition, args).some(target => !isUidElementTarget(target))))));
 }
 
 function shouldResolveSessionTabTarget(definition: RuntimeTool, args: Fields = {}) {
