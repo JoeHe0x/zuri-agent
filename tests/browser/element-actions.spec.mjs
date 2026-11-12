@@ -119,7 +119,11 @@ async function createHarness(mode, launchOptions = {}) {
         command: (method, params) => chrome.debugger.sendCommand({ tabId }, method, params),
         screen(name, args) { return this.call(name, { tabId, ...args }, "run_script"); },
         async call(name, args, source) {
-          try { return await runtime.execute(name, name === 'open_tab' ? args : { tabRef: args.tabId ?? tabId, ...args }, undefined, { ...context, workingTabId: tabId, source }); }
+          try {
+            const result = await runtime.execute(name, name === 'open_tab' ? args : { tabRef: args.tabId ?? tabId, ...args }, undefined, { ...context, workingTabId: tabId, source });
+            // Host page context rides inline on results in this runtime; tests assert the business payload.
+            return result && typeof result === 'object' ? Object.fromEntries(Object.entries(result).filter(([key]) => !/^_(?:page|tabId)/.test(key))) : result;
+          }
           catch (error) { return { message: error.message, code: error.code, hint: error.hint, details: error.details }; }
         },
         async state() {
