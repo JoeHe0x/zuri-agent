@@ -431,7 +431,7 @@ export function getBatchTabPolicy(name: string, args: unknown, options: ToolOpti
   const definition = resolveToolDefinition(name, options);
   if (!definition) return null;
   const input = record(args), barrier = isToolBarrier(definition, input);
-  if (definition.workingTab === "created") return { kind: "create", ...(definition.behavior?.parallelOpen ? { parallel: !barrier } : {}) };
+  if (definition.tabLifecycle === "created") return { kind: "create", ...(definition.behavior?.parallelOpen ? { parallel: !barrier } : {}) };
   const pageAccess = resolvePageAccess(definition, input);
   const targets = pageAccess ? elementTargetsOf(definition, input) : [];
   if (targets.some(isUidElementTarget)) {
@@ -575,7 +575,7 @@ export async function executeTool(name: string, args: unknown, signal?: AbortSig
     if (uidTargets.length && record(args).tabId != null && elementRuntime.elementUidTabId(uidTargets) !== record(args).tabId) {
       throw tabReferenceError("conflicting_target", record(args).tabId, language);
     }
-    if (record(args).tabAlias != null && (definition.workingTab !== "created" || !isTabAlias(record(args).tabAlias))) {
+    if (record(args).tabAlias != null && (definition.tabLifecycle !== "created" || !isTabAlias(record(args).tabAlias))) {
       throw tabReferenceError("invalid_alias", record(args).tabAlias, language);
     }
     effectiveArgs = withWorkingTabDefault(definition, args, parameters, context);
@@ -669,7 +669,7 @@ export async function executeTool(name: string, args: unknown, signal?: AbortSig
         async (partial, timeoutError) => {
           try { return await finishTimedOutTool(selectedDefinition, partial, signal, language, timeoutError, context); }
           catch (error) {
-            if (selectedDefinition.workingTab === "created" && Number(partial.result.tabId) > 0) {
+            if (selectedDefinition.tabLifecycle === "created" && Number(partial.result.tabId) > 0) {
               try { await chrome.tabs.remove(Number(partial.result.tabId)); } catch { /* Already closed. */ }
             }
             throw error;
@@ -1154,7 +1154,7 @@ function withWorkingTabDefault(definition: RuntimeTool, args: unknown, parameter
 
 async function recordWorkingTabFromTool(definition: RuntimeTool, args: Fields = {}, result: unknown = {}, context: ToolContext = {}, signal?: AbortSignal) {
   const toolName = definition.name;
-  const role = typeof definition.workingTab === "function" ? definition.workingTab(args) : definition.workingTab;
+  const role = typeof definition.tabLifecycle === "function" ? definition.tabLifecycle(args) : definition.tabLifecycle;
   const sessionId = typeof context.sessionId === "string" ? context.sessionId.trim() : "";
   const sessions = getToolRuntimeDependencies(context).sessions;
   if (!sessionId || !sessions) return;
@@ -1215,7 +1215,7 @@ function inferWorkingTabId(definition: RuntimeTool, args: Fields = {}, result: u
   if (result && typeof result === "object") {
     const resultTabId = Number(record(result).tabId);
     if (Number.isFinite(resultTabId) && resultTabId > 0) return resultTabId;
-    if (definition.workingTab === "created") {
+    if (definition.tabLifecycle === "created") {
       const openedId = Number(record(result).id);
       if (Number.isFinite(openedId) && openedId > 0) return openedId;
     }
